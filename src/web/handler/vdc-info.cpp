@@ -56,6 +56,20 @@ static void addParameterDescriptions(VdcDb& db, const VdcDb::PropertyDesc& prop,
   }
 }
 
+static std::string convertHardwareGuid(const std::string &guid) {
+  std::string hwid;
+  if (beginsWith(guid, "macaddress:")) {
+    hwid = "MAC " + guid.substr(11);
+  } else if (beginsWith(guid, "enoceanaddress:")) {
+    hwid = "EnOcean ID " + guid.substr(15);
+  } else if (guid.find(':') != std::string::npos) {
+    hwid = guid.substr(guid.find(':') + 1);
+  } else {
+    hwid = guid;
+  }
+  return hwid;
+}
+
 void addSpec(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& dsDeviceGTIN = device.getOemEanAsString();
   auto dbspec = db.getSpec(dsDeviceGTIN, langCode);
@@ -63,10 +77,10 @@ void addSpec(VdcDb& db, const Device& device, const std::string& langCode, JSONW
 
   std::map<std::string, std::string> specTable;
   specTable["name"] = device.getName();
-  specTable["dsDeviceId"] = dsDeviceGTIN;
+  specTable["dsDeviceGTIN"] = dsDeviceGTIN;
   specTable["model"] = spec.model;
   specTable["modelVersion"] = spec.modelVersion;
-  specTable["hardwareGuid"] = spec.hardwareGuid;
+  specTable["hardwareGuid"] = convertHardwareGuid(spec.hardwareGuid);
   specTable["hardwareModelGuid"] = spec.hardwareModelGuid;
   specTable["vendorId"] = spec.vendorId;
   specTable["vendorName"] = spec.vendorName;

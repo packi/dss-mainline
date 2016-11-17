@@ -75,6 +75,7 @@ namespace dss {
     if (_device.getDevice()->isVdcDevice()) {
       _json.add("VdcHardwareModelGuid", _device.getDevice()->getVdcHardwareModelGuid());
       _json.add("VdcModelUID", _device.getDevice()->getVdcModelUID());
+      _json.add("VdcModelVersion", _device.getDevice()->getVdcModelVersion());
       _json.add("VdcVendorGuid", _device.getDevice()->getVdcVendorGuid());
       _json.add("VdcOemGuid", _device.getDevice()->getVdcOemGuid());
       _json.add("VdcConfigURL", _device.getDevice()->getVdcConfigURL());

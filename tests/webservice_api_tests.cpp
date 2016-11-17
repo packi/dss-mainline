@@ -23,6 +23,7 @@
 #include "unix/systeminfo.h"
 #include "webservice_api.h"
 #include "src/web/webrequests.h"
+#include "messages/vdcapi.pb.h"
 #include "tests/util/dss_instance_fixture.h"
 
 using namespace dss;

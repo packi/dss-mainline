@@ -196,6 +196,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareModelGuid, false));
       propNode->createProperty("ModelUID")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelUID, false));
+      propNode->createProperty("ModelVersion")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcModelVersion, false));
       propNode->createProperty("VendorGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
       propNode->createProperty("OemGuid")
@@ -3139,7 +3141,7 @@ namespace dss {
     deviceBusInterface->setProperty(*this, setPropertyParams);
 
     auto deviceReference = boost::make_shared<DeviceReference>(getDSID(), &getApartment());
-    boost::shared_ptr<Event> evt = createDeviceCustomActionChangedEvent(deviceReference, id, action, title, *actionElement);
+    boost::shared_ptr<Event> evt = createDeviceCustomActionChangedEvent(deviceReference, id, action, title, actionParams);
     DSS::getInstance()->getEventQueue().pushEvent(evt);
   }
 

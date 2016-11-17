@@ -441,45 +441,45 @@ function stateChange() {
     var sunriseIndoors = getSolarDate('sunrise', 1);
     var now = new Date();
     var nextStateChange;
-    var pTwilight = Property.getNode('/usr/states/twilight');
-    var pDay = Property.getNode('/usr/states/daynight');
-    var pDayIndoors = Property.getNode('/usr/states/daynight_indoors');
-    var pDaylight = Property.getNode('/usr/states/daylight');
+    var pTwilight = getState('twilight_state', false);
+    var pDay = getState('daynight_state', false);
+    var pDayIndoors = getState('daynight_indoors_state', false);
+    var pDaylight = getState('daylight_state', false);
 
     if ((dawn_start === "[Below]") && (dusk_end === "[Below]")) {
         // continuous night
         // night
-        pTwilight.setStatusValue(false);
-        pDay.setStatusValue(false);
-        pDayIndoors.setStatusValue(false);
-        pDaylight.setStatusValue(false);
+        pTwilight.setValue(2);
+        pDay.setValue(2);
+        pDayIndoors.setValue(2);
+        pDaylight.setValue(2);
     } else if ((sunrise === "[Above]") && (sunset === "[Above]")) {
         // continuous day
         // day
-        pTwilight.setStatusValue(false);
-        pDay.setStatusValue(true);
-        pDayIndoors.setStatusValue(true);
-        pDaylight.setStatusValue(true);
+        pTwilight.setValue(2);
+        pDay.setValue(1);
+        pDayIndoors.setValue(1);
+        pDaylight.setValue(1);
     } else if ((sunrise === "[Below]") && (sunset === "[Below]")) {
         // night-twilight
-        pDay.setStatusValue(false);
-        pDayIndoors.setStatusValue(false);
+        pDay.setValue(2);
+        pDayIndoors.setValue(2);
         if (now < dawn_start) {
             // night
             nextStateChange = dawn_start;
-            pTwilight.setStatusValue(false);
-            pDaylight.setStatusValue(false);
+            pTwilight.setValue(2);
+            pDaylight.setValue(2);
         } else if (now < dusk_end) {
             // twilight
             nextStateChange = dusk_end;
-            pTwilight.setStatusValue(true);
-            pDaylight.setStatusValue(true);
+            pTwilight.setValue(1);
+            pDaylight.setValue(1);
         } else {
             // night
             nextStateChange = dawn_start;
             nextStateChange.setDate(nextStateChange.getDate() + 1);
-            pTwilight.setStatusValue(false);
-            pDaylight.setStatusValue(false);
+            pTwilight.setValue(2);
+            pDaylight.setValue(2);
         }
     } else if ((dawn_start === "[Above]") && (dusk_end === "[Above]")) {
         // twilight-day
@@ -488,84 +488,84 @@ function stateChange() {
             if (now < sunrise) {
                 // twilight
                 nextStateChange = sunrise;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunriseIndoors) {
                 // sunrise+1h
                 nextStateChange = sunriseIndoors;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else {
                 // day
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(true);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(1);
+                pDaylight.setValue(1);
             }
         } else if (sunrise === "[Above]") {
             // first sunset
             if (now < sunsetIndoors) {
                 // sunrise+1h
                 nextStateChange = sunset;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(true);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(1);
+                pDaylight.setValue(1);
             } else if (now < sunset) {
                 // day
                 nextStateChange = sunset;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else {
                 // twilight
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             }
         } else {
             if (now < sunrise) {
                 // twilight
                 nextStateChange = sunrise;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunriseIndoors) {
                 // sunrise+1h
                 nextStateChange = sunriseIndoors;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunsetIndoors) {
                 // day
                 nextStateChange = sunsetIndoors;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(true);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(1);
+                pDaylight.setValue(1);
             } else if ( now < sunset) {
                 // sunset-1h
                 nextStateChange = sunset;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else {
                 // twilight
                 nextStateChange = sunrise;
                 nextStateChange.setDate(nextStateChange.getDate() + 1);
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             }
         }
     } else {
@@ -575,146 +575,156 @@ function stateChange() {
             if (now < dawn_start) {
                 // night
                 nextStateChange = dawn_start;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(false);
+                pTwilight.setValue(2);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(2);
             } else if (now < sunrise) {
                 // twilight
                 nextStateChange = sunrise;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunriseIndoors) {
                 // sunrise+1h
                 nextStateChange = sunriseIndoors;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunsetIndoors) {
                 // day
                 nextStateChange = sunsetIndoors;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(true);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(1);
+                pDaylight.setValue(1);
             } else if (now < sunset) {
                 // sunset-1h
                 nextStateChange = sunset;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else {
                 // twilight
                 nextStateChange = sunrise;
                 nextStateChange.setDate(nextStateChange.getDate() + 1);
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             }
         } else if (dawn_start === "[Above]") {
             // first twilight
             if (now < sunrise) {
                 // twilight
                 nextStateChange = sunrise;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunriseIndoors) {
                 // sunrise+1h
                 nextStateChange = sunriseIndoors;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunsetIndoors) {
                 // day
                 nextStateChange = sunsetIndoors;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(true);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(1);
+                pDaylight.setValue(1);
             } else if (now < sunset) {
                 // sunset-1h
                 nextStateChange = sunset;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < dusk_end) {
                 // twilight
                 nextStateChange = dusk_end;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else {
                 // night
                 nextStateChange = sunrise; // should be next dawn_start but this is not available
                 nextStateChange.setDate(nextStateChange.getDate() + 1);
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(false);
+                pTwilight.setValue(2);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(2);
             }
         } else {
             if (now < dawn_start) {
                 // night
                 nextStateChange = dawn_start;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(false);
+                pTwilight.setValue(2);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(2);
             } else if (now < sunrise) {
                 // twilight
                 nextStateChange = sunrise;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunriseIndoors) {
                 // sunrise+1h
                 nextStateChange = sunriseIndoors;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < sunsetIndoors) {
                 // day
                 nextStateChange = sunsetIndoors;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(true);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(1);
+                pDaylight.setValue(1);
             } else if (now < sunset) {
                 // sunset-1h
                 nextStateChange = sunset;
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(true);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(2);
+                pDay.setValue(1);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else if (now < dusk_end) {
                 // twilight
                 nextStateChange = dusk_end;
-                pTwilight.setStatusValue(true);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(true);
+                pTwilight.setValue(1);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(1);
             } else {
                 // night
                 nextStateChange = dawn_start;
                 nextStateChange.setDate(nextStateChange.getDate() + 1);
-                pTwilight.setStatusValue(false);
-                pDay.setStatusValue(false);
-                pDayIndoors.setStatusValue(false);
-                pDaylight.setStatusValue(false);
+                pTwilight.setValue(2);
+                pDay.setValue(2);
+                pDayIndoors.setValue(2);
+                pDaylight.setValue(2);
             }
         }
+    }
+    {
+        var pTwilightProp = Property.getNode('/usr/states/twilight');
+        pTwilightProp.setStatusValue(pTwilight.getValue() === 1);
+        var pDayProp = Property.getNode('/usr/states/daynight');
+        pDayProp.setStatusValue(pDay.getValue() === 1);
+        var pDayIndoorsProp = Property.getNode('/usr/states/daynight_indoors');
+        pDayIndoorsProp.setStatusValue(pDayIndoors.getValue() === 1);
+        var pDaylightProp = Property.getNode('/usr/states/daylight');
+        pDaylightProp.setStatusValue(pDaylight.getValue() === 1);
     }
 
     if (nextStateChange !== undefined) {

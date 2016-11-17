@@ -24,8 +24,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
-#define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/document.h>
 
 #include <fstream>
 
@@ -35,7 +33,6 @@
 #include "src/foreach.h"
 #include "src/model/device.h"
 #include "src/vdc-db.h"
-#include "src/vdc-db-fetcher.h"
 #include "src/propertysystem.h"
 #include "src/vdc-connection.h"
 #include "src/web/webrequests.h"
@@ -48,6 +45,20 @@ using namespace dss;
 // http://db.aizo.net/vdc-db.php
 
 BOOST_AUTO_TEST_SUITE(VDC_DB)
+
+namespace {
+struct Recreate {
+    Recreate() { VdcDb::recreate(*DSS::getInstance()); }
+};
+
+class Fixture : public DSSInstanceFixture {
+public:
+  Recreate recreate;
+  VdcDb db;
+
+  Fixture() : db(*DSS::getInstance()) {}
+};
+} // namespace
 
 static void dumpStates(std::vector<DeviceStateSpec_t> states) {
   foreach (const DeviceStateSpec_t &state, states) {
@@ -62,39 +73,40 @@ static void dumpStates(std::vector<DeviceStateSpec_t> states) {
   }
 }
 
-BOOST_FIXTURE_TEST_CASE(getStates, DSSInstanceFixture) {
-  std::string gtin("7640156791914"); // VZug Steamer
-  std::string no_gtin("invalid_gtin");
+static const char *gtin = "1234567890123";
 
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
-  VdcDb db;
-
+BOOST_FIXTURE_TEST_CASE(getStates, Fixture) {
   std::vector<DeviceStateSpec_t> states_s;
-  BOOST_CHECK_NO_THROW(states_s = db.getStatesLegacy(gtin));
+  states_s = db.getStatesLegacy(gtin);
   //dumpStates(states_s);
 
-  BOOST_CHECK_EQUAL(states_s[1].Name, "operationMode");
-  BOOST_CHECK_EQUAL(states_s[1].Values.size(), 3);
-  BOOST_CHECK_EQUAL(states_s[1].Values[1], "steaming");
-  BOOST_CHECK_EQUAL(states_s[2].Name, "timer");
-  BOOST_CHECK_EQUAL(states_s[2].Values[1], "running");
+  BOOST_REQUIRE_EQUAL(states_s.size(), 1);
+  BOOST_CHECK_EQUAL(states_s[0].Name, "dummyState");
+  BOOST_REQUIRE_EQUAL(states_s[0].Values.size(), 4);
+  BOOST_CHECK_EQUAL(states_s[0].Values[0], "d");
 
   std::vector<VdcDb::StateDesc> states_i;
-  BOOST_CHECK_NO_THROW(states_i = db.getStates(gtin, "base"));
-  BOOST_CHECK_EQUAL(states_i[0].name, "fan");
-  BOOST_CHECK_EQUAL(states_i[0].title, "ventilator");
-  BOOST_CHECK_EQUAL(states_i[0].values.size(), 2);
-  BOOST_CHECK_EQUAL(states_i[0].values[1].first, "off");
-  BOOST_CHECK_EQUAL(states_i[0].values[1].second, "turned of");
-  BOOST_CHECK_EQUAL(states_i[2].name, "timer");
-  BOOST_CHECK_EQUAL(states_i[2].values[1].first, "running");
-  BOOST_CHECK_EQUAL(states_i[2].values[1].second, "running");
+  states_i = db.getStates(gtin, "base");
+  BOOST_REQUIRE_EQUAL(states_i.size(), 1);
+  BOOST_CHECK_EQUAL(states_i[0].name, "dummyState");
+  BOOST_CHECK_EQUAL(states_i[0].title, "dummyState");
+  BOOST_REQUIRE_EQUAL(states_i[0].values.size(), 4);
+  BOOST_CHECK_EQUAL(states_i[0].values[0].first, "d");
+  BOOST_CHECK_EQUAL(states_i[0].values[0].second, "d");
+  BOOST_CHECK_EQUAL(states_i[0].values[1].first, "u");
+  BOOST_CHECK_EQUAL(states_i[0].values[1].second, "u");
+  BOOST_CHECK_EQUAL(states_i[0].values[2].first, "mm");
+  BOOST_CHECK_EQUAL(states_i[0].values[2].second, "mm");
+  BOOST_CHECK_EQUAL(states_i[0].values[3].first, "y");
+  BOOST_CHECK_EQUAL(states_i[0].values[3].second, "y");
 
-  BOOST_CHECK_NO_THROW(states_i = db.getStates(gtin, "de_DE"));
-  BOOST_CHECK_EQUAL(states_i[1].name, "operationMode");
-  BOOST_CHECK_EQUAL(states_i[1].title, "Betriebszustand");
-  BOOST_CHECK_EQUAL(states_i[1].values[1].first, "steaming");
-  BOOST_CHECK_EQUAL(states_i[1].values[1].second, "dampft");
+  states_i = db.getStates(gtin, "de_DE");
+  BOOST_REQUIRE_EQUAL(states_i.size(), 1);
+  BOOST_CHECK_EQUAL(states_i[0].name, "dummyState");
+  BOOST_CHECK_EQUAL(states_i[0].title, "dummyState");
+  BOOST_REQUIRE_EQUAL(states_i[0].values.size(), 4);
+  BOOST_CHECK_EQUAL(states_i[0].values[0].first, "d");
+  BOOST_CHECK_EQUAL(states_i[0].values[0].second, "d");
 }
 
 static void dumpProperties(const std::vector<VdcDb::PropertyDesc> &props) {
@@ -105,20 +117,18 @@ static void dumpProperties(const std::vector<VdcDb::PropertyDesc> &props) {
   Logger::getInstance()->log("properties: \n" + out, lsWarning);
 }
 
-BOOST_FIXTURE_TEST_CASE(lookupProperties, DSSInstanceFixture) {
-  std::string gtin("7640156791914"); // VZug Steamer
-
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
-  VdcDb db;
+BOOST_FIXTURE_TEST_CASE(lookupProperties, Fixture) {
   std::vector<VdcDb::PropertyDesc> props;
-  BOOST_CHECK_NO_THROW(props = db.getProperties(gtin));
-  BOOST_CHECK(props[2].name == "temperature.sensor");
-  BOOST_CHECK(props[2].title == "coretemperature");
+  props = db.getProperties(gtin);
+  BOOST_REQUIRE_EQUAL(props.size(), 1);
+  BOOST_CHECK_EQUAL(props[0].name, "dummyProperty");
+  BOOST_CHECK_EQUAL(props[0].title, "dummyProperty");
   //dumpProperties(props);
 
-  BOOST_CHECK_NO_THROW(props = db.getProperties(gtin, "de_DE"));
-  BOOST_CHECK(props[2].name == "temperature.sensor");
-  BOOST_CHECK(props[2].title == "Garguttemperatur");
+  props = db.getProperties(gtin, "de_DE");
+  BOOST_REQUIRE_EQUAL(props.size(), 1);
+  BOOST_CHECK_EQUAL(props[0].name, "dummyProperty");
+  BOOST_CHECK_EQUAL(props[0].title, "dummyProperty");
   //dumpProperties(props);
 }
 
@@ -133,24 +143,26 @@ static void dumpActionDesc(const std::vector<VdcDb::ActionDesc> &actions) {
   Logger::getInstance()->log("actions: \n" + out, lsWarning);
 }
 
-BOOST_FIXTURE_TEST_CASE(lookupActions, DSSInstanceFixture) {
-  std::string gtin("7640156791914"); // VZug Steamer
-
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
-  VdcDb db;
+BOOST_FIXTURE_TEST_CASE(lookupActions, Fixture) {
   std::vector<VdcDb::ActionDesc> actions;
-  BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, ""));
-  BOOST_CHECK(actions[1].name == "steam");
-  BOOST_CHECK(actions[1].title == "steam");
-  BOOST_CHECK(actions[1].params[0].name == "duration");
-  BOOST_CHECK(actions[1].params[0].title == "time");
+  actions = db.getActions(gtin, "");
+  BOOST_REQUIRE_EQUAL(actions.size(), 2);
+  BOOST_CHECK_EQUAL(actions[0].name, "dummy");
+  BOOST_CHECK_EQUAL(actions[0].title, "dummy");
+  BOOST_REQUIRE_EQUAL(actions[0].params.size(), 0);
+  //TODO params
+//   BOOST_CHECK_EQUAL(actions[0].params[0].name, "duration");
+//   BOOST_CHECK_EQUAL(actions[0].params[0].title, "time");
   //dumpActionDesc(actions);
 
-  BOOST_CHECK_NO_THROW(actions = db.getActions(gtin, "de_DE"));
-  BOOST_CHECK(actions[1].name == "steam");
-  BOOST_CHECK(actions[1].title == "Dampfen");
-  BOOST_CHECK(actions[1].params[1].name == "temperature");
-  BOOST_CHECK(actions[1].params[1].title == "Temperatur");
+  actions = db.getActions(gtin, "de_DE");
+  BOOST_REQUIRE_EQUAL(actions.size(), 2);
+  BOOST_CHECK_EQUAL(actions[0].name, "dummy");
+  BOOST_CHECK_EQUAL(actions[0].title, "dummy");
+  BOOST_REQUIRE_EQUAL(actions[0].params.size(), 0);
+  //TODO params
+//   BOOST_CHECK_EQUAL(actions[0].params[0].name, "duration");
+//   BOOST_CHECK_EQUAL(actions[0].params[0].title, "time");
   //dumpActionDesc(actions);
 }
 
@@ -165,30 +177,28 @@ static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
   Logger::getInstance()->log("standard actions: \n" + out, lsWarning);
 }
 
-BOOST_FIXTURE_TEST_CASE(lookupStandardActions, DSSInstanceFixture) {
-  std::string gtin("7640156791914"); // VZug Steamer
-
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
-  VdcDb db;
+BOOST_FIXTURE_TEST_CASE(lookupStandardActions, Fixture) {
   std::vector<VdcDb::StandardActionDesc> stdActions;
-  BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, "de_DE"));
+  stdActions = db.getStandardActions(gtin, "de_DE");
   //dumpDesc(stdActions);
-  BOOST_CHECK(stdActions[1].name == "std.pizza");
-  BOOST_CHECK(stdActions[1].title == "Pizza");
-  BOOST_CHECK(stdActions[0].args[1].first == "duration");
+  BOOST_REQUIRE_EQUAL(stdActions.size(), 2);
+  BOOST_CHECK_EQUAL(stdActions[0].name, "std.dummy");
+  BOOST_CHECK_EQUAL(stdActions[0].title, "std.dummy");
+  BOOST_CHECK_EQUAL(stdActions[1].name, "std.moreDummy");
+  BOOST_CHECK_EQUAL(stdActions[1].title, "std.moreDummy");
 
   BOOST_CHECK_NO_THROW(stdActions = db.getStandardActions(gtin, ""));
   //dumpDesc(stdActions);
-  BOOST_CHECK(stdActions[1].name == "std.pizza");
-  BOOST_CHECK(stdActions[1].title == "pizza");
-  BOOST_CHECK(stdActions[0].args[1].first == "duration");
+  BOOST_REQUIRE_EQUAL(stdActions.size(), 2);
+  BOOST_CHECK_EQUAL(stdActions[0].name, "std.dummy");
+  BOOST_CHECK_EQUAL(stdActions[0].title, "std.dummy");
+  BOOST_CHECK_EQUAL(stdActions[1].name, "std.moreDummy");
+  BOOST_CHECK_EQUAL(stdActions[1].title, "std.moreDummy");
 }
 
-BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
-  VdcDb db;
+BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
   Device dev(DSUID_NULL, NULL);
-  dev.setOemInfo(7640156791914, 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
+  dev.setOemInfo(1234567890123, 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
   VdsdSpec_t vdcSpec;
   vdcSpec.oemGuid = "x-oemGuid";
   vdcSpec.oemModelGuid = "x-oemModelGuid";
@@ -215,31 +225,22 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, DSSInstanceFixture) {
   std::string ret = json.successJSON();
 
   //Logger::getInstance()->log("info: " + ret, lsWarning);
-  std::string expect = R"expect({"result":{"spec":{"class":{"title":"Device Class","tags":"invisible","value":"x-class"},"classVersion":{"title":"deviceclasses version","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dS Device GTIN","tags":"overview:2","value":""},"hardwareGuid":{"title":"Article Identifier","tags":"overview:5","value":"x-hardwareGuid"},"hardwareModelGuid":{"title":"Product Id","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"Model Name","tags":"overview:3","value":"x-model"},"modelVersion":{"title":"Model Version","tags":"overview:4","value":"x-modelVersion"},"name":{"title":"Name","tags":"overview:1","value":""},"vendorId":{"title":"Vendor Id","tags":"","value":"x-vendorId"},"vendorName":{"title":"Vendor","tags":"overview:7","value":"x-vendorName"}},"stateDescriptions":{"fan":{"title":"ventilator","tags":"","options":{"on":"on","off":"turned of"}},"operationMode":{"title":"operation mode","tags":"overview","options":{"heating":"heating","steaming":"steaming","off":"turned of"}},"timer":{"title":"alarm clock","tags":"","options":{"inactive":"inactive","running":"running"}}},"propertyDescriptions":{"temperature":{"title":"temperature","tags":"","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"},"duration":{"title":"finishtime","tags":"","type":"numeric","min":"0","max":"1800","resolution":"1","siunit":"second","default":"0"},"temperature.sensor":{"title":"coretemperature","tags":"readonly","type":"numeric","min":"0","max":"250","resolution":"1","siunit":"celsius","default":"0"}},"actionDescriptions":{"bake":{"title":"bake","params":{"duration":{"title":"time","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"temperature","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"steam":{"title":"steam","params":{"duration":{"title":"time","tags":"","type":"numeric","min":"60","max":"7200","resolution":"10","siunit":"second","default":"30"},"temperature":{"title":"temperature","tags":"","type":"numeric","min":"50","max":"240","resolution":"1","siunit":"celsius","default":"180"}}},"stop":{"title":"turn off","params":{}}},"standardActions":{"std.cake":{"title":"cake","action":"bake","params":{"temperature":"160","duration":"3000"}},"std.pizza":{"title":"pizza","action":"bake","params":{"temperature":"180","duration":"1200"}},"std.asparagus":{"title":"asparagus","action":"steam","params":{"temperature":"180","duration":"2520"}},"std.stop":{"title":"stop","action":"stop","params":{}}}},"ok":true})expect";
+  std::string expect = R"({"result":{"spec":{"class":{"title":"class","tags":"invisible","value":"x-class"},"classVersion":{"title":"classVersion","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dsDeviceGTIN","tags":"settings:5","value":""},"dummyNode":{"title":"dummyNode","tags":"overview","value":""},"hardwareGuid":{"title":"hardwareGuid","tags":"settings:4","value":"x-hardwareGuid"},"hardwareModelGuid":{"title":"hardwareModelGuid","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"model","tags":"overview:2;settings:2","value":"x-model"},"modelVersion":{"title":"modelVersion","tags":"invisible","value":"x-modelVersion"},"name":{"title":"name","tags":"overview:1;settings:1","value":""},"vendorId":{"title":"vendorId","tags":"invisible","value":"x-vendorId"},"vendorName":{"title":"vendorName","tags":"overview:3;settings:3","value":"x-vendorName"}},"stateDescriptions":{"dummyState":{"title":"dummyState","tags":"","options":{"d":"d","u":"u","mm":"mm","y":"y"}}},"propertyDescriptions":{"dummyProperty":{"title":"dummyProperty","tags":"","type":"string","default":""}},"actionDescriptions":{"dummy":{"title":"dummy","params":{}},"moreDummy":{"title":"moreDummy","params":{"dummyParam":{"title":"dummyParam","tags":"","type":"string","default":""}}}},"standardActions":{"std.dummy":{"title":"std.dummy","action":"dummy","params":{}},"std.moreDummy":{"title":"std.moreDummy","action":"moreDummy","params":{}}}},"ok":true})";
   //Logger::getInstance()->log("expect: " + expect, lsWarning);
-  rapidjson::Document returnedResult;
-  returnedResult.Parse(ret.c_str());
-
-
-  rapidjson::Document expectedResult;
-  expectedResult.Parse(expect.c_str());
-  BOOST_CHECK(returnedResult == expectedResult);
+  BOOST_CHECK_EQUAL(ret, expect);
 }
 
-BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
-  std::string gtin("0000000000000");
-  // invalid gtin
+BOOST_FIXTURE_TEST_CASE(checkNotFound, Fixture) {
+  auto invalidGtin = "0000000000000";
 
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
-  VdcDb db;
-  BOOST_CHECK(db.getStates(gtin).empty());
-  BOOST_CHECK(db.getProperties(gtin).empty());
-  BOOST_CHECK(db.getActions(gtin).empty());
-  BOOST_CHECK(db.getEvents(gtin).empty());
-  BOOST_CHECK(db.getStandardActions(gtin, "").empty());
+  BOOST_CHECK(db.getStates(invalidGtin).empty());
+  BOOST_CHECK(db.getProperties(invalidGtin).empty());
+  BOOST_CHECK(db.getActions(invalidGtin).empty());
+  BOOST_CHECK(db.getEvents(invalidGtin).empty());
+  BOOST_CHECK(db.getStandardActions(invalidGtin, "").empty());
 
   Device dev(DSUID_NULL, NULL);
-  dev.setOemInfo(strToInt(gtin), 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
+  dev.setOemInfo(strToInt(invalidGtin), 0, 0, DEVICE_OEM_EAN_NO_INTERNET_ACCESS, 0);
   dev.setVdcSpec(VdsdSpec_t());
 
   JSONWriter json;
@@ -253,31 +254,7 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, DSSInstanceFixture) {
   //Logger::getInstance()->log("info: " + ret, lsWarning);
   std::string expect = R"expect({"result":{"stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{},"eventDescriptions":{}},"ok":true})expect";
   //Logger::getInstance()->log("expect: " + expect, lsWarning);
-  rapidjson::Document returnedResult;
-  returnedResult.Parse(ret.c_str());
-
-  rapidjson::Document expectedResult;
-  expectedResult.Parse(expect.c_str());
-
-  // empty states/properties/actions
-  BOOST_CHECK(returnedResult == expectedResult);
-}
-
-BOOST_FIXTURE_TEST_CASE(checkDeviceSupport, DSSInstanceFixture) {
-  std::string gtins[] = {
-    "7640156791914", // V-Zug MSLQ - aktiv
-    "7640156791945" , // vDC smarter iKettle 2.0
-  };
-
-  VdcDbFetcher dbFetcher(*DSS::getInstance()); // recreate db
-  VdcDb db;
-  foreach (auto gtin, gtins) {
-    BOOST_CHECK(!db.getStates(gtin, "de_DE").empty());
-    BOOST_CHECK(!db.getProperties(gtin, "de_DE").empty());
-    BOOST_CHECK(!db.getActions(gtin, "de_DE").empty());
-    BOOST_CHECK(!db.getStandardActions(gtin, "de_DE").empty());
-    BOOST_CHECK(!db.getEvents(gtin, "de_DE").empty());
-  }
+  BOOST_CHECK_EQUAL(ret, expect);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

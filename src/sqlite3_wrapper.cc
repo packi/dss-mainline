@@ -41,8 +41,6 @@ void SQLite3::Deleter::operator()(::sqlite3* ptr) {
 
 SQLite3::SQLite3(const std::string& db_file, Mode mode)
 {
-  boost::mutex::scoped_lock lock(m_mutex);
-
   if (!sqlite3_threadsafe()) {
     throw std::runtime_error("Need a threadsafe SQLite version, aborting");
   }
@@ -53,7 +51,7 @@ SQLite3::SQLite3(const std::string& db_file, Mode mode)
         db_file + ": " + strerror(errno));
   }
 
-  int flags = SQLITE_OPEN_FULLMUTEX;
+  int flags = SQLITE_OPEN_NOMUTEX;
   if (mode == Mode::ReadWrite) {
     flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
   } else {
@@ -74,7 +72,6 @@ void SqlStatement::Deleter::operator()(::sqlite3_stmt* ptr) {
 }
 
 SqlStatement::SqlStatement(SQLite3& db, const std::string &sql) : m_db(db) {
-  boost::mutex::scoped_lock lock(m_db.m_mutex);
   sqlite3_stmt* ptr = NULL;
   const char *rem = NULL;
   int ret = sqlite3_prepare_v2(db, sql.c_str(), sql.size(), &ptr, &rem);
@@ -143,7 +140,6 @@ SQLite3::query_result SqlStatement::fetchAll()
   SQLite3::query_result results;
   int ret;
 
-  boost::mutex::scoped_lock lock(m_db.m_mutex);
   int columns = sqlite3_column_count(*this);
   do {
     ret = sqlite3_step(*this);
@@ -174,9 +170,6 @@ SQLite3::query_result SqlStatement::fetchAll()
   return results;
 }
 
-// CAUTION: this function does not lock the mutex! it can be used as a helper
-// for API functions that need to perform more than one db operation
-// sequentially
 void SQLite3::execInternal(const std::string& sql)
 {
   char *errmsg = NULL;
@@ -192,7 +185,6 @@ void SQLite3::execInternal(const std::string& sql)
 
 void SQLite3::exec(const std::string& sql)
 {
-  boost::mutex::scoped_lock lock(m_mutex);
   execInternal(sql);
 }
 

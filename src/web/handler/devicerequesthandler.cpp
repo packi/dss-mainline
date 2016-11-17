@@ -876,6 +876,9 @@ namespace dss {
         vdcapi::PropertyElement* e3 = e2->add_elements();
         e3->set_name("command");
         e3->mutable_value()->set_v_string(action);
+        vdcapi::PropertyElement* e4 = e2->add_elements();
+        e4->set_name("dontCare");
+        e4->mutable_value()->set_v_bool(action.empty());
         pDevice->setVdcProperty(query);
       }
       if (_request.hasParameter("value") || _request.hasParameter("angle")) {
@@ -2063,7 +2066,7 @@ namespace dss {
     } else if (_request.getMethod() == "getInfoStatic") {
       std::string langCode("");
       _request.getParameter("lang", langCode);
-      VdcDb db;
+      VdcDb db(*DSS::getInstance());
       JSONWriter json;
       vdcInfo::addSpec(db, *pDevice, langCode, json);
       vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
@@ -2095,7 +2098,7 @@ namespace dss {
       _request.getParameter("lang", langCode);
 
 
-      VdcDb db;
+      VdcDb db(*DSS::getInstance());
       JSONWriter json;
       auto filter = vdcInfo::parseFilter(filterParam);
       vdcInfo::addByFilter(db, *pDevice, filter, langCode, json);

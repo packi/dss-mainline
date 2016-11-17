@@ -24,16 +24,20 @@
 #include <memory>
 #include <mutex>
 
+#include "logger.h"
 #include "src/businterface.h"
 #include "src/sqlite3_wrapper.h"
 
 namespace dss {
 
+class DSS;
+
 class VdcDb {
 public:
-  VdcDb(SQLite3::Mode mode = SQLite3::Mode::ReadOnly);
+  VdcDb(DSS &dss, SQLite3::Mode mode = SQLite3::Mode::ReadOnly);
 
-  static std::string getFilePath();
+  static std::string getFilePath(DSS &dss);
+  static void recreate(DSS &dss);
 
   SQLite3& getDb() { return m_db; }
 
@@ -100,6 +104,7 @@ public:
   bool hasActionInterface(const std::string &gtin);
 
 private:
+  __DECL_LOG_CHANNEL__;
   SQLite3 m_db;
   static std::mutex s_mutex;
   std::lock_guard<std::mutex> m_lock;

@@ -455,6 +455,7 @@ namespace dss {
         VdsdSpec_t props = VdcHelper::getSpec(dev->getDSMeterDSID(), dev->getDSID());
         dev->setVdcHardwareModelGuid(props.hardwareModelGuid);
         dev->setVdcModelUID(props.modelUID);
+        dev->setVdcModelVersion(props.modelVersion);
         dev->setVdcVendorGuid(props.vendorGuid);
         dev->setVdcOemGuid(props.oemGuid);
         dev->setVdcOemModelGuid(props.oemModelGuid);
@@ -471,7 +472,7 @@ namespace dss {
           eanString.erase(0, 8);
         }
 
-        VdcDb db;
+        VdcDb db(*DSS::getInstance());
         dev->initStates(dev, db.getStatesLegacy(eanString)); // throws
         dev->setHasActions(db.hasActionInterface(eanString)); // throws
       }
