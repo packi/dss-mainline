@@ -472,6 +472,50 @@ namespace dss {
     return state;
   }
 
+  vdcapi::Message VdcHelper::callLearningFunction(dsuid_t vdc, bool establish, int64_t timeout, const vdcapi::PropertyElement& params)
+  {
+    DeviceBusInterface* deviceBusInterface = DSS::getInstance()->getApartment().getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> learningCall;
+    vdcapi::PropertyElement* param0 = learningCall.Add();
+    param0->set_name("establish");
+    param0->mutable_value()->set_v_bool(establish);
+    if (timeout >= 0) {
+      vdcapi::PropertyElement* param1 = learningCall.Add();
+      param1->set_name("timeout");
+      param1->mutable_value()->set_v_int64(timeout);
+    }
+    if (params.elements_size()) {
+      vdcapi::PropertyElement* paramx = learningCall.Add();
+      paramx->set_name("params");
+      *paramx->mutable_elements() = params.elements();
+    }
+    return VdcConnection::genericRequest(vdc, vdc, "pair", learningCall);
+  }
+
+  vdcapi::Message VdcHelper::callFirmwareFunction(dsuid_t vdc, bool checkOnly, bool clearSettings, const vdcapi::PropertyElement& params)
+  {
+    DeviceBusInterface* deviceBusInterface = DSS::getInstance()->getApartment().getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> firmwareCall;
+    vdcapi::PropertyElement* param0 = firmwareCall.Add();
+    param0->set_name("checkonly");
+    param0->mutable_value()->set_v_bool(checkOnly);
+    vdcapi::PropertyElement* param1 = firmwareCall.Add();
+    param1->set_name("clearsettings");
+    param1->mutable_value()->set_v_bool(clearSettings);
+    if (params.elements_size()) {
+      vdcapi::PropertyElement* paramx = firmwareCall.Add();
+      paramx->set_name("params");
+      *paramx->mutable_elements() = params.elements();
+    }
+    return VdcConnection::genericRequest(vdc, vdc, "firmwareUpdate", firmwareCall);
+  }
+
   vdcapi::Message VdcConnection::genericRequest(const dsuid_t& vdcId, const dsuid_t& targetId,
     const std::string& methodName,
     const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params)

@@ -92,6 +92,10 @@ namespace dss {
     };
     static State getState(dsuid_t _vdsm, dsuid_t _device);
 
+    static vdcapi::Message callLearningFunction(dsuid_t vdc, bool establish, int64_t timeout, const vdcapi::PropertyElement& params);
+    static vdcapi::Message callFirmwareFunction(dsuid_t vdc, bool checkOnly, bool clearSettings, const vdcapi::PropertyElement& params);
+  };
+
   struct VdcConnection
   {
     static vdcapi::Message genericRequest(const dsuid_t& vdcId, const dsuid_t& targetId,
