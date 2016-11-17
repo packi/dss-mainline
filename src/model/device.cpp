@@ -3141,7 +3141,7 @@ namespace dss {
     deviceBusInterface->setProperty(*this, setPropertyParams);
 
     auto deviceReference = boost::make_shared<DeviceReference>(getDSID(), &getApartment());
-    boost::shared_ptr<Event> evt = createDeviceCustomActionChangedEvent(deviceReference, id, action, title, *actionElement);
+    boost::shared_ptr<Event> evt = createDeviceCustomActionChangedEvent(deviceReference, id, action, title, actionParams);
     DSS::getInstance()->getEventQueue().pushEvent(evt);
   }
 
