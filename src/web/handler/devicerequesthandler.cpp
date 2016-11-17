@@ -876,6 +876,9 @@ namespace dss {
         vdcapi::PropertyElement* e3 = e2->add_elements();
         e3->set_name("command");
         e3->mutable_value()->set_v_string(action);
+        vdcapi::PropertyElement* e4 = e2->add_elements();
+        e4->set_name("dontCare");
+        e4->mutable_value()->set_v_bool(action.empty());
         pDevice->setVdcProperty(query);
       }
       if (_request.hasParameter("value") || _request.hasParameter("angle")) {
