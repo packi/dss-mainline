@@ -77,7 +77,7 @@ void addSpec(VdcDb& db, const Device& device, const std::string& langCode, JSONW
 
   std::map<std::string, std::string> specTable;
   specTable["name"] = device.getName();
-  specTable["dsDeviceId"] = dsDeviceGTIN;
+  specTable["dsDeviceGTIN"] = dsDeviceGTIN;
   specTable["model"] = spec.model;
   specTable["modelVersion"] = spec.modelVersion;
   specTable["hardwareGuid"] = convertHardwareGuid(spec.hardwareGuid);
