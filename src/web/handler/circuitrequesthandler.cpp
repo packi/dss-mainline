@@ -122,6 +122,18 @@ namespace dss {
         json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
+      } else if(_request.getMethod() == "firmwareCheck") {
+        vdcapi::Message res = VdcHelper::callFirmwareFunction(dsMeter->getDSID(), true, false, *paramsElement);
+        json.add("response");
+        ProtobufToJSon::protoPropertyToJson(res, json);
+        return json.successJSON();
+      } else if(_request.getMethod() == "firmwareUpdate") {
+        bool clearSettings = false;
+        _request.getParameter("clearsettings", clearSettings);
+        vdcapi::Message res = VdcHelper::callFirmwareFunction(dsMeter->getDSID(), false, clearSettings, *paramsElement);
+        json.add("response");
+        ProtobufToJSon::protoPropertyToJson(res, json);
+        return json.successJSON();
       } else {
         throw std::runtime_error("Unhandled function");
       }
