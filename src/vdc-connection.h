@@ -31,6 +31,8 @@
 #include <boost/shared_ptr.hpp>
 #include <digitalSTROM/dsuid.h>
 
+#include "src/messages/vdc-messages.pb.h"
+
 namespace dss {
 
   class JSONElement;
@@ -89,6 +91,18 @@ namespace dss {
       std::vector<std::pair<std::string, std::string> > deviceStates;
     };
     static State getState(dsuid_t _vdsm, dsuid_t _device);
+
+  struct VdcConnection
+  {
+    static vdcapi::Message genericRequest(const dsuid_t& vdcId, const dsuid_t& targetId,
+        const std::string& methodName,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params);
+
+    static vdcapi::Message setProperty(const dsuid_t& vdcId, const dsuid_t& targetId,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties);
+
+    static vdcapi::Message getProperty(const dsuid_t& vdcId, const dsuid_t& targetId,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
   };
 
 } // namespace

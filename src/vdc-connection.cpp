@@ -472,4 +472,107 @@ namespace dss {
     return state;
   }
 
+  vdcapi::Message VdcConnection::genericRequest(const dsuid_t& vdcId, const dsuid_t& targetId,
+    const std::string& methodName,
+    const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params)
+  {
+    char dsuid_string[DSUID_STR_LEN];
+    dsuid_to_string(&targetId, dsuid_string);
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_GENERIC_REQUEST);
+    auto genericRequest = message.mutable_vdsm_request_generic_request();
+    genericRequest->set_dsuid(dsuid_string);
+    genericRequest->set_methodname(methodName);
+    *genericRequest->mutable_params() = params;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+        vdcId, message.ByteSize(), arrayOut, &arrayInSize, arrayIn);
+
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::GENERIC_RESPONSE) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    const vdcapi::GenericResponse& response = message.generic_response();
+    if (response.code() != vdcapi::ERR_OK) {
+      throw std::runtime_error(std::string("Vdc error code:") + intToString(response.code())
+          + " message:" + response.description());
+    }
+    return message;
+  }
+
+  vdcapi::Message VdcConnection::setProperty(const dsuid_t& vdcId, const dsuid_t& targetId,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties)
+  {
+    char dsuid_string[DSUID_STR_LEN];
+    dsuid_to_string(&targetId, dsuid_string);
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_SET_PROPERTY);
+    vdcapi::vdsm_RequestSetProperty* setPropertyRquest = message.mutable_vdsm_request_set_property();
+    setPropertyRquest->set_dsuid(dsuid_string);
+    *setPropertyRquest->mutable_properties() = properties;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+        vdcId, message.ByteSize(), arrayOut, &arrayInSize, arrayIn);
+
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::GENERIC_RESPONSE) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    const vdcapi::GenericResponse& response = message.generic_response();
+    if (response.code() != vdcapi::ERR_OK) {
+      throw std::runtime_error(std::string("Vdc error code:") + intToString(response.code())
+          + " message:" + response.description());
+    }
+
+    return message;
+  }
+
+  vdcapi::Message VdcConnection::getProperty(const dsuid_t& vdcId, const dsuid_t& targetId,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query)
+  {
+    char dsuid_string[DSUID_STR_LEN];
+    dsuid_to_string(&targetId, dsuid_string);
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
+    vdcapi::vdsm_RequestGetProperty* getPropertyRequest = message.mutable_vdsm_request_get_property();
+    getPropertyRequest->set_dsuid(dsuid_string);
+    *getPropertyRequest->mutable_query() = query;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
+            vdcId, message.ByteSize(), arrayOut, &arrayInSize, arrayIn);
+
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::VDC_RESPONSE_GET_PROPERTY) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    return message;
+  }
+
 }// namespace
