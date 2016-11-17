@@ -2572,8 +2572,8 @@ namespace dss {
                                 boost::shared_ptr<const Device> _device) {
     std::string devName = _device->getName() + ";" + dsuid2str(_device->getDSID());
     std::string actionName;
-    if (m_properties.has("name")) {
-      actionName = m_properties.get("name");
+    if (m_properties.has("actionId")) {
+      actionName = m_properties.get("actionId");
     }
     _logger->logln(";DeviceNamedAction;" + actionName + ";" + actionName + ";;;;;" + devName + ";");
   }
@@ -2583,8 +2583,8 @@ namespace dss {
                                 boost::shared_ptr<const Device> _device) {
     std::string devName = _device->getName() + ";" + dsuid2str(_device->getDSID());
     std::string evtName;
-    if (m_properties.has("name")) {
-      evtName = m_properties.get("name");
+    if (m_properties.has("eventId")) {
+      evtName = m_properties.get("eventId");
     }
     std::string value;
     if (m_properties.has("value")) {
@@ -2598,8 +2598,8 @@ namespace dss {
                                 boost::shared_ptr<const Device> _device) {
     std::string devName = _device->getName() + ";" + dsuid2str(_device->getDSID());
     std::string stateName;
-    if (m_properties.has("name")) {
-      stateName = m_properties.get("name");
+    if (m_properties.has("stateId")) {
+      stateName = m_properties.get("stateId");
     }
     std::string value;
     if (m_properties.has("value")) {
