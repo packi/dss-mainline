@@ -180,6 +180,7 @@ namespace dss {
   const int SensorIDOutputCurrent16A = 64;
   const int SensorIDActivePowerVA = 65;
   const int SensorIDNotUsed = 253;
+  const int SensorIDUnknownType = 255;
 
   const int SensorMaxLifeTime = 3600; /* 1h */
 

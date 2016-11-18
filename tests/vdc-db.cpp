@@ -147,23 +147,21 @@ BOOST_FIXTURE_TEST_CASE(lookupActions, Fixture) {
   std::vector<VdcDb::ActionDesc> actions;
   actions = db.getActions(gtin, "");
   BOOST_REQUIRE_EQUAL(actions.size(), 2);
-  BOOST_CHECK_EQUAL(actions[0].name, "dummy");
-  BOOST_CHECK_EQUAL(actions[0].title, "dummy");
-  BOOST_REQUIRE_EQUAL(actions[0].params.size(), 0);
-  //TODO params
-//   BOOST_CHECK_EQUAL(actions[0].params[0].name, "duration");
-//   BOOST_CHECK_EQUAL(actions[0].params[0].title, "time");
-  //dumpActionDesc(actions);
+  BOOST_CHECK_EQUAL(actions[0].name, "dummyAction1");
+  BOOST_CHECK_EQUAL(actions[0].title, "dummyAction1");
+  BOOST_REQUIRE_EQUAL(actions[0].params.size(), 2);
+  BOOST_CHECK_EQUAL(actions[0].params[0].name, "dummyActionParam1");
+  BOOST_CHECK_EQUAL(actions[0].params[0].title, "dummyActionParam1");
+  dumpActionDesc(actions);
 
   actions = db.getActions(gtin, "de_DE");
   BOOST_REQUIRE_EQUAL(actions.size(), 2);
-  BOOST_CHECK_EQUAL(actions[0].name, "dummy");
-  BOOST_CHECK_EQUAL(actions[0].title, "dummy");
-  BOOST_REQUIRE_EQUAL(actions[0].params.size(), 0);
-  //TODO params
-//   BOOST_CHECK_EQUAL(actions[0].params[0].name, "duration");
-//   BOOST_CHECK_EQUAL(actions[0].params[0].title, "time");
-  //dumpActionDesc(actions);
+  BOOST_CHECK_EQUAL(actions[0].name, "dummyAction1");
+  BOOST_CHECK_EQUAL(actions[0].title, "dummyAction1");
+  BOOST_REQUIRE_EQUAL(actions[0].params.size(), 2);
+  BOOST_CHECK_EQUAL(actions[0].params[0].name, "dummyActionParam1");
+  BOOST_CHECK_EQUAL(actions[0].params[0].title, "dummyActionParam1");
+  dumpActionDesc(actions);
 }
 
 static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
@@ -225,7 +223,7 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
   std::string ret = json.successJSON();
 
   //Logger::getInstance()->log("info: " + ret, lsWarning);
-  std::string expect = R"({"result":{"spec":{"class":{"title":"class","tags":"invisible","value":"x-class"},"classVersion":{"title":"classVersion","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dsDeviceGTIN","tags":"settings:5","value":""},"dummyNode":{"title":"dummyNode","tags":"overview","value":""},"hardwareGuid":{"title":"hardwareGuid","tags":"settings:4","value":"x-hardwareGuid"},"hardwareModelGuid":{"title":"hardwareModelGuid","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"model","tags":"overview:2;settings:2","value":"x-model"},"modelVersion":{"title":"modelVersion","tags":"invisible","value":"x-modelVersion"},"name":{"title":"name","tags":"overview:1;settings:1","value":""},"vendorId":{"title":"vendorId","tags":"invisible","value":"x-vendorId"},"vendorName":{"title":"vendorName","tags":"overview:3;settings:3","value":"x-vendorName"}},"stateDescriptions":{"dummyState":{"title":"dummyState","tags":"","options":{"d":"d","u":"u","mm":"mm","y":"y"}}},"propertyDescriptions":{"dummyProperty":{"title":"dummyProperty","tags":"","type":"string","default":""}},"actionDescriptions":{"dummy":{"title":"dummy","params":{}},"moreDummy":{"title":"moreDummy","params":{"dummyParam":{"title":"dummyParam","tags":"","type":"string","default":""}}}},"standardActions":{"std.dummy":{"title":"std.dummy","action":"dummy","params":{}},"std.moreDummy":{"title":"std.moreDummy","action":"moreDummy","params":{}}}},"ok":true})";
+  std::string expect = R"expect({"result":{"spec":{"class":{"title":"class","tags":"invisible","value":"x-class"},"classVersion":{"title":"classVersion","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dsDeviceGTIN","tags":"settings:5","value":""},"dummyNode":{"title":"dummyNode","tags":"overview","value":""},"hardwareGuid":{"title":"hardwareGuid","tags":"settings:4","value":"x-hardwareGuid"},"hardwareModelGuid":{"title":"hardwareModelGuid","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"model","tags":"overview:2;settings:2","value":"x-model"},"modelVersion":{"title":"modelVersion","tags":"invisible","value":"x-modelVersion"},"name":{"title":"name","tags":"overview:1;settings:1","value":""},"vendorId":{"title":"vendorId","tags":"invisible","value":"x-vendorId"},"vendorName":{"title":"vendorName","tags":"overview:3;settings:3","value":"x-vendorName"}},"stateDescriptions":{"dummyState":{"title":"dummyState","tags":"overview","options":{"d":"d","u":"u","mm":"mm","y":"y"}}},"propertyDescriptions":{"dummyProperty":{"title":"dummyProperty","tags":"","type":"string","default":""}},"actionDescriptions":{"dummyAction1":{"title":"dummyAction1","params":{"dummyActionParam1":{"title":"dummyActionParam1","tags":"","type":"string","default":""},"dummyActionParam2":{"title":"dummyActionParam2","tags":"","type":"numeric","min":"1","max":"12","resolution":"0,01","siunit":"liter","default":"1"}}},"dummyAction2":{"title":"dummyAction2","params":{}}},"standardActions":{"std.dummy":{"title":"std.dummy","action":"dummyAction1","params":{}},"std.moreDummy":{"title":"std.moreDummy","action":"dummyAction2","params":{}}}},"ok":true})expect";
   //Logger::getInstance()->log("expect: " + expect, lsWarning);
   BOOST_CHECK_EQUAL(ret, expect);
 }

@@ -4116,7 +4116,7 @@ namespace dss {
         JS_ReportError(cx, "Model.zone_getAssignedSensor: ext of wrong type");
         return JS_FALSE;
       }
-      int sensorType = SensorIDNotUsed;
+      int sensorType = SensorIDUnknownType;
       if (argc >= 1) {
         try {
           sensorType = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);

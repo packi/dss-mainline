@@ -1362,7 +1362,7 @@ Sample: {
       double fValue = strToDouble(sensorValueFloat);
 
       std::string strType = _event.getPropertyByName("sensorType");
-      int sensorType = 255;
+      int sensorType = SensorIDUnknownType;
       if (!strType.empty()) {
         sensorType = strToInt(strType);
       } else {
