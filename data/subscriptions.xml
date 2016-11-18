@@ -74,7 +74,7 @@
   -->
 
   <!-- Sunrise/Sunset calculation script -->
-  <subscription event-name="running" handler-name="javascript">
+  <subscription event-name="model_ready" handler-name="javascript">
     <parameter>
       <parameter name="filename1">scripts/solar_computer.js</parameter>
       <parameter name="script_id">solar_computer</parameter>

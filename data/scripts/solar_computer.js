@@ -740,7 +740,7 @@ function stateChange() {
     }
 }
 
-if (raisedEvent.name == "running") {
+if (raisedEvent.name == "model_ready") {
 
     var la = Property.getProperty('/config/geodata/latitude');
     var lo = Property.getProperty('/config/geodata/longitude');
