@@ -24,6 +24,9 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/test/unit_test.hpp>
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
 
 #include <fstream>
 
@@ -71,6 +74,61 @@ static void dumpStates(std::vector<DeviceStateSpec_t> states) {
     }
     Logger::getInstance()->log(state.Name + ": [" + values + "]", lsWarning);
   }
+}
+
+static bool jsonStringsAreEqual(const std::string& expected, const std::string& result, std::string& errorString) {
+  rapidjson::Document returnedResult;
+  returnedResult.Parse(result.c_str());
+
+  rapidjson::Document expectedResult;
+  expectedResult.Parse(expected.c_str());
+
+  if (returnedResult != expectedResult) {
+    rapidjson::StringBuffer expectedBuffer;
+    rapidjson::StringBuffer resultBuffer;
+
+    expectedBuffer.Clear();
+    resultBuffer.Clear();
+
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> expectedWriter(expectedBuffer);
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> resultWriter(resultBuffer);
+    expectedResult.Accept(expectedWriter);
+    returnedResult.Accept(resultWriter);
+
+    std::stringstream expectedStrings(expectedBuffer.GetString());
+    std::stringstream resultStrings(resultBuffer.GetString());
+
+    std::string expectedLine;
+    std::string resultLine;
+    while (!expectedStrings.eof() && !resultStrings.eof()) {
+      if (expectedStrings.eof()) {
+        expectedLine = "";
+      } else {
+        std::getline(expectedStrings, expectedLine);
+      }
+      if (expectedStrings.eof()) {
+        resultLine = "";
+      } else {
+        std::getline(resultStrings, resultLine);
+      }
+
+      if (expectedLine != resultLine) {
+        errorString += ">> ";
+        errorString += resultLine;
+        errorString += " != ";
+        errorString += expectedLine;
+        errorString += "\n";
+      }
+      else
+      {
+        errorString += expectedLine;
+        errorString += "\n";
+      }
+
+    }
+    return false;
+  }
+  return true;
 }
 
 static const char *gtin = "1234567890123";
@@ -223,9 +281,135 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
   std::string ret = json.successJSON();
 
   //Logger::getInstance()->log("info: " + ret, lsWarning);
-  std::string expect = R"expect({"result":{"spec":{"class":{"title":"class","tags":"invisible","value":"x-class"},"classVersion":{"title":"classVersion","tags":"invisible","value":"x-classVersion"},"dsDeviceGTIN":{"title":"dsDeviceGTIN","tags":"settings:5","value":""},"dummyNode":{"title":"dummyNode","tags":"overview","value":""},"hardwareGuid":{"title":"hardwareGuid","tags":"settings:4","value":"x-hardwareGuid"},"hardwareModelGuid":{"title":"hardwareModelGuid","tags":"invisible","value":"x-hardwareModelGuid"},"model":{"title":"model","tags":"overview:2;settings:2","value":"x-model"},"modelVersion":{"title":"modelVersion","tags":"invisible","value":"x-modelVersion"},"name":{"title":"name","tags":"overview:1;settings:1","value":""},"vendorId":{"title":"vendorId","tags":"invisible","value":"x-vendorId"},"vendorName":{"title":"vendorName","tags":"overview:3;settings:3","value":"x-vendorName"}},"stateDescriptions":{"dummyState":{"title":"dummyState","tags":"overview","options":{"d":"d","u":"u","mm":"mm","y":"y"}}},"propertyDescriptions":{"dummyProperty":{"title":"dummyProperty","tags":"","type":"string","default":""}},"actionDescriptions":{"dummyAction1":{"title":"dummyAction1","params":{"dummyActionParam1":{"title":"dummyActionParam1","tags":"","type":"string","default":""},"dummyActionParam2":{"title":"dummyActionParam2","tags":"","type":"numeric","min":"1","max":"12","resolution":"0,01","siunit":"liter","default":"1"}}},"dummyAction2":{"title":"dummyAction2","params":{}}},"standardActions":{"std.dummy":{"title":"std.dummy","action":"dummyAction1","params":{}},"std.moreDummy":{"title":"std.moreDummy","action":"dummyAction2","params":{}}}},"ok":true})expect";
+  std::string expect = R"expect(
+  {
+      "result": {
+          "spec": {
+              "class": {
+                  "title": "class",
+                  "tags": "invisible",
+                  "value": "x-class"
+              },
+              "classVersion": {
+                  "title": "classVersion",
+                  "tags": "invisible",
+                  "value": "x-classVersion"
+              },
+              "dsDeviceGTIN": {
+                  "title": "dsDeviceGTIN",
+                  "tags": "settings:5",
+                  "value": "1234567890123"
+              },
+              "dummyNode": {
+                  "title": "dummyNode",
+                  "tags": "overview",
+                  "value": ""
+              },
+              "hardwareGuid": {
+                  "title": "hardwareGuid",
+                  "tags": "settings:4",
+                  "value": "x-hardwareGuid"
+              },
+              "hardwareModelGuid": {
+                  "title": "hardwareModelGuid",
+                  "tags": "invisible",
+                  "value": "x-hardwareModelGuid"
+              },
+              "model": {
+                  "title": "model",
+                  "tags": "overview:2;settings:2",
+                  "value": "x-model"
+              },
+              "modelVersion": {
+                  "title": "modelVersion",
+                  "tags": "invisible",
+                  "value": "x-modelVersion"
+              },
+              "name": {
+                  "title": "name",
+                  "tags": "overview:1;settings:1",
+                  "value": ""
+              },
+              "vendorId": {
+                  "title": "vendorId",
+                  "tags": "invisible",
+                  "value": "x-vendorId"
+              },
+              "vendorName": {
+                  "title": "vendorName",
+                  "tags": "overview:3;settings:3",
+                  "value": "x-vendorName"
+              }
+          },
+          "stateDescriptions": {
+              "dummyState": {
+                  "title": "dummyState",
+                  "tags": "overview",
+                  "options": {
+                      "d": "d",
+                      "u": "u",
+                      "mm": "mm",
+                      "y": "y"
+                  }
+              }
+          },
+          "propertyDescriptions": {
+              "dummyProperty": {
+                  "title": "dummyProperty",
+                  "tags": "",
+                  "type": "string",
+                  "default": ""
+              }
+          },
+          "actionDescriptions": {
+              "dummyAction1": {
+                  "title": "dummyAction1",
+                  "params": {
+                      "dummyActionParam1": {
+                          "title": "dummyActionParam1",
+                          "tags": "",
+                          "type": "string",
+                          "default": ""
+                      },
+                      "dummyActionParam2": {
+                          "title": "dummyActionParam2",
+                          "tags": "",
+                          "type": "numeric",
+                          "min": "1",
+                          "max": "12",
+                          "resolution": "0,01",
+                          "siunit": "liter",
+                          "default": "1"
+                      }
+                  }
+              },
+              "dummyAction2": {
+                  "title": "dummyAction2",
+                  "params": {}
+              }
+          },
+          "standardActions": {
+              "std.dummy": {
+                  "title": "std.dummy",
+                  "action": "dummyAction1",
+                  "params": {}
+              },
+              "std.moreDummy": {
+                  "title": "std.moreDummy",
+                  "action": "dummyAction2",
+                  "params": {}
+              }
+          }
+      },
+      "ok": true
+  }
+  )expect";
   //Logger::getInstance()->log("expect: " + expect, lsWarning);
-  BOOST_CHECK_EQUAL(ret, expect);
+
+  std::string error;
+  bool jsonEqual = jsonStringsAreEqual(expect, ret, error);
+
+  BOOST_CHECK_MESSAGE(jsonEqual, error);
 }
 
 BOOST_FIXTURE_TEST_CASE(checkNotFound, Fixture) {
@@ -250,9 +434,21 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, Fixture) {
   std::string ret = json.successJSON();
 
   //Logger::getInstance()->log("info: " + ret, lsWarning);
-  std::string expect = R"expect({"result":{"stateDescriptions":{},"propertyDescriptions":{},"actionDescriptions":{},"standardActions":{},"eventDescriptions":{}},"ok":true})expect";
+  std::string expect = R"expect(
+  {
+      "result": {
+          "stateDescriptions": {},
+          "propertyDescriptions": {},
+          "actionDescriptions": {},
+          "standardActions": {},
+          "eventDescriptions": {}
+      },
+      "ok": true
+  })expect";
   //Logger::getInstance()->log("expect: " + expect, lsWarning);
-  BOOST_CHECK_EQUAL(ret, expect);
+  std::string error;
+  bool jsonEqual = jsonStringsAreEqual(expect, ret, error);
+  BOOST_CHECK_MESSAGE(jsonEqual, error);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
