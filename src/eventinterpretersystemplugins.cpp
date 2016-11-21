@@ -2118,7 +2118,7 @@ namespace dss {
     }
 
     PropertyNodePtr triggerPathNode;
-
+    std::string sTriggerPath;
     try {
       for (int i = 0; i < triggerProperty->getChildCount(); i++) {
         PropertyNodePtr triggerNode = triggerProperty->getChild(i);
@@ -2136,7 +2136,7 @@ namespace dss {
           continue;
         }
 
-        std::string sTriggerPath = triggerPathNode->getStringValue();
+        sTriggerPath = triggerPathNode->getStringValue();
 
         if (checkTrigger(triggerParamNode) && checkSystemCondition(sTriggerPath)) {
 
@@ -2173,10 +2173,10 @@ namespace dss {
       } // for loop
     } catch (PropertyTypeMismatch& e) {
       Logger::getInstance()->log("SystemTrigger::run: error parsing trigger at " +
-          triggerPathNode->getDisplayName(), lsInfo);
+          sTriggerPath + ": " + e.what(), lsInfo);
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemTrigger::run: runtime error at " +
-          triggerPathNode->getDisplayName(), lsInfo);
+          sTriggerPath + ": " + e.what(), lsInfo);
     }
   }
 
