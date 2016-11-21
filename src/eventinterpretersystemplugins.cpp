@@ -1515,7 +1515,7 @@ namespace dss {
     }
 
     dsuid_t dsuid = m_evtSrcDSID;
-    std::string action = m_properties.get("name");
+    std::string action = m_properties.get("actionId");
 
     if (dsuid == DSUID_NULL) {
       return false;
@@ -1554,7 +1554,7 @@ namespace dss {
     }
 
     dsuid_t dsuid = m_evtSrcDSID;
-    std::string evtName = m_properties.get("name");
+    std::string evtName = m_properties.get("eventId");
 
     if (dsuid == DSUID_NULL) {
       return false;
