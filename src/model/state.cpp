@@ -60,18 +60,6 @@ namespace dss {
     publishToPropertyTree();
   } // ctor
 
-  State::State(const std::string& _name, eState _state)
-    : m_name(_name),
-      m_IsPersistent(false),
-      m_callOrigin(coUnknown),
-      m_originDeviceDSUID(DSUID_NULL),
-      m_state(_state),
-      m_type(StateType_Apartment)
-  {
-    load();
-    publishToPropertyTree();
-  } // ctor
-
   State::State(eStateType _type, const std::string& _name, const std::string& _identifier)
   : m_name(_name),
     m_IsPersistent(false),
