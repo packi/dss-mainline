@@ -1,5 +1,17 @@
 dSS - digitalSTROM Server
 
+v1.39.0	22.11.2016
+	* add getInfo filter to return operational vdc values, #15063
+	* improve vdc language/country code mappings, #15097
+	* allow passing parameters along with callAction, #15098
+	* return modelVersion as vdec property, #15210
+	* convert hardwareGuid prefix into human readable string
+	* add new circuit json handler for pairing, #14732
+	* improve finding of librry by configure, #15132
+	* extend solar computer to make real states for sun states, #15213
+	* fix solar time calculator, #15252
+	* fix vdc event system trigger, #15273
+
 v1.38.0	07.11.2016
 	* send model_ready after 30 seconds timeout, if no dSMs are on
 	  the bus, #14736
