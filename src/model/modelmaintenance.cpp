@@ -2532,7 +2532,7 @@ namespace dss {
         raiseEvent(createDeviceEventEvent(pDevRev, deviceEvent));
       }
     } catch(ItemNotFoundException& e) {
-      log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
+      log("onVdceEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
   }
 
