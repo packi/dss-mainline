@@ -2045,14 +2045,9 @@ namespace dss {
 
       // increment event counter as last step to catch possible
       // data model exceptions in above sequence
-      try {
-        pMeter->incrementBinaryInputEventCount();
-      } catch(DSSException& e) {
-        log("onBinaryInputEvent: " + std::string(e.what()), lsWarning);
-      }
-
-    } catch(ItemNotFoundException& e) {
-      log("onBinaryInputEvent: Datamodel failure: " + std::string(e.what()), lsWarning);
+      pMeter->incrementBinaryInputEventCount();
+    } catch(const std::exception& e) {
+      log("onBinaryInputEvent: what: " + std::string(e.what()), lsWarning);
     }
   } // onBinaryInputEvent
 
