@@ -475,11 +475,11 @@ namespace dss {
     manipulator.synchronizeZoneSensorAssignment(DSS::getInstance()->getApartment().getZones());
   }
 
-  void MeterMaintenance::raiseEvent(boost::shared_ptr<Event> _pEvent) {
+  void MeterMaintenance::raiseEvent(const boost::shared_ptr<Event> &event) {
     if(DSS::hasInstance()) {
-      DSS::getInstance()->getEventQueue().pushEvent(_pEvent);
+      DSS::getInstance()->raiseEvent(event);
     }
-  } // raiseEvent
+  }
 
  //=============================================== ModelMaintenance
 
@@ -1251,11 +1251,11 @@ namespace dss {
     }
   } // readConfiguration
 
-  void ModelMaintenance::raiseEvent(boost::shared_ptr<Event> _pEvent) {
+  void ModelMaintenance::raiseEvent(const boost::shared_ptr<Event> &event) {
     if(DSS::hasInstance()) {
-      getDSS().getEventQueue().pushEvent(_pEvent);
+      getDSS().raiseEvent(event);
     }
-  } // raiseEvent
+  }
 
   void ModelMaintenance::synchronizeHeatingAssignment(const dsuid_t& _dSMeterID) {
     boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::UpdateAutoselect);

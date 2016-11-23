@@ -137,7 +137,7 @@ namespace dss {
     void setApartmentState();
     void autoAssignSensors();
     void synchronizeZoneSensorAssignment();
-    void raiseEvent(boost::shared_ptr<Event> _pEvent);
+    void raiseEvent(const boost::shared_ptr<Event> &event);
     void setupInitializedState();
     void monitorInitialization();
     int getdSMBusMemberCount();
@@ -274,7 +274,7 @@ namespace dss {
     void scheduleConfigWrite();
     void delayedConfigWrite();
 
-    void raiseEvent(boost::shared_ptr<Event> _pEvent);
+    void raiseEvent(const boost::shared_ptr<Event> &event);
     void notifyModelConsistent(); //< notifies pendingChangesBarrier
 
     void onDeviceCallScene(const dsuid_t& _dsMeterID, const int _deviceID, const int _originDeviceID, const int _sceneID, const callOrigin_t _origin, const bool _forced, const std::string _token);
