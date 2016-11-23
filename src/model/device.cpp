@@ -2166,6 +2166,14 @@ namespace dss {
 
   void Device::clearBinaryInputStates() {
     boost::mutex::scoped_lock lock(m_deviceMutex);
+    foreach(auto&& state, m_binaryInputStates) {
+      try {
+        m_pApartment->removeState(state);
+      } catch (const std::exception& e) {
+        Logger::getInstance()->log(std::string("Device::clearBinaryInputStates: remove state failed:")
+            + e.what(), lsWarning);
+      }
+    }
     m_binaryInputStates.clear();
   }
 
