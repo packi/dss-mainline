@@ -395,14 +395,6 @@ namespace dss {
     return ret;
   }
 
-  double SceneHelper::roundDigits(const double input, const int digits) {
-    double output = input;
-    output *= pow(10, digits);
-    output = round(output);
-    output /= pow(10, digits);
-    return output;
-  }
-
   double sensorToFloat12(int _sensorType, int _sensorValue) {
     double convertedSensorValue;
     switch (_sensorType) {

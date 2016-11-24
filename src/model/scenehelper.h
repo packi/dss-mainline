@@ -70,8 +70,6 @@ namespace dss {
     static bool isDimSequence(const unsigned int _scene);
     static uint64_t getReachableScenesBitmapForButtonID(const int _buttonID);
     static SceneOnState isOnScene(const int _groupID, const unsigned int _scene);
-
-    static double roundDigits(const double input, const int digits);
   }; // SceneHelper
 
 } // namespace dss
