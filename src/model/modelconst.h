@@ -184,6 +184,11 @@ namespace dss {
 
   const int SensorMaxLifeTime = 3600; /* 1h */
 
+  double sensorToFloat12(const int _sensorType, const int _sensorValue);
+  int sensorToSystem(const int _sensorType, const double _sensorValue);
+  uint8_t sensorToPrecision(const int _sensorType);
+  std::string sensorName(const int _sensorType);
+
   // BinaryInput Type IDs
   const int BinaryInputIDPresence = 1;
   const int BinaryInputIDRoomBrightness = 2;

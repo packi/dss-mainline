@@ -2534,7 +2534,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValue = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat =
-        SceneHelper::sensorToFloat12(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+        sensorToFloat12(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
@@ -2546,7 +2546,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValue =
-            SceneHelper::sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+            sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }

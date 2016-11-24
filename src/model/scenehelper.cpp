@@ -403,7 +403,7 @@ namespace dss {
     return output;
   }
 
-  double SceneHelper::sensorToFloat12(int _sensorType, int _sensorValue) {
+  double sensorToFloat12(int _sensorType, int _sensorValue) {
     double convertedSensorValue;
     switch (_sensorType) {
     case SensorIDActivePower:
@@ -468,7 +468,7 @@ namespace dss {
     return convertedSensorValue;
   } // sensorToFloat12
 
-  int SceneHelper::sensorToSystem(int _sensorType, double _sensorValue) {
+  int sensorToSystem(int _sensorType, double _sensorValue) {
     int convertedSensorValue;
     switch (_sensorType) {
     case SensorIDActivePower:
@@ -560,7 +560,7 @@ namespace dss {
     return convertedSensorValue;
   } // sensorToSystem
 
-  uint8_t SceneHelper::sensorToPrecision(const int _sensorType) {
+  uint8_t sensorToPrecision(const int _sensorType) {
     switch (_sensorType) {
       case SensorIDRoomTemperatureControlVariable:
         return 1;
@@ -570,7 +570,7 @@ namespace dss {
     return 0;
   }
 
-  std::string SceneHelper::sensorName(const int _sensorType) {
+  std::string sensorName(const int _sensorType) {
     std::string _name;
     switch(_sensorType) {
       case SensorIDActivePower:

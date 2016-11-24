@@ -35,11 +35,11 @@ BOOST_AUTO_TEST_CASE(test_sensor_conversion)
 {
 #define SENSOR_MIN 0
 #define SENSOR_MAX 0xfff
-  BOOST_CHECK_NO_THROW(SceneHelper::sensorToSystem(SensorIDTemperatureIndoors, SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, SENSOR_MIN)));
-  BOOST_CHECK_NO_THROW(SceneHelper::sensorToSystem(SensorIDTemperatureIndoors, SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, SENSOR_MAX)));
+  BOOST_CHECK_NO_THROW(sensorToSystem(SensorIDTemperatureIndoors, sensorToFloat12(SensorIDTemperatureIndoors, SENSOR_MIN)));
+  BOOST_CHECK_NO_THROW(sensorToSystem(SensorIDTemperatureIndoors, sensorToFloat12(SensorIDTemperatureIndoors, SENSOR_MAX)));
 
-  BOOST_CHECK_THROW(SceneHelper::sensorToSystem(SensorIDTemperatureIndoors, (float)SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, SENSOR_MIN)), SensorOutOfRangeException);
-  BOOST_CHECK_NO_THROW(SceneHelper::sensorToSystem(SensorIDTemperatureIndoors, (float)SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, SENSOR_MAX)));
+  BOOST_CHECK_THROW(sensorToSystem(SensorIDTemperatureIndoors, (float)sensorToFloat12(SensorIDTemperatureIndoors, SENSOR_MIN)), SensorOutOfRangeException);
+  BOOST_CHECK_NO_THROW(sensorToSystem(SensorIDTemperatureIndoors, (float)sensorToFloat12(SensorIDTemperatureIndoors, SENSOR_MAX)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

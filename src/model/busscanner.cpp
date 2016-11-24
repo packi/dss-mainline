@@ -967,10 +967,10 @@ namespace dss {
           age = now.addSeconds(-1 * sensorAge);
           if (age > zSensors.m_TemperatureValueTS) {
             _zone->setTemperature(
-                SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), age);
+                sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), age);
           } else {
             _zone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDTemperatureIndoors,
-                SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), "");
+                sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error getting heating temperature value on zone " + intToString(_zone->getID()) +
@@ -982,10 +982,10 @@ namespace dss {
           age = now.addSeconds(-1 * sensorAge);
           if (age > zValues.m_NominalValueTS) {
             _zone->setNominalValue(
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), age);
+                sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), age);
           } else {
             _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureSetpoint,
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), "");
+                sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error reading heating nominal temperature value on zone " + intToString(_zone->getID()) +
@@ -997,10 +997,10 @@ namespace dss {
           age = now.addSeconds(-1 * sensorAge);
           if (age > zValues.m_ControlValueTS) {
             _zone->setControlValue(
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), age);
+                sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), age);
           } else {
             _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureControlVariable,
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), "");
+                sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error reading heating control value on zone " + intToString(_zone->getID()) +

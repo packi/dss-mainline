@@ -186,7 +186,7 @@ createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
 {
   boost::shared_ptr<Event> event;
   // TODO ensure sensorType valid or implement fallback
-  double floatValue = SceneHelper::sensorToFloat12(_type, _value);
+  double floatValue = sensorToFloat12(_type, _value);
 
   event = boost::make_shared<Event>(EventName::DeviceSensorValue, _devRef);
   event->setProperty(ef_sensorIndex, intToString(_index));
@@ -214,7 +214,7 @@ createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
 {
   boost::shared_ptr<Event> event;
   // TODO ensure sensorType valid or implement fallback
-  double floatValue = SceneHelper::sensorToFloat12(_type, _value);
+  double floatValue = sensorToFloat12(_type, _value);
 
   event = boost::make_shared<Event>(EventName::ZoneSensorValue, _group);
   event->setProperty("sensorType", intToString(_type));
@@ -382,38 +382,38 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
     event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
     if (_properties.m_HeatingControlMode == HeatingControlModeIDPID) {
       event->setProperty("NominalTemperature_Off",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode0)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode0)));
       event->setProperty("NominalTemperature_Comfort",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode1)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode1)));
       event->setProperty("NominalTemperature_Economy",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode2)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode2)));
       event->setProperty("NominalTemperature_NotUsed",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode3)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode3)));
       event->setProperty("NominalTemperature_Night",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode4)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode4)));
       event->setProperty("NominalTemperature_Holiday",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode5)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode5)));
       event->setProperty("NominalTemperature_Cooling",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode6)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode6)));
       event->setProperty("NominalTemperature_CoolingOff",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode7)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode7)));
     } else if (_properties.m_HeatingControlMode == HeatingControlModeIDFixed) {
       event->setProperty("ControlValue_Off",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode0)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode0)));
       event->setProperty("ControlValue_Comfort",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode1)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode1)));
       event->setProperty("ControlValue_Economy",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode2)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode2)));
       event->setProperty("ControlValue_NotUsed",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode3)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode3)));
       event->setProperty("ControlValue_Night",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode4)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode4)));
       event->setProperty("ControlValue_Holiday",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode5)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode5)));
       event->setProperty("ControlValue_Cooling",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode6)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode6)));
       event->setProperty("ControlValue_CoolingOff",
-          doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode7)));
+          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode7)));
     }
     return event;
 }
@@ -439,10 +439,10 @@ createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
   }
   if (_props.m_HeatingControlMode == HeatingControlModeIDPID) {
     event->setProperty("NominalTemperature",
-                       doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _stat.m_NominalValue)));
+                       doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _stat.m_NominalValue)));
   } else if (_props.m_HeatingControlMode == HeatingControlModeIDFixed) {
     event->setProperty("ControlValue",
-                       doubleToString(SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, _stat.m_ControlValue)));
+                       doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _stat.m_ControlValue)));
   }
   return event;
 }
