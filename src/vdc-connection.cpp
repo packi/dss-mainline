@@ -284,7 +284,7 @@ namespace dss {
       {
         VdcElementReader reader = biStateReader["value"];
         if (reader.isValid()) {
-            binaryInputStates[biStateIndex] = reader.getValueAsBool() ? State_Active : State_Inactive;
+            binaryInputStates[biStateIndex] = reader.getValueAsBool() ? 1 : 0;
             continue;
         }
       }

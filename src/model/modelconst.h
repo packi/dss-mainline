@@ -27,6 +27,10 @@
 
 namespace dss {
 
+  // Documentation links:
+  // http://developer.digitalstrom.org/Architecture/ds-basics.pdf
+  // https://git.digitalstrom.org/digitalstrom-documentation/digitalstrom-documentation/tree/master/ds-basics
+
   // Scene constants for devices
   const uint8_t SceneOff = 0x00;
   const uint8_t SceneOffA1 = 0x01;
@@ -206,6 +210,8 @@ namespace dss {
   const int BinaryInputIDHeatingSystem = 19;
   const int BinaryInputIDHeatingSystemMode = 20;
   const int BinaryInputIDPowerUp = 21;
+  const int BinaryInputIDMalfunction = 22;
+  const int BinaryInputIDService = 23;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
