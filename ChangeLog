@@ -1,5 +1,10 @@
 dSS - digitalSTROM Server
 
+v1.39.1	25.11.2016
+	* fix inital read out of binary input states from vdcs
+	* updated translations
+	* modified standard actions and parameter for ikettle
+
 v1.39.0	22.11.2016
 	* add getInfo filter to return operational vdc values, #15063
 	* improve vdc language/country code mappings, #15097
