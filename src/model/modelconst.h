@@ -152,42 +152,43 @@ namespace dss {
   const uint8_t SensorFunction_Generic10 = 10;
   const uint8_t SensorFunction_Generic11 = 11;
 
-  // Sensor Type ID's
-  const int SensorIDActivePower = 4;
-  const int SensorIDOutputCurrent = 5;
-  const int SensorIDElectricMeter = 6;
-  const int SensorIDOutputCurrentEx = 64;
-  const int SensorIDPowerConsumptionVA = 65;
-  const int SensorIDTemperatureIndoors = 9;
-  const int SensorIDTemperatureOutdoors = 10;
-  const int SensorIDBrightnessIndoors = 11;
-  const int SensorIDBrightnessOutdoors = 12;
-  const int SensorIDHumidityIndoors = 13;
-  const int SensorIDHumidityOutdoors = 14;
-  const int SensorIDAirPressure = 15;
-  const int SensorIDGustSpeed = 16;
-  const int SensorIDGustDirection = 17;
-  const int SensorIDWindSpeed = 18;
-  const int SensorIDWindDirection = 19;
-  const int SensorIDPrecipitation = 20;
-  const int SensorIDCO2Concentration = 21;
-  const int SensorIDCOConcentration = 22;
-  const int SensorIDSoundPressureLevel = 25;
-  const int SensorIDRoomTemperatureSetpoint = 50;
-  const int SensorIDRoomTemperatureControlVariable = 51;
-  const int SensorIDReserved1 = 61;
-  const int SensorIDReserved2 = 62;
-  const int SensorIDOutputCurrent16A = 64;
-  const int SensorIDActivePowerVA = 65;
-  const int SensorIDNotUsed = 253;
-  const int SensorIDUnknownType = 255;
+  enum class SensorType {
+    ActivePower = 4,
+    OutputCurrent = 5,
+    ElectricMeter = 6,
+    OutputCurrentEx = 64,
+    PowerConsumptionVA = 65,
+    TemperatureIndoors = 9,
+    TemperatureOutdoors = 10,
+    BrightnessIndoors = 11,
+    BrightnessOutdoors = 12,
+    HumidityIndoors = 13,
+    HumidityOutdoors = 14,
+    AirPressure = 15,
+    GustSpeed = 16,
+    GustDirection = 17,
+    WindSpeed = 18,
+    WindDirection = 19,
+    Precipitation = 20,
+    CO2Concentration = 21,
+    COConcentration = 22,
+    SoundPressureLevel = 25,
+    RoomTemperatureSetpoint = 50,
+    RoomTemperatureControlVariable = 51,
+    Reserved1 = 61,
+    Reserved2 = 62,
+    OutputCurrent16A = 64,
+    ActivePowerVA = 65,
+    NotUsed = 253,
+    UnknownType = 255,
+  };
 
   const int SensorMaxLifeTime = 3600; /* 1h */
 
-  double sensorToFloat12(const int _sensorType, const int _sensorValue);
-  int sensorToSystem(const int _sensorType, const double _sensorValue);
-  uint8_t sensorToPrecision(const int _sensorType);
-  std::string sensorName(const int _sensorType);
+  double sensorToFloat12(SensorType _sensorType, const int _sensorValue);
+  int sensorToSystem(SensorType _sensorType, const double _sensorValue);
+  uint8_t sensorToPrecision(SensorType _sensorType);
+  std::string sensorName(SensorType _sensorType);
 
   // BinaryInput Type IDs
   const int BinaryInputIDPresence = 1;

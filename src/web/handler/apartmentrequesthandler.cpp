@@ -402,26 +402,26 @@ namespace dss {
           case HeatingControlModeIDOff:
             break;
           case HeatingControlModeIDPID:
-            json.add("Off", sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
-            json.add("Comfort", sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
-            json.add("Economy", sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
-            json.add("NotUsed", sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
-            json.add("Night", sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
-            json.add("Holiday", sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
-            json.add("Cooling", sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode7));
+            json.add("Off", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+            json.add("Comfort", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+            json.add("Economy", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+            json.add("NotUsed", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+            json.add("Night", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+            json.add("Holiday", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+            json.add("Cooling", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+            json.add("CoolingOff", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
-            json.add("Off", sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
-            json.add("Comfort", sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
-            json.add("Economy", sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
-            json.add("NotUsed", sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
-            json.add("Night", sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
-            json.add("Holiday", sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
-            json.add("Cooling", sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode7));
+            json.add("Off", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+            json.add("Comfort", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+            json.add("Economy", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+            json.add("NotUsed", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+            json.add("Night", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+            json.add("Holiday", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+            json.add("Cooling", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+            json.add("CoolingOff", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
             break;
           }
           json.endObject();
@@ -447,7 +447,7 @@ namespace dss {
               it ++) {
             json.startObject();
             boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-            json.add("sensorType", devSensor->m_sensorType);
+            json.add("sensorType", static_cast<int>(devSensor->m_sensorType));
             json.add("dsuid", dsuid2str(devSensor->m_DSUID));
             json.endObject();
           }

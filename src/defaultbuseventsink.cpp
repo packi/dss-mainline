@@ -167,7 +167,7 @@ namespace dss {
       const dsuid_t &_sourceDevice,
       const int& _zoneID,
       const int& _groupID,
-      const int& _sensorType,
+      SensorType _sensorType,
       const int& _sensorValue,
       const int& _precision,
       const SceneAccessCategory _category,
@@ -175,7 +175,7 @@ namespace dss {
     ModelEvent* pEvent = new ModelEventWithStrings(ModelEvent::etZoneSensorValue, _dsMeterID);
     pEvent->addParameter(_zoneID);
     pEvent->addParameter(_groupID);
-    pEvent->addParameter(_sensorType);
+    pEvent->addParameter(static_cast<int>(_sensorType));
     pEvent->addParameter(_sensorValue);
     pEvent->addParameter(_precision);
     pEvent->setSingleStringParameter(dsuid2str(_sourceDevice));

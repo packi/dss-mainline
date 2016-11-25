@@ -36,10 +36,10 @@ public:
   virtual void run();
 private:
   Apartment *m_Apartment;
-  DateTime getDateTimeForSensor(const ZoneSensorStatus_t& hSensors, const int _sensorType);
-  void checkZoneSensor(boost::shared_ptr<Zone> _zone, const int _sensorType, const ZoneSensorStatus_t& hSensors);
-  bool checkZoneValueDueTime(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts);
-  bool checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts);
+  DateTime getDateTimeForSensor(const ZoneSensorStatus_t& hSensors, SensorType _sensorType);
+  void checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorType _sensorType, const ZoneSensorStatus_t& hSensors);
+  bool checkZoneValueDueTime(boost::shared_ptr<Group> _group, SensorType _sensorType, DateTime _ts);
+  bool checkZoneValue(boost::shared_ptr<Group> _group, SensorType _sensorType, DateTime _ts);
 };
 
 class HeatingMonitorTask : public Task {

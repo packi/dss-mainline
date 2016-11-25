@@ -176,10 +176,10 @@ namespace dss {
 
   public:
     StateSensor(const std::string& _identifier, const std::string& _scriptId,
-        boost::shared_ptr<Device> _dev, int _sensorType,
+        boost::shared_ptr<Device> _dev, SensorType _sensorType,
         const std::string& activateCondition, const std::string& deactivateCondition);
     StateSensor(const std::string& _identifier, const std::string& _scriptId,
-        boost::shared_ptr<Group> _group, int _sensorType,
+        boost::shared_ptr<Group> _group, SensorType _sensorType,
         const std::string& activateCondition, const std::string& deactivateCondition);
     virtual ~StateSensor();
 

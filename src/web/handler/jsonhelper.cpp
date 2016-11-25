@@ -172,7 +172,7 @@ namespace dss {
     const std::vector<boost::shared_ptr<DeviceSensor_t> > sensors = _device.getDevice()->getSensors();
     for (size_t i = 0; i < sensors.size(); i++) {
       _json.startObject();
-      _json.add("type", sensors.at(i)->m_sensorType);
+      _json.add("type", static_cast<int>(sensors.at(i)->m_sensorType));
       _json.add("valid", sensors.at(i)->m_sensorValueValidity);
       _json.add("value", sensors.at(i)->m_sensorValueFloat);
       _json.endObject();

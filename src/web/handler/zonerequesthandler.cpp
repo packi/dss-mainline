@@ -404,41 +404,41 @@ namespace dss {
             break;
           case HeatingControlModeIDPID:
             json.add("Off",
-                sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
             json.add("Comfort",
-                sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
             json.add("Economy",
-                sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
             json.add("NotUsed",
-                sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
             json.add("Night",
-                sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
             json.add("Holiday",
-                sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
             json.add("Cooling",
-                sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode6));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
             json.add("CoolingOff",
-                sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode7));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
             json.add("Off",
-                sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
             json.add("Comfort",
-                sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
             json.add("Economy",
-                sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
             json.add("NotUsed",
-                sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
             json.add("Night",
-                sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
             json.add("Holiday",
-                sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
             json.add("Cooling",
-                sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode6));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
             json.add("CoolingOff",
-                sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode7));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
             break;
 
           }
@@ -452,14 +452,14 @@ namespace dss {
           JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingOperationModeSpec_t hOpValues;
-          int SensorConversion;
+          SensorType SensorConversion;
           int iValue;
           double fValue;
 
           if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-            SensorConversion = SensorIDRoomTemperatureSetpoint;
+            SensorConversion = SensorType::RoomTemperatureSetpoint;
           } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-            SensorConversion = SensorIDRoomTemperatureControlVariable;
+            SensorConversion = SensorType::RoomTemperatureControlVariable;
           } else {
             return JSONWriter::failure("Cannot set control values in current mode");
           }
@@ -630,15 +630,15 @@ namespace dss {
           hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
               hProp.m_HeatingControlDSUID, pZone->getID());
 
-          json.add("CtrlTRecent", (double) sensorToFloat12(SensorIDTemperatureIndoors, hInternals.Trecent));
-          json.add("CtrlTReference", (double) sensorToFloat12(SensorIDRoomTemperatureSetpoint, hInternals.Treference));
+          json.add("CtrlTRecent", (double) sensorToFloat12(SensorType::TemperatureIndoors, hInternals.Trecent));
+          json.add("CtrlTReference", (double) sensorToFloat12(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
           json.add("CtrlTError", (double) hInternals.TError * 0.025);
           json.add("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
           json.add("CtrlIntegral", (double) hInternals.Integral * 0.025);
           json.add("CtrlYp", (double) hInternals.Yp * 0.01);
           json.add("CtrlYi", (double) hInternals.Yi * 0.01);
           json.add("CtrlYd", (double) hInternals.Yd *0.01);
-          json.add("CtrlY", (double) sensorToFloat12(SensorIDRoomTemperatureControlVariable, hInternals.Y));
+          json.add("CtrlY", (double) sensorToFloat12(SensorType::RoomTemperatureControlVariable, hInternals.Y));
           json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
 
           return json.successJSON();
@@ -653,22 +653,24 @@ namespace dss {
           }
           dsuid_t dsuid = str2dsuid(dsuidStr);
 
-          int type = strToIntDef(_request.getParameter("sensorType"), -1);
-          if (type < 0) {
+          int intType = strToIntDef(_request.getParameter("sensorType"), -1);
+          if (intType < 0) {
             return JSONWriter::failure("Missing or invalid parameter 'sensorType'");
           }
           boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(dsuid);
 
+          SensorType type = static_cast<SensorType>(intType);
+
           switch (type)  {
-            case SensorIDBrightnessOutdoors:
-            case SensorIDTemperatureOutdoors:
-            case SensorIDHumidityOutdoors:
-            case SensorIDWindSpeed:
-            case SensorIDWindDirection:
-            case SensorIDGustSpeed:
-            case SensorIDGustDirection:
-            case SensorIDPrecipitation:
-            case SensorIDAirPressure:
+            case SensorType::BrightnessOutdoors:
+            case SensorType::TemperatureOutdoors:
+            case SensorType::HumidityOutdoors:
+            case SensorType::WindSpeed:
+            case SensorType::WindDirection:
+            case SensorType::GustSpeed:
+            case SensorType::GustDirection:
+            case SensorType::Precipitation:
+            case SensorType::AirPressure:
               pZone = m_Apartment.getZone(0);
               break;
           }
@@ -680,12 +682,13 @@ namespace dss {
           if (pZone->getID() == 0) {
             return JSONWriter::success();
           }
-          int type = strToIntDef(_request.getParameter("sensorType"), -1);
-          if (type < 0) {
+          int intType = strToIntDef(_request.getParameter("sensorType"), -1);
+          if (intType < 0) {
             return JSONWriter::failure("Missing or invalid parameter 'sensorType'");
           }
+          SensorType sensorType = static_cast<SensorType>(intType);
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-          manipulator.resetZoneSensor(pZone, type);
+          manipulator.resetZoneSensor(pZone, sensorType);
           return JSONWriter::success();
         } else if(_request.getMethod() == "getAssignedSensors") {
           JSONWriter json;
@@ -696,7 +699,7 @@ namespace dss {
               it ++) {
             json.startObject();
             boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-            json.add("sensorType", devSensor->m_sensorType);
+            json.add("sensorType", static_cast<int>(devSensor->m_sensorType));
             json.add("dsuid", dsuid2str(devSensor->m_DSUID));
             json.endObject();
           }

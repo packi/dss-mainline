@@ -158,7 +158,7 @@ namespace dss {
 
   typedef struct {
     dsuid_t m_DSUID;
-    int m_sensorType;
+    SensorType m_sensorType;
     int m_sensorIndex;
   } MainZoneSensor_t;
     /** Represents a Zone.
@@ -253,17 +253,17 @@ namespace dss {
     void setBrightnessValue(double _value, DateTime& _ts);
     void setCO2ConcentrationValue(double _value, DateTime& _ts);
 
-    void setSensor(boost::shared_ptr<const Device> _device, uint8_t _sensorType);
+    void setSensor(boost::shared_ptr<const Device> _device, SensorType _sensorType);
     void setSensor(boost::shared_ptr<MainZoneSensor_t> _mainZoneSensor);
-    void resetSensor(uint8_t _sensorType);
-    bool isSensorAssigned(uint8_t _sensorType) const;
+    void resetSensor(SensorType _sensorType);
+    bool isSensorAssigned(SensorType _sensorType) const;
     std::vector<boost::shared_ptr<MainZoneSensor_t> > getAssignedSensors() { return m_MainSensors; }
 
-    boost::shared_ptr<std::vector<int> > getUnassignedSensorTypes() const;
-    boost::shared_ptr<std::vector<int> > getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const;
+    boost::shared_ptr<std::vector<SensorType> > getUnassignedSensorTypes() const;
+    boost::shared_ptr<std::vector<SensorType> > getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const;
 
-    boost::shared_ptr<Device> getAssignedSensorDevice(int _sensorType) const;
-    bool isZoneSensor(boost::shared_ptr<Device> _device, int _sensorType) const;
+    boost::shared_ptr<Device> getAssignedSensorDevice(SensorType _sensorType) const;
+    bool isZoneSensor(boost::shared_ptr<Device> _device, SensorType _sensorType) const;
 
     bool isDeviceZoneMember(const DeviceReference& _device) const;
     void removeInvalidZoneSensors();
@@ -274,7 +274,7 @@ namespace dss {
 
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
-    bool isAllowedSensorType(int _sensorType);
+    bool isAllowedSensorType(SensorType _sensorType);
     void dirty();
   }; // Zone
 

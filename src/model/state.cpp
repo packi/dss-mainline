@@ -417,11 +417,11 @@ namespace dss {
   }
 
   StateSensor::StateSensor(const std::string& _identifier, const std::string& _scriptId,
-      boost::shared_ptr<Device> _device, int _sensorType,
+      boost::shared_ptr<Device> _device, SensorType _sensorType,
       const std::string& _activateCondition, const std::string& _deactivateCondition)
   : State(StateType_SensorDevice,
       "dev." + dsuid2str(_device->getDSID()) +
-      ".type" + intToString(_sensorType) +
+      ".type" + intToString(static_cast<int>(_sensorType)) +
       "." + _identifier,
       _scriptId),
     m_activateCondition(_activateCondition),
@@ -433,12 +433,12 @@ namespace dss {
   }
 
   StateSensor::StateSensor(const std::string& _identifier, const std::string& _scriptId,
-      boost::shared_ptr<Group> _group, int _sensorType,
+      boost::shared_ptr<Group> _group, SensorType _sensorType,
       const std::string& _activateCondition, const std::string& _deactivateCondition)
   : State(StateType_SensorZone,
       "zone.zone" + intToString(_group->getZoneID()) +
       ".group"  + intToString(_group->getID()) +
-      ".type" + intToString(_sensorType) +
+      ".type" + intToString(static_cast<int>(_sensorType)) +
       "." + _identifier,
       _scriptId),
     m_activateCondition(_activateCondition),

@@ -99,7 +99,7 @@ namespace dss {
                                    const dsuid_t& _sourceDevice,
                                    const int& _zoneID,
                                    const int& _groupID,
-                                   const int& _sensorType,
+                                   SensorType _sensorType,
                                    const int& _sensorValue,
                                    const int& _precision,
                                    const SceneAccessCategory _category,

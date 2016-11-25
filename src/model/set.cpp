@@ -401,9 +401,9 @@ namespace dss {
 
   class BySensorSelector : public IDeviceSelector {
   private:
-    int m_sensorType;
+    SensorType m_sensorType;
   public:
-    BySensorSelector(int _type) : m_sensorType(_type) {}
+    BySensorSelector(SensorType _type) : m_sensorType(_type) {}
     virtual ~BySensorSelector() {}
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
@@ -416,7 +416,7 @@ namespace dss {
     }
   };
 
-  Set Set::getBySensorType(int _type) const {
+  Set Set::getBySensorType(SensorType _type) const {
     return getSubset(BySensorSelector(_type));
   }
 

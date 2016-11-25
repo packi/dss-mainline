@@ -182,7 +182,7 @@ createDeviceEventEvent(boost::shared_ptr<DeviceReference> _devRef, const std::st
 
 boost::shared_ptr<Event>
 createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
-                             int _index, int _type, int _value)
+                             int _index, SensorType _type, int _value)
 {
   boost::shared_ptr<Event> event;
   // TODO ensure sensorType valid or implement fallback
@@ -190,7 +190,7 @@ createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
 
   event = boost::make_shared<Event>(EventName::DeviceSensorValue, _devRef);
   event->setProperty(ef_sensorIndex, intToString(_index));
-  event->setProperty("sensorType", intToString(_type));
+  event->setProperty("sensorType", intToString(static_cast<int>(_type)));
   event->setProperty("sensorValue", intToString(_value));
   event->setProperty("sensorValueFloat", doubleToString(floatValue));
   return event;
@@ -198,18 +198,18 @@ createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
 
 boost::shared_ptr<Event>
 createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> _devRef,
-                               int _index, int _type, const DateTime& _ts)
+                               int _index, SensorType _type, const DateTime& _ts)
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::DeviceInvalidSensor, _devRef);
   event->setProperty(ef_sensorIndex, intToString(_index));
-  event->setProperty("sensorType", intToString(_type));
+  event->setProperty("sensorType", intToString(static_cast<int>(_type)));
   event->setProperty("lastValueTS", _ts.toISO8601_ms());
   return event;
 }
 
 boost::shared_ptr<Event>
-createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
+createZoneSensorValueEvent(boost::shared_ptr<Group> _group, SensorType _type,
                            int _value, const dsuid_t &_sourceDevice)
 {
   boost::shared_ptr<Event> event;
@@ -217,7 +217,7 @@ createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
   double floatValue = sensorToFloat12(_type, _value);
 
   event = boost::make_shared<Event>(EventName::ZoneSensorValue, _group);
-  event->setProperty("sensorType", intToString(_type));
+  event->setProperty("sensorType", intToString(static_cast<int>(_type)));
   event->setProperty("sensorValue", intToString(_value));
   event->setProperty("sensorValueFloat", doubleToString(floatValue));
   event->setProperty("originDSID", dsuid2str(_sourceDevice));
@@ -225,12 +225,12 @@ createZoneSensorValueEvent(boost::shared_ptr<Group> _group, int _type,
 }
 
 boost::shared_ptr<Event>
-createZoneSensorErrorEvent(boost::shared_ptr<Group> _group, int _type,
+createZoneSensorErrorEvent(boost::shared_ptr<Group> _group, SensorType _type,
                       const DateTime& _ts)
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::ZoneSensorError, _group);
-  event->setProperty("sensorType", intToString(_type));
+  event->setProperty("sensorType", intToString(static_cast<int>(_type)));
   event->setProperty("lastValueTS", _ts.toISO8601_ms());
   return event;
 }
@@ -382,38 +382,38 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
     event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
     if (_properties.m_HeatingControlMode == HeatingControlModeIDPID) {
       event->setProperty("NominalTemperature_Off",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode0)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureSetpoint, _mode.OpMode0)));
       event->setProperty("NominalTemperature_Comfort",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode1)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureSetpoint, _mode.OpMode1)));
       event->setProperty("NominalTemperature_Economy",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode2)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureSetpoint, _mode.OpMode2)));
       event->setProperty("NominalTemperature_NotUsed",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode3)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureSetpoint, _mode.OpMode3)));
       event->setProperty("NominalTemperature_Night",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode4)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureSetpoint, _mode.OpMode4)));
       event->setProperty("NominalTemperature_Holiday",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode5)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureSetpoint, _mode.OpMode5)));
       event->setProperty("NominalTemperature_Cooling",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode6)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureSetpoint, _mode.OpMode6)));
       event->setProperty("NominalTemperature_CoolingOff",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureSetpoint, _mode.OpMode7)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureSetpoint, _mode.OpMode7)));
     } else if (_properties.m_HeatingControlMode == HeatingControlModeIDFixed) {
       event->setProperty("ControlValue_Off",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode0)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _mode.OpMode0)));
       event->setProperty("ControlValue_Comfort",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode1)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _mode.OpMode1)));
       event->setProperty("ControlValue_Economy",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode2)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _mode.OpMode2)));
       event->setProperty("ControlValue_NotUsed",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode3)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _mode.OpMode3)));
       event->setProperty("ControlValue_Night",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode4)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _mode.OpMode4)));
       event->setProperty("ControlValue_Holiday",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode5)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _mode.OpMode5)));
       event->setProperty("ControlValue_Cooling",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode6)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _mode.OpMode6)));
       event->setProperty("ControlValue_CoolingOff",
-          doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _mode.OpMode7)));
+          doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _mode.OpMode7)));
     }
     return event;
 }
@@ -439,10 +439,10 @@ createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
   }
   if (_props.m_HeatingControlMode == HeatingControlModeIDPID) {
     event->setProperty("NominalTemperature",
-                       doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _stat.m_NominalValue)));
+                       doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _stat.m_NominalValue)));
   } else if (_props.m_HeatingControlMode == HeatingControlModeIDFixed) {
     event->setProperty("ControlValue",
-                       doubleToString(sensorToFloat12(SensorIDRoomTemperatureControlVariable, _stat.m_ControlValue)));
+                       doubleToString(sensorToFloat12(SensorType::RoomTemperatureControlVariable, _stat.m_ControlValue)));
   }
   return event;
 }

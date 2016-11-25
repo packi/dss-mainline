@@ -223,7 +223,7 @@ namespace dss {
     void handleZoneSensorValueEvent(uint8_t _errorCode,
         dsuid_t _sourceID, dsuid_t _destinationID,
         uint16_t _ZoneId, uint8_t _GroupId, dsuid_t _dSUID,
-        uint8_t _SensorType, uint16_t _Value, uint8_t _Precision);
+        SensorType _SensorType, uint16_t _Value, uint8_t _Precision);
     static void handleZoneSensorValueCallback(uint8_t _errorCode, void* _userData,
         dsuid_t _sourceID, dsuid_t _destinationID,
         uint16_t _ZoneId, uint8_t _GroupId, dsuid_t _dSUID,
