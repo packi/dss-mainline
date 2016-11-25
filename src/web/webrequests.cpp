@@ -97,7 +97,7 @@ namespace dss {
   }
   void JSONWriter::add(std::string _name, SensorType sensorType) {
     m_writer.String(_name);
-    add(static_cast<int>(sensorType));
+    m_writer.Int(static_cast<int>(sensorType));
   }
   void JSONWriter::add(std::string _value) {
     add(_value.c_str());
