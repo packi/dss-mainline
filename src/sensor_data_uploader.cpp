@@ -336,8 +336,7 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
       highPrio = false;
     }
     if (_event.getName() == EventName::ZoneSensorValue) {
-      auto sensorType = static_cast<SensorType>(strToInt(_event.getPropertyByName("sensorType")));
-      switch (sensorType) {
+      switch (_event.getPropertyByName<SensorType>("sensorType")) {
         case SensorType::RoomTemperatureControlVariable:
         case SensorType::RoomTemperatureSetpoint:
           break;
@@ -544,8 +543,7 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
     }
 
     if (_event.getName() == EventName::ZoneSensorValue) {
-      auto sensorType = static_cast<SensorType>(strToInt(_event.getPropertyByName("sensorType")));
-      switch (sensorType) {
+      switch (_event.getPropertyByName<SensorType>("sensorType")) {
         case SensorType::RoomTemperatureControlVariable:
         case SensorType::RoomTemperatureSetpoint:
           break;

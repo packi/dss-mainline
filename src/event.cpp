@@ -40,6 +40,7 @@
 #include "src/model/device.h"
 #include "src/model/devicereference.h"
 #include "src/model/set.h"
+#include "src/model/modelconst.h"
 #include "src/security/security.h"
 
 #include <set>
@@ -126,6 +127,15 @@ namespace dss {
     }
     return m_Properties.get(_name, empty_string);
   } // getPropertyByName
+
+  template <>
+  SensorType Event::getPropertyByName<SensorType>(const std::string& value) const {
+    auto&& strValue = getPropertyByName(value);
+    if (strValue.empty()) {
+      return SensorType::UnknownType;
+    }
+    return static_cast<SensorType>(strToInt(strValue));
+  }
 
   bool Event::hasPropertySet(const std::string& _name) const {
     if (_name == EventProperty::Name) {

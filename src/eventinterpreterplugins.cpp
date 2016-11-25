@@ -1361,11 +1361,8 @@ Sample: {
       std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
       double fValue = strToDouble(sensorValueFloat);
 
-      std::string strType = _event.getPropertyByName("sensorType");
-      SensorType sensorType = SensorType::UnknownType;
-      if (!strType.empty()) {
-        sensorType = static_cast<SensorType>(strToInt(strType));
-      } else {
+      auto sensorType = _event.getPropertyByName<SensorType>("sensorType");
+      if (sensorType == SensorType::UnknownType) {
         try {
           int index = strToInt(_event.getPropertyByName("sensorIndex"));
           sensorType = pDevRev->getDevice()->getSensor(index)->m_sensorType;
@@ -1379,8 +1376,7 @@ Sample: {
     if (_event.getName() == EventName::ZoneSensorValue && _event.getRaisedAtGroup()) {
       boost::shared_ptr<const Group> pGroup = _event.getRaisedAtGroup();
 
-      std::string strType = _event.getPropertyByName("sensorType");
-      SensorType sensorType = static_cast<SensorType>(strToInt(strType));
+      auto sensorType = _event.getPropertyByName<SensorType>("sensorType");
       std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
       double fValue = strToDouble(sensorValueFloat);
 
