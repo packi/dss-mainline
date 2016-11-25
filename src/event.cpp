@@ -174,6 +174,12 @@ namespace dss {
     return false;
   }
 
+  bool Event::setProperty(const std::string& name, SensorType value) {
+    // TODO(someday) use proper structure to preserve type
+    m_Properties.set(name, intToString(static_cast<int>(value)));
+    return true;
+  }
+
   boost::shared_ptr<const Group> Event::getRaisedAtGroup(Apartment& _apartment) const {
     if(m_RaiseLocation == erlGroup) {
       return m_RaisedAtGroup;

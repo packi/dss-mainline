@@ -170,6 +170,7 @@ namespace dss {
     bool hasPropertySet(const std::string& _name) const;
     void unsetProperty(const std::string& _name);
     bool setProperty(const std::string& _name, const std::string& _value);
+    bool setProperty(const std::string& name, SensorType value);
 
     void setLocation(const std::string& _value) { m_Location = _value; m_LocationSet = true; }
     void setContext(const std::string& _value) { m_Context = _value; m_ContextSet = true; }

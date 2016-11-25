@@ -190,7 +190,7 @@ createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
 
   event = boost::make_shared<Event>(EventName::DeviceSensorValue, _devRef);
   event->setProperty(ef_sensorIndex, intToString(_index));
-  event->setProperty("sensorType", intToString(static_cast<int>(_type)));
+  event->setProperty("sensorType", _type);
   event->setProperty("sensorValue", intToString(_value));
   event->setProperty("sensorValueFloat", doubleToString(floatValue));
   return event;
@@ -203,7 +203,7 @@ createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> _devRef,
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::DeviceInvalidSensor, _devRef);
   event->setProperty(ef_sensorIndex, intToString(_index));
-  event->setProperty("sensorType", intToString(static_cast<int>(_type)));
+  event->setProperty("sensorType", _type);
   event->setProperty("lastValueTS", _ts.toISO8601_ms());
   return event;
 }
@@ -217,7 +217,7 @@ createZoneSensorValueEvent(boost::shared_ptr<Group> _group, SensorType _type,
   double floatValue = sensorToFloat12(_type, _value);
 
   event = boost::make_shared<Event>(EventName::ZoneSensorValue, _group);
-  event->setProperty("sensorType", intToString(static_cast<int>(_type)));
+  event->setProperty("sensorType", _type);
   event->setProperty("sensorValue", intToString(_value));
   event->setProperty("sensorValueFloat", doubleToString(floatValue));
   event->setProperty("originDSID", dsuid2str(_sourceDevice));
@@ -230,7 +230,7 @@ createZoneSensorErrorEvent(boost::shared_ptr<Group> _group, SensorType _type,
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::ZoneSensorError, _group);
-  event->setProperty("sensorType", intToString(static_cast<int>(_type)));
+  event->setProperty("sensorType", _type);
   event->setProperty("lastValueTS", _ts.toISO8601_ms());
   return event;
 }
