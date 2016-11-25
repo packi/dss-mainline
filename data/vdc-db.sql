@@ -306,8 +306,8 @@ insert into device_properties values(3 , 12 , "temperature.sensor" , 1 , "0" , "
 insert into device_properties values(4 , 18 , "currentTemperature" , 1 , "0" , "100" , "0" , "1" , "celsius" , "readonly;overview" );
 insert into device_properties values(5 , 18 , "waterLevel" , 3 , "0" , "2.0" , "0" , "0.2" , "liter" , "readonly;overview" );
 insert into device_properties values(6 , 18 , "defaulttemperature" , 1 , "0" , "100" , "100" , "1" , "celsius" , "settings" );
-insert into device_properties values(7 , 18 , "defaultcooldowntemperature" , 1 , "0" , "100" , "80" , "1" , "celsius" , "settings" );
-insert into device_properties values(8 , 18 , "defaultkeepwarmtime" , 2 , "0" , "120" , "15" , "1" , "min" , "settings" );
+insert into device_properties values(7 , 18 , "defaultcooldowntemperature" , 1 , "0" , "100" , "80" , "1" , "celsius" , "invisible" );
+insert into device_properties values(8 , 18 , "defaultkeepwarmtime" , 2 , "0" , "30" , "15" , "1" , "min" , "settings" );
 insert into device_properties values(9 , 11 , "dummyProperty" , 4 , "" , "" , "" , "" , "Things" , "" );
 drop table if exists "name_device_properties";
 create table "name_device_properties" (id primary key,reference_id,lang_code,displayMask,alt_label,alt_postfix,alt_precision_float,lang,country);
@@ -420,10 +420,7 @@ insert into device_actions_predefined_parameter values(3 , "180" , 1 , 2);
 insert into device_actions_predefined_parameter values(4 , "1200" , 2 , 2);
 insert into device_actions_predefined_parameter values(5 , "180" , 3 , 3);
 insert into device_actions_predefined_parameter values(6 , "2520" , 4 , 3);
-insert into device_actions_predefined_parameter values(7 , "37" , 8 , 6);
-insert into device_actions_predefined_parameter values(8 , "30" , 7 , 6);
-insert into device_actions_predefined_parameter values(9 , "30" , 5 , 5);
-insert into device_actions_predefined_parameter values(10 , "100" , 6 , 5);
+insert into device_actions_predefined_parameter values(9 , "40" , 6 , 5);
 
 drop view if exists "name_master_2";
 create view if not exists "name_master_2"  as
