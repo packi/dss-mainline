@@ -54,6 +54,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
     m_SyncPending(false),
+    m_readFromDsm(false),
     m_connectedDevices(0)
   {
   } // ctor
@@ -98,6 +99,11 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
   void Group::setApplicationConfiguration(const int applicationConfiguration) {
     m_ApplicationConfiguration = applicationConfiguration;
+  }
+
+  bool Group::equalConfig(const GroupSpec_t& group) {
+    return ((getName() == group.Name) && (getApplicationType() == group.applicationType) &&
+            (getApplicationConfiguration() && (int)group.applicationConfiguration));
   }
 
   Set Group::getDevices() const {

@@ -770,18 +770,43 @@ namespace dss {
         pGroup->setIsConnected(true);
         pGroup->setLastCalledScene(SceneOff);
         pGroup->setIsValid(true);
+      } else if (isGlobalAppGroup(group.GroupID)) {
+        try {
+          pGroup = m_Apartment.getGroup(group.GroupID);
 
+          if (!pGroup->equalConfig(group)) {
+            if (!pGroup->isReadFromDsm()) {
+              // First DSM is owner of Apartment Application group
+              pGroup->setName(group.Name);
+              pGroup->setApplicationType(group.applicationType);
+              pGroup->setApplicationConfiguration(group.applicationConfiguration);
+              pGroup->setReadFromDsm(true);
+            } else {
+              // All other DSMs need to be overwritten in synchronizeGroups() function
+              pGroup->setIsSynchronized(false);
+            }
+          }
+        } catch (ItemNotFoundException&) {
+          boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
+          pGroup = Group::make(group, zoneBroadcast);
+          pGroup->setReadFromDsm(true);
+          zoneBroadcast->addGroup(pGroup);
+        }
+
+        pGroup->setIsPresent(true);
+        pGroup->setIsConnected(true);
+        pGroup->setLastCalledScene(SceneOff);
+        pGroup->setIsValid(true);
       } else {
-
+        // user groups
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
           groupOnZone = Group::make(group, _zone);
           _zone->addGroup(groupOnZone);
         } else {
-          if ( (groupOnZone->getName() != group.Name) ||
-               (groupOnZone->getApplicationType() != group.applicationType) ||
-               (groupOnZone->getApplicationConfiguration() != (int)group.applicationConfiguration)) {
+          // DSS is the owner of user groups configuration we will overwrite in DSM
+          if (!groupOnZone->equalConfig(group)) {
             groupOnZone->setIsSynchronized(false);
           }
         }
@@ -789,7 +814,6 @@ namespace dss {
         groupOnZone->setIsConnected(true);
         groupOnZone->setLastCalledScene(SceneOff);
         groupOnZone->setIsValid(true);
-
       }
     }
     return true;

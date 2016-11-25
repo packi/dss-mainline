@@ -50,6 +50,7 @@ namespace dss {
     int m_LastButOneCalledScene;
     bool m_IsValid;
     bool m_SyncPending;
+    bool m_readFromDsm;
     std::string m_AssociatedSet;
     std::map<uint8_t, std::string> m_SceneNames;
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
@@ -88,6 +89,11 @@ namespace dss {
 
     bool isSynchronized() const { return !m_SyncPending; }
     void setIsSynchronized(const bool _value) { m_SyncPending = !_value; }
+
+    void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
+    bool isReadFromDsm() const { return m_readFromDsm; }
+
+    bool equalConfig(const GroupSpec_t &group);
 
     std::string getAssociatedSet() const { return m_AssociatedSet; }
     void setAssociatedSet(const std::string& _value) { m_AssociatedSet = _value; }

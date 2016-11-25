@@ -41,7 +41,6 @@ namespace dss {
     int m_Floor;
     std::vector<int> m_LockedScenes;
     bool m_ConfigurationLocked;
-    bool m_readFromDsm;
     bool m_automatic;
   public:
     /** Constructs a cluster with the given id. */
@@ -65,9 +64,6 @@ namespace dss {
     void setLockedScenes(const std::vector<int>& _lockedScenes) { m_LockedScenes = _lockedScenes; updateLockedScenes(); }
     const std::vector<int>& getLockedScenes() const { return m_LockedScenes; }
     void addLockedScene(int _lockedScene) { m_LockedScenes.push_back(_lockedScene); updateLockedScenes(); }
-
-    void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
-    bool isReadFromDsm() const { return m_readFromDsm; }
 
     void setAutomatic(const bool _automatic) { m_automatic = _automatic; }
     bool isAutomatic() const { return m_automatic; }

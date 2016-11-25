@@ -43,7 +43,6 @@ namespace dss {
     m_ProtectionClass(wpc_none),
     m_Floor(0),
     m_ConfigurationLocked(false),
-    m_readFromDsm(false),
     m_automatic(false)
   {
   } // ctor
