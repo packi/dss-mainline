@@ -1211,7 +1211,7 @@ namespace dss {
       boost::shared_ptr<DeviceSensor_t> sensor = pDevice->getSensor(id);
       JSONWriter json;
       json.add("sensorIndex", id);
-      json.add("sensorType", static_cast<int>(sensor->m_sensorType));
+      json.add("sensorType", sensor->m_sensorType);
       return json.successJSON();
 
     } else if (_request.getMethod() == "getSensorEventTableEntry") {

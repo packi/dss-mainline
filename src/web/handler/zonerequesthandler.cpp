@@ -699,7 +699,7 @@ namespace dss {
               it ++) {
             json.startObject();
             boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-            json.add("sensorType", static_cast<int>(devSensor->m_sensorType));
+            json.add("sensorType", devSensor->m_sensorType);
             json.add("dsuid", dsuid2str(devSensor->m_DSUID));
             json.endObject();
           }

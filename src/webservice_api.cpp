@@ -95,8 +95,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       pDeviceRef = event->getRaisedAtDevice();
       appendCommon(json, evtGroup_Metering, evtCategory_DeviceSensorValue,
                    event.get());
-      int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      json.add("SensorType", sensorType);
+      json.add("SensorType", event->getPropertyByName<SensorType>("sensorType"));
       json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       propValue = event->getPropertyByName(ef_sensorIndex);
@@ -107,8 +106,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
       appendCommon(json, evtGroup_Metering, evtCategory_ZoneSensorValue,
                    event.get());
-      int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      json.add("SensorType", sensorType);
+      json.add("SensorType", event->getPropertyByName<SensorType>("sensorType"));
       json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
@@ -180,14 +178,13 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_DeviceSensorError, event.get());
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
-      json.add("SensorType", strToInt(event->getPropertyByName("sensorType")));
+      json.add("SensorType", event->getPropertyByName<SensorType>("sensorType"));
       json.add("StatusCode", dsEnum_SensorError_noValue);
     } else if ((event->getName() == EventName::ZoneSensorError) && (event->getRaiseLocation() == erlGroup)) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
       appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_ZoneSensorError, event.get());
-      int sensorType = strToInt(event->getPropertyByName("sensorType"));
-      json.add("SensorType", sensorType);
+      json.add("SensorType", event->getPropertyByName<SensorType>("sensorType"));
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
       json.add("StatusCode", dsEnum_SensorError_noValue);
@@ -629,9 +626,8 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       pDeviceRef = event->getRaisedAtDevice();
       createHeader(json, evtGroup_Metering, evtCategory_DeviceSensorValue,
                    event.get());
-      int sensorType = strToInt(event->getPropertyByName("sensorType"));
       json.startObject("EventBody");
-      json.add("SensorType", sensorType);
+      json.add("SensorType", event->getPropertyByName<SensorType>("sensorType"));
       json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       json.endObject();
@@ -639,9 +635,8 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
       createHeader(json, evtGroup_Metering, evtCategory_ZoneSensorValue,
                    event.get());
-      int sensorType = strToInt(event->getPropertyByName("sensorType"));
       json.startObject("EventBody");
-      json.add("SensorType", sensorType);
+      json.add("SensorType", event->getPropertyByName<SensorType>("sensorType"));
       json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
       json.add("ZoneID",  pGroup->getZoneID());
       json.endObject();
@@ -738,7 +733,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
                    evtCategory_DeviceSensorError, event.get());
       json.startObject("EventBody");
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
-      json.add("SensorType", strToInt(event->getPropertyByName("sensorType")));
+      json.add("SensorType", event->getPropertyByName<SensorType>("sensorType"));
       json.add("StatusCode", dsEnum_SensorError_noValue);
       json.endObject();
     } else if ((event->getName() == EventName::DeviceActionEvent) && (event->getRaiseLocation() == erlDevice)) {
@@ -798,9 +793,8 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
       createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_ZoneSensorError, event.get());
-      int sensorType = strToInt(event->getPropertyByName("sensorType"));
       json.startObject("EventBody");
-      json.add("SensorType", sensorType);
+      json.add("SensorType", event->getPropertyByName<SensorType>("sensorType"));
       json.add("ZoneID",  pGroup->getZoneID());
       json.add("GroupID", pGroup->getID());
       json.add("StatusCode", dsEnum_SensorError_noValue);
