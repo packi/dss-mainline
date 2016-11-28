@@ -1,5 +1,9 @@
 dSS - digitalSTROM Server
 
+v1.39.2	28.11.2016
+	* updated translations
+	* avoid delay for vdc event upload
+
 v1.39.1	25.11.2016
 	* fix inital read out of binary input states from vdcs
 	* updated translations
