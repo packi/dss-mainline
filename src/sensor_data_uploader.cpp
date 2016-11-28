@@ -558,15 +558,16 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
     if (_event.getName() == EventName::Running) {
       scheduleBatchUploader();
     } else if (_event.getName() == EventName::DeviceBinaryInputEvent ||
-               _event.getName() == EventName::DeviceSensorValue ||
-               _event.getName() == EventName::ZoneSensorValue ||
-               _event.getName() == EventName::ZoneSensorError ||
                _event.getName() == EventName::DeviceStatus ||
-               _event.getName() == EventName::DeviceInvalidSensor ||
-               _event.getName() == EventName::DeviceCustomActionChangedEvent ||
                _event.getName() == EventName::DeviceActionEvent ||
                _event.getName() == EventName::DeviceEventEvent ||
-               _event.getName() == EventName::DeviceStateEvent ||
+               _event.getName() == EventName::DeviceStateEvent) {
+      m_log->append(_event.getptr(), true);
+    } else if (_event.getName() == EventName::DeviceSensorValue ||
+               _event.getName() == EventName::ZoneSensorValue ||
+               _event.getName() == EventName::ZoneSensorError ||
+               _event.getName() == EventName::DeviceInvalidSensor ||
+               _event.getName() == EventName::DeviceCustomActionChangedEvent ||
                _event.getName() == EventName::HeatingEnabled ||
                _event.getName() == EventName::HeatingControllerSetup ||
                _event.getName() == EventName::HeatingControllerValue ||
