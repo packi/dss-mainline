@@ -2044,7 +2044,7 @@ namespace dss {
   }
 
   void Device::setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -2054,7 +2054,7 @@ namespace dss {
 
   void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup)
   {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -2064,7 +2064,7 @@ namespace dss {
   }
 
   uint8_t Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -2072,7 +2072,7 @@ namespace dss {
   }
 
   bool Device::hasBinaryInputType(int inputType) const {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     foreach(boost::shared_ptr<DeviceBinaryInput_t> binInput, m_binaryInputs) {
       if (binInput->m_inputType == inputType) {
         return true;
@@ -2082,7 +2082,7 @@ namespace dss {
   }
 
   void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -2140,7 +2140,7 @@ namespace dss {
   }
 
   void Device::setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_index >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -2149,7 +2149,7 @@ namespace dss {
   }
 
   void Device::setBinaryInputId(uint8_t _index, uint8_t _inputId) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_index >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -2157,7 +2157,7 @@ namespace dss {
   }
 
   void Device::setBinaryInputType(uint8_t _index, uint8_t _inputType) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_index >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
@@ -2165,7 +2165,15 @@ namespace dss {
   }
 
   void Device::clearBinaryInputStates() {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
+    foreach(auto&& state, m_binaryInputStates) {
+      try {
+        m_pApartment->removeState(state);
+      } catch (const std::exception& e) {
+        Logger::getInstance()->log(std::string("Device::clearBinaryInputStates: remove state failed:")
+            + e.what(), lsWarning);
+      }
+    }
     m_binaryInputStates.clear();
   }
 
@@ -2173,7 +2181,7 @@ namespace dss {
     if (stateSpecs.empty()) {
       return;
     }
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr node;
     if (m_pPropertyNode != NULL) {
       node = m_pPropertyNode->getPropertyByName("states");
@@ -2216,7 +2224,7 @@ namespace dss {
   }
 
   void Device::clearStates() {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     BOOST_FOREACH(const States::value_type& state, m_states) {
       try {
         m_pApartment->removeState(state.second);
@@ -2278,14 +2286,10 @@ namespace dss {
   }
 
   void Device::handleBinaryInputEvent(const int index, const int state) {
-    boost::shared_ptr<State> pState;
-    uint8_t inputType = 0;
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     try {
-      pState = getBinaryInputState(index);
-      inputType = getDeviceBinaryInputType(index);
-    } catch(std::runtime_error& e) {}
-
-    if (pState != NULL) {
+      auto&& pState = getBinaryInputState(index);
+      auto&& inputType = getDeviceBinaryInputType(index);
       if (inputType == BinaryInputIDWindowTilt) {
         if (state == 0) {
           pState->setState(coSystem, StateWH_Closed);
@@ -2305,11 +2309,13 @@ namespace dss {
           pState->setState(coSystem, State_Unknown);
         }
       }
+    } catch (const std::exception& e) {
+      Logger::getInstance()->log(std::string("Device::handleBinaryInputEvent: what:")+ e.what(), lsWarning);
     }
   }
 
   void Device::setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr binaryInputNode;
     if (m_pPropertyNode != NULL) {
       binaryInputNode = m_pPropertyNode->getPropertyByName("binaryInputs");
@@ -2385,7 +2391,7 @@ namespace dss {
   }
 
   void Device::setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _sensorInputs) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr sensorInputNode;
     if (m_pPropertyNode != NULL) {
       sensorInputNode = m_pPropertyNode->getPropertyByName("sensorInputs");
@@ -2441,7 +2447,7 @@ namespace dss {
   }
 
   void Device::setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr outputChannelNode;
     if (m_pPropertyNode != NULL) {
       outputChannelNode = m_pPropertyNode->getPropertyByName("outputChannels");
@@ -2590,7 +2596,7 @@ namespace dss {
   }
 
   boost::shared_ptr<State> Device::getBinaryInputState(uint8_t _inputIndex) const {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex >= m_binaryInputStates.size()) {
       throw ItemNotFoundException(std::string("Device::getBinaryInputState: index out of bounds"));
     }
@@ -2598,7 +2604,7 @@ namespace dss {
   }
 
   void Device::setConfigLock(bool _lockConfig) {
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     m_IsConfigLocked = _lockConfig;
   }
 
@@ -2855,7 +2861,7 @@ namespace dss {
   void Device::setCardinalDirection(CardinalDirection_t _direction, bool _initial) {
     assert(valid(_direction));
 
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (m_cardinalDirection != _direction) {
       m_cardinalDirection = _direction;
       if (!_initial) {
@@ -2867,7 +2873,7 @@ namespace dss {
   void Device::setWindProtectionClass(WindProtectionClass_t _klass, bool _initial) {
     assert(valid(_klass));
 
-    boost::mutex::scoped_lock lock(m_deviceMutex);
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
 
     if (!_initial) {
       if (getDeviceClass() != DEVICE_CLASS_GR) {

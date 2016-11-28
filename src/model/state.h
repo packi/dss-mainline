@@ -101,11 +101,10 @@ namespace dss {
   public:
     /** Constructs a state. */
     State(const std::string& _name);
-    State(const std::string& _name, eState _state);
+    State(eStateType _type, const std::string& _name, const std::string& _identifier);
     State(boost::shared_ptr<Device> _device, int _inputIndex);
     State(boost::shared_ptr<Device> _device, const std::string& stateName);
     State(boost::shared_ptr<Group> _group);
-    State(eStateType _type, const std::string& _name, const std::string& _identifier);
     State(boost::shared_ptr<DSMeter> _meter, int _inputIndex);
 
     virtual ~State();

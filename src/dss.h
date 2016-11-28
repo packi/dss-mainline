@@ -193,6 +193,9 @@ namespace dss {
     void setDatabaseDirectory(const std::string& _value);
     void publishDSID();
     int getUptime() const;
+
+    /// handy method calling getEventQueue().pushEvent(event);
+    void raiseEvent(const boost::shared_ptr<Event> &event);
   }; // DSS
 
 }
