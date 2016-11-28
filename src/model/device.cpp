@@ -2166,6 +2166,14 @@ namespace dss {
 
   void Device::clearBinaryInputStates() {
     boost::mutex::scoped_lock lock(m_deviceMutex);
+    foreach(auto&& state, m_binaryInputStates) {
+      try {
+        m_pApartment->removeState(state);
+      } catch (const std::exception& e) {
+        Logger::getInstance()->log(std::string("Device::clearBinaryInputStates: remove state failed:")
+            + e.what(), lsWarning);
+      }
+    }
     m_binaryInputStates.clear();
   }
 
@@ -2278,14 +2286,10 @@ namespace dss {
   }
 
   void Device::handleBinaryInputEvent(const int index, const int state) {
-    boost::shared_ptr<State> pState;
-    uint8_t inputType = 0;
+    boost::mutex::scoped_lock lock(m_deviceMutex);
     try {
-      pState = getBinaryInputState(index);
-      inputType = getDeviceBinaryInputType(index);
-    } catch(std::runtime_error& e) {}
-
-    if (pState != NULL) {
+      auto&& pState = getBinaryInputState(index);
+      auto&& inputType = getDeviceBinaryInputType(index);
       if (inputType == BinaryInputIDWindowTilt) {
         if (state == 0) {
           pState->setState(coSystem, StateWH_Closed);
@@ -2305,6 +2309,8 @@ namespace dss {
           pState->setState(coSystem, State_Unknown);
         }
       }
+    } catch (const std::exception& e) {
+      Logger::getInstance()->log(std::string("Device::handleBinaryInputEvent: what:")+ e.what(), lsWarning);
     }
   }
 
