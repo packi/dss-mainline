@@ -30,7 +30,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
 #include "src/ds485types.h"
 #include "src/datetools.h"
@@ -319,7 +319,7 @@ namespace dss {
 
     std::string m_AKMInputProperty;
 
-    mutable boost::mutex m_deviceMutex;
+    mutable boost::recursive_mutex m_deviceMutex;
 
     CardinalDirection_t m_cardinalDirection; //<  wind protection of blinds
     WindProtectionClass_t m_windProtectionClass;
