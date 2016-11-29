@@ -118,8 +118,7 @@ namespace dss {
     publishToPropertyTree();
   }
 
-  State::State(boost::shared_ptr<Group> _group)
-      :
+  State::State(boost::shared_ptr<Group> _group) :
     m_IsPersistent(false),
     m_callOrigin(coUnknown),
     m_originDeviceDSUID(DSUID_NULL),
