@@ -118,7 +118,26 @@ namespace dss {
     publishToPropertyTree();
   }
 
+  std::string State::makeGroupName(const Group& group) {
+    auto&& logicalName = [&]() -> std::string {
+      auto&& standardGroupId = group.getStandardGroupID();
+      switch (standardGroupId) {
+        case GroupIDYellow:
+          return "light"; // ATTENTION: This is inconsistent with group.getName() == "yellow"
+          break;
+        case GroupIDHeating:
+          return "heating";
+          break;
+        default:
+          return "unknown";
+          break;
+      }
+    }();
+    return "zone." + intToString(group.getZoneID()) + "." + logicalName;
+  }
+
   State::State(boost::shared_ptr<Group> _group) :
+    m_name(makeGroupName(*_group)),
     m_IsPersistent(false),
     m_callOrigin(coUnknown),
     m_originDeviceDSUID(DSUID_NULL),
@@ -126,20 +145,6 @@ namespace dss {
     m_type(StateType_Group),
     m_providerGroup(_group)
   {
-    std::string logicalName = "unknown";
-
-    switch (_group->getStandardGroupID()) {
-      case GroupIDYellow:
-        logicalName = "light";
-        break;
-      case GroupIDHeating:
-        logicalName = "heating";
-        break;
-      default:
-        break;
-    }
-
-    m_name = "zone." + intToString(_group->getZoneID()) + "." + logicalName;
     load();
     publishToPropertyTree();
   }
