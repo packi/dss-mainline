@@ -477,14 +477,22 @@ namespace dss {
     m_States.push_back(_state);
   } // allocateState
 
-  boost::shared_ptr<State> Apartment::getState(const eStateType _type, const std::string& _name) const {
+  boost::shared_ptr<State> Apartment::tryGetState(const eStateType _type, const std::string& _name) const {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<State> state, m_States) {
       if ((state->getType() == _type) && (state->getName() == _name)) {
         return state;
       }
     }
-    throw ItemNotFoundException(_name);
+    return 0;
+  } // tryGetState
+
+  boost::shared_ptr<State> Apartment::getState(const eStateType _type, const std::string& _name) const {
+    auto state = tryGetState(_type, _name);
+    if (!state) {
+      throw ItemNotFoundException(_name);
+    }
+    return state;
   } // getState
 
   boost::shared_ptr<State> Apartment::getNonScriptState(const std::string& _stateName) const {
