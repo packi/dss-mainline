@@ -47,6 +47,7 @@
 #include "model/modelconst.h"
 #include "model/scenehelper.h"
 #include "model/modulator.h"
+#include "model/data_types.h"
 #include "propertysystem.h"
 #include "security/security.h"
 #include "structuremanipulator.h"
@@ -410,6 +411,67 @@ namespace dss {
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeDeviceScene: could not call scene on zone " +
+              std::string(e.what()));
+    }
+  }
+
+  void SystemEventActionExecute::executeDeviceChannelValue(PropertyNodePtr _actionNode) {
+    try {
+      boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
+      if (target == NULL) {
+        Logger::getInstance()->log("SystemEventActionExecute::"
+                 "executeDeviceChannelValue: could not set value on device - device "
+                 "was not found", lsError);
+        return;
+      }
+
+      struct channel {
+        int id;
+        int value;
+      };
+      std::vector<channel> vChannels;
+
+      while (true) {
+        auto oChannelIdNode = _actionNode->getPropertyByName(std::string("channelid-") + std::string(0));
+        auto oChannelValueNode = _actionNode->getPropertyByName(std::string("channelvalue-") + std::string(0));
+        if ((oChannelIdNode == NULL) || (oChannelValueNode == NULL)) {
+          break;
+        }
+        vChannels.push_back({oChannelIdNode->getIntegerValue(), oChannelValueNode->getIntegerValue()});
+      }
+
+      auto numNonApplyChannels = static_cast <int>(vChannels.size()) - 1;
+
+      if (numNonApplyChannels < 0) {
+        Logger::getInstance()->log("SystemEventActionExecute::"
+                 "executeDeviceChannelValue: no channel settings found", lsWarning);
+        return;
+      }
+
+      for (int i = 0; i < numNonApplyChannels; ++i) {
+        auto ch = vChannels[i];
+        target->setDeviceOutputChannelValue(ch.id, getOutputChannelSize(ch.id), ch.value, false);
+      }
+      auto ch = vChannels[numNonApplyChannels];
+      target->setDeviceOutputChannelValue(ch.id, getOutputChannelSize(ch.id), ch.value, true);
+
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeDeviceChannelValue: execution not allowed: " +
+                    std::string(e.what()));
+      std::string action_name = getActionName(_actionNode);
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event(EventName::ExecutionDenied));
+      pEvent->setProperty("action-type", "device-moc-value");
+      pEvent->setProperty("action-name", action_name);
+      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
+      pEvent->setProperty("reason", std::string(e.what()));
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+              "executeDeviceChannelValue: could not set value on device " +
               std::string(e.what()));
     }
   }
@@ -793,6 +855,9 @@ namespace dss {
           return ACTION_DURATION_DEVICE_SCENE;
         } else if (sActionType == "device-value") {
           executeDeviceValue(_actionNode);
+          return ACTION_DURATION_DEVICE_VALUE;
+        } else if (sActionType == "device-moc-value") {
+          executeDeviceChannelValue(_actionNode);
           return ACTION_DURATION_DEVICE_VALUE;
         } else if (sActionType == "device-blink") {
           executeDeviceBlink(_actionNode);
