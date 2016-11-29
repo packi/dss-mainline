@@ -528,9 +528,9 @@ insert into device_actions_parameter values(1 , 1 , "temperature" , 1 , "50" , "
 insert into device_actions_parameter values(2 , 1 , "duration" , 2 , "60" , "7200" , "30" , "10" , "second" , "");
 insert into device_actions_parameter values(3 , 2 , "temperature" , 1 , "50" , "240" , "180" , "1" , "celsius" , "");
 insert into device_actions_parameter values(4 , 2 , "duration" , 2 , "60" , "7200" , "30" , "10" , "second" , "");
-insert into device_actions_parameter values(5 , 6 , "keepwarmtime" , 2 , "0" , "120" , "30" , "1" , "min" , "");
+insert into device_actions_parameter values(5 , 6 , "keepwarmtime" , 2 , "0" , "30" , "30" , "1" , "min" , "");
 insert into device_actions_parameter values(6 , 6 , "temperature" , 1 , "20" , "100" , "50" , "1" , "celsius" , "");
-insert into device_actions_parameter values(7 , 5 , "keepwarmtime" , 2 , "0" , "120" , "30" , "1" , "min" , "");
+insert into device_actions_parameter values(7 , 5 , "keepwarmtime" , 2 , "0" , "30" , "30" , "1" , "min" , "");
 insert into device_actions_parameter values(8 , 5 , "temperature" , 1 , "20" , "100" , "100" , "1" , "celsius" , "");
 insert into device_actions_parameter values(9 , 7 , "dummyActionParam1" , 4 , "" , "" , "" , "" , "milligram" , "");
 insert into device_actions_parameter values(10 , 7 , "dummyActionParam2" , 2 , "1" , "12" , "1" , "0,01" , "liter" , "");
