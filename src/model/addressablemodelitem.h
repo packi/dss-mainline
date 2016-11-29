@@ -40,6 +40,7 @@ namespace dss {
                                public boost::enable_shared_from_this<AddressableModelItem> {
   public:
     AddressableModelItem(Apartment* _pApartment);
+    Apartment& getApartment() { return *m_pApartment; }
 
     virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
