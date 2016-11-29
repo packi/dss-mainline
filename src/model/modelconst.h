@@ -324,6 +324,11 @@ namespace dss {
     return (groupId >= GroupIDGlobalAppMin && groupId <= GroupIDGlobalAppMax);
   }
 
+  inline bool isValidGroup(int groupId) {
+    // TODO: faster alternative would be ((groupId >= GroupIDYellow) && (groupId <= GroupIDMax)) but it do not exclude reserved
+    return isDefaultGroup(groupId) || isAppUserGroup(groupId) || isZoneUserGroup(groupId) || isControlGroup(groupId) || isGlobalAppGroup(groupId);
+  }
+
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
 
   const uint8_t CfgClassComm = 0x00;

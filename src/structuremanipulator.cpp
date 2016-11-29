@@ -411,8 +411,9 @@ namespace dss {
 
   int StructureManipulator::persistSet(Set& _set, const std::string& _originalSet) {
     // find next empty user-group
+    // TODO: As I understand this persist/create group with devices is only for UserGroups? or also ControlGroups?
     int idFound = -1;
-    for(int groupID = GroupIDUserGroupStart; groupID <= GroupIDMax; groupID++) {
+    for(int groupID = GroupIDUserGroupStart; groupID <= GroupIDUserGroupEnd; groupID++) {
       try {
         m_Apartment.getGroup(groupID);
       } catch(ItemNotFoundException&) {
@@ -624,7 +625,7 @@ namespace dss {
   void StructureManipulator::groupSetConfiguration(boost::shared_ptr<Group> _group, const int _groupConfiguration) {
 
     // we allow to set the configuration in all groups for now
-    if (isDefaultGroup(_group->getID()) || isAppUserGroup(_group->getID()) || isZoneUserGroup(_group->getID()) || isGlobalAppGroup(_group->getID())) {
+    if (isValidGroup(_group->getID())) {
       _group->setConfiguration(_groupConfiguration);
       m_Interface.groupSetConfiguration(_group->getZoneID(), _group->getID(), _groupConfiguration);
       return;

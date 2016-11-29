@@ -154,21 +154,19 @@ namespace dss {
       }
 
       if (m_pApartment->getPropertyNode() != NULL) {
-        for (int g = 1; g <= 63; g++) {
-          if ( isInGroup(g) ) {
-            int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
-            std::string gPath = "zones/zone" + intToString(zid) +
-                "/groups/group" + intToString(g) + "/devices/" +
-                dsuid2str(m_DSID);
-            PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
-            if (gnode != NULL) {
-              gnode->alias(PropertyNodePtr());
-              gnode->getParentNode()->removeChild(gnode);
-            }
-            PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(g));
-            if (gsubnode != NULL) {
-              gsubnode->getParentNode()->removeChild(gsubnode);
-            }
+        foreach(auto&& g, m_Groups) {
+          int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
+          std::string gPath = "zones/zone" + intToString(zid) +
+              "/groups/group" + intToString(g) + "/devices/" +
+              dsuid2str(m_DSID);
+          PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
+          if (gnode != NULL) {
+            gnode->alias(PropertyNodePtr());
+            gnode->getParentNode()->removeChild(gnode);
+          }
+          PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(g));
+          if (gsubnode != NULL) {
+            gsubnode->getParentNode()->removeChild(gsubnode);
           }
         }
       }
@@ -386,18 +384,16 @@ namespace dss {
       }
     }
 
-    for (int g = 1; g <= 63; g++) {
-      if ( isInGroup(g) ) {
-        std::string gPath = "zones/zone" + intToString(m_ZoneID) +
-                            "/groups/group" + intToString(g) + "/devices/" +
-                            dsuid2str(m_DSID);
-        PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
-        if (gnode) {
-          gnode->alias(m_pPropertyNode);
-        }
-        PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
-        gsubnode->createProperty("id")->setIntegerValue(g);
+    foreach (auto&& g, m_Groups) {
+      std::string gPath = "zones/zone" + intToString(m_ZoneID) +
+                          "/groups/group" + intToString(g) + "/devices/" +
+                          dsuid2str(m_DSID);
+      PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
+      if (gnode) {
+        gnode->alias(m_pPropertyNode);
       }
+      PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
+      gsubnode->createProperty("id")->setIntegerValue(g);
     }
 
     if (m_DSMeterDSID != DSUID_NULL) {
@@ -624,7 +620,7 @@ namespace dss {
     }
     // for standard groups force that only one group is active
     for (int g = GroupIDYellow; g <= GroupIDStandardMax; g++) {
-      if (m_GroupBitmask.test(g-1)) {
+      if (isInGroup(g)) {
         removeFromGroup(g);
       }
     }
@@ -1167,9 +1163,12 @@ namespace dss {
     return m_pApartment->getGroup(getGroupIdByIndex(_index));
   } // getGroupByIndex
 
+  std::vector<int> Device::getGroups() const {
+    return m_Groups;
+  }
+
   void Device::addToGroup(const int _groupID) {
-    if ((_groupID > 0) && (_groupID <= GroupIDMax)) {
-      m_GroupBitmask.set(_groupID-1);
+    if (isValidGroup(_groupID)) {
       updateIconPath();
       if (find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
         m_Groups.push_back(_groupID);
@@ -1194,8 +1193,7 @@ namespace dss {
   } // addToGroup
 
   void Device::removeFromGroup(const int _groupID) {
-    if ((_groupID > 0) && (_groupID <= GroupIDMax)) {
-      m_GroupBitmask.reset(_groupID-1);
+    if (isValidGroup(_groupID)) {
       updateIconPath();
       std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
       if (it != m_Groups.end()) {
@@ -1229,7 +1227,6 @@ namespace dss {
   } // removeFromGroup
 
   void Device::resetGroups() {
-    m_GroupBitmask.reset();
     std::vector<int>::iterator it;
     while (m_Groups.size() > 0) {
       int g = m_Groups.front();
@@ -1241,22 +1238,15 @@ namespace dss {
     return m_Groups.size();
   } // getGroupsCount
 
-  std::bitset<63>& Device::getGroupBitmask() {
-    return m_GroupBitmask;
-  } // getGroupBitmask
-
-  const std::bitset<63>& Device::getGroupBitmask() const {
-    return m_GroupBitmask;
-  } // getGroupBitmask
-
   bool Device::isInGroup(const int _groupID) const {
     bool result = false;
     if (_groupID == 0) {
       result = true;
-    } else if ((_groupID < 0) || (_groupID > GroupIDMax)) {
+    } else if (!isValidGroup(_groupID)) {
       result = false;
     } else {
-      result = m_GroupBitmask.test(_groupID - 1);
+      auto it = find(m_Groups.begin(), m_Groups.end(), _groupID);
+      result = (it != m_Groups.end());
     }
     return result;
   } // isInGroup
@@ -1853,8 +1843,9 @@ namespace dss {
       return -1;
     }
 
+    // TODO: is this valid? "Joker group" of device will be first standard group <= 8?
     for (int g = 1; g <= (int)DEVICE_CLASS_SW; g++) {
-      if (m_GroupBitmask.test(g-1)) {
+      if (isInGroup(g)) {
         if (g < (int)DEVICE_CLASS_SW) {
           return g;
         } else if (g == (int)DEVICE_CLASS_SW) {

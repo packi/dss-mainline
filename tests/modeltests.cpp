@@ -346,10 +346,10 @@ BOOST_AUTO_TEST_CASE(testSetBuilder) {
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setShortAddress(1);
-  dev1->getGroupBitmask().set(GroupIDYellow - 1);
+  dev1->addToGroup(GroupIDYellow);
   boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsuid2);
   dev2->setShortAddress(2);
-  dev2->getGroupBitmask().set(GroupIDCyan - 1);
+  dev2->addToGroup(GroupIDCyan);
   boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsuid3);
   dev3->setShortAddress(3);
   boost::shared_ptr<Device> dev4 = apt.allocateDevice(dsuid4);
@@ -563,7 +563,7 @@ BOOST_AUTO_TEST_CASE(testRemoval) {
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
   dev1->setShortAddress(1);
-  dev1->getGroupBitmask().set(GroupIDYellow - 1);
+  dev1->addToGroup(GroupIDYellow);
 
   SetBuilder builder(apt);
   BOOST_CHECK_EQUAL(1, builder.buildSet(".yellow", boost::shared_ptr<Zone>()).length());

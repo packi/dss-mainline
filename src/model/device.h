@@ -242,7 +242,6 @@ namespace dss {
     std::string m_DSMeterDSUIDstr; // for proptree publishing
     std::string m_LastKnownMeterDSIDstr; // for proptree publishing
     std::string m_LastKnownMeterDSUIDstr; // for proptree publishing
-    std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
     int m_ActiveGroup;
     int m_DefaultGroup;
@@ -495,11 +494,6 @@ namespace dss {
     static const std::string getDeviceClassString(const DeviceClasses_t _class);
     static const std::string getColorString(const int _class);
 
-    /** Returns the group bitmask (1 based) of the device */
-    std::bitset<63>& getGroupBitmask();
-    /** @copydoc getGroupBitmask() */
-    const std::bitset<63>& getGroupBitmask() const;
-
     /** Returns wheter the device is in group \a _groupID or not. */
     bool isInGroup(const int _groupID) const;
     /** Adds the device to group \a _groupID. */
@@ -513,7 +507,8 @@ namespace dss {
     boost::shared_ptr<Group> getGroupByIndex(const int _index);
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
-
+    /** Returns the numbers of groups this device is in */
+    std::vector<int> getGroups() const;
     /** Retuturns group to which the joker is configured or -1 if device is not
         a joker */
     int getJokerGroup() const;
