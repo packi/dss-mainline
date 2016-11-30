@@ -2089,17 +2089,13 @@ namespace dss {
             continue;
           }
           int oldState = state->getState();
-          int newState;
-          if ((_sensorValue & (1 << index)) > 0) {
-            newState = State_Active;
-          } else {
-            newState = State_Inactive;
-          }
+          int binaryInputValue = (_sensorValue & (1 << index)) ? 1 : 0;
+          int newState = binaryInputValue ? State_Active : State_Inactive;
           if (newState != oldState) {
             state->setState(coSystem, newState);
             raiseEvent(createDeviceBinaryInputEvent(pDevRev, index, // HERE
                                                     pDev->getDeviceBinaryInputType(index),
-                                                    newState));
+                                                    binaryInputValue));
           }
         }
 
