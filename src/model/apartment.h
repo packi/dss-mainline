@@ -181,7 +181,10 @@ typedef struct {
     /** Return an Empty Cluster, if available. */
     boost::shared_ptr<Cluster> getEmptyCluster();
 
-    boost::shared_ptr<State> getState(const eStateType _type, 
+    /// @return nullptr on failure
+    boost::shared_ptr<State> tryGetState(const eStateType _type, const std::string& _stateName) const;
+    /// @throw ItemNotFoundException on failure
+    boost::shared_ptr<State> getState(const eStateType _type,
                                       const std::string& _stateName) const;
     boost::shared_ptr<State> getNonScriptState(const std::string& _stateName) const;
     /** Returns the state by type, identifier and name */
