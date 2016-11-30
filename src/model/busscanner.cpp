@@ -1180,7 +1180,8 @@ namespace dss {
           Logger::getInstance()->log("BinaryInputScanner: device " +
               dsuid2str(dev->getDSID()) + ", state = " + intToString(value), lsDebug);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-            dev->handleBinaryInputEvent(index, (value >> index) & 1);
+            dev->handleBinaryInputEvent(index,
+                ((value >> index) & 1) ? BinaryInputState::Active : BinaryInputState::Inactive);
           }
           // avoid powerline bus monopolization
           sleep(5);
@@ -1188,7 +1189,7 @@ namespace dss {
           Logger::getInstance()->log("BinaryInputScanner: device " + dsuid2str(dev->getDSID())
               + " did not respond to input state query", lsWarning);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-            dev->handleBinaryInputEvent(index, -1);
+            dev->handleBinaryInputEvent(index, BinaryInputState::Unknown);
           }
         }
 
@@ -1196,10 +1197,10 @@ namespace dss {
         // IP Device
         try {
           VdcHelper::State state = VdcHelper::getState(dsm->getDSID(), dev->getDSID());
-          const std::map<int,int64_t>& sInput = state.binaryInputStates;
+          const auto& sInput = state.binaryInputStates;
           Logger::getInstance()->log("BinaryInputScanner: device " +
               dsuid2str(dev->getDSID()) + ", state response fields = " + intToString(sInput.size()), lsDebug);
-          for (std::map<int,int64_t>::const_iterator it = sInput.begin(); it != sInput.end(); ++it ) {
+          for (auto it = sInput.begin(); it != sInput.end(); ++it ) {
             dev->handleBinaryInputEvent(it->first, it->second);
           }
           dev->setStateValues(state.deviceStates);
@@ -1207,7 +1208,7 @@ namespace dss {
           Logger::getInstance()->log("BinaryInputScanner: VdcDevice " + dsuid2str(dev->getDSID()) +
               " failure: " + e.what(), lsWarning);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-            dev->handleBinaryInputEvent(index, -1);
+            dev->handleBinaryInputEvent(index, BinaryInputState::Unknown);
           }
         }
       }

@@ -38,6 +38,7 @@
 #include "addressablemodelitem.h"
 #include "businterface.h"
 #include "modelevent.h"
+#include "modelconst.h"
 
 #define DEV_PARAM_BUTTONINPUT_STANDARD              0
 #define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1   5
@@ -796,7 +797,7 @@ namespace dss {
     bool isMainDevice() const;
     dsuid_t getMainDeviceDSUID() const;
 
-    void handleBinaryInputEvent(const int index, const int state);
+    void handleBinaryInputEvent(const int index, BinaryInputState state);
 
     /// Calls (invokes) device specific action.
     void callAction(const std::string& actionId, const vdcapi::PropertyElement& params);

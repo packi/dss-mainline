@@ -219,6 +219,19 @@ namespace dss {
   const int BinaryInputIDMalfunction = 22;
   const int BinaryInputIDService = 23;
 
+  enum class BinaryInputState {
+    Inactive = 0,
+    Active = 1,
+    Unknown = -1
+  };
+  // BinaryInputState enum for BinaryInputIDWindowTilt binary input type (vdc only)
+  enum class BinaryInputWindowHandleState {
+    Closed = 0,
+    Open = 1,
+    Tilted = 2,
+    Unknown = -1
+  };
+
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
   const uint8_t ClickType2T = 0x01;     // Tipp 2
