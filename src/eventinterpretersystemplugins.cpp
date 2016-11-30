@@ -431,12 +431,14 @@ namespace dss {
       };
       std::vector<channel> vChannels;
 
+      int i = 0;
       while (true) {
-        auto oChannelIdNode = _actionNode->getPropertyByName(std::string("channelid-") + std::string(0));
-        auto oChannelValueNode = _actionNode->getPropertyByName(std::string("channelvalue-") + std::string(0));
+        auto oChannelIdNode = _actionNode->getPropertyByName(std::string("channelid-") + intToString(i));
+        auto oChannelValueNode = _actionNode->getPropertyByName(std::string("channelvalue-") + intToString(i));
         if ((oChannelIdNode == NULL) || (oChannelValueNode == NULL)) {
           break;
         }
+        i++;
         vChannels.push_back({oChannelIdNode->getIntegerValue(), oChannelValueNode->getIntegerValue()});
       }
 
