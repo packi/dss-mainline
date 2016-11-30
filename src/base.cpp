@@ -150,6 +150,14 @@ namespace dss {
     return sstream.str();
   } // doubleToString
 
+  double roundDigits(const double input, const int digits) {
+    double output = input;
+    output *= pow(10, digits);
+    output = round(output);
+    output /= pow(10, digits);
+    return output;
+  }
+
   std::string intToString(const long long _int, bool _hex) {
     //
     // http://en.cppreference.com/w/cpp/types/numeric_limits/digits10

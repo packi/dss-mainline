@@ -70,12 +70,6 @@ namespace dss {
     static bool isDimSequence(const unsigned int _scene);
     static uint64_t getReachableScenesBitmapForButtonID(const int _buttonID);
     static SceneOnState isOnScene(const int _groupID, const unsigned int _scene);
-
-    static double roundDigits(const double input, const int digits);
-    static double sensorToFloat12(const int _sensorType, const int _sensorValue);
-    static int sensorToSystem(const int _sensorType, const double _sensorValue);
-    static uint8_t sensorToPrecision(const int _sensorType);
-    static std::string sensorName(const int _sensorType);
   }; // SceneHelper
 
 } // namespace dss

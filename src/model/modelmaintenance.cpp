@@ -1064,7 +1064,7 @@ namespace dss {
                           str2dsuid(event->getSingleStringParameter()),
                           event->getParameter(0),
                           event->getParameter(1),
-                          event->getParameter(2),
+                          static_cast<SensorType>(event->getParameter(2)),
                           event->getParameter(3),
                           event->getParameter(4));
       }
@@ -2106,7 +2106,7 @@ namespace dss {
 
       // regular sensor value event
       } else if (_sensorIndex <= 15) {
-        uint8_t sensorType = SensorIDUnknownType;
+        auto sensorType = SensorType::UnknownType;
         try {
           pDev->setSensorValue(_sensorIndex, (const unsigned int) _sensorValue);
           boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
@@ -2126,14 +2126,14 @@ namespace dss {
                                            const dsuid_t& _sourceDevice,
                                            const int& _zoneID,
                                            const int& _groupID,
-                                           const int& _sensorType,
+                                           SensorType _sensorType,
                                            const int& _sensorValue,
                                            const int& _precision) {
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
-      double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
+      double fValue = sensorToFloat12(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
       // check for a valid dsuid

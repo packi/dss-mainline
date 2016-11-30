@@ -35,6 +35,7 @@
 
 #include "src/logger.h"
 #include "src/dss.h"
+#include "src/model/modelconst.h"
 
 #include <external/civetweb/civetweb.h>
 
@@ -93,6 +94,7 @@ namespace dss {
     void add(std::string _name, unsigned long long int _value);
     void add(std::string _name, bool _value);
     void add(std::string _name, double _value);
+    void add(std::string _name, SensorType sensorType);
     void add(std::string _value);
     void add(const char* _value);
     void add(int _value);

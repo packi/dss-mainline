@@ -178,9 +178,10 @@ namespace dss {
         return JSONWriter::failure("Need valid parameter 'sensorType' and 'sensorValue'");
       }
       double sensorValue = ::strtod(sensorValueString.c_str(), 0);
+      SensorType _sensorType = static_cast<SensorType>(sensorType);
 
       _interface->pushSensor(coJSON, SceneAccess::stringToCategory(categoryStr),
-          sourceID, sensorType, sensorValue, sessionToken);
+          sourceID, _sensorType, sensorValue, sessionToken);
       return JSONWriter::success();
     }
     throw std::runtime_error("Unknown function");

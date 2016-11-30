@@ -106,7 +106,7 @@ namespace dss {
   } CircuitPowerStateSpec_t;
 
   typedef struct {
-    uint8_t SensorType;
+    SensorType sensorType;
     uint32_t SensorPollInterval;
     uint8_t SensorBroadcastFlag;
     uint8_t SensorConversionFlag;
@@ -330,8 +330,8 @@ namespace dss {
     virtual ZoneHeatingInternalsSpec_t getZoneHeatingInternals(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
     virtual ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
     virtual ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
-    virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) = 0;
-    virtual void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType, uint16_t *SensorValue, uint32_t *SensorAge) = 0;
+    virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, SensorType _sensorType) = 0;
+    virtual void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, SensorType _sensorType, uint16_t *SensorValue, uint32_t *SensorAge) = 0;
     virtual int getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool _onlyActive = false) = 0;
     /** vdsm property queries */
     virtual void protobufMessageRequest(const dsuid_t _dSMdSUID, const uint16_t _request_size, const uint8_t *_request, uint16_t *_response_size, uint8_t *_response) = 0;
@@ -384,8 +384,8 @@ namespace dss {
     virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) = 0;
     virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) = 0;
     virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) = 0;
-    virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) = 0;
-    virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) = 0;
+    virtual void setZoneSensor(const uint16_t _zoneID, SensorType _sensorType, const dsuid_t& _sensorDSUID) = 0;
+    virtual void resetZoneSensor(const uint16_t _zoneID, SensorType _sensorType) = 0;
 
     virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) = 0;
 
@@ -404,7 +404,7 @@ namespace dss {
     virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
-    virtual void pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, double _sensorValueFloat, const std::string _token) = 0;
+    virtual void pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, SensorType _sensorType, double _sensorValueFloat, const std::string _token) = 0;
     //< @ret true if locked
     virtual bool isOperationLock(const dsuid_t &_dSM, int _clusterId) = 0;
   }; // ActionRequestInterface
@@ -487,7 +487,7 @@ namespace dss {
                                    const dsuid_t& _sourceDevice,
                                    const int& _zoneID,
                                    const int& _groupID,
-                                   const int& _sensorType,
+                                   SensorType _sensorType,
                                    const int& _sensorValue,
                                    const int& _precision,
                                    const SceneAccessCategory _category,

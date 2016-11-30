@@ -595,9 +595,9 @@ namespace dss {
       return;
     }
 
-    int _sensorType;
+    SensorType _sensorType;
     try {
-      _sensorType = strToInt(sensorType);
+      _sensorType = static_cast<SensorType>(strToInt(sensorType));
     } catch (std::runtime_error &ex) {
       Logger::getInstance()->log("ModelPersistence: could not convert sensortype for device " + std::string(sensorType) + ": " + ex.what(), lsError);
       return;
@@ -1134,7 +1134,7 @@ namespace dss {
   {
     _ofs << doIndent(_indent) << "<sensor dsuid=\""
          << dsuid2str(_zoneSensor->m_DSUID) << "\""
-         << " sensorType=\"" << intToString(_zoneSensor->m_sensorType) << "\""
+         << " sensorType=\"" << intToString(static_cast<int>(_zoneSensor->m_sensorType)) << "\""
          << " sensorIndex=\"" << intToString(_zoneSensor->m_sensorIndex)  << "\"/>"
          << std::endl;
   } // zoneSensorToXML

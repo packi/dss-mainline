@@ -42,7 +42,7 @@
 
 namespace dss {
 
-bool SensorMonitorTask::checkZoneValueDueTime(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
+bool SensorMonitorTask::checkZoneValueDueTime(boost::shared_ptr<Group> _group, SensorType _sensorType, DateTime _ts) {
   DateTime now;
   if (_ts != DateTime::NullDate) {
     int age = now.difference(_ts);
@@ -51,12 +51,12 @@ bool SensorMonitorTask::checkZoneValueDueTime(boost::shared_ptr<Group> _group, i
   return false;
 }
 
-bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, int _sensorType, DateTime _ts) {
+bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, SensorType _sensorType, DateTime _ts) {
   bool zoneTimeDue = checkZoneValueDueTime(_group, _sensorType, _ts);
   if (zoneTimeDue) {
     DateTime now;
     Logger::getInstance()->log(std::string("Sensor value (type: ") +
-        intToString(_sensorType) + ") for zone #" +
+        sensorName(_sensorType) + ") for zone #" +
         intToString(_group->getZoneID()) +
         " is too old: " + _ts.toISO8601_ms() +
         ", age in seconds is " + intToString(now.difference(_ts)), lsInfo);
@@ -139,13 +139,13 @@ void SensorMonitorTask::run() {
       if (pZone->getID() > 0) {
         ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
 
-        checkZoneSensor(pZone, SensorIDTemperatureIndoors, hSensors);
-        checkZoneSensor(pZone, SensorIDHumidityIndoors,    hSensors);
-        checkZoneSensor(pZone, SensorIDCO2Concentration,   hSensors);
-        checkZoneSensor(pZone, SensorIDBrightnessIndoors,  hSensors);
+        checkZoneSensor(pZone, SensorType::TemperatureIndoors, hSensors);
+        checkZoneSensor(pZone, SensorType::HumidityIndoors,    hSensors);
+        checkZoneSensor(pZone, SensorType::CO2Concentration,   hSensors);
+        checkZoneSensor(pZone, SensorType::BrightnessIndoors,  hSensors);
 
         ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
-        if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorIDRoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
+        if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorType::RoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
           pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
         }
       }
@@ -179,7 +179,7 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
         }
         if (hSensors.m_TemperatureValueTS  != DateTime::NullDate) {
           pZone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
-                            SensorIDTemperatureIndoors,
+                            SensorType::TemperatureIndoors,
                             hSensors.m_TemperatureValue, "");
           usleep(1000 * 1000);
         }
@@ -196,7 +196,7 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
           if (hStatus.m_ControlValueTS != DateTime::NullDate) {
             pGroup->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
-                               SensorIDRoomTemperatureControlVariable,
+                               SensorType::RoomTemperatureControlVariable,
                                hStatus.m_ControlValue, "");
             usleep(1000 * 1000);
           }
@@ -214,26 +214,26 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
   }
 }
 
-DateTime SensorMonitorTask::getDateTimeForSensor(const ZoneSensorStatus_t& _hSensors, const int _sensorType)
+DateTime SensorMonitorTask::getDateTimeForSensor(const ZoneSensorStatus_t& _hSensors, SensorType _sensorType)
 {
   switch (_sensorType) {
-  case SensorIDTemperatureIndoors: {
+  case SensorType::TemperatureIndoors: {
     return _hSensors.m_TemperatureValueTS;
   }
-  case SensorIDHumidityIndoors: {
+  case SensorType::HumidityIndoors: {
     return _hSensors.m_HumidityValueTS;
   }
-  case SensorIDBrightnessIndoors: {
+  case SensorType::BrightnessIndoors: {
     return _hSensors.m_BrightnessValueTS;
   }
-  case SensorIDCO2Concentration: {
+  case SensorType::CO2Concentration: {
     return _hSensors.m_CO2ConcentrationValueTS;
   }
   }
   return DateTime::NullDate;
 }
 
-void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, const int _sensorType, const ZoneSensorStatus_t& _hSensors) {
+void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorType _sensorType, const ZoneSensorStatus_t& _hSensors) {
 
   boost::shared_ptr<Device> sensorDevice = _zone->getAssignedSensorDevice(_sensorType);
 
@@ -243,19 +243,19 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, const int
   if (checkZoneValueDueTime(_zone->getGroup(GroupIDBroadcast), _sensorType, sensorTime)) {
     sensorFault = true;
     switch (_sensorType) {
-    case SensorIDTemperatureIndoors: {
+    case SensorType::TemperatureIndoors: {
       _zone->setTemperature(_hSensors.m_TemperatureValue, DateTime::NullDate);
       break;
     }
-    case SensorIDHumidityIndoors: {
+    case SensorType::HumidityIndoors: {
       _zone->setHumidityValue(_hSensors.m_HumidityValue, DateTime::NullDate);
       break;
     }
-    case SensorIDBrightnessIndoors: {
+    case SensorType::BrightnessIndoors: {
       _zone->setBrightnessValue(_hSensors.m_BrightnessValue, DateTime::NullDate);
       break;
     }
-    case SensorIDCO2Concentration: {
+    case SensorType::CO2Concentration: {
       _zone->setCO2ConcentrationValue(_hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
       break;
     }
@@ -265,7 +265,7 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, const int
   if (sensorFault) {
     DateTime now;
     Logger::getInstance()->log(std::string("Sensor not available, or value (type: ") +
-        intToString(_sensorType) + ") for zone #" +
+        sensorName(_sensorType) + ") for zone #" +
         intToString(_zone->getID()) +
         " is too old: " + sensorTime.toISO8601_ms() +
         ", age in seconds is " + intToString(now.difference(sensorTime)), lsWarning);

@@ -404,41 +404,41 @@ namespace dss {
             break;
           case HeatingControlModeIDPID:
             json.add("Off",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
             json.add("Comfort",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
             json.add("Economy",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
             json.add("NotUsed",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
             json.add("Night",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
             json.add("Holiday",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
             json.add("Cooling",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode6));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
             json.add("CoolingOff",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode7));
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
             json.add("Off",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
             json.add("Comfort",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
             json.add("Economy",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
             json.add("NotUsed",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
             json.add("Night",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
             json.add("Holiday",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
             json.add("Cooling",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode6));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
             json.add("CoolingOff",
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode7));
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
             break;
 
           }
@@ -452,14 +452,14 @@ namespace dss {
           JSONWriter json;
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           ZoneHeatingOperationModeSpec_t hOpValues;
-          int SensorConversion;
+          SensorType SensorConversion;
           int iValue;
           double fValue;
 
           if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-            SensorConversion = SensorIDRoomTemperatureSetpoint;
+            SensorConversion = SensorType::RoomTemperatureSetpoint;
           } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-            SensorConversion = SensorIDRoomTemperatureControlVariable;
+            SensorConversion = SensorType::RoomTemperatureControlVariable;
           } else {
             return JSONWriter::failure("Cannot set control values in current mode");
           }
@@ -476,88 +476,88 @@ namespace dss {
           if (_request.hasParameter("Off")) {
             try {
               iValue = strToUInt(_request.getParameter("Off"));
-              hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode0 = sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Off"));
-                hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode0 = sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Comfort")) {
             try {
               iValue = strToUInt(_request.getParameter("Comfort"));
-              hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode1 = sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Comfort"));
-                hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode1 = sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Economy")) {
             try {
               iValue = strToUInt(_request.getParameter("Economy"));
-              hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode2 = sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Economy"));
-                hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode2 = sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("NotUsed")) {
             try {
               iValue = strToUInt(_request.getParameter("NotUsed"));
-              hOpValues.OpMode3 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode3 = sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("NotUsed"));
-                hOpValues.OpMode3 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode3 = sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Night")) {
             try {
               iValue = strToUInt(_request.getParameter("Night"));
-              hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode4 = sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Night"));
-                hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode4 = sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Holiday")) {
             try {
               iValue = strToUInt(_request.getParameter("Holiday"));
-              hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode5 = sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Holiday"));
-                hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode5 = sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Cooling")) {
             try {
               iValue = strToUInt(_request.getParameter("Cooling"));
-              hOpValues.OpMode6 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode6 = sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Cooling"));
-                hOpValues.OpMode6 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode6 = sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("CoolingOff")) {
             try {
               iValue = strToUInt(_request.getParameter("CoolingOff"));
-              hOpValues.OpMode7 = SceneHelper::sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode7 = sensorToSystem(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("CoolingOff"));
-                hOpValues.OpMode7 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode7 = sensorToSystem(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
@@ -630,15 +630,15 @@ namespace dss {
           hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
               hProp.m_HeatingControlDSUID, pZone->getID());
 
-          json.add("CtrlTRecent", (double) SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, hInternals.Trecent));
-          json.add("CtrlTReference", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hInternals.Treference));
+          json.add("CtrlTRecent", (double) sensorToFloat12(SensorType::TemperatureIndoors, hInternals.Trecent));
+          json.add("CtrlTReference", (double) sensorToFloat12(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
           json.add("CtrlTError", (double) hInternals.TError * 0.025);
           json.add("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
           json.add("CtrlIntegral", (double) hInternals.Integral * 0.025);
           json.add("CtrlYp", (double) hInternals.Yp * 0.01);
           json.add("CtrlYi", (double) hInternals.Yi * 0.01);
           json.add("CtrlYd", (double) hInternals.Yd *0.01);
-          json.add("CtrlY", (double) SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hInternals.Y));
+          json.add("CtrlY", (double) sensorToFloat12(SensorType::RoomTemperatureControlVariable, hInternals.Y));
           json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
 
           return json.successJSON();
@@ -653,22 +653,24 @@ namespace dss {
           }
           dsuid_t dsuid = str2dsuid(dsuidStr);
 
-          int type = strToIntDef(_request.getParameter("sensorType"), -1);
-          if (type < 0) {
+          int intType = strToIntDef(_request.getParameter("sensorType"), -1);
+          if (intType < 0) {
             return JSONWriter::failure("Missing or invalid parameter 'sensorType'");
           }
           boost::shared_ptr<Device> dev = m_Apartment.getDeviceByDSID(dsuid);
 
+          SensorType type = static_cast<SensorType>(intType);
+
           switch (type)  {
-            case SensorIDBrightnessOutdoors:
-            case SensorIDTemperatureOutdoors:
-            case SensorIDHumidityOutdoors:
-            case SensorIDWindSpeed:
-            case SensorIDWindDirection:
-            case SensorIDGustSpeed:
-            case SensorIDGustDirection:
-            case SensorIDPrecipitation:
-            case SensorIDAirPressure:
+            case SensorType::BrightnessOutdoors:
+            case SensorType::TemperatureOutdoors:
+            case SensorType::HumidityOutdoors:
+            case SensorType::WindSpeed:
+            case SensorType::WindDirection:
+            case SensorType::GustSpeed:
+            case SensorType::GustDirection:
+            case SensorType::Precipitation:
+            case SensorType::AirPressure:
               pZone = m_Apartment.getZone(0);
               break;
           }
@@ -680,12 +682,13 @@ namespace dss {
           if (pZone->getID() == 0) {
             return JSONWriter::success();
           }
-          int type = strToIntDef(_request.getParameter("sensorType"), -1);
-          if (type < 0) {
+          int intType = strToIntDef(_request.getParameter("sensorType"), -1);
+          if (intType < 0) {
             return JSONWriter::failure("Missing or invalid parameter 'sensorType'");
           }
+          SensorType sensorType = static_cast<SensorType>(intType);
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-          manipulator.resetZoneSensor(pZone, type);
+          manipulator.resetZoneSensor(pZone, sensorType);
           return JSONWriter::success();
         } else if(_request.getMethod() == "getAssignedSensors") {
           JSONWriter json;

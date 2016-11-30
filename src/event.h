@@ -170,6 +170,10 @@ namespace dss {
     bool hasPropertySet(const std::string& _name) const;
     void unsetProperty(const std::string& _name);
     bool setProperty(const std::string& _name, const std::string& _value);
+    bool setProperty(const std::string& name, SensorType value);
+
+    template<typename T>
+    T getPropertyByName(const std::string &name) const;
 
     void setLocation(const std::string& _value) { m_Location = _value; m_LocationSet = true; }
     void setContext(const std::string& _value) { m_Context = _value; m_ContextSet = true; }
@@ -193,6 +197,10 @@ namespace dss {
     DateTime getTimestamp() const { return m_timestamp; }
     std::string toString() const;
   }; // Event
+
+
+  template <>
+  SensorType Event::getPropertyByName<SensorType>(const std::string& value) const;
 
   //-------------------------------------------------- Events
 

@@ -463,13 +463,13 @@ namespace dss {
   } // setVendorID
 
   void Device::fillSensorTable(std::vector<DeviceSensorSpec_t>& _slist) {
-    DeviceSensorSpec_t sensorInputReserved1 = { 0x3d, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInputReserved2 = { 0x3e, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput04 = { SensorIDActivePower, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput05 = { SensorIDOutputCurrent, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput06 = { SensorIDElectricMeter, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput64 = { SensorIDOutputCurrent16A, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput65 = { SensorIDActivePowerVA, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInputReserved1 = { SensorType::Reserved1, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInputReserved2 = { SensorType::Reserved2, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput04 = { SensorType::ActivePower, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput05 = { SensorType::OutputCurrent, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput06 = { SensorType::ElectricMeter, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput64 = { SensorType::OutputCurrent16A, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput65 = { SensorType::ActivePowerVA, 0, 0, 0 };
     DeviceClasses_t deviceClass = getDeviceClass();
     int devType = (deviceClass << 16) | m_ProductID;
 
@@ -2415,7 +2415,7 @@ namespace dss {
 
       boost::shared_ptr<DeviceSensor_t> binput = boost::make_shared<DeviceSensor_t>();
       binput->m_sensorIndex = m_sensorInputCount;
-      binput->m_sensorType = it->SensorType;
+      binput->m_sensorType = it->sensorType;
       binput->m_sensorPollInterval = it->SensorPollInterval;
       binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
       binput->m_sensorPushConversionFlag = it->SensorConversionFlag;
@@ -2429,7 +2429,7 @@ namespace dss {
         std::string bpath = std::string("sensorInput") + intToString(m_sensorInputCount);
         PropertyNodePtr entry = sensorInputNode->createProperty(bpath);
         entry->createProperty("type")
-                ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
+                ->linkToProxy(PropertyProxyReference<int, SensorType>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
         entry->createProperty("index")
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorIndex));
         entry->createProperty("valid")
@@ -2522,7 +2522,7 @@ namespace dss {
     return m_sensorInputs[_sensorIndex];
   }
 
-  const boost::shared_ptr<DeviceSensor_t> Device::getSensorByType(uint8_t _sensorType) const {
+  const boost::shared_ptr<DeviceSensor_t> Device::getSensorByType(SensorType _sensorType) const {
     for (size_t i = 0; i < getSensorCount(); i++) {
       boost::shared_ptr<DeviceSensor_t> sensor = m_sensorInputs.at(i);
       if (sensor->m_sensorType == _sensorType) {
@@ -2540,7 +2540,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValue = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat =
-        SceneHelper::sensorToFloat12(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+        sensorToFloat12(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
@@ -2552,7 +2552,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValue =
-            SceneHelper::sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+            sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }

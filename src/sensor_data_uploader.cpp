@@ -336,10 +336,9 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
       highPrio = false;
     }
     if (_event.getName() == EventName::ZoneSensorValue) {
-      int sensorType = strToInt(_event.getPropertyByName("sensorType"));
-      switch (sensorType) {
-        case SensorIDRoomTemperatureControlVariable:
-        case SensorIDRoomTemperatureSetpoint:
+      switch (_event.getPropertyByName<SensorType>("sensorType")) {
+        case SensorType::RoomTemperatureControlVariable:
+        case SensorType::RoomTemperatureSetpoint:
           break;
         default:
           highPrio = false;
@@ -364,7 +363,7 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
       if (_event.getName() == EventName::ZoneSensorValue) {
         log(std::string("SensorDataUploader ZoneSensorValue event ") +
             std::string(" sensor dsuid: ") + _event.getPropertyByName("originDSID") +
-            std::string(" sensor type:  ") + std::string(_event.getPropertyByName("sensorType")) +
+            std::string(" sensor type:  ") + _event.getPropertyByName("sensorType") +
             std::string(" sensor value: ") + _event.getPropertyByName("sensorValue") +
             std::string(" sensor value: ") + _event.getPropertyByName("sensorValueFloat")
             , lsDebug);
@@ -544,10 +543,9 @@ void SensorDataUploadDsHubPlugin::handleEvent(Event& _event,
     }
 
     if (_event.getName() == EventName::ZoneSensorValue) {
-      int sensorType = strToInt(_event.getPropertyByName("sensorType"));
-      switch (sensorType) {
-        case SensorIDRoomTemperatureControlVariable:
-        case SensorIDRoomTemperatureSetpoint:
+      switch (_event.getPropertyByName<SensorType>("sensorType")) {
+        case SensorType::RoomTemperatureControlVariable:
+        case SensorType::RoomTemperatureSetpoint:
           break;
         default:
           highPrio = false;

@@ -96,7 +96,7 @@ namespace dss {
     Set getByColor(DeviceClasses_t _color) const;
 
     /** Returns a subset of the devices which have sensors of the given type */
-    Set getBySensorType(int _type) const;
+    Set getBySensorType(SensorType _type) const;
 
     /** Returns a subset of devices with the given function-id. */
     Set getByFunctionID(const int _functionID) const;
