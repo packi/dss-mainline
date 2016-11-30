@@ -77,6 +77,7 @@ namespace dss {
     unsigned char payload[PAYLOAD_LEN];
   } GenericEventPayload_t;
 
+  unsigned int getOutputChannelSize(const int type);
 }
 
 #endif
