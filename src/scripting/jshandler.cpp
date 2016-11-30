@@ -489,7 +489,7 @@ namespace dss {
           break;
         }
         if (!paramString.empty()) {
-          paramString += '&';
+          paramString += ';';
         }
         {
           jsval val;
