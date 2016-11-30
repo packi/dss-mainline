@@ -155,7 +155,7 @@ namespace dss {
 
       if (m_pApartment->getPropertyNode() != NULL) {
         for (int g = 1; g <= 63; g++) {
-          if (m_GroupBitmask.test(g-1)) {
+          if ( isInGroup(g) ) {
             int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
             std::string gPath = "zones/zone" + intToString(zid) +
                 "/groups/group" + intToString(g) + "/devices/" +
@@ -387,7 +387,7 @@ namespace dss {
     }
 
     for (int g = 1; g <= 63; g++) {
-      if (m_GroupBitmask.test(g-1)) {
+      if ( isInGroup(g) ) {
         std::string gPath = "zones/zone" + intToString(m_ZoneID) +
                             "/groups/group" + intToString(g) + "/devices/" +
                             dsuid2str(m_DSID);

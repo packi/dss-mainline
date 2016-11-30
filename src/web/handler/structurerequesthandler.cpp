@@ -598,7 +598,7 @@ namespace dss {
       }
     }
 
-    if (!(dev->getGroupBitmask().test(gr->getStandardGroupID()-1) ||
+    if (!(dev->isInGroup(gr->getStandardGroupID()) ||
           (dev->getDeviceType() == DEVICE_TYPE_AKM) ||
           (dev->getDeviceType() == DEVICE_TYPE_UMR))) {
       return JSONWriter::failure("Devices does not match color of group (" + intToString(gr->getStandardGroupID()) + ")");

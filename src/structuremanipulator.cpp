@@ -726,7 +726,7 @@ namespace dss {
   void StructureManipulator::deviceRemoveFromGroups(boost::shared_ptr<Device> device) {
     boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
     for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
-      if (!device->getGroupBitmask().test(g - 1)) {
+      if (!device->isInGroup(g)) {
         continue;
       }
       boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
@@ -754,7 +754,7 @@ namespace dss {
     /* check if device is also in a colored user group */
     boost::shared_ptr<Zone> pZone = m_Apartment.getZone(newGroup->getZoneID());
     for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
-      if (!device->getGroupBitmask().test(g - 1)) {
+      if (!device->isInGroup(g)) {
         continue;
       }
       boost::shared_ptr<Group> itGroup = pZone->getGroup(g);

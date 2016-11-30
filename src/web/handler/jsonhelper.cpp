@@ -148,11 +148,8 @@ namespace dss {
     _json.add("DefaultGroup", _device.getDevice()->getDefaultGroup());
 
     _json.startArray("groups");
-    std::bitset<63> deviceGroups = _device.getDevice()->getGroupBitmask();
-    for (int g = 1; g <= 63; g++) {
-      if (deviceGroups.test(g-1)) {
-        _json.add(g);
-      }
+    for (int g = 0; g < _device.getDevice()->getGroupsCount(); g++) {
+      _json.add(_device.getDevice()->getGroupIdByIndex(g));
     }
     _json.endArray();
 
