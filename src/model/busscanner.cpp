@@ -267,6 +267,11 @@ namespace dss {
 
     foreach(ClusterSpec_t cluster, clusters) {
 
+      // in case this DSM does not provide group configuration ignore it.
+      if (_dsMeter->getApiVersion() < 0x303) {
+        cluster.configuration = 0;
+      }
+
       if (cluster.StandardGroupID > 0) {
         log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
             " and devices: " + intToString(cluster.NumberOfDevices));
@@ -298,6 +303,7 @@ namespace dss {
       if ((pCluster->getStandardGroupID() == 0) ||
           ((pCluster->getStandardGroupID() > 0) && !pCluster->isReadFromDsm())) {
         pCluster->setStandardGroupID(cluster.StandardGroupID);
+        pCluster->setConfiguration(cluster.configuration);
         pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
         pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
         pCluster->setConfigurationLocked(cluster.configurationLocked);
@@ -392,6 +398,11 @@ namespace dss {
     dev->setRevisionID(_spec.Version);
     dev->setIsLockedInDSM(_spec.Locked);
     dev->setOutputMode(_spec.OutputMode);
+
+    if (_dsMeter->getApiVersion() >= 0x303) {
+      dev->setActiveGroup(_spec.deviceActiveGroup);
+      dev->setDefaultGroup(_spec.deviceDefaultGroup);
+    }
 
     dev->setButtonActiveGroup(_spec.ActiveGroup);
     dev->setButtonGroupMembership(_spec.GroupMembership);
@@ -724,6 +735,11 @@ namespace dss {
         continue;
       }
 
+      // in case this DSM does not provide group configuration it is invalid and should be ignored
+      if (_dsMeter->getApiVersion() < 0x303) {
+        group.configuration = 0;
+      }
+
       log("scanDSMeter:    Found group with id: " + intToString(group.GroupID) +
           " and devices: " + intToString(group.NumberOfDevices));
 
@@ -738,6 +754,7 @@ namespace dss {
           groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
           groupOnZone->setName(group.Name);
           groupOnZone->setStandardGroupID(group.StandardGroupID);
+          groupOnZone->setConfiguration(group.configuration);
           _zone->addGroup(groupOnZone);
         }
         groupOnZone->setIsPresent(true);
@@ -752,6 +769,7 @@ namespace dss {
           pGroup.reset(new Group(group.GroupID, zoneBroadcast, m_Apartment));
           pGroup->setName(group.Name);
           pGroup->setStandardGroupID(group.StandardGroupID);
+          pGroup->setConfiguration(group.configuration);
           zoneBroadcast->addGroup(pGroup);
         }
         pGroup->setIsPresent(true);
@@ -767,10 +785,12 @@ namespace dss {
           groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
           groupOnZone->setName(group.Name);
           groupOnZone->setStandardGroupID(group.StandardGroupID);
+          groupOnZone->setConfiguration(group.configuration);
           _zone->addGroup(groupOnZone);
         } else {
-          if (groupOnZone->getName() != group.Name ||
-              groupOnZone->getStandardGroupID() != group.StandardGroupID) {
+          if ( (groupOnZone->getName() != group.Name) ||
+               (groupOnZone->getStandardGroupID() != group.StandardGroupID) ||
+               (groupOnZone->getConfiguration() != (int)group.configuration)) {
             groupOnZone->setIsSynchronized(false);
           }
         }

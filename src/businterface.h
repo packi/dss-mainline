@@ -71,6 +71,7 @@ namespace dss {
     uint8_t StandardGroupID;
     uint16_t NumberOfDevices;
     std::string Name;
+    uint32_t configuration;
   } GroupSpec_t;
 
   typedef struct {
@@ -84,6 +85,7 @@ namespace dss {
     uint16_t floor;
     bool configurationLocked;
     std::vector<int> lockedScenes;
+    uint32_t configuration;
   } ClusterSpec_t;
 
   typedef struct {
@@ -137,6 +139,8 @@ namespace dss {
     bool sensorInputsValid;
     std::vector<int> outputChannels;
     bool outputChannelsValid;
+    uint8_t deviceActiveGroup;
+    uint8_t deviceDefaultGroup;
   } DeviceSpec_t;
 
   typedef struct {
@@ -367,6 +371,7 @@ namespace dss {
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) = 0;
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
+    virtual void groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration) = 0;
 
     virtual void createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) = 0;
     virtual void removeCluster(uint8_t _clusterID) = 0;
@@ -375,7 +380,8 @@ namespace dss {
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) = 0;
     virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) = 0;
     virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) = 0;
-
+    virtual void clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration) = 0;
+    
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
 

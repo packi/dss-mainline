@@ -72,10 +72,13 @@ namespace dss {
     void removeGroup(boost::shared_ptr<Zone> _zone, int _groupNumber);
     void groupSetName(boost::shared_ptr<Group> _group, const std::string& _name);
     void groupSetStandardID(boost::shared_ptr<Group> _group, const int _standardGroupNumber);
+    void groupSetConfiguration(boost::shared_ptr<Group> _group, const int _standardGroupNumber);
+
     void sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name);
 
     void clusterSetName(boost::shared_ptr<Cluster> _cluster, const std::string& _name);
     void clusterSetStandardID(boost::shared_ptr<Cluster> _cluster, const int _standardGroupNumber);
+    void clusterSetConfiguration(boost::shared_ptr<Cluster> _cluster, const int _clusterConfiguration);
     void clusterSetConfigurationLock(boost::shared_ptr<Cluster> _cluster, bool _locked);
 
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);

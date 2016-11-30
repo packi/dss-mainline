@@ -72,6 +72,8 @@ namespace dss {
     m_LastKnownMeterDSID(DSUID_NULL),
     m_DSMeterDSIDstr(),
     m_LastKnownMeterDSIDstr(),
+    m_ActiveGroup(0),
+    m_DefaultGroup(0),
     m_FunctionID(0),
     m_ProductID(0),
     m_VendorID(0),
@@ -268,6 +270,11 @@ namespace dss {
       ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
     m_pPropertyNode->createProperty("GTIN")
       ->linkToProxy(PropertyProxyReference<std::string>(m_GTIN, false));
+    m_pPropertyNode->createProperty("ActiveGroup")
+      ->linkToProxy(PropertyProxyReference<int>(m_ActiveGroup, false));
+    m_pPropertyNode->createProperty("DefaultGroup")
+      ->linkToProxy(PropertyProxyReference<int>(m_DefaultGroup, false));
+
     PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
     oemNode->createProperty("ProductState")
       ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));

@@ -244,6 +244,8 @@ namespace dss {
     std::string m_LastKnownMeterDSUIDstr; // for proptree publishing
     std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
+    int m_ActiveGroup;
+    int m_DefaultGroup;
     int m_FunctionID;
     int m_ProductID;
     int m_VendorID;
@@ -597,6 +599,12 @@ namespace dss {
     void lock();
     /** Tells the dSM that it may forget a device if it's not present. */
     void unlock();
+
+    /** Device level active and default group used for Global Applications. */
+    void setActiveGroup(const int _value) { m_ActiveGroup = _value; }
+    int getActiveGroup() const { return m_ActiveGroup; }
+    void setDefaultGroup(const int _value) { m_DefaultGroup = _value; }
+    int getDefaultGroup() const { return m_DefaultGroup; }
 
     void setButtonSetsLocalPriority(const bool _value) { m_ButtonSetsLocalPriority = _value; }
     bool getButtonSetsLocalPriority() const { return m_ButtonSetsLocalPriority; }

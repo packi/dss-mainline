@@ -144,6 +144,9 @@ namespace dss {
     _json.add("buttonInputCount", _device.getDevice()->getButtonInputCount());
     _json.add("AKMInputProperty", _device.getDevice()->getAKMInputProperty());
 
+    _json.add("ActiveGroup", _device.getDevice()->getActiveGroup());
+    _json.add("DefaultGroup", _device.getDevice()->getDefaultGroup());
+
     _json.startArray("groups");
     std::bitset<63> deviceGroups = _device.getDevice()->getGroupBitmask();
     for (int g = 1; g <= 63; g++) {
@@ -231,6 +234,7 @@ namespace dss {
     _json.add("color", _group->getStandardGroupID());
     _json.add("isPresent", _group->isPresent());
     _json.add("isValid", _group->isValid());
+    _json.add("configuration", _group->getConfiguration());
 
     _json.startArray("devices");
     Set devices = _group->getDevices();

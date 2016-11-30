@@ -43,6 +43,7 @@ namespace dss {
     int m_ZoneID;
     int m_GroupID;
     int m_StandardGroupID;
+    int m_Configuration;
     int m_LastCalledScene;
     int m_LastButOneCalledScene;
     bool m_IsValid;
@@ -65,6 +66,10 @@ namespace dss {
     /** Returns the id of the default behavior and associated standard group number */
     int getStandardGroupID() const { return m_StandardGroupID; }
     void setStandardGroupID(const int _standardGroupNumber);
+
+    /** Returns the configuration of this group */
+    int getConfiguration() const { return m_Configuration; }
+    void setConfiguration(const int _configuration);
 
     /** returns true if the group is configured and usable */
     bool isValid() const;

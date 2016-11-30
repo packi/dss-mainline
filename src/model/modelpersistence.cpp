@@ -753,7 +753,8 @@ namespace dss {
                (strcmp(_name, "protectionClass") == 0) ||
                (strcmp(_name, "floor") == 0) ||
                (strcmp(_name, "configurationLocked") == 0) ||
-               (strcmp(_name, "automatic") == 0))) {
+               (strcmp(_name, "automatic") == 0) ||
+               (strcmp(_name, "configuration") == 0))) {
             m_expectString = true;
         } else if ((m_state == ps_cluster) &&
             (strcmp(_name, "lockedScenes") == 0)) {
@@ -768,12 +769,13 @@ namespace dss {
         } else if (m_state == ps_lockedScenes) {
           parseLockedScenes(_name, _attrs);
         }
-      // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>, <color>
+      // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>, <color>, <configuration>
       } else if (m_level == 5) {
         if ((m_state == ps_group) &&
             ((strcmp(_name, "name") == 0) ||
              (strcmp(_name, "color") == 0) ||
-             (strcmp(_name, "associatedSet") == 0))) {
+             (strcmp(_name, "associatedSet") == 0) ||
+             (strcmp(_name, "configuration") == 0))) {
           m_expectString = true;
         } else if ((m_state == ps_group) && (strcmp(_name, "scenes") == 0)) {
           m_state = ps_scene;
@@ -899,6 +901,8 @@ namespace dss {
                   isAutomatic = p > 0;
                 } catch (std::invalid_argument&) {}
                 m_tempCluster->setAutomatic(isAutomatic);
+              } else if (strcmp(_name, "configuration") == 0) {
+                m_tempCluster->setConfiguration(strToUIntDef(m_chardata, 0));
               }
             }
           }
@@ -920,6 +924,8 @@ namespace dss {
             m_tempGroup->setAssociatedSet(m_chardata);
           } else if (strcmp(_name, "color") == 0) {
             m_tempGroup->setStandardGroupID(strToUIntDef(m_chardata, 0));
+          } else if (strcmp(_name, "configuration") == 0) {
+            m_tempGroup->setConfiguration(strToUIntDef(m_chardata, 0));
           }
         } else if ((m_state == ps_scene) && (strcmp(_name, "scenes") == 0)) {
           m_state = ps_group;
@@ -1120,6 +1126,7 @@ namespace dss {
     addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));
     addElementSimple(_ofs, _indent + 1, "configurationLocked", (_pCluster->isConfigurationLocked() ? "1" : "0"));
     addElementSimple(_ofs, _indent + 1, "automatic", (_pCluster->isAutomatic() ? "1" : "0"));
+    addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pCluster->getConfiguration()));
     _ofs << doIndent(_indent + 1) << "<lockedScenes>" << std::endl;
     const std::vector<int> lockedScenes = _pCluster->getLockedScenes();
     for (unsigned int iScene = 0; iScene < lockedScenes.size(); iScene++) {
