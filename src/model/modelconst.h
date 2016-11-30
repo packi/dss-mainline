@@ -299,6 +299,9 @@ namespace dss {
   const int GroupIDControlTemperature = 48;
   const int GroupIDControlGroupMax = 55;
   const int GroupIDMax = 63;
+  const int GroupIDGlobalAppMin = 64;
+  const int GroupIDGlobalAppVentilation = 64;
+  const int GroupIDGlobalAppMax = 128;
 
   inline bool isDefaultGroup(int groupId) {
     return ((groupId >= GroupIDYellow && groupId <= GroupIDStandardMax)) ||
@@ -315,6 +318,10 @@ namespace dss {
 
   inline bool isControlGroup(int groupId) {
     return (groupId >= GroupIDControlGroupMin && groupId <= GroupIDControlGroupMax);
+  }
+
+  inline bool isGlobalAppGroup(int groupId) {
+    return (groupId >= GroupIDGlobalAppMin && groupId <= GroupIDGlobalAppMax);
   }
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;
