@@ -439,7 +439,7 @@ namespace dss {
           break;
         }
         i++;
-        vChannels.push_back({oChannelIdNode->getIntegerValue(), oChannelValueNode->getIntegerValue()});
+        vChannels.push_back(channel{oChannelIdNode->getIntegerValue(), oChannelValueNode->getIntegerValue()});
       }
 
       auto numNonApplyChannels = static_cast <int>(vChannels.size()) - 1;
