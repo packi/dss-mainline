@@ -484,7 +484,7 @@ namespace dss {
         return state;
       }
     }
-    return 0;
+    return boost::shared_ptr<State>();
   } // tryGetState
 
   boost::shared_ptr<State> Apartment::getState(const eStateType _type, const std::string& _name) const {
