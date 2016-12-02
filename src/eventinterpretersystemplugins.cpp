@@ -3601,6 +3601,9 @@ namespace dss {
           case SensorType::AirPressure:
             zoneId = 0;
             break;
+          default:
+            // for other types we just try to find proper device if it exist
+            break;
         }
         boost::shared_ptr<Zone> pZone = DSS::getInstance()->getApartment().getZone(zoneId);
         boost::shared_ptr<Device> sDevice = pZone->getAssignedSensorDevice(sensorType);

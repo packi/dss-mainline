@@ -160,8 +160,6 @@ namespace dss {
     ActivePower = 4,
     OutputCurrent = 5,
     ElectricMeter = 6,
-    OutputCurrentEx = 64,
-    PowerConsumptionVA = 65,
     TemperatureIndoors = 9,
     TemperatureOutdoors = 10,
     BrightnessIndoors = 11,

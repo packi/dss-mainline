@@ -229,8 +229,9 @@ DateTime SensorMonitorTask::getDateTimeForSensor(const ZoneSensorStatus_t& _hSen
     case SensorType::CO2Concentration: {
       return _hSensors.m_CO2ConcentrationValueTS;
     }
+    default:
+      throw std::runtime_error("Unexpected SensorType: " + sensorName(_sensorType));
   }
-  return DateTime::NullDate;
 }
 
 void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorType _sensorType, const ZoneSensorStatus_t& _hSensors) {
@@ -259,6 +260,8 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorTyp
         _zone->setCO2ConcentrationValue(_hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
         break;
       }
+      default:
+        throw std::runtime_error("Unexpected SensorType: " + sensorName(_sensorType));
     }
   }
 
