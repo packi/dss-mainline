@@ -400,14 +400,14 @@ namespace dss {
     switch (_sensorType) {
     case SensorType::ActivePower:
     case SensorType::OutputCurrent:
-    case SensorType::PowerConsumptionVA:
+    case SensorType::ActivePowerVA:
       convertedSensorValue = (double) _sensorValue;
       break;
     case SensorType::ElectricMeter:
       convertedSensorValue = (double) (_sensorValue * 0.01);
       convertedSensorValue= roundDigits(convertedSensorValue, 2);
       break;
-    case SensorType::OutputCurrentEx:
+    case SensorType::OutputCurrent16A:
       convertedSensorValue = (double) (_sensorValue * 4);
       break;
     case SensorType::TemperatureIndoors:
@@ -465,7 +465,7 @@ namespace dss {
     switch (_sensorType) {
     case SensorType::ActivePower:
     case SensorType::OutputCurrent:
-    case SensorType::PowerConsumptionVA:
+    case SensorType::ActivePowerVA:
       if (_sensorValue < 0 || _sensorValue > 4095) {
         throw SensorOutOfRangeException("Value must be in range [0..4095]");
       }
@@ -477,7 +477,7 @@ namespace dss {
       }
       convertedSensorValue = (int) ((_sensorValue + 0.005) / 0.01);
       break;
-    case SensorType::OutputCurrentEx:
+    case SensorType::OutputCurrent16A:
       if (_sensorValue < 0 || _sensorValue > 16380) {
         throw SensorOutOfRangeException("Value must be in range [0..16380]");
       }
@@ -571,9 +571,9 @@ namespace dss {
         _name = "Output Current"; break;
       case SensorType::ElectricMeter:
         _name = "Electric Meter"; break;
-      case SensorType::OutputCurrentEx:
+      case SensorType::OutputCurrent16A:
         _name = "Output Current Ex"; break;
-      case SensorType::PowerConsumptionVA:
+      case SensorType::ActivePowerVA:
         _name = "Active Power Ex"; break;
       case SensorType::TemperatureIndoors:
         _name = "Temperature Indoors"; break;
@@ -612,7 +612,7 @@ namespace dss {
       case SensorType::UnknownType:
         _name = "Unknown Type"; break;
       default:
-        _name = "Invalid Type"; break;
+        _name = "Invalid Type: " +  intToString(static_cast<int>(_sensorType)); break;
     }
     return _name;
   } // sensorName

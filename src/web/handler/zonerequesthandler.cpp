@@ -673,6 +673,28 @@ namespace dss {
             case SensorType::AirPressure:
               pZone = m_Apartment.getZone(0);
               break;
+            case SensorType::ActivePower:
+            case SensorType::OutputCurrent:
+            case SensorType::ElectricMeter:
+            case SensorType::OutputCurrent16A:
+            case SensorType::ActivePowerVA:
+            case SensorType::TemperatureIndoors:
+            case SensorType::BrightnessIndoors:
+            case SensorType::HumidityIndoors:
+            case SensorType::CO2Concentration:
+            case SensorType::COConcentration:
+            case SensorType::SoundPressureLevel:
+            case SensorType::RoomTemperatureSetpoint:
+            case SensorType::RoomTemperatureControlVariable:
+              // all valid sensor types do not need any processing
+              break;
+            case SensorType::Reserved1:
+            case SensorType::Reserved2:
+            case SensorType::NotUsed:
+            case SensorType::UnknownType:
+            default:
+              return JSONWriter::failure("Invalid parameter 'sensorType': " + intToString(static_cast<int>(type)));
+              break;
           }
 
           StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
