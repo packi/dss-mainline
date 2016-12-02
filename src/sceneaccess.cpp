@@ -91,7 +91,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
       }
       const Device* pDevice = dynamic_cast<const Device*>(_pTarget);
       if (pDevice != NULL) {
-        if (pDevice->getGroupBitmask().test(DEVICE_CLASS_GR-1)) {
+        if (pDevice->isInGroup(DEVICE_CLASS_GR)) {
           throw SceneAccessException(protectionMessage);
         }
       }
@@ -134,7 +134,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
           }
           const Device* pDevice = dynamic_cast<const Device*>(_pTarget);
           if (pDevice != NULL) {
-            if (pDevice->getGroupBitmask().test(i-1)) {
+            if (pDevice->isInGroup(i)) {
               throw SceneAccessException("Execution blocked: wind is active");
             }
           }

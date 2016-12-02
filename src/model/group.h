@@ -31,6 +31,7 @@
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
 #include "state.h"
+#include "src/businterface.h"
 
 namespace dss {
 
@@ -43,6 +44,7 @@ namespace dss {
     int m_ZoneID;
     int m_GroupID;
     int m_StandardGroupID;
+    int m_Configuration;
     int m_LastCalledScene;
     int m_LastButOneCalledScene;
     bool m_IsValid;
@@ -65,6 +67,10 @@ namespace dss {
     /** Returns the id of the default behavior and associated standard group number */
     int getStandardGroupID() const { return m_StandardGroupID; }
     void setStandardGroupID(const int _standardGroupNumber);
+
+    /** Returns the configuration of this group */
+    int getConfiguration() const { return m_Configuration; }
+    void setConfiguration(const int _configuration);
 
     /** returns true if the group is configured and usable */
     bool isValid() const;
@@ -123,6 +129,8 @@ namespace dss {
     void addConnectedDevice();
     void removeConnectedDevice();
     bool hasConnectedDevices() { return (m_connectedDevices > 0); }
+
+    static boost::shared_ptr<Group> make(const GroupSpec_t& _spec, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
   }; // Group
 
 } // namespace dss

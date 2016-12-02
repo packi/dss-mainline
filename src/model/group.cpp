@@ -43,6 +43,7 @@ namespace dss {
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
     m_StandardGroupID(0),
+    m_Configuration(0),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
@@ -84,6 +85,10 @@ namespace dss {
       } catch (ItemDuplicateException& ex) {} // we only care that it exists
     }
   } // getID
+
+  void Group::setConfiguration(const int _configuration) {
+    m_Configuration = _configuration;
+  }
 
   Set Group::getDevices() const {
     return m_pApartment->getZone(m_ZoneID)->getDevices().getByGroup(m_GroupID);
@@ -242,6 +247,8 @@ namespace dss {
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
         m_pPropertyNode->createProperty("connectedDevices")
           ->linkToProxy(PropertyProxyReference<int>(m_connectedDevices, false));
+        m_pPropertyNode->createProperty("configuration")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getConfiguration, &Group::setConfiguration));          
       }
     }
   } // publishToPropertyTree
@@ -304,6 +311,17 @@ namespace dss {
     if (m_connectedDevices > 0) {
       --m_connectedDevices;
     }
+  }
+
+  boost::shared_ptr<Group> Group::make(const GroupSpec_t& _groupSpec, boost::shared_ptr<Zone> _pZone, Apartment& _apartment)
+  {
+    boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone, _apartment));
+
+    pGroup->setName(_groupSpec.Name);
+    pGroup->setStandardGroupID(_groupSpec.StandardGroupID);
+    pGroup->setConfiguration(_groupSpec.configuration);
+
+    return pGroup;
   }
 
 } // namespace dss

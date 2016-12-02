@@ -411,8 +411,9 @@ namespace dss {
 
   int StructureManipulator::persistSet(Set& _set, const std::string& _originalSet) {
     // find next empty user-group
+    // TODO: As I understand this persist/create group with devices is only for UserGroups? or also ControlGroups?
     int idFound = -1;
-    for(int groupID = GroupIDUserGroupStart; groupID <= GroupIDMax; groupID++) {
+    for(int groupID = GroupIDUserGroupStart; groupID <= GroupIDUserGroupEnd; groupID++) {
       try {
         m_Apartment.getGroup(groupID);
       } catch(ItemNotFoundException&) {
@@ -621,6 +622,18 @@ namespace dss {
     throw DSSException("SetStandardColor group: id " + intToString(_group->getID()) + " too large");
   } // groupSetStandardID
 
+  void StructureManipulator::groupSetConfiguration(boost::shared_ptr<Group> _group, const int _groupConfiguration) {
+
+    // we allow to set the configuration in all groups for now
+    if (isValidGroup(_group->getID())) {
+      _group->setConfiguration(_groupConfiguration);
+      m_Interface.groupSetConfiguration(_group->getZoneID(), _group->getID(), _groupConfiguration);
+      return;
+    }
+
+    throw DSSException("SetStandardColor group: id " + intToString(_group->getID()) + " too large");
+  } // groupSetConfiguration
+
   void StructureManipulator::sceneSetName(boost::shared_ptr<Group> _group,
                                           int _sceneNumber,
                                           const std::string& _name) {
@@ -714,7 +727,7 @@ namespace dss {
   void StructureManipulator::deviceRemoveFromGroups(boost::shared_ptr<Device> device) {
     boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
     for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
-      if (!device->getGroupBitmask().test(g - 1)) {
+      if (!device->isInGroup(g)) {
         continue;
       }
       boost::shared_ptr<Group> pGroup = pZone->getGroup(g);
@@ -742,7 +755,7 @@ namespace dss {
     /* check if device is also in a colored user group */
     boost::shared_ptr<Zone> pZone = m_Apartment.getZone(newGroup->getZoneID());
     for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
-      if (!device->getGroupBitmask().test(g - 1)) {
+      if (!device->isInGroup(g)) {
         continue;
       }
       boost::shared_ptr<Group> itGroup = pZone->getGroup(g);
@@ -890,6 +903,19 @@ namespace dss {
     throw DSSException("SetStandardColor cluster: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetStandardID
 
+  void StructureManipulator::clusterSetConfiguration(boost::shared_ptr<Cluster> _cluster,
+                                                  const int _clusterConfiguration) {
+    if (isAppUserGroup(_cluster->getID())) {
+      if (_cluster->isConfigurationLocked()) {
+        throw DSSException("The group is locked and cannot be modified");
+      }
+      _cluster->setConfiguration(_clusterConfiguration);
+      m_Interface.clusterSetConfiguration(_cluster->getID(), _clusterConfiguration);
+      return;
+    }
+
+    throw DSSException("SetConfiguration cluster: id " + intToString(_cluster->getID()) + " not a cluster");
+  } // clusterSetConfiguration
 
   void StructureManipulator::clusterSetConfigurationLock(boost::shared_ptr<Cluster> _cluster,
                                                          bool _locked) {
