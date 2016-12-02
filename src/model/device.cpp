@@ -2285,29 +2285,32 @@ namespace dss {
     // other custom devices...
   }
 
-  void Device::handleBinaryInputEvent(const int index, const int state) {
+  void Device::handleBinaryInputEvent(const int index, BinaryInputState inputState) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     try {
-      auto&& pState = getBinaryInputState(index);
+      auto&& state = m_binaryInputStates.at(index);
       auto&& inputType = getDeviceBinaryInputType(index);
       if (inputType == BinaryInputIDWindowTilt) {
-        if (state == 0) {
-          pState->setState(coSystem, StateWH_Closed);
-        } else if (state == 1) {
-          pState->setState(coSystem, StateWH_Open);
-        } else if (state == 2) {
-          pState->setState(coSystem, StateWH_Tilted);
-        } else if (state == -1) {
-          pState->setState(coSystem, StateWH_Unknown);
-        }
+        state->setState(coSystem,
+            [&]() {
+              switch (static_cast<BinaryInputWindowHandleState>(inputState)) {
+                case BinaryInputWindowHandleState::Closed: return StateWH_Closed;
+                case BinaryInputWindowHandleState::Open: return StateWH_Open;
+                case BinaryInputWindowHandleState::Tilted: return StateWH_Tilted;
+                case BinaryInputWindowHandleState::Unknown: return StateWH_Unknown;
+              };
+              return StateWH_Unknown;
+            }());
       } else {
-        if (state == 0) {
-          pState->setState(coSystem, State_Inactive);
-        } else if (state == 1) {
-          pState->setState(coSystem, State_Active);
-        } else if (state == -1) {
-          pState->setState(coSystem, State_Unknown);
-        }
+        state->setState(coSystem,
+            [&]() {
+              switch (inputState) {
+                case BinaryInputState::Inactive: return State_Inactive;
+                case BinaryInputState::Active: return State_Active;
+                case BinaryInputState::Unknown: return State_Unknown;
+              };
+              return State_Unknown;
+            }());
       }
     } catch (const std::exception& e) {
       Logger::getInstance()->log(std::string("Device::handleBinaryInputEvent: what:")+ e.what(), lsWarning);

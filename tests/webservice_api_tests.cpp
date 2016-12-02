@@ -242,7 +242,7 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
   boost::shared_ptr<Event> pEvent;
 
   if (eventName == EventName::DeviceBinaryInputEvent) {
-    pEvent = createDeviceBinaryInputEvent(createDevRef(), 0, 1, 7);
+    pEvent = createDeviceBinaryInputEvent(createDevRef(), 0, 1, BinaryInputState::Active);
   } else if (eventName == EventName::DeviceSensorValue) {
     pEvent = createDeviceSensorValueEvent(createDevRef(), 0, SensorType::AirPressure, 7);
   } else if (eventName == EventName::DeviceStatus) {

@@ -32,6 +32,7 @@
 #include <digitalSTROM/dsuid.h>
 
 #include "src/messages/vdc-messages.pb.h"
+#include "model/modelconst.h"
 
 namespace dss {
 
@@ -87,7 +88,7 @@ namespace dss {
     static void getIcon(dsuid_t _vdsm, dsuid_t _device, size_t *size, uint8_t **data);
 
     struct State {
-      std::map<int,int64_t> binaryInputStates;
+      std::map<int,BinaryInputState> binaryInputStates;
       std::vector<std::pair<std::string, std::string> > deviceStates;
     };
     static State getState(dsuid_t _vdsm, dsuid_t _device);

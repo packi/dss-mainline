@@ -1036,7 +1036,8 @@ namespace dss {
       if (event->getParameterCount() < 4) {
         log("Expected at least 4 parameter for ModelEvent::etDeviceBinaryStateEvent");
       } else {
-        onBinaryInputEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), event->getParameter(3));
+        onBinaryInputEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1),
+            event->getParameter(2), static_cast<BinaryInputState>(event->getParameter(3)));
       }
       break;
     case ModelEvent::etDeviceSensorValue:
@@ -2032,7 +2033,7 @@ namespace dss {
   } // onSensorEvent
 
   void ModelMaintenance::onBinaryInputEvent(dsuid_t _meterID,
-      const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state) {
+      const devid_t _deviceID, const int& _eventIndex, const int& _eventType, BinaryInputState _state) {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
@@ -2089,13 +2090,14 @@ namespace dss {
             continue;
           }
           int oldState = state->getState();
-          int binaryInputValue = (_sensorValue & (1 << index)) ? 1 : 0;
-          int newState = binaryInputValue ? State_Active : State_Inactive;
+          auto binaryInputState =
+              (_sensorValue & (1 << index)) ? BinaryInputState::Active : BinaryInputState::Inactive;
+          int newState = binaryInputState == BinaryInputState::Active ? State_Active : State_Inactive;
           if (newState != oldState) {
             state->setState(coSystem, newState);
             raiseEvent(createDeviceBinaryInputEvent(pDevRev, index, // HERE
                                                     pDev->getDeviceBinaryInputType(index),
-                                                    binaryInputValue));
+                                                    binaryInputState));
           }
         }
 

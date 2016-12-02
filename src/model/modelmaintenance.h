@@ -294,7 +294,8 @@ namespace dss {
                                int _configClass, int _configIndex, int _value);
     void rescanDevice(const dsuid_t& _dsMeterID, const int _deviceID);
     void onSensorEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex);
-    void onBinaryInputEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state);
+    void onBinaryInputEvent(dsuid_t _meterID, const devid_t _deviceID, const int& _eventIndex, const int& _eventType,
+        BinaryInputState _state);
     void onSensorValue(dsuid_t _meterID, const devid_t _deviceID, const int& _sensorIndex, const int& _sensorValue);
     void onCircuitPowerStateChange(dsuid_t _meterID, const int& _baseIndex, const int& _stateMask, const int& _stateValue);
     void onZoneSensorValue(const dsuid_t &_meterID, const dsuid_t& _sourceDevice, const int& _zoneID, const int& _groupID, SensorType _sensorType, const int& _sensorValue, const int& _precision);
