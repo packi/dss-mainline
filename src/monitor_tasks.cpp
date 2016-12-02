@@ -217,18 +217,18 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
 DateTime SensorMonitorTask::getDateTimeForSensor(const ZoneSensorStatus_t& _hSensors, SensorType _sensorType)
 {
   switch (_sensorType) {
-  case SensorType::TemperatureIndoors: {
-    return _hSensors.m_TemperatureValueTS;
-  }
-  case SensorType::HumidityIndoors: {
-    return _hSensors.m_HumidityValueTS;
-  }
-  case SensorType::BrightnessIndoors: {
-    return _hSensors.m_BrightnessValueTS;
-  }
-  case SensorType::CO2Concentration: {
-    return _hSensors.m_CO2ConcentrationValueTS;
-  }
+    case SensorType::TemperatureIndoors: {
+      return _hSensors.m_TemperatureValueTS;
+    }
+    case SensorType::HumidityIndoors: {
+      return _hSensors.m_HumidityValueTS;
+    }
+    case SensorType::BrightnessIndoors: {
+      return _hSensors.m_BrightnessValueTS;
+    }
+    case SensorType::CO2Concentration: {
+      return _hSensors.m_CO2ConcentrationValueTS;
+    }
   }
   return DateTime::NullDate;
 }
@@ -243,22 +243,22 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorTyp
   if (checkZoneValueDueTime(_zone->getGroup(GroupIDBroadcast), _sensorType, sensorTime)) {
     sensorFault = true;
     switch (_sensorType) {
-    case SensorType::TemperatureIndoors: {
-      _zone->setTemperature(_hSensors.m_TemperatureValue, DateTime::NullDate);
-      break;
-    }
-    case SensorType::HumidityIndoors: {
-      _zone->setHumidityValue(_hSensors.m_HumidityValue, DateTime::NullDate);
-      break;
-    }
-    case SensorType::BrightnessIndoors: {
-      _zone->setBrightnessValue(_hSensors.m_BrightnessValue, DateTime::NullDate);
-      break;
-    }
-    case SensorType::CO2Concentration: {
-      _zone->setCO2ConcentrationValue(_hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
-      break;
-    }
+      case SensorType::TemperatureIndoors: {
+        _zone->setTemperature(_hSensors.m_TemperatureValue, DateTime::NullDate);
+        break;
+      }
+      case SensorType::HumidityIndoors: {
+        _zone->setHumidityValue(_hSensors.m_HumidityValue, DateTime::NullDate);
+        break;
+      }
+      case SensorType::BrightnessIndoors: {
+        _zone->setBrightnessValue(_hSensors.m_BrightnessValue, DateTime::NullDate);
+        break;
+      }
+      case SensorType::CO2Concentration: {
+        _zone->setCO2ConcentrationValue(_hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
+        break;
+      }
     }
   }
 
