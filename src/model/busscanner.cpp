@@ -751,10 +751,7 @@ namespace dss {
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
-          groupOnZone->setName(group.Name);
-          groupOnZone->setStandardGroupID(group.StandardGroupID);
-          groupOnZone->setConfiguration(group.configuration);
+          groupOnZone = Group::make(group, _zone, m_Apartment);
           _zone->addGroup(groupOnZone);
         }
         groupOnZone->setIsPresent(true);
@@ -766,10 +763,7 @@ namespace dss {
           pGroup = m_Apartment.getGroup(group.GroupID);
         } catch (ItemNotFoundException&) {
           boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
-          pGroup.reset(new Group(group.GroupID, zoneBroadcast, m_Apartment));
-          pGroup->setName(group.Name);
-          pGroup->setStandardGroupID(group.StandardGroupID);
-          pGroup->setConfiguration(group.configuration);
+          pGroup = Group::make(group, zoneBroadcast, m_Apartment);
           zoneBroadcast->addGroup(pGroup);
         }
         pGroup->setIsPresent(true);
@@ -782,10 +776,7 @@ namespace dss {
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
-          groupOnZone->setName(group.Name);
-          groupOnZone->setStandardGroupID(group.StandardGroupID);
-          groupOnZone->setConfiguration(group.configuration);
+          groupOnZone = Group::make(group, _zone, m_Apartment);
           _zone->addGroup(groupOnZone);
         } else {
           if ( (groupOnZone->getName() != group.Name) ||

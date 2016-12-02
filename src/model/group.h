@@ -31,6 +31,7 @@
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
 #include "state.h"
+#include "src/businterface.h"
 
 namespace dss {
 
@@ -128,6 +129,8 @@ namespace dss {
     void addConnectedDevice();
     void removeConnectedDevice();
     bool hasConnectedDevices() { return (m_connectedDevices > 0); }
+
+    static boost::shared_ptr<Group> make(const GroupSpec_t& _spec, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
   }; // Group
 
 } // namespace dss

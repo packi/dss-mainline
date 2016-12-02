@@ -313,4 +313,15 @@ namespace dss {
     }
   }
 
+  boost::shared_ptr<Group> Group::make(const GroupSpec_t& _groupSpec, boost::shared_ptr<Zone> _pZone, Apartment& _apartment)
+  {
+    boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone, _apartment));
+
+    pGroup->setName(_groupSpec.Name);
+    pGroup->setStandardGroupID(_groupSpec.StandardGroupID);
+    pGroup->setConfiguration(_groupSpec.configuration);
+
+    return pGroup;
+  }
+
 } // namespace dss
