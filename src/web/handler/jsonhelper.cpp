@@ -153,16 +153,16 @@ namespace dss {
     }
     _json.endArray();
 
-    const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = _device.getDevice()->getBinaryInputs();
+    auto&& binaryInputs = _device.getDevice()->getBinaryInputs();
     _json.add("binaryInputCount", (int)binaryInputs.size());
     _json.startArray("binaryInputs");
-    for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
+    for (auto&& it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
       _json.startObject();
       _json.add("targetGroupType", (*it)->m_targetGroupType);
       _json.add("targetGroup", (*it)->m_targetGroupId);
       _json.add("inputType", (*it)->m_inputType);
       _json.add("inputId", (*it)->m_inputId);
-      _json.add("state", _device.getDevice()->getBinaryInputState((*it)->m_inputIndex)->getState());
+      _json.add("state", (*it)->m_state->getState());
       _json.endObject();
     }
     _json.endArray();

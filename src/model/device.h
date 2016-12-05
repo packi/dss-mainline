@@ -157,13 +157,20 @@ namespace dss {
     bool posTimeMax; // device supports maximum positioning time
   } DeviceFeatures_t;
 
-  typedef struct {
+  class Device;
+  struct DeviceBinaryInput {
     int m_inputIndex;        // input line index
     int m_inputType;         // type of input signal
     int m_inputId;           // target Id, like ButtonId
     int m_targetGroupType;   // type of target group: standard, user, apartment
     int m_targetGroupId;     // index of target group, 0..63
-  } DeviceBinaryInput_t;
+    boost::shared_ptr<State> m_state;
+
+    DeviceBinaryInput(Device& device);
+    ~DeviceBinaryInput();
+  private:
+    Device& m_device;
+  };
 
   typedef struct {
     int m_sensorIndex;       // sensor index
@@ -307,9 +314,7 @@ namespace dss {
 
     bool m_IsConfigLocked;
 
-    uint8_t m_binaryInputCount;
-    std::vector<boost::shared_ptr<DeviceBinaryInput_t> > m_binaryInputs;
-    std::vector<boost::shared_ptr<State> > m_binaryInputStates;
+    std::vector<boost::shared_ptr<DeviceBinaryInput> > m_binaryInputs;
 
     typedef std::map<std::string, boost::shared_ptr<State> > States;
     States m_states;
@@ -719,13 +724,12 @@ namespace dss {
 
     void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;
-    const std::vector<boost::shared_ptr<DeviceBinaryInput_t> >& getBinaryInputs() const;
-    const boost::shared_ptr<DeviceBinaryInput_t> getBinaryInput(uint8_t _inputIndex) const;
+    const std::vector<boost::shared_ptr<DeviceBinaryInput> >& getBinaryInputs() const;
+    const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
     void setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup);
     void setBinaryInputId(uint8_t _index, uint8_t _inputId);
     void setBinaryInputType(uint8_t _index, uint8_t _inputType);
-    boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
-    void clearBinaryInputStates();
+    void clearBinaryInputs();
 
     void initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& specs);
     const std::map<std::string, boost::shared_ptr<State> >& getStates() const { return m_states; }

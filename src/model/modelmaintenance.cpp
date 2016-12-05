@@ -2085,7 +2085,7 @@ namespace dss {
         for (int index = 0; index < pDev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state;
           try {
-            state = pDev->getBinaryInputState(index);
+            state = pDev->getBinaryInput(index)->m_state;
           } catch (ItemNotFoundException& e) {
             continue;
           }

@@ -59,6 +59,16 @@
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
 
+  DeviceBinaryInput::DeviceBinaryInput(Device& device) : m_device(device) {}
+
+  DeviceBinaryInput::~DeviceBinaryInput() {
+    try {
+      m_device.getApartment().removeState(m_state);
+    } catch (const std::exception& e) {
+      Logger::getInstance()->log(std::string("~DeviceBinaryInput: remove state failed:") + e.what(), lsWarning);
+    }
+  }
+
   //================================================== Device
 
   Device::Device(dsuid_t _dsid, Apartment* _pApartment)
@@ -112,7 +122,6 @@ namespace dss {
     m_hasActions(false),
     m_ValveType(DEVICE_VALVE_UNKNOWN),
     m_IsConfigLocked(false),
-    m_binaryInputCount(0),
     m_sensorInputCount(0),
     m_outputChannelCount(0),
     m_AKMInputProperty(),
@@ -2124,7 +2133,7 @@ namespace dss {
   }
 
   const uint8_t Device::getBinaryInputCount() const {
-    return (uint8_t) m_binaryInputCount;
+    return (uint8_t) m_binaryInputs.size();
   }
 
   void Device::setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup) {
@@ -2152,17 +2161,9 @@ namespace dss {
     m_binaryInputs[_index]->m_inputType = _inputType;
   }
 
-  void Device::clearBinaryInputStates() {
+  void Device::clearBinaryInputs() {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    foreach(auto&& state, m_binaryInputStates) {
-      try {
-        m_pApartment->removeState(state);
-      } catch (const std::exception& e) {
-        Logger::getInstance()->log(std::string("Device::clearBinaryInputStates: remove state failed:")
-            + e.what(), lsWarning);
-      }
-    }
-    m_binaryInputStates.clear();
+    m_binaryInputs.clear();
   }
 
   void Device::initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& stateSpecs) {
@@ -2275,7 +2276,7 @@ namespace dss {
 
   void Device::handleBinaryInputEvent(const int index, BinaryInputState inputState) {
     try {
-      auto&& state = m_binaryInputStates.at(index);
+      auto&& state = m_binaryInputs.at(index)->m_state;
       auto&& inputType = getDeviceBinaryInputType(index);
       if (inputType == BinaryInputIDWindowTilt) {
         state->setState(coSystem,
@@ -2314,46 +2315,44 @@ namespace dss {
       }
       binaryInputNode = m_pPropertyNode->createProperty("binaryInputs");
     }
-    m_binaryInputCount = 0;
+    int binaryInputCount = 0;
     m_binaryInputs.clear();
-    m_binaryInputStates.clear();
 
     for (std::vector<DeviceBinaryInputSpec_t>::const_iterator it = _binaryInputs.begin();
         it != _binaryInputs.end();
         ++it) {
-      boost::shared_ptr<DeviceBinaryInput_t> binput = boost::make_shared<DeviceBinaryInput_t>();
-      binput->m_inputIndex = m_binaryInputCount;
-      binput->m_inputId = it->InputID;
-      binput->m_inputType = it->InputType;
-      binput->m_targetGroupType = it->TargetGroupType;
-      binput->m_targetGroupId = it->TargetGroup;
-      m_binaryInputs.push_back(binput);
+      m_binaryInputs.push_back(boost::make_shared<DeviceBinaryInput>(*this));
+      auto& binaryInput = m_binaryInputs.back();
+      binaryInput->m_inputIndex = binaryInputCount;
+      binaryInput->m_inputId = it->InputID;
+      binaryInput->m_inputType = it->InputType;
+      binaryInput->m_targetGroupType = it->TargetGroupType;
+      binaryInput->m_targetGroupId = it->TargetGroup;
+      binaryInput->m_state = boost::make_shared<State>(me, binaryInputCount);
+      auto& state = binaryInput->m_state;
 
-      boost::shared_ptr<State> state = boost::make_shared<State>(me, m_binaryInputCount);
-      assignCustomBinaryInputValues(binput->m_inputType, state);
+      assignCustomBinaryInputValues(binaryInput->m_inputType, state);
 
       try {
         getApartment().allocateState(state);
       } catch (ItemDuplicateException& ex) {
         state = getApartment().getNonScriptState(state->getName());
       }
-      m_binaryInputStates.push_back(state);
 
       if (m_pPropertyNode != NULL) {
-        std::string bpath = std::string("binaryInput") + intToString(m_binaryInputCount);
+        std::string bpath = std::string("binaryInput") + intToString(binaryInputCount);
         PropertyNodePtr entry = binaryInputNode->createProperty(bpath);
         entry->createProperty("targetGroupType")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_targetGroupType));
+                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_targetGroupType));
         entry->createProperty("targetGroupId")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_targetGroupId));
+                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_targetGroupId));
         entry->createProperty("inputType")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputType));
+                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputType));
         entry->createProperty("inputId")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputId));
+                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputId));
         entry->createProperty("inputIndex")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputIndex));
-        PropertyNodePtr stateNode = m_binaryInputStates[m_binaryInputCount]
-                ->getPropertyNode();
+                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputIndex));
+        PropertyNodePtr stateNode = state->getPropertyNode();
         PropertyNodePtr stateValueNode = stateNode->getProperty("value");
         if (stateValueNode != NULL) {
           PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
@@ -2361,15 +2360,15 @@ namespace dss {
         }
       }
 
-      m_binaryInputCount ++;
+      binaryInputCount++;
     }
   }
 
-  const std::vector<boost::shared_ptr<DeviceBinaryInput_t> >& Device::getBinaryInputs() const {
+  const std::vector<boost::shared_ptr<DeviceBinaryInput> >& Device::getBinaryInputs() const {
     return m_binaryInputs;
   }
 
-  const boost::shared_ptr<DeviceBinaryInput_t> Device::getBinaryInput(uint8_t _inputIndex) const {
+  const boost::shared_ptr<DeviceBinaryInput> Device::getBinaryInput(uint8_t _inputIndex) const {
     if (_inputIndex >= getBinaryInputCount()) {
       throw ItemNotFoundException(std::string("Device::getBinaryInput: index out of bounds"));
     }
@@ -2583,14 +2582,6 @@ namespace dss {
             (_otherDev->getDSMeterDSID() != m_DSMeterDSID) &&
             (_otherDev->getOemEan() == m_OemEanNumber) &&
             (_otherDev->getOemSerialNumber() == m_OemSerialNumber));
-  }
-
-  boost::shared_ptr<State> Device::getBinaryInputState(uint8_t _inputIndex) const {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex >= m_binaryInputStates.size()) {
-      throw ItemNotFoundException(std::string("Device::getBinaryInputState: index out of bounds"));
-    }
-    return m_binaryInputStates[_inputIndex];
   }
 
   void Device::setConfigLock(bool _lockConfig) {

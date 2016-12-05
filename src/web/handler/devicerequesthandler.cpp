@@ -1084,8 +1084,8 @@ namespace dss {
     } else if (_request.getMethod() == "getBinaryInputs") {
       JSONWriter json;
       json.startArray("inputs");
-      std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binputs = pDevice->getBinaryInputs();
-      for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::iterator it = binputs.begin();
+      auto&& binputs = pDevice->getBinaryInputs();
+      for (auto&& it = binputs.begin();
           it != binputs.end();
           it ++) {
         json.startObject();

@@ -239,8 +239,7 @@ void SystemState::startup() {
       continue;
     }
 
-    foreach (boost::shared_ptr<DeviceBinaryInput_t> input,
-             device->getBinaryInputs()) {
+    foreach (auto&& input, device->getBinaryInputs()) {
       // motion
       if ((input->m_inputType == BinaryInputIDMovement) ||
           (input->m_inputType == BinaryInputIDMovementInDarkness)) {
@@ -694,7 +693,7 @@ void SystemState::stateBinaryinput() {
   }
 
   uint8_t inputIndex = (uint8_t)iiNode->getIntegerValue();
-  const boost::shared_ptr<DeviceBinaryInput_t> devInput = pDev->getBinaryInput(inputIndex);
+  auto&& devInput = pDev->getBinaryInput(inputIndex);
 
   if (devInput->m_inputId != 15) {
     return;
