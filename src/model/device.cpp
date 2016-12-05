@@ -2069,16 +2069,6 @@ namespace dss {
     return m_binaryInputs[_inputIndex]->m_inputType;
   }
 
-  bool Device::hasBinaryInputType(int inputType) const {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    foreach(boost::shared_ptr<DeviceBinaryInput_t> binInput, m_binaryInputs) {
-      if (binInput->m_inputType == inputType) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
