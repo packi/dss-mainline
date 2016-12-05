@@ -508,8 +508,8 @@ namespace dss {
     boost::shared_ptr<Group> getGroupByIndex(const int _index);
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
-    /** Returns the numbers of groups this device is in */
-    std::vector<int> getGroups() const;
+    /** Returns the vector of groups the device is in */
+    const std::vector<int>& getGroups() const;
     /** Retuturns group to which the joker is configured or -1 if device is not
         a joker */
     int getJokerGroup() const;

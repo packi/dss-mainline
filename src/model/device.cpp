@@ -1163,7 +1163,7 @@ namespace dss {
     return m_pApartment->getGroup(getGroupIdByIndex(_index));
   } // getGroupByIndex
 
-  std::vector<int> Device::getGroups() const {
+  const std::vector<int>& Device::getGroups() const {
     return m_Groups;
   }
 
