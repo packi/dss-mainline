@@ -310,9 +310,14 @@ namespace dss {
   const int GroupIDControlTemperature = 48;
   const int GroupIDControlGroupMax = 55;
   const int GroupIDMax = 63;
+  // TODO: verify that this ranges are valid
   const int GroupIDGlobalAppMin = 64;
-  const int GroupIDGlobalAppVentilation = 64;
-  const int GroupIDGlobalAppMax = 128;
+  const int GroupIDGlobalAppDsMin = 64;
+  const int GroupIDGlobalAppDsVentilation = 64;
+  const int GroupIDGlobalAppDsMax = 187;
+  const int GroupIDGlobalAppUserMin = 188;
+  const int GroupIDGlobalAppUserMax = 249;
+  const int GroupIDGlobalAppMax = 249;
 
   inline bool isDefaultGroup(int groupId) {
     return ((groupId >= GroupIDYellow && groupId <= GroupIDStandardMax)) ||
@@ -331,8 +336,16 @@ namespace dss {
     return (groupId >= GroupIDControlGroupMin && groupId <= GroupIDControlGroupMax);
   }
 
+  inline bool isGlobalAppDsGroup(int groupId) {
+    return ( (groupId >= GroupIDGlobalAppDsMin) && (groupId <= GroupIDGlobalAppDsMax) );
+  }
+
+  inline bool isGlobalAppUserGroup(int groupId) {
+    return ( (groupId >= GroupIDGlobalAppUserMin) && (groupId <= GroupIDGlobalAppUserMax) );
+  }
+
   inline bool isGlobalAppGroup(int groupId) {
-    return (groupId >= GroupIDGlobalAppMin && groupId <= GroupIDGlobalAppMax);
+    return isGlobalAppDsGroup(groupId) || isGlobalAppUserGroup(groupId);
   }
 
   inline bool isValidGroup(int groupId) {
