@@ -27,6 +27,7 @@
 
 #include "busscanner.h"
 
+#include <type_traits>
 #include <vector>
 #include <boost/make_shared.hpp>
 
@@ -853,7 +854,7 @@ namespace dss {
         SensorType::BrightnessIndoors
     };
 
-    for (uint8_t i=0; i < sizeof(idList)/sizeof(uint8_t); i++) {
+    for (uint8_t i=0; i < std::extent<decltype(idList)>::value; i++) {
       dsuid_t sensorDevice;
       try {
         sensorDevice = m_Interface.getZoneSensor(_dsMeter->getDSID(), _zone->getID(), idList[i]);

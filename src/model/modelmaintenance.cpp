@@ -1200,8 +1200,12 @@ namespace dss {
       }
       break;
     case ModelEvent::etVdceEvent:
-      onVdceEvent(*dynamic_cast<VdceModelEvent*>(event.get()));
+    {
+      auto vdcModelEvent = dynamic_cast<VdceModelEvent*>(event.get());
+      assert(vdcModelEvent != 0);
+      onVdceEvent(*vdcModelEvent);
       break;
+    }
     default:
       assert(false);
       break;
