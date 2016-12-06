@@ -2078,12 +2078,12 @@ namespace dss {
     return m_binaryInputs[_inputIndex]->m_inputType;
   }
 
-  void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {
+  void Device::setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId id) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
-    uint8_t val = (_targetId & 0xf) << 4;
+    uint8_t val = (static_cast<int>(id) & 0xf) << 4;
     if (_inputIndex == m_binaryInputs.size()) {
       val |= 0x80;
     }
@@ -2145,7 +2145,7 @@ namespace dss {
     m_binaryInputs[_index]->m_targetGroupType = targetGroupType;
   }
 
-  void Device::setBinaryInputId(uint8_t _index, uint8_t _inputId) {
+  void Device::setBinaryInputId(uint8_t _index, BinaryInputId _inputId) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_index >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
@@ -2349,7 +2349,7 @@ namespace dss {
         entry->createProperty("inputType")
                 ->linkToProxy(PropertyProxyReference<int, BinaryInputType>(binaryInput->m_inputType));
         entry->createProperty("inputId")
-                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputId));
+                ->linkToProxy(PropertyProxyReference<int, BinaryInputId>(binaryInput->m_inputId));
         entry->createProperty("inputIndex")
                 ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputIndex));
         PropertyNodePtr stateNode = state->getPropertyNode();

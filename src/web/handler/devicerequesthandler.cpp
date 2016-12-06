@@ -1133,7 +1133,7 @@ namespace dss {
       if (id < 0 || id > 15) {
         return JSONWriter::failure("Invalid or missing parameter 'inputId'");
       }
-      pDevice->setDeviceBinaryInputId(index, id);
+      pDevice->setDeviceBinaryInputId(index, static_cast<BinaryInputId>(id));
       return JSONWriter::success();
 
     } else if (_request.getMethod() == "getAKMInputTimeouts") {

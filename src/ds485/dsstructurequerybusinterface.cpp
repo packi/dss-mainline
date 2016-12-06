@@ -384,7 +384,7 @@ namespace dss {
           binaryInput.TargetGroupType = TargetGroupType;
           binaryInput.TargetGroup = TargetGroup;
           binaryInput.InputType = static_cast<BinaryInputType>(InputType);
-          binaryInput.InputID = InputID;
+          binaryInput.InputID = static_cast<BinaryInputId>(InputID);
           _spec.binaryInputs.push_back(binaryInput);
         }
         _spec.binaryInputsValid = true;

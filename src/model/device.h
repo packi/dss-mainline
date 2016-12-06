@@ -161,7 +161,7 @@ namespace dss {
   struct DeviceBinaryInput {
     int m_inputIndex;        // input line index
     BinaryInputType m_inputType; // type of input signal
-    int m_inputId;           // target Id, like ButtonId
+    BinaryInputId m_inputId;           // target Id, like ButtonId
     int m_targetGroupType;   // type of target group: standard, user, apartment
     int m_targetGroupId;     // index of target group, 0..63
     boost::shared_ptr<State> m_state;
@@ -423,7 +423,7 @@ namespace dss {
     void getDeviceValveControl(DeviceValveControlSpec_t& _config);
 
     /** Binary input devices */
-    void setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId);
+    void setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId _targetId);
     void setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup);
     void setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType _inputType);
     BinaryInputType getDeviceBinaryInputType(uint8_t _inputIndex);
@@ -727,7 +727,7 @@ namespace dss {
     const std::vector<boost::shared_ptr<DeviceBinaryInput> >& getBinaryInputs() const;
     const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
     void setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup);
-    void setBinaryInputId(uint8_t _index, uint8_t _inputId);
+    void setBinaryInputId(uint8_t _index, BinaryInputId _inputId);
     void setBinaryInputType(uint8_t _index, BinaryInputType _inputType);
     void clearBinaryInputs();
 
