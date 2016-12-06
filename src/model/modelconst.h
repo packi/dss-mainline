@@ -190,8 +190,8 @@ namespace dss {
 
   double sensorValueToDouble(SensorType _sensorType, const int _sensorValue);
   int doubleToSensorValue(SensorType _sensorType, const double _sensorValue);
-  uint8_t sensorToPrecision(SensorType _sensorType);
-  std::string sensorName(SensorType _sensorType);
+  uint8_t sensorTypeToPrecision(SensorType _sensorType);
+  std::string sensorTypeName(SensorType _sensorType);
 
   // BinaryInput Type IDs
   const int BinaryInputIDPresence = 1;

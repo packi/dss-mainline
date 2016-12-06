@@ -864,7 +864,7 @@ namespace dss {
         // check if zone sensor already assigned
         boost::shared_ptr<Device> oldDev = _zone->getAssignedSensorDevice(idList[i]);
         if (oldDev && (oldDev->getDSID() != sensorDevice)) {
-          log("Duplicate sensor type " + sensorName(idList[i]) +
+          log("Duplicate sensor type " + sensorTypeName(idList[i]) +
               " registration on zone " + intToString(_zone->getID()) +
               ": dsuid " + dsuid2str(oldDev->getDSID()) +
               " is zone reference, and dsuid " + dsuid2str(sensorDevice) +

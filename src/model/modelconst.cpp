@@ -186,7 +186,7 @@ namespace dss {
     return convertedSensorValue;
   } // doubleToSensorValue
 
-  uint8_t sensorToPrecision(SensorType _sensorType) {
+  uint8_t sensorTypeToPrecision(SensorType _sensorType) {
     switch (_sensorType) {
       case SensorType::RoomTemperatureControlVariable:
         return 1;
@@ -196,7 +196,7 @@ namespace dss {
     return 0;
   }
 
-  std::string sensorName(SensorType _sensorType) {
+  std::string sensorTypeName(SensorType _sensorType) {
     std::string _name;
     switch(_sensorType) {
       case SensorType::ActivePower:
@@ -249,5 +249,5 @@ namespace dss {
         _name = "Invalid Type: " +  intToString(static_cast<int>(_sensorType)); break;
     }
     return _name;
-  } // sensorName
+  } // sensorTypeName
 }

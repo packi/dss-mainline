@@ -56,7 +56,7 @@ bool SensorMonitorTask::checkZoneValue(boost::shared_ptr<Group> _group, SensorTy
   if (zoneTimeDue) {
     DateTime now;
     Logger::getInstance()->log(std::string("Sensor value (type: ") +
-        sensorName(_sensorType) + ") for zone #" +
+        sensorTypeName(_sensorType) + ") for zone #" +
         intToString(_group->getZoneID()) +
         " is too old: " + _ts.toISO8601_ms() +
         ", age in seconds is " + intToString(now.difference(_ts)), lsInfo);
@@ -230,7 +230,7 @@ DateTime SensorMonitorTask::getDateTimeForSensor(const ZoneSensorStatus_t& _hSen
       return _hSensors.m_CO2ConcentrationValueTS;
     }
     default:
-      throw std::runtime_error("Unexpected SensorType: " + sensorName(_sensorType));
+      throw std::runtime_error("Unexpected SensorType: " + sensorTypeName(_sensorType));
   }
 }
 
@@ -261,14 +261,14 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorTyp
         break;
       }
       default:
-        throw std::runtime_error("Unexpected SensorType: " + sensorName(_sensorType));
+        throw std::runtime_error("Unexpected SensorType: " + sensorTypeName(_sensorType));
     }
   }
 
   if (sensorFault) {
     DateTime now;
     Logger::getInstance()->log(std::string("Sensor not available, or value (type: ") +
-        sensorName(_sensorType) + ") for zone #" +
+        sensorTypeName(_sensorType) + ") for zone #" +
         intToString(_zone->getID()) +
         " is too old: " + sensorTime.toISO8601_ms() +
         ", age in seconds is " + intToString(now.difference(sensorTime)), lsWarning);
