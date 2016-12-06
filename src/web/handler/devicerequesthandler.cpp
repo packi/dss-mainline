@@ -1115,14 +1115,14 @@ namespace dss {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
       int gtype = strToIntDef(_request.getParameter("groupType"), -1);
-      if (gtype < 0 || gtype > 4) {
+      if (gtype < 0 || gtype >= static_cast<int>(GroupType::End)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupType'");
       }
       int gid = strToIntDef(_request.getParameter("groupId"), -1);
       if (gid < 0 || gid > 63) {
         return JSONWriter::failure("Invalid or missing parameter 'groupId'");
       }
-      pDevice->setDeviceBinaryInputTarget(index, gtype, gid);
+      pDevice->setDeviceBinaryInputTarget(index, static_cast<GroupType>(gtype), gid);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputId") {
       int index = strToIntDef(_request.getParameter("index"), -1);

@@ -287,6 +287,15 @@ namespace dss {
   const int ColorIDGreen = 7;
   const int ColorIDBlack = 8;
 
+  enum class GroupType {
+    Standard = 0, // (from dsm-api doc) 0 = Standard Groups
+    Todo1 = 1, // (from dsm-api doc) 1 = Global groups
+    Todo2 = 2, // (from dsm-api doc) 2 = Apartment-wide signals
+    Todo3 = 3, // ???
+    Todo4 = 4, // ???
+    End
+  };
+
   // Group ID"s
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;

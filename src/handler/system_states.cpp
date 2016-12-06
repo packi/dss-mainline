@@ -627,20 +627,16 @@ void SystemState::undoscene() {
 }
 
 void SystemState::stateBinaryInputGeneric(State &_state,
-                                          int targetGroupType,
+                                          GroupType targetGroupType,
                                           int targetGroupId) {
   try {
     std::string stateName = _state.getName();
-    PropertyNodePtr pNode =
-        DSS::getInstance()->getPropertySystem().getProperty(
-            "/scripts/system_state/" + stateName + "." +
-            intToString(targetGroupType) + "." +
-            intToString(targetGroupId));
+    auto&& nodePath = "/scripts/system_state/" + stateName + "." +
+        intToString(static_cast<int>(targetGroupType)) + "." +
+        intToString(targetGroupId);
+    PropertyNodePtr pNode = DSS::getInstance()->getPropertySystem().getProperty(nodePath);
     if (pNode == NULL) {
-      pNode = DSS::getInstance()->getPropertySystem().createProperty(
-            "/scripts/system_state/" + stateName + "." +
-            intToString(targetGroupType) + "." +
-            intToString(targetGroupId));
+      pNode = DSS::getInstance()->getPropertySystem().createProperty(nodePath);
       pNode->setIntegerValue(0);
     }
 
