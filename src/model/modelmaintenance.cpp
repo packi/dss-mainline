@@ -1036,7 +1036,8 @@ namespace dss {
       if (event->getParameterCount() < 4) {
         log("Expected at least 4 parameter for ModelEvent::etDeviceBinaryStateEvent");
       } else {
-        onBinaryInputEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2), event->getParameter(3));
+        onBinaryInputEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1),
+            event->getParameter(2), static_cast<BinaryInputState>(event->getParameter(3)));
       }
       break;
     case ModelEvent::etDeviceSensorValue:
@@ -1064,7 +1065,7 @@ namespace dss {
                           str2dsuid(event->getSingleStringParameter()),
                           event->getParameter(0),
                           event->getParameter(1),
-                          event->getParameter(2),
+                          static_cast<SensorType>(event->getParameter(2)),
                           event->getParameter(3),
                           event->getParameter(4));
       }
@@ -1199,8 +1200,12 @@ namespace dss {
       }
       break;
     case ModelEvent::etVdceEvent:
-      onVdceEvent(*dynamic_cast<VdceModelEvent*>(event.get()));
+    {
+      auto vdcModelEvent = dynamic_cast<VdceModelEvent*>(event.get());
+      assert(vdcModelEvent != 0);
+      onVdceEvent(*vdcModelEvent);
       break;
+    }
     default:
       assert(false);
       break;
@@ -2032,7 +2037,7 @@ namespace dss {
   } // onSensorEvent
 
   void ModelMaintenance::onBinaryInputEvent(dsuid_t _meterID,
-      const devid_t _deviceID, const int& _eventIndex, const int& _eventType, const int& _state) {
+      const devid_t _deviceID, const int& _eventIndex, const int& _eventType, BinaryInputState _state) {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
@@ -2089,17 +2094,14 @@ namespace dss {
             continue;
           }
           int oldState = state->getState();
-          int newState;
-          if ((_sensorValue & (1 << index)) > 0) {
-            newState = State_Active;
-          } else {
-            newState = State_Inactive;
-          }
+          auto binaryInputState =
+              (_sensorValue & (1 << index)) ? BinaryInputState::Active : BinaryInputState::Inactive;
+          int newState = binaryInputState == BinaryInputState::Active ? State_Active : State_Inactive;
           if (newState != oldState) {
             state->setState(coSystem, newState);
             raiseEvent(createDeviceBinaryInputEvent(pDevRev, index, // HERE
                                                     pDev->getDeviceBinaryInputType(index),
-                                                    newState));
+                                                    binaryInputState));
           }
         }
 
@@ -2110,7 +2112,7 @@ namespace dss {
 
       // regular sensor value event
       } else if (_sensorIndex <= 15) {
-        uint8_t sensorType = SensorIDUnknownType;
+        auto sensorType = SensorType::UnknownType;
         try {
           pDev->setSensorValue(_sensorIndex, (const unsigned int) _sensorValue);
           boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
@@ -2130,14 +2132,14 @@ namespace dss {
                                            const dsuid_t& _sourceDevice,
                                            const int& _zoneID,
                                            const int& _groupID,
-                                           const int& _sensorType,
+                                           SensorType _sensorType,
                                            const int& _sensorValue,
                                            const int& _precision) {
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
-      double fValue = SceneHelper::sensorToFloat12(_sensorType, _sensorValue);
+      double fValue = sensorToFloat12(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
       // check for a valid dsuid

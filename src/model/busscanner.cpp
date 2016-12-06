@@ -27,6 +27,7 @@
 
 #include "busscanner.h"
 
+#include <type_traits>
 #include <vector>
 #include <boost/make_shared.hpp>
 
@@ -267,6 +268,11 @@ namespace dss {
 
     foreach(ClusterSpec_t cluster, clusters) {
 
+      // in case this DSM does not provide group configuration ignore it.
+      if (_dsMeter->getApiVersion() < 0x303) {
+        cluster.configuration = 0;
+      }
+
       if (cluster.StandardGroupID > 0) {
         log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
             " and devices: " + intToString(cluster.NumberOfDevices));
@@ -298,6 +304,7 @@ namespace dss {
       if ((pCluster->getStandardGroupID() == 0) ||
           ((pCluster->getStandardGroupID() > 0) && !pCluster->isReadFromDsm())) {
         pCluster->setStandardGroupID(cluster.StandardGroupID);
+        pCluster->setConfiguration(cluster.configuration);
         pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
         pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
         pCluster->setConfigurationLocked(cluster.configurationLocked);
@@ -393,6 +400,11 @@ namespace dss {
     dev->setIsLockedInDSM(_spec.Locked);
     dev->setOutputMode(_spec.OutputMode);
 
+    if (_dsMeter->getApiVersion() >= 0x303) {
+      dev->setActiveGroup(_spec.deviceActiveGroup);
+      dev->setDefaultGroup(_spec.deviceDefaultGroup);
+    }
+
     dev->setButtonActiveGroup(_spec.ActiveGroup);
     dev->setButtonGroupMembership(_spec.GroupMembership);
     dev->setButtonSetsLocalPriority(_spec.SetsLocalPriority);
@@ -445,7 +457,7 @@ namespace dss {
     if ((dev->getDeviceType() == DEVICE_TYPE_AKM) &&
         (dev->getBinaryInputCount() > 0) &&
         (dev->getBinaryInput(0)->m_targetGroupType == 0) &&
-        (!dev->getGroupBitmask().test(dev->getBinaryInput(0)->m_targetGroupId - 1))) {
+        (!dev->isInGroup(dev->getBinaryInput(0)->m_targetGroupId))) {
       /* group is only added in dSS datamodel, not on the dSM and device */
       dev->addToGroup(dev->getBinaryInput(0)->m_targetGroupId);
     }
@@ -724,6 +736,11 @@ namespace dss {
         continue;
       }
 
+      // in case this DSM does not provide group configuration it is invalid and should be ignored
+      if (_dsMeter->getApiVersion() < 0x303) {
+        group.configuration = 0;
+      }
+
       log("scanDSMeter:    Found group with id: " + intToString(group.GroupID) +
           " and devices: " + intToString(group.NumberOfDevices));
 
@@ -735,9 +752,7 @@ namespace dss {
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
-          groupOnZone->setName(group.Name);
-          groupOnZone->setStandardGroupID(group.StandardGroupID);
+          groupOnZone = Group::make(group, _zone, m_Apartment);
           _zone->addGroup(groupOnZone);
         }
         groupOnZone->setIsPresent(true);
@@ -749,9 +764,7 @@ namespace dss {
           pGroup = m_Apartment.getGroup(group.GroupID);
         } catch (ItemNotFoundException&) {
           boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
-          pGroup.reset(new Group(group.GroupID, zoneBroadcast, m_Apartment));
-          pGroup->setName(group.Name);
-          pGroup->setStandardGroupID(group.StandardGroupID);
+          pGroup = Group::make(group, zoneBroadcast, m_Apartment);
           zoneBroadcast->addGroup(pGroup);
         }
         pGroup->setIsPresent(true);
@@ -764,13 +777,12 @@ namespace dss {
         groupOnZone = _zone->getGroup(group.GroupID);
         if (groupOnZone == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone.reset(new Group(group.GroupID, _zone, m_Apartment));
-          groupOnZone->setName(group.Name);
-          groupOnZone->setStandardGroupID(group.StandardGroupID);
+          groupOnZone = Group::make(group, _zone, m_Apartment);
           _zone->addGroup(groupOnZone);
         } else {
-          if (groupOnZone->getName() != group.Name ||
-              groupOnZone->getStandardGroupID() != group.StandardGroupID) {
+          if ( (groupOnZone->getName() != group.Name) ||
+               (groupOnZone->getStandardGroupID() != group.StandardGroupID) ||
+               (groupOnZone->getConfiguration() != (int)group.configuration)) {
             groupOnZone->setIsSynchronized(false);
           }
         }
@@ -835,12 +847,14 @@ namespace dss {
       pGroup->setOnState(coUnknown, states.test(GroupIDYellow-1));
     }
 
-    uint8_t idList[] = { SensorIDTemperatureIndoors,
-        SensorIDHumidityIndoors,
-        SensorIDCO2Concentration,
-        SensorIDBrightnessIndoors };
+    SensorType idList[] = {
+        SensorType::TemperatureIndoors,
+        SensorType::HumidityIndoors,
+        SensorType::CO2Concentration,
+        SensorType::BrightnessIndoors
+    };
 
-    for (uint8_t i=0; i < sizeof(idList)/sizeof(uint8_t); i++) {
+    for (uint8_t i=0; i < std::extent<decltype(idList)>::value; i++) {
       dsuid_t sensorDevice;
       try {
         sensorDevice = m_Interface.getZoneSensor(_dsMeter->getDSID(), _zone->getID(), idList[i]);
@@ -850,7 +864,7 @@ namespace dss {
         // check if zone sensor already assigned
         boost::shared_ptr<Device> oldDev = _zone->getAssignedSensorDevice(idList[i]);
         if (oldDev && (oldDev->getDSID() != sensorDevice)) {
-          log("Duplicate sensor type " + intToString(idList[i]) +
+          log("Duplicate sensor type " + sensorName(idList[i]) +
               " registration on zone " + intToString(_zone->getID()) +
               ": dsuid " + dsuid2str(oldDev->getDSID()) +
               " is zone reference, and dsuid " + dsuid2str(sensorDevice) +
@@ -962,45 +976,45 @@ namespace dss {
         ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
         ZoneSensorStatus_t zSensors = _zone->getSensorStatus();
         try {
-          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDTemperatureIndoors,
+          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::TemperatureIndoors,
               &sensorValue, &sensorAge);
           age = now.addSeconds(-1 * sensorAge);
           if (age > zSensors.m_TemperatureValueTS) {
             _zone->setTemperature(
-                SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), age);
+                sensorToFloat12(SensorType::TemperatureIndoors, sensorValue), age);
           } else {
-            _zone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDTemperatureIndoors,
-                SceneHelper::sensorToFloat12(SensorIDTemperatureIndoors, sensorValue), "");
+            _zone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::TemperatureIndoors,
+                sensorToFloat12(SensorType::TemperatureIndoors, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error getting heating temperature value on zone " + intToString(_zone->getID()) +
               " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
         }
         try {
-          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureSetpoint,
+          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::RoomTemperatureSetpoint,
               &sensorValue, &sensorAge);
           age = now.addSeconds(-1 * sensorAge);
           if (age > zValues.m_NominalValueTS) {
             _zone->setNominalValue(
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), age);
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, sensorValue), age);
           } else {
-            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureSetpoint,
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, sensorValue), "");
+            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::RoomTemperatureSetpoint,
+                sensorToFloat12(SensorType::RoomTemperatureSetpoint, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error reading heating nominal temperature value on zone " + intToString(_zone->getID()) +
               " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
         }
         try {
-          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorIDRoomTemperatureControlVariable,
+          m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::RoomTemperatureControlVariable,
               &sensorValue, &sensorAge);
           age = now.addSeconds(-1 * sensorAge);
           if (age > zValues.m_ControlValueTS) {
             _zone->setControlValue(
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), age);
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, sensorValue), age);
           } else {
-            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorIDRoomTemperatureControlVariable,
-                SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, sensorValue), "");
+            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::RoomTemperatureControlVariable,
+                sensorToFloat12(SensorType::RoomTemperatureControlVariable, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error reading heating control value on zone " + intToString(_zone->getID()) +
@@ -1178,7 +1192,8 @@ namespace dss {
           Logger::getInstance()->log("BinaryInputScanner: device " +
               dsuid2str(dev->getDSID()) + ", state = " + intToString(value), lsDebug);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-            dev->handleBinaryInputEvent(index, (value >> index) & 1);
+            dev->handleBinaryInputEvent(index,
+                ((value >> index) & 1) ? BinaryInputState::Active : BinaryInputState::Inactive);
           }
           // avoid powerline bus monopolization
           sleep(5);
@@ -1186,7 +1201,7 @@ namespace dss {
           Logger::getInstance()->log("BinaryInputScanner: device " + dsuid2str(dev->getDSID())
               + " did not respond to input state query", lsWarning);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-            dev->handleBinaryInputEvent(index, -1);
+            dev->handleBinaryInputEvent(index, BinaryInputState::Unknown);
           }
         }
 
@@ -1194,10 +1209,10 @@ namespace dss {
         // IP Device
         try {
           VdcHelper::State state = VdcHelper::getState(dsm->getDSID(), dev->getDSID());
-          const std::map<int,int64_t>& sInput = state.binaryInputStates;
+          const auto& sInput = state.binaryInputStates;
           Logger::getInstance()->log("BinaryInputScanner: device " +
               dsuid2str(dev->getDSID()) + ", state response fields = " + intToString(sInput.size()), lsDebug);
-          for (std::map<int,int64_t>::const_iterator it = sInput.begin(); it != sInput.end(); ++it ) {
+          for (auto it = sInput.begin(); it != sInput.end(); ++it ) {
             dev->handleBinaryInputEvent(it->first, it->second);
           }
           dev->setStateValues(state.deviceStates);
@@ -1205,7 +1220,7 @@ namespace dss {
           Logger::getInstance()->log("BinaryInputScanner: VdcDevice " + dsuid2str(dev->getDSID()) +
               " failure: " + e.what(), lsWarning);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-            dev->handleBinaryInputEvent(index, -1);
+            dev->handleBinaryInputEvent(index, BinaryInputState::Unknown);
           }
         }
       }

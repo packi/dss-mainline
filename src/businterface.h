@@ -71,6 +71,7 @@ namespace dss {
     uint8_t StandardGroupID;
     uint16_t NumberOfDevices;
     std::string Name;
+    uint32_t configuration;
   } GroupSpec_t;
 
   typedef struct {
@@ -84,6 +85,7 @@ namespace dss {
     uint16_t floor;
     bool configurationLocked;
     std::vector<int> lockedScenes;
+    uint32_t configuration;
   } ClusterSpec_t;
 
   typedef struct {
@@ -106,7 +108,7 @@ namespace dss {
   } CircuitPowerStateSpec_t;
 
   typedef struct {
-    uint8_t SensorType;
+    SensorType sensorType;
     uint32_t SensorPollInterval;
     uint8_t SensorBroadcastFlag;
     uint8_t SensorConversionFlag;
@@ -137,6 +139,8 @@ namespace dss {
     bool sensorInputsValid;
     std::vector<int> outputChannels;
     bool outputChannelsValid;
+    uint8_t deviceActiveGroup;
+    uint8_t deviceDefaultGroup;
   } DeviceSpec_t;
 
   typedef struct {
@@ -330,8 +334,8 @@ namespace dss {
     virtual ZoneHeatingInternalsSpec_t getZoneHeatingInternals(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
     virtual ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
     virtual ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) = 0;
-    virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) = 0;
-    virtual void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType, uint16_t *SensorValue, uint32_t *SensorAge) = 0;
+    virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, SensorType _sensorType) = 0;
+    virtual void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, SensorType _sensorType, uint16_t *SensorValue, uint32_t *SensorAge) = 0;
     virtual int getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool _onlyActive = false) = 0;
     /** vdsm property queries */
     virtual void protobufMessageRequest(const dsuid_t _dSMdSUID, const uint16_t _request_size, const uint8_t *_request, uint16_t *_response_size, uint8_t *_response) = 0;
@@ -367,6 +371,7 @@ namespace dss {
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) = 0;
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
+    virtual void groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration) = 0;
 
     virtual void createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) = 0;
     virtual void removeCluster(uint8_t _clusterID) = 0;
@@ -375,7 +380,8 @@ namespace dss {
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) = 0;
     virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) = 0;
     virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) = 0;
-
+    virtual void clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration) = 0;
+    
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
 
@@ -384,8 +390,8 @@ namespace dss {
     virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) = 0;
     virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) = 0;
     virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) = 0;
-    virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) = 0;
-    virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) = 0;
+    virtual void setZoneSensor(const uint16_t _zoneID, SensorType _sensorType, const dsuid_t& _sensorDSUID) = 0;
+    virtual void resetZoneSensor(const uint16_t _zoneID, SensorType _sensorType) = 0;
 
     virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) = 0;
 
@@ -404,7 +410,7 @@ namespace dss {
     virtual void increaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void decreaseOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
     virtual void stopOutputChannelValue(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, uint8_t _channel, const std::string _token) = 0;
-    virtual void pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, double _sensorValueFloat, const std::string _token) = 0;
+    virtual void pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, SensorType _sensorType, double _sensorValueFloat, const std::string _token) = 0;
     //< @ret true if locked
     virtual bool isOperationLock(const dsuid_t &_dSM, int _clusterId) = 0;
   }; // ActionRequestInterface
@@ -487,7 +493,7 @@ namespace dss {
                                    const dsuid_t& _sourceDevice,
                                    const int& _zoneID,
                                    const int& _groupID,
-                                   const int& _sensorType,
+                                   SensorType _sensorType,
                                    const int& _sensorValue,
                                    const int& _precision,
                                    const SceneAccessCategory _category,

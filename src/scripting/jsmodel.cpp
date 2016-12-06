@@ -56,6 +56,11 @@
 #include "src/stringconverter.h"
 #include "src/sceneaccess.h"
 #include "src/util.h"
+#include "src/messages/vdc-messages.pb.h"
+#include "src/vdc-element-reader.h"
+#include "src/web/webrequests.h"
+#include "src/protobufjson.h"
+#include "src/stringconverter.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -2200,6 +2205,151 @@ namespace dss {
     return JS_FALSE;
   } // dev_get_output_value
 
+  JSBool dev_get_vdc_property(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+      if(self.is("Device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
+
+        if (!pDev->isVdcDevice()) {
+          JS_ReportError(cx, "Device is not a vdc device");
+          return JS_FALSE;
+        }
+        if(argc == 1) {
+          std::string path;
+          try {
+            path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, "Convert arguments: %s", ex.what());
+            return JS_FALSE;
+          }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            std::vector<std::string> parts = splitString(path, '/');
+            google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+            vdcapi::PropertyElement* currentElement;
+            bool firstElement = true;
+            foreach(std::string part, parts) {
+              if (firstElement) {
+                currentElement = query.Add();
+                firstElement = false;
+              } else {
+                currentElement = currentElement->add_elements();
+              }
+              currentElement->set_name(part);
+            }
+            vdcapi::Message message = pDev->getVdcProperty(query);
+            VdcElementReader reader(message.vdc_response_get_property().properties());
+            JSONWriter json(JSONWriter::jsonNoneResult);
+            json.add("result");
+            ProtobufToJSon::processElementsPretty(reader.childElements(), json);
+
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, json.successJSON().c_str())));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "General failure: %s", ex.what());
+          }
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dev_get_vdc_property
+
+  JSBool dev_set_vdc_property(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+      if(self.is("Device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
+        if (!pDev->isVdcDevice()) {
+          JS_ReportError(cx, "Device is not a vdc device");
+          return JS_FALSE;
+        }
+
+        if (argc == 2) {
+          std::string path;
+          std::string value;
+          try {
+            path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, ex.what());
+            return JS_FALSE;
+          }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            std::vector<std::string> parts = splitString(path, '/');
+            google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+            vdcapi::PropertyElement* currentElement;
+            bool firstElement = true;
+            foreach(std::string part, parts) {
+              if (firstElement) {
+                currentElement = query.Add();
+                firstElement = false;
+              } else {
+                currentElement = currentElement->add_elements();
+              }
+              currentElement->set_name(part);
+            }
+
+            if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[1])) {
+              StringConverter st("UTF-8", "UTF-8");
+              std::string propValue = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]));
+              currentElement->mutable_value()->set_v_string(propValue);
+            } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[1])) {
+              currentElement->mutable_value()->set_v_bool(ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]));
+            } else if (JSVAL_IS_INT(JS_ARGV(cx, vp)[1])) {
+              currentElement->mutable_value()->set_v_int64(ctx->convertTo<int>(JS_ARGV(cx, vp)[1]));
+            } else if(JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[1])) {
+              currentElement->mutable_value()->set_v_double(ctx->convertTo<double>(JS_ARGV(cx, vp)[1]));
+            } else {
+              JS_ReportWarning(cx, "Property.setVdcProperty: unknown type of argument 2");
+              JS_ResumeRequest(cx, ref);
+              return JS_FALSE;
+            }
+            pDev->setVdcProperty(query);
+
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "General failure: %s", ex.what());
+          }
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dev_set_output_value
+
   JSBool dev_set_output_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -2308,7 +2458,7 @@ namespace dss {
           jsrefcount ref = JS_SuspendRequest(cx);
           try {
             boost::shared_ptr<DeviceSensor_t> sensor = pDev->getSensor(sensorIndex);
-            int retValue = sensor->m_sensorType;
+            int retValue = static_cast<int>(sensor->m_sensorType);
             JS_SET_RVAL(cx, vp, INT_TO_JSVAL(retValue));
             JS_ResumeRequest(cx, ref);
             return JS_TRUE;
@@ -2341,7 +2491,7 @@ namespace dss {
       ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
           ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
       boost::shared_ptr<Device> pDev;
-      int sensorType;
+      SensorType sensorType;
       std::string activateCondition;
       std::string deactivateCondition;
       std::string creatorId = "default";
@@ -2364,7 +2514,7 @@ namespace dss {
       }
 
       try {
-        sensorType = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+        sensorType = static_cast<SensorType>(ctx->convertTo<int>(JS_ARGV(cx, vp)[0]));
         activateCondition = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
         deactivateCondition = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
         if (argc >= 4) {
@@ -2618,6 +2768,8 @@ namespace dss {
     JS_FS("getPropertyNode", dev_get_property_node, 0, 0),
     JS_FS("setJokerGroup", dev_set_joker_group, 1, 0),
     JS_FS("setButtonID", dev_set_button_id, 1, 0),
+    JS_FS("setVdcProperty", dev_set_vdc_property, 2, 0),
+    JS_FS("getVdcProperty", dev_get_vdc_property, 1, 0),
     JS_FS_END
   };
 
@@ -3450,7 +3602,7 @@ namespace dss {
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       uint8_t groupID;
       dsuid_t sourceDSID;
-      uint8_t sensorType;
+      SensorType sensorType;
       uint16_t sensorValue;
       SceneAccessCategory category = SAC_UNKNOWN;
       if (pZone != NULL && argc >= 4) {
@@ -3465,7 +3617,7 @@ namespace dss {
           } else {
             sourceDSID = str2dsuid(sDSID);
           }
-          sensorType = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[2]);
+          sensorType = static_cast<SensorType>(ctx->convertTo<int>(JS_ARGV(cx, vp)[2]));
           sensorValue = ctx->convertTo<uint16_t>(JS_ARGV(cx, vp)[3]);
           if (argc >= 5) {
             category = SceneAccess::stringToCategory(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[4]));
@@ -3482,7 +3634,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        double sensorValueFloat = SceneHelper::sensorToFloat12(sensorType, sensorValue);
+        double sensorValueFloat = sensorToFloat12(sensorType, sensorValue);
         pGroup->pushSensor(coJSScripting, category, sourceDSID, sensorType, sensorValueFloat, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
@@ -3513,7 +3665,7 @@ namespace dss {
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       uint8_t groupID;
       dsuid_t sourceDSID;
-      uint8_t sensorType;
+      SensorType sensorType;
       double sensorValue;
       SceneAccessCategory category = SAC_UNKNOWN;
       if (pZone != NULL && argc >= 4) {
@@ -3528,7 +3680,7 @@ namespace dss {
           } else {
             sourceDSID = str2dsuid(sDSID);
           }
-          sensorType = ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[2]);
+          sensorType = static_cast<SensorType>(ctx->convertTo<uint8_t>(JS_ARGV(cx, vp)[2]));
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
           return JS_FALSE;
@@ -3842,41 +3994,41 @@ namespace dss {
         break;
       case HeatingControlModeIDPID:
         obj.setProperty<double>("Off",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode0));
+            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode1));
+            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode2));
+            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode3));
+            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode4));
+            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode5));
+            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
         obj.setProperty<double>("Cooling",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode6));
+            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
         obj.setProperty<double>("CoolingOff",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureSetpoint, hOpValues.OpMode7));
+            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
         break;
       case HeatingControlModeIDZoneFollower:
         break;
       case HeatingControlModeIDFixed:
         obj.setProperty<double>("Off",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode0));
+            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode1));
+            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode2));
+            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode3));
+            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode4));
+            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode5));
+            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
         obj.setProperty<double>("Cooling",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode6));
+            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
         obj.setProperty<double>("CoolingOff",
-            SceneHelper::sensorToFloat12(SensorIDRoomTemperatureControlVariable, hOpValues.OpMode7));
+            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
         break;
       }
       return JS_TRUE;
@@ -4017,12 +4169,12 @@ namespace dss {
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
       ZoneHeatingOperationModeSpec_t hOpValues;
-      int SensorConversion;
+      SensorType SensorConversion;
 
       if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
-        SensorConversion = SensorIDRoomTemperatureSetpoint;
+        SensorConversion = SensorType::RoomTemperatureSetpoint;
       } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
-        SensorConversion = SensorIDRoomTemperatureControlVariable;
+        SensorConversion = SensorType::RoomTemperatureControlVariable;
       } else {
         JS_ReportError(cx, "Model.zone_setTemperatureControlValues: cannot set control values in current mode");
         return JS_FALSE;
@@ -4067,21 +4219,21 @@ namespace dss {
 
         double fValue = strToDouble(propValue);
         if (propKey == "Off") {
-          hOpValues.OpMode0 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode0 = sensorToSystem(SensorConversion, fValue);
         } else if (propKey == "Comfort") {
-          hOpValues.OpMode1 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode1 = sensorToSystem(SensorConversion, fValue);
         } else if (propKey == "Economy") {
-          hOpValues.OpMode2 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode2 = sensorToSystem(SensorConversion, fValue);
         } else if (propKey == "NotUsed") {
-          hOpValues.OpMode3 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode3 = sensorToSystem(SensorConversion, fValue);
         } else if (propKey == "Night") {
-          hOpValues.OpMode4 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode4 = sensorToSystem(SensorConversion, fValue);
         } else if (propKey == "Holiday") {
-          hOpValues.OpMode5 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode5 = sensorToSystem(SensorConversion, fValue);
         } else if (propKey == "Cooling") {
-          hOpValues.OpMode6 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode6 = sensorToSystem(SensorConversion, fValue);
         } else if (propKey == "CoolingOff") {
-          hOpValues.OpMode7 = SceneHelper::sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode7 = sensorToSystem(SensorConversion, fValue);
         } else {
           JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: unknown opmode \"%s\"", propKey.c_str());
         }
@@ -4116,10 +4268,10 @@ namespace dss {
         JS_ReportError(cx, "Model.zone_getAssignedSensor: ext of wrong type");
         return JS_FALSE;
       }
-      int sensorType = SensorIDUnknownType;
+      auto sensorType = SensorType::UnknownType;
       if (argc >= 1) {
         try {
-          sensorType = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+          sensorType = static_cast<SensorType>(ctx->convertTo<int>(JS_ARGV(cx, vp)[0]));
         } catch(ScriptException& e) {
           JS_ReportError(cx, e.what());
           return JS_FALSE;
@@ -4137,7 +4289,7 @@ namespace dss {
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
       boost::shared_ptr<Device> pSensor = pZone->getAssignedSensorDevice(sensorType);
 
-      obj.setProperty<int>("type", sensorType);
+      obj.setProperty<int>("type", static_cast<int>(sensorType));
       if (!pSensor) {
         obj.setProperty<bool>("dsuid", false);
       } else {
@@ -4179,14 +4331,14 @@ namespace dss {
       }
 
       int groupNumber;
-      int sensorType;
+      SensorType sensorType;
       std::string activateCondition;
       std::string deactivateCondition;
       std::string creatorId = "default";
 
       try {
         groupNumber = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
-        sensorType = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+        sensorType = static_cast<SensorType>(ctx->convertTo<int>(JS_ARGV(cx, vp)[1]));
         activateCondition = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
         deactivateCondition = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[3]);
         if (argc >= 5) {

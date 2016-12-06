@@ -401,9 +401,9 @@ namespace dss {
 
   class BySensorSelector : public IDeviceSelector {
   private:
-    int m_sensorType;
+    SensorType m_sensorType;
   public:
-    BySensorSelector(int _type) : m_sensorType(_type) {}
+    BySensorSelector(SensorType _type) : m_sensorType(_type) {}
     virtual ~BySensorSelector() {}
 
     virtual bool selectDevice(boost::shared_ptr<const Device> _device) const {
@@ -416,7 +416,7 @@ namespace dss {
     }
   };
 
-  Set Set::getBySensorType(int _type) const {
+  Set Set::getBySensorType(SensorType _type) const {
     return getSubset(BySensorSelector(_type));
   }
 
@@ -570,19 +570,37 @@ namespace dss {
     }
 
     static boost::shared_ptr<Group> findGroupContainingAllDevices(const Set& _set, const Zone& _zone) {
-      std::bitset<63> possibleGroups;
-      possibleGroups.set();
-      for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
-        possibleGroups &= _set[iDevice].getDevice()->getGroupBitmask();
-      }
-      if(possibleGroups.any()) {
-        for(unsigned int iGroup = 0; iGroup < possibleGroups.size(); iGroup++) {
-          if(possibleGroups.test(iGroup)) {
-            Logger::getInstance()->log("Sending the command to group " + intToString(iGroup + 1));
-            return _zone.getGroup(iGroup + 1);
+      std::vector<int> intersection;
+
+      // if there are any devices try to find common group
+      if (_set.length() > 0) {
+        // start with group list from first device
+        intersection = _set[0].getDevice()->getGroups();
+        std::sort(intersection.begin(), intersection.end());
+
+        // search all other devices
+        for(int iDevice = 1; iDevice < _set.length(); iDevice++) {
+
+          std::vector<int> deviceGroups = _set[iDevice].getDevice()->getGroups();
+          std::sort(deviceGroups.begin(), deviceGroups.end());
+
+          // find all groups that are in common with current intersection
+          std::vector<int> tmpVector;
+          std::set_intersection(intersection.begin(), intersection.end(), deviceGroups.begin(), deviceGroups.end(), std::back_inserter(tmpVector));
+
+          intersection = std::move(tmpVector);
+
+          // if we do not have common groups we will not find any
+          if (intersection.size() == 0) {
+            break;
           }
         }
-        assert(false); // can't come here or we've detected a bug in std::bitvector.any()
+      }
+
+      // if we found at least one group that is common to all devices return it, otherwise just use broadcast group
+      if (intersection.size() > 0) {
+        Logger::getInstance()->log("Sending the command to group " + intToString(intersection.front()));
+        return _zone.getGroup(intersection.front());
       } else {
         Logger::getInstance()->log("Sending the command to broadcast group");
         return _zone.getGroup(GroupIDBroadcast);

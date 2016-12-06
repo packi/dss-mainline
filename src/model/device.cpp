@@ -72,6 +72,8 @@ namespace dss {
     m_LastKnownMeterDSID(DSUID_NULL),
     m_DSMeterDSIDstr(),
     m_LastKnownMeterDSIDstr(),
+    m_ActiveGroup(0),
+    m_DefaultGroup(0),
     m_FunctionID(0),
     m_ProductID(0),
     m_VendorID(0),
@@ -152,21 +154,19 @@ namespace dss {
       }
 
       if (m_pApartment->getPropertyNode() != NULL) {
-        for (int g = 1; g <= 63; g++) {
-          if (m_GroupBitmask.test(g-1)) {
-            int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
-            std::string gPath = "zones/zone" + intToString(zid) +
-                "/groups/group" + intToString(g) + "/devices/" +
-                dsuid2str(m_DSID);
-            PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
-            if (gnode != NULL) {
-              gnode->alias(PropertyNodePtr());
-              gnode->getParentNode()->removeChild(gnode);
-            }
-            PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(g));
-            if (gsubnode != NULL) {
-              gsubnode->getParentNode()->removeChild(gsubnode);
-            }
+        foreach(auto&& g, m_Groups) {
+          int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
+          std::string gPath = "zones/zone" + intToString(zid) +
+              "/groups/group" + intToString(g) + "/devices/" +
+              dsuid2str(m_DSID);
+          PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
+          if (gnode != NULL) {
+            gnode->alias(PropertyNodePtr());
+            gnode->getParentNode()->removeChild(gnode);
+          }
+          PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(g));
+          if (gsubnode != NULL) {
+            gsubnode->getParentNode()->removeChild(gsubnode);
           }
         }
       }
@@ -268,6 +268,11 @@ namespace dss {
       ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
     m_pPropertyNode->createProperty("GTIN")
       ->linkToProxy(PropertyProxyReference<std::string>(m_GTIN, false));
+    m_pPropertyNode->createProperty("ActiveGroup")
+      ->linkToProxy(PropertyProxyReference<int>(m_ActiveGroup, false));
+    m_pPropertyNode->createProperty("DefaultGroup")
+      ->linkToProxy(PropertyProxyReference<int>(m_DefaultGroup, false));
+
     PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
     oemNode->createProperty("ProductState")
       ->linkToProxy(PropertyProxyMemberFunction<Device, std::string, false>(*this, &Device::getOemProductInfoStateAsString));
@@ -379,18 +384,16 @@ namespace dss {
       }
     }
 
-    for (int g = 1; g <= 63; g++) {
-      if (m_GroupBitmask.test(g-1)) {
-        std::string gPath = "zones/zone" + intToString(m_ZoneID) +
-                            "/groups/group" + intToString(g) + "/devices/" +
-                            dsuid2str(m_DSID);
-        PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
-        if (gnode) {
-          gnode->alias(m_pPropertyNode);
-        }
-        PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
-        gsubnode->createProperty("id")->setIntegerValue(g);
+    foreach (auto&& g, m_Groups) {
+      std::string gPath = "zones/zone" + intToString(m_ZoneID) +
+                          "/groups/group" + intToString(g) + "/devices/" +
+                          dsuid2str(m_DSID);
+      PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
+      if (gnode) {
+        gnode->alias(m_pPropertyNode);
       }
+      PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
+      gsubnode->createProperty("id")->setIntegerValue(g);
     }
 
     if (m_DSMeterDSID != DSUID_NULL) {
@@ -463,13 +466,13 @@ namespace dss {
   } // setVendorID
 
   void Device::fillSensorTable(std::vector<DeviceSensorSpec_t>& _slist) {
-    DeviceSensorSpec_t sensorInputReserved1 = { 0x3d, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInputReserved2 = { 0x3e, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput04 = { SensorIDActivePower, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput05 = { SensorIDOutputCurrent, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput06 = { SensorIDElectricMeter, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput64 = { SensorIDOutputCurrent16A, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput65 = { SensorIDActivePowerVA, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInputReserved1 = { SensorType::Reserved1, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInputReserved2 = { SensorType::Reserved2, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput04 = { SensorType::ActivePower, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput05 = { SensorType::OutputCurrent, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput06 = { SensorType::ElectricMeter, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput64 = { SensorType::OutputCurrent16A, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInput65 = { SensorType::ActivePowerVA, 0, 0, 0 };
     DeviceClasses_t deviceClass = getDeviceClass();
     int devType = (deviceClass << 16) | m_ProductID;
 
@@ -617,7 +620,7 @@ namespace dss {
     }
     // for standard groups force that only one group is active
     for (int g = GroupIDYellow; g <= GroupIDStandardMax; g++) {
-      if (m_GroupBitmask.test(g-1)) {
+      if (isInGroup(g)) {
         removeFromGroup(g);
       }
     }
@@ -1160,9 +1163,12 @@ namespace dss {
     return m_pApartment->getGroup(getGroupIdByIndex(_index));
   } // getGroupByIndex
 
+  std::vector<int> Device::getGroups() const {
+    return m_Groups;
+  }
+
   void Device::addToGroup(const int _groupID) {
-    if ((_groupID > 0) && (_groupID <= GroupIDMax)) {
-      m_GroupBitmask.set(_groupID-1);
+    if (isValidGroup(_groupID)) {
       updateIconPath();
       if (find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
         m_Groups.push_back(_groupID);
@@ -1187,8 +1193,7 @@ namespace dss {
   } // addToGroup
 
   void Device::removeFromGroup(const int _groupID) {
-    if ((_groupID > 0) && (_groupID <= GroupIDMax)) {
-      m_GroupBitmask.reset(_groupID-1);
+    if (isValidGroup(_groupID)) {
       updateIconPath();
       std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
       if (it != m_Groups.end()) {
@@ -1222,7 +1227,6 @@ namespace dss {
   } // removeFromGroup
 
   void Device::resetGroups() {
-    m_GroupBitmask.reset();
     std::vector<int>::iterator it;
     while (m_Groups.size() > 0) {
       int g = m_Groups.front();
@@ -1234,22 +1238,15 @@ namespace dss {
     return m_Groups.size();
   } // getGroupsCount
 
-  std::bitset<63>& Device::getGroupBitmask() {
-    return m_GroupBitmask;
-  } // getGroupBitmask
-
-  const std::bitset<63>& Device::getGroupBitmask() const {
-    return m_GroupBitmask;
-  } // getGroupBitmask
-
   bool Device::isInGroup(const int _groupID) const {
     bool result = false;
     if (_groupID == 0) {
       result = true;
-    } else if ((_groupID < 0) || (_groupID > GroupIDMax)) {
+    } else if (!isValidGroup(_groupID)) {
       result = false;
     } else {
-      result = m_GroupBitmask.test(_groupID - 1);
+      auto it = find(m_Groups.begin(), m_Groups.end(), _groupID);
+      result = (it != m_Groups.end());
     }
     return result;
   } // isInGroup
@@ -1846,8 +1843,9 @@ namespace dss {
       return -1;
     }
 
+    // TODO: is this valid? "Joker group" of device will be first standard group <= 8?
     for (int g = 1; g <= (int)DEVICE_CLASS_SW; g++) {
-      if (m_GroupBitmask.test(g-1)) {
+      if (isInGroup(g)) {
         if (g < (int)DEVICE_CLASS_SW) {
           return g;
         } else if (g == (int)DEVICE_CLASS_SW) {
@@ -2285,29 +2283,32 @@ namespace dss {
     // other custom devices...
   }
 
-  void Device::handleBinaryInputEvent(const int index, const int state) {
+  void Device::handleBinaryInputEvent(const int index, BinaryInputState inputState) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     try {
-      auto&& pState = getBinaryInputState(index);
+      auto&& state = m_binaryInputStates.at(index);
       auto&& inputType = getDeviceBinaryInputType(index);
       if (inputType == BinaryInputIDWindowTilt) {
-        if (state == 0) {
-          pState->setState(coSystem, StateWH_Closed);
-        } else if (state == 1) {
-          pState->setState(coSystem, StateWH_Open);
-        } else if (state == 2) {
-          pState->setState(coSystem, StateWH_Tilted);
-        } else if (state == -1) {
-          pState->setState(coSystem, StateWH_Unknown);
-        }
+        state->setState(coSystem,
+            [&]() {
+              switch (static_cast<BinaryInputWindowHandleState>(inputState)) {
+                case BinaryInputWindowHandleState::Closed: return StateWH_Closed;
+                case BinaryInputWindowHandleState::Open: return StateWH_Open;
+                case BinaryInputWindowHandleState::Tilted: return StateWH_Tilted;
+                case BinaryInputWindowHandleState::Unknown: return StateWH_Unknown;
+              };
+              return StateWH_Unknown;
+            }());
       } else {
-        if (state == 0) {
-          pState->setState(coSystem, State_Inactive);
-        } else if (state == 1) {
-          pState->setState(coSystem, State_Active);
-        } else if (state == -1) {
-          pState->setState(coSystem, State_Unknown);
-        }
+        state->setState(coSystem,
+            [&]() {
+              switch (inputState) {
+                case BinaryInputState::Inactive: return State_Inactive;
+                case BinaryInputState::Active: return State_Active;
+                case BinaryInputState::Unknown: return State_Unknown;
+              };
+              return State_Unknown;
+            }());
       }
     } catch (const std::exception& e) {
       Logger::getInstance()->log(std::string("Device::handleBinaryInputEvent: what:")+ e.what(), lsWarning);
@@ -2415,7 +2416,7 @@ namespace dss {
 
       boost::shared_ptr<DeviceSensor_t> binput = boost::make_shared<DeviceSensor_t>();
       binput->m_sensorIndex = m_sensorInputCount;
-      binput->m_sensorType = it->SensorType;
+      binput->m_sensorType = it->sensorType;
       binput->m_sensorPollInterval = it->SensorPollInterval;
       binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
       binput->m_sensorPushConversionFlag = it->SensorConversionFlag;
@@ -2429,7 +2430,7 @@ namespace dss {
         std::string bpath = std::string("sensorInput") + intToString(m_sensorInputCount);
         PropertyNodePtr entry = sensorInputNode->createProperty(bpath);
         entry->createProperty("type")
-                ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
+                ->linkToProxy(PropertyProxyReference<int, SensorType>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
         entry->createProperty("index")
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorIndex));
         entry->createProperty("valid")
@@ -2522,7 +2523,7 @@ namespace dss {
     return m_sensorInputs[_sensorIndex];
   }
 
-  const boost::shared_ptr<DeviceSensor_t> Device::getSensorByType(uint8_t _sensorType) const {
+  const boost::shared_ptr<DeviceSensor_t> Device::getSensorByType(SensorType _sensorType) const {
     for (size_t i = 0; i < getSensorCount(); i++) {
       boost::shared_ptr<DeviceSensor_t> sensor = m_sensorInputs.at(i);
       if (sensor->m_sensorType == _sensorType) {
@@ -2540,7 +2541,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValue = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat =
-        SceneHelper::sensorToFloat12(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+        sensorToFloat12(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
@@ -2552,7 +2553,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValue =
-            SceneHelper::sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+            sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }

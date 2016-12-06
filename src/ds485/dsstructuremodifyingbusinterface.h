@@ -55,6 +55,7 @@ namespace dss {
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID);
     virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID);
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name);
+    virtual void groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration);
 
     virtual void createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name);
     virtual void removeCluster(uint8_t _clusterID);
@@ -63,6 +64,7 @@ namespace dss {
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass);
     virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes);
     virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock);
+    virtual void clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration);
 
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent);
@@ -71,8 +73,8 @@ namespace dss {
     virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec);
     virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec);
     virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec);
-    virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t sensorType, const dsuid_t& sensorDSUID);
-    virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t sensorType);
+    virtual void setZoneSensor(const uint16_t _zoneID, SensorType sensorType, const dsuid_t& sensorDSUID);
+    virtual void resetZoneSensor(const uint16_t _zoneID, SensorType sensorType);
 
     virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold);
 

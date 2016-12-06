@@ -1175,10 +1175,10 @@ Sample: {
 
         if (!valueSeen) {
           Logger::getInstance()->log(std::string("GetWeatherInformation: missing temperature value: "), lsInfo);
-        } else if (! pZone->isSensorAssigned(SensorIDTemperatureOutdoors)) {
+        } else if (!pZone->isSensorAssigned(SensorType::TemperatureOutdoors)) {
           Logger::getInstance()->log("GetWeatherInformation: Outdoor Temperature: " + doubleToString(valOutdoorTemperature), lsDebug);
           pZone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
-              SensorIDTemperatureOutdoors, valOutdoorTemperature, "");
+              SensorType::TemperatureOutdoors, valOutdoorTemperature, "");
         }
       }
     }
@@ -1361,11 +1361,8 @@ Sample: {
       std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
       double fValue = strToDouble(sensorValueFloat);
 
-      std::string strType = _event.getPropertyByName("sensorType");
-      int sensorType = SensorIDUnknownType;
-      if (!strType.empty()) {
-        sensorType = strToInt(strType);
-      } else {
+      auto sensorType = _event.getPropertyByName<SensorType>("sensorType");
+      if (sensorType == SensorType::UnknownType) {
         try {
           int index = strToInt(_event.getPropertyByName("sensorIndex"));
           sensorType = pDevRev->getDevice()->getSensor(index)->m_sensorType;
@@ -1379,8 +1376,7 @@ Sample: {
     if (_event.getName() == EventName::ZoneSensorValue && _event.getRaisedAtGroup()) {
       boost::shared_ptr<const Group> pGroup = _event.getRaisedAtGroup();
 
-      std::string strType = _event.getPropertyByName("sensorType");
-      int sensorType = strToInt(strType);
+      auto sensorType = _event.getPropertyByName<SensorType>("sensorType");
       std::string sensorValueFloat = _event.getPropertyByName("sensorValueFloat");
       double fValue = strToDouble(sensorValueFloat);
 

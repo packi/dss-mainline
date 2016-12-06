@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(createDeviceSensors)
 
   std::string activeCondition = "> ; 24.99";
   std::string inactiveCondition = "< ; 20.0";
-  int sensorType = 17;
+  auto sensorType = SensorType::GustDirection;
 
   StateSensor state("opaqueString", "scriptId", dev, sensorType, activeCondition, inactiveCondition);
   state.newValue(coDsmApi, 30.0);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(createGroupSensor)
 
   std::string activeCondition = "> ; 24.99";
   std::string inactiveCondition = "< ; 20.0";
-  int sensorType = 17;
+  auto sensorType = SensorType::GustDirection;
 
   StateSensor state("opaqueString", "scriptId", zone1->getGroup(1), sensorType, activeCondition, inactiveCondition);
   state.newValue(coDsmApi, 30.0);
@@ -101,11 +101,11 @@ BOOST_AUTO_TEST_CASE(updateDeviceSensorStates)
 
   std::string activeCondition = "> ; 24.99";
   std::string inactiveCondition = "< ; 20.0";
-  int sensorType = 17;
+  auto sensorType = SensorType::GustDirection;
 
   auto state1 = boost::make_shared<StateSensor>("opaqueString", "scriptId", dev, sensorType, activeCondition, inactiveCondition);
   auto state2 = boost::make_shared<StateSensor>("_opaqueString2", "scriptId", dev, sensorType, activeCondition, inactiveCondition);
-  auto state3 = boost::make_shared<StateSensor>("opaqueString", "scriptId", dev, sensorType + 1, activeCondition, inactiveCondition);
+  auto state3 = boost::make_shared<StateSensor>("opaqueString", "scriptId", dev, SensorType::SoundPressureLevel , activeCondition, inactiveCondition);
   apt.allocateState(state1);
   apt.allocateState(state2);
   apt.allocateState(state3);
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(updateZoneSensorStates)
 
   int zoneId = 1;
   int groupId = 2;
-  int sensorType = 17;
+  auto sensorType = SensorType::GustDirection;
   std::string activeCondition = "> ; 24.99";
   std::string inactiveCondition = "< ; 20.0";
 

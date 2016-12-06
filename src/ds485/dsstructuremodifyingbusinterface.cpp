@@ -243,6 +243,10 @@ namespace dss {
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetName
 
+  void DSStructureModifyingBusInterface::groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration) {
+    // TODO: implement after API changes
+  } // groupSetConfiguration
+
   void DSStructureModifyingBusInterface::removeGroup(uint16_t _zoneID, uint8_t _groupID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
@@ -367,7 +371,7 @@ namespace dss {
 
   void DSStructureModifyingBusInterface::setZoneSensor(
                                 const uint16_t _zoneID,
-                                const uint8_t _sensorType,
+                                SensorType _sensorType,
                                 const dsuid_t& _sensorDSUID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
@@ -375,7 +379,7 @@ namespace dss {
     }
 
     int ret = ZoneProperties_set_zone_sensor(m_DSMApiHandle, DSUID_BROADCAST,
-                                             _zoneID, _sensorType,
+                                             _zoneID, static_cast<uint8_t>(_sensorType),
                                              _sensorDSUID);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
@@ -401,14 +405,14 @@ namespace dss {
 
   void DSStructureModifyingBusInterface::resetZoneSensor(
                                             const uint16_t _zoneID,
-                                            const uint8_t _sensorType) {
+                                            SensorType _sensorType) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
 
     int ret = ZoneProperties_reset_zone_sensor(m_DSMApiHandle, DSUID_BROADCAST,
-                                             _zoneID, _sensorType);
+                                             _zoneID, static_cast<uint8_t>(_sensorType));
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
     if (m_pModelMaintenance) {
@@ -441,6 +445,10 @@ namespace dss {
     ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _standardGroupID);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
+  }
+
+  void DSStructureModifyingBusInterface::clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration) {
+    // TODO: implement after API changes
   }
 
   void DSStructureModifyingBusInterface::clusterSetProperties(uint8_t _clusterID, uint16_t _location,

@@ -104,6 +104,7 @@ namespace dss {
     State(eStateType _type, const std::string& _name, const std::string& _identifier);
     State(boost::shared_ptr<Device> _device, int _inputIndex);
     State(boost::shared_ptr<Device> _device, const std::string& stateName);
+    static std::string makeGroupName(const Group& group);
     State(boost::shared_ptr<Group> _group);
     State(boost::shared_ptr<DSMeter> _meter, int _inputIndex);
 
@@ -175,10 +176,10 @@ namespace dss {
 
   public:
     StateSensor(const std::string& _identifier, const std::string& _scriptId,
-        boost::shared_ptr<Device> _dev, int _sensorType,
+        boost::shared_ptr<Device> _dev, SensorType _sensorType,
         const std::string& activateCondition, const std::string& deactivateCondition);
     StateSensor(const std::string& _identifier, const std::string& _scriptId,
-        boost::shared_ptr<Group> _group, int _sensorType,
+        boost::shared_ptr<Group> _group, SensorType _sensorType,
         const std::string& activateCondition, const std::string& deactivateCondition);
     virtual ~StateSensor();
 

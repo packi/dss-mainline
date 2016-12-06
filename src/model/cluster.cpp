@@ -102,7 +102,8 @@ namespace dss {
             (m_Location == cluster.location) &&
             (m_ProtectionClass == cluster.protectionClass) &&
             (m_Floor == cluster.floor) &&
-            (m_ConfigurationLocked == cluster.configurationLocked));
+            (m_ConfigurationLocked == cluster.configurationLocked) &&
+            (getConfiguration() == (int)cluster.configuration));
   } // equalConfig
 
   void Cluster::reset() {
@@ -114,6 +115,7 @@ namespace dss {
     setAutomatic(false);
     setStandardGroupID(0);
     setName("");
+    setConfiguration(0);
   } // reset
 
   void Cluster::removeDevice(Device& _device)

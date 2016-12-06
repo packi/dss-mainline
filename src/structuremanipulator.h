@@ -72,10 +72,13 @@ namespace dss {
     void removeGroup(boost::shared_ptr<Zone> _zone, int _groupNumber);
     void groupSetName(boost::shared_ptr<Group> _group, const std::string& _name);
     void groupSetStandardID(boost::shared_ptr<Group> _group, const int _standardGroupNumber);
+    void groupSetConfiguration(boost::shared_ptr<Group> _group, const int _standardGroupNumber);
+
     void sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name);
 
     void clusterSetName(boost::shared_ptr<Cluster> _cluster, const std::string& _name);
     void clusterSetStandardID(boost::shared_ptr<Cluster> _cluster, const int _standardGroupNumber);
+    void clusterSetConfiguration(boost::shared_ptr<Cluster> _cluster, const int _clusterConfiguration);
     void clusterSetConfigurationLock(boost::shared_ptr<Cluster> _cluster, bool _locked);
 
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
@@ -84,8 +87,8 @@ namespace dss {
 
     void setZoneHeatingConfig(boost::shared_ptr<Zone> _zone, const dsuid_t& _ctrlDSUID, const ZoneHeatingConfigSpec_t _spec);
     void clearZoneHeatingConfig(boost::shared_ptr<Zone> _zone);
-    void setZoneSensor(boost::shared_ptr<Zone> _zone, const uint8_t _sensorType, boost::shared_ptr<Device> _dev);
-    void resetZoneSensor(boost::shared_ptr<Zone> _zone, const uint8_t _sensorType);
+    void setZoneSensor(boost::shared_ptr<Zone> _zone, SensorType _sensorType, boost::shared_ptr<Device> _dev);
+    void resetZoneSensor(boost::shared_ptr<Zone> _zone, SensorType _sensorType);
     void autoAssignZoneSensors(boost::shared_ptr<Zone> _zone);
     void synchronizeZoneSensorAssignment(std::vector<boost::shared_ptr<Zone> > _zones);
     /**

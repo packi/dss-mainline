@@ -145,4 +145,8 @@ bool convertWindProtectionClass(unsigned int _class, WindProtectionClass_t *_out
   return true;
 }
 
+unsigned int getOutputChannelSize(const int type) {
+  return (type == 7 || type == 8) ? 1 : 0;
+}
+
 }

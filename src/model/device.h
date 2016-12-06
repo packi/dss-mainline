@@ -38,6 +38,7 @@
 #include "addressablemodelitem.h"
 #include "businterface.h"
 #include "modelevent.h"
+#include "modelconst.h"
 
 #define DEV_PARAM_BUTTONINPUT_STANDARD              0
 #define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1   5
@@ -166,7 +167,7 @@ namespace dss {
 
   typedef struct {
     int m_sensorIndex;       // sensor index
-    int m_sensorType;        // type of sensor
+    SensorType m_sensorType;
     uint32_t m_sensorPollInterval;
     bool m_sensorBroadcastFlag;
     bool m_sensorPushConversionFlag;
@@ -242,8 +243,9 @@ namespace dss {
     std::string m_DSMeterDSUIDstr; // for proptree publishing
     std::string m_LastKnownMeterDSIDstr; // for proptree publishing
     std::string m_LastKnownMeterDSUIDstr; // for proptree publishing
-    std::bitset<63> m_GroupBitmask;
     std::vector<int> m_Groups;
+    int m_ActiveGroup;
+    int m_DefaultGroup;
     int m_FunctionID;
     int m_ProductID;
     int m_VendorID;
@@ -493,11 +495,6 @@ namespace dss {
     static const std::string getDeviceClassString(const DeviceClasses_t _class);
     static const std::string getColorString(const int _class);
 
-    /** Returns the group bitmask (1 based) of the device */
-    std::bitset<63>& getGroupBitmask();
-    /** @copydoc getGroupBitmask() */
-    const std::bitset<63>& getGroupBitmask() const;
-
     /** Returns wheter the device is in group \a _groupID or not. */
     bool isInGroup(const int _groupID) const;
     /** Adds the device to group \a _groupID. */
@@ -511,7 +508,8 @@ namespace dss {
     boost::shared_ptr<Group> getGroupByIndex(const int _index);
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
-
+    /** Returns the numbers of groups this device is in */
+    std::vector<int> getGroups() const;
     /** Retuturns group to which the joker is configured or -1 if device is not
         a joker */
     int getJokerGroup() const;
@@ -597,6 +595,12 @@ namespace dss {
     void lock();
     /** Tells the dSM that it may forget a device if it's not present. */
     void unlock();
+
+    /** Device level active and default group used for Global Applications. */
+    void setActiveGroup(const int _value) { m_ActiveGroup = _value; }
+    int getActiveGroup() const { return m_ActiveGroup; }
+    void setDefaultGroup(const int _value) { m_DefaultGroup = _value; }
+    int getDefaultGroup() const { return m_DefaultGroup; }
 
     void setButtonSetsLocalPriority(const bool _value) { m_ButtonSetsLocalPriority = _value; }
     bool getButtonSetsLocalPriority() const { return m_ButtonSetsLocalPriority; }
@@ -734,7 +738,7 @@ namespace dss {
     const uint8_t getSensorCount() const;
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
-    const boost::shared_ptr<DeviceSensor_t> getSensorByType(uint8_t _sensorType) const;
+    const boost::shared_ptr<DeviceSensor_t> getSensorByType(SensorType _sensorType) const;
     const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
     const void setSensorValue(int _sensorIndex, double _sensorValue) const;
     const void setSensorDataValidity(int _sensorIndex, bool _valid) const;
@@ -796,7 +800,7 @@ namespace dss {
     bool isMainDevice() const;
     dsuid_t getMainDeviceDSUID() const;
 
-    void handleBinaryInputEvent(const int index, const int state);
+    void handleBinaryInputEvent(const int index, BinaryInputState state);
 
     /// Calls (invokes) device specific action.
     void callAction(const std::string& actionId, const vdcapi::PropertyElement& params);

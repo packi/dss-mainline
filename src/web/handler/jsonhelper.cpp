@@ -144,12 +144,12 @@ namespace dss {
     _json.add("buttonInputCount", _device.getDevice()->getButtonInputCount());
     _json.add("AKMInputProperty", _device.getDevice()->getAKMInputProperty());
 
+    _json.add("ActiveGroup", _device.getDevice()->getActiveGroup());
+    _json.add("DefaultGroup", _device.getDevice()->getDefaultGroup());
+
     _json.startArray("groups");
-    std::bitset<63> deviceGroups = _device.getDevice()->getGroupBitmask();
-    for (int g = 1; g <= 63; g++) {
-      if (deviceGroups.test(g-1)) {
-        _json.add(g);
-      }
+    for (int g = 0; g < _device.getDevice()->getGroupsCount(); g++) {
+      _json.add(_device.getDevice()->getGroupIdByIndex(g));
     }
     _json.endArray();
 
@@ -172,7 +172,7 @@ namespace dss {
     const std::vector<boost::shared_ptr<DeviceSensor_t> > sensors = _device.getDevice()->getSensors();
     for (size_t i = 0; i < sensors.size(); i++) {
       _json.startObject();
-      _json.add("type", sensors.at(i)->m_sensorType);
+      _json.add("type", static_cast<int>(sensors.at(i)->m_sensorType));
       _json.add("valid", sensors.at(i)->m_sensorValueValidity);
       _json.add("value", sensors.at(i)->m_sensorValueFloat);
       _json.endObject();
@@ -231,6 +231,7 @@ namespace dss {
     _json.add("color", _group->getStandardGroupID());
     _json.add("isPresent", _group->isPresent());
     _json.add("isValid", _group->isValid());
+    _json.add("configuration", _group->getConfiguration());
 
     _json.startArray("devices");
     Set devices = _group->getDevices();

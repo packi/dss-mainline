@@ -1045,7 +1045,7 @@ namespace dss {
                                                 uint16_t _zoneID,
                                                 uint8_t _groupID,
                                                 dsuid_t _dSUID,
-                                                uint8_t _SensorType,
+                                                SensorType _SensorType,
                                                 uint16_t _Value,
                                                 uint8_t _Precision) {
     loginFromCallback();
@@ -1067,11 +1067,12 @@ namespace dss {
       uint8_t _SensorType,
       uint16_t _Value,
       uint8_t _Precision) {
+
     if (_errorCode == 0) {
       static_cast<DSBusInterface*>(_userData)->
           handleZoneSensorValueEvent(_errorCode, _sourceID, _destinationID,
               _ZoneId, _GroupId, _dSUID,
-              _SensorType, _Value, _Precision);
+              static_cast<SensorType>(_SensorType), _Value, _Precision);
     }
   }
 

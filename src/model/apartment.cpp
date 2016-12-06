@@ -477,14 +477,22 @@ namespace dss {
     m_States.push_back(_state);
   } // allocateState
 
-  boost::shared_ptr<State> Apartment::getState(const eStateType _type, const std::string& _name) const {
+  boost::shared_ptr<State> Apartment::tryGetState(const eStateType _type, const std::string& _name) const {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<State> state, m_States) {
       if ((state->getType() == _type) && (state->getName() == _name)) {
         return state;
       }
     }
-    throw ItemNotFoundException(_name);
+    return boost::shared_ptr<State>();
+  } // tryGetState
+
+  boost::shared_ptr<State> Apartment::getState(const eStateType _type, const std::string& _name) const {
+    auto state = tryGetState(_type, _name);
+    if (!state) {
+      throw ItemNotFoundException(_name);
+    }
+    return state;
   } // getState
 
   boost::shared_ptr<State> Apartment::getNonScriptState(const std::string& _stateName) const {
@@ -513,12 +521,12 @@ namespace dss {
   }
 
   // throws (dynamic_cast relies on consistent sensor names)
-  void Apartment::updateSensorStates(const dsuid_t &dsuid, int sensorType, double value, callOrigin_t origin)
+  void Apartment::updateSensorStates(const dsuid_t &dsuid, SensorType sensorType, double value, callOrigin_t origin)
   {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     // A single sensor can have multiple states, by setting different on/off threshold
     // TODO(someday) SensorState should have a field to identify the input sensor
-    std::string prefix("dev." + dsuid2str(dsuid) + ".type" + intToString(sensorType));
+    std::string prefix("dev." + dsuid2str(dsuid) + ".type" + intToString(static_cast<int>(sensorType)));
 
     foreach (boost::shared_ptr<State> state, m_States) {
       if (boost::starts_with(state->getName(), prefix)) {
@@ -528,12 +536,12 @@ namespace dss {
   }
 
   // throws (dynamic_cast relies on consistent sensor names)
-  void Apartment::updateSensorStates(int zoneId, int groupId, int sensorType, double value, callOrigin_t origin)
+  void Apartment::updateSensorStates(int zoneId, int groupId, SensorType sensorType, double value, callOrigin_t origin)
   {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     // A single sensor can have multiple states, by setting different on/off threshold
     // TODO(someday) SensorState should have a field to identify the input sensor
-    std::string prefix("zone.zone" + intToString(zoneId) + ".group" + intToString(groupId) + ".type" + intToString(sensorType));
+    std::string prefix("zone.zone" + intToString(zoneId) + ".group" + intToString(groupId) + ".type" + intToString(static_cast<int>(sensorType)));
 
     foreach (boost::shared_ptr<State> state, m_States) {
       if (boost::starts_with(state->getName(), prefix)) {

@@ -411,16 +411,16 @@ namespace dss {
         }
 
         for (int i = 0; i < numSensors; i++) {
-          uint8_t SensorType;
+          uint8_t sensorType;
           uint32_t SensorPollInterval;
           uint8_t SensorBroadcastFlag;
           uint8_t SensorConversionFlag;
           ret = DeviceSensor_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,
-                                               &SensorType, &SensorPollInterval,
+                                               &sensorType, &SensorPollInterval,
                                                &SensorBroadcastFlag, &SensorConversionFlag);
           DSBusInterface::checkResultCode(ret);
           DeviceSensorSpec_t sensorInput;
-          sensorInput.SensorType = SensorType;
+          sensorInput.sensorType = static_cast<SensorType>(sensorType);
           sensorInput.SensorPollInterval = SensorPollInterval;
           sensorInput.SensorBroadcastFlag = SensorBroadcastFlag;
           sensorInput.SensorConversionFlag = SensorConversionFlag;
@@ -715,7 +715,7 @@ namespace dss {
   dsuid_t DSStructureQueryBusInterface::getZoneSensor(
                                                 const dsuid_t& _meterDSUID,
                                                 const uint16_t _zoneID,
-                                                const uint8_t _sensorType) {
+                                                SensorType _sensorType) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -723,7 +723,7 @@ namespace dss {
 
     dsuid_t sensorDSUID;
     int ret = ZoneProperties_get_zone_sensor(m_DSMApiHandle, _meterDSUID,
-                                             _zoneID, _sensorType,
+                                             _zoneID, static_cast<uint8_t>(_sensorType),
                                              &sensorDSUID);
     DSBusInterface::checkResultCode(ret);
     return sensorDSUID;
@@ -732,7 +732,7 @@ namespace dss {
   void DSStructureQueryBusInterface::getZoneSensorValue(
       const dsuid_t& _meterDSUID,
       const uint16_t _zoneID,
-      const uint8_t _sensorType,
+      SensorType _sensorType,
       uint16_t *_sensorValue,
       uint32_t *_sensorAge) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -741,7 +741,7 @@ namespace dss {
     }
 
     int ret = ZoneProperties_get_zone_sensor_value(m_DSMApiHandle, _meterDSUID,
-        _zoneID, _sensorType, _sensorValue, _sensorAge);
+        _zoneID, static_cast<uint8_t>(_sensorType), _sensorValue, _sensorAge);
     DSBusInterface::checkResultCode(ret);
   }
 

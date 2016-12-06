@@ -156,37 +156,41 @@ namespace dss {
   const uint8_t SensorFunction_Generic10 = 10;
   const uint8_t SensorFunction_Generic11 = 11;
 
-  // Sensor Type ID's
-  const int SensorIDActivePower = 4;
-  const int SensorIDOutputCurrent = 5;
-  const int SensorIDElectricMeter = 6;
-  const int SensorIDOutputCurrentEx = 64;
-  const int SensorIDPowerConsumptionVA = 65;
-  const int SensorIDTemperatureIndoors = 9;
-  const int SensorIDTemperatureOutdoors = 10;
-  const int SensorIDBrightnessIndoors = 11;
-  const int SensorIDBrightnessOutdoors = 12;
-  const int SensorIDHumidityIndoors = 13;
-  const int SensorIDHumidityOutdoors = 14;
-  const int SensorIDAirPressure = 15;
-  const int SensorIDGustSpeed = 16;
-  const int SensorIDGustDirection = 17;
-  const int SensorIDWindSpeed = 18;
-  const int SensorIDWindDirection = 19;
-  const int SensorIDPrecipitation = 20;
-  const int SensorIDCO2Concentration = 21;
-  const int SensorIDCOConcentration = 22;
-  const int SensorIDSoundPressureLevel = 25;
-  const int SensorIDRoomTemperatureSetpoint = 50;
-  const int SensorIDRoomTemperatureControlVariable = 51;
-  const int SensorIDReserved1 = 61;
-  const int SensorIDReserved2 = 62;
-  const int SensorIDOutputCurrent16A = 64;
-  const int SensorIDActivePowerVA = 65;
-  const int SensorIDNotUsed = 253;
-  const int SensorIDUnknownType = 255;
+  enum class SensorType {
+    ActivePower = 4,
+    OutputCurrent = 5,
+    ElectricMeter = 6,
+    TemperatureIndoors = 9,
+    TemperatureOutdoors = 10,
+    BrightnessIndoors = 11,
+    BrightnessOutdoors = 12,
+    HumidityIndoors = 13,
+    HumidityOutdoors = 14,
+    AirPressure = 15,
+    GustSpeed = 16,
+    GustDirection = 17,
+    WindSpeed = 18,
+    WindDirection = 19,
+    Precipitation = 20,
+    CO2Concentration = 21,
+    COConcentration = 22,
+    SoundPressureLevel = 25,
+    RoomTemperatureSetpoint = 50,
+    RoomTemperatureControlVariable = 51,
+    Reserved1 = 61,
+    Reserved2 = 62,
+    OutputCurrent16A = 64,
+    ActivePowerVA = 65,
+    NotUsed = 253,
+    UnknownType = 255,
+  };
 
   const int SensorMaxLifeTime = 3600; /* 1h */
+
+  double sensorToFloat12(SensorType _sensorType, const int _sensorValue);
+  int sensorToSystem(SensorType _sensorType, const double _sensorValue);
+  uint8_t sensorToPrecision(SensorType _sensorType);
+  std::string sensorName(SensorType _sensorType);
 
   // BinaryInput Type IDs
   const int BinaryInputIDPresence = 1;
@@ -212,6 +216,19 @@ namespace dss {
   const int BinaryInputIDPowerUp = 21;
   const int BinaryInputIDMalfunction = 22;
   const int BinaryInputIDService = 23;
+
+  enum class BinaryInputState {
+    Inactive = 0,
+    Active = 1,
+    Unknown = -1
+  };
+  // BinaryInputState enum for BinaryInputIDWindowTilt binary input type (vdc only)
+  enum class BinaryInputWindowHandleState {
+    Closed = 0,
+    Open = 1,
+    Tilted = 2,
+    Unknown = -1
+  };
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
@@ -293,6 +310,9 @@ namespace dss {
   const int GroupIDControlTemperature = 48;
   const int GroupIDControlGroupMax = 55;
   const int GroupIDMax = 63;
+  const int GroupIDGlobalAppMin = 64;
+  const int GroupIDGlobalAppVentilation = 64;
+  const int GroupIDGlobalAppMax = 128;
 
   inline bool isDefaultGroup(int groupId) {
     return ((groupId >= GroupIDYellow && groupId <= GroupIDStandardMax)) ||
@@ -309,6 +329,15 @@ namespace dss {
 
   inline bool isControlGroup(int groupId) {
     return (groupId >= GroupIDControlGroupMin && groupId <= GroupIDControlGroupMax);
+  }
+
+  inline bool isGlobalAppGroup(int groupId) {
+    return (groupId >= GroupIDGlobalAppMin && groupId <= GroupIDGlobalAppMax);
+  }
+
+  inline bool isValidGroup(int groupId) {
+    // TODO: faster alternative would be ((groupId >= GroupIDYellow) && (groupId <= GroupIDMax)) but it do not exclude reserved
+    return isDefaultGroup(groupId) || isAppUserGroup(groupId) || isZoneUserGroup(groupId) || isControlGroup(groupId) || isGlobalAppGroup(groupId);
   }
 
   const uint64_t DSIDHeader = 0x3504175FE0000000ll;

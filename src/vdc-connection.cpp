@@ -260,7 +260,7 @@ namespace dss {
     VdcElementReader reader(message.vdc_response_get_property().properties());
 
     State state;
-    std::map<int,int64_t>& binaryInputStates = state.binaryInputStates;
+    auto& binaryInputStates = state.binaryInputStates;
     VdcElementReader biStatesReader = reader["binaryInputStates"];
     for (VdcElementReader::iterator it = biStatesReader.begin(); it != biStatesReader.end(); it++) {
       VdcElementReader biStateReader = *it;
@@ -277,15 +277,16 @@ namespace dss {
       {
         VdcElementReader reader = biStateReader["extendedValue"];
         if (reader.isValid()) {
-            binaryInputStates[biStateIndex] = reader.getValueAsInt();
+            binaryInputStates[biStateIndex] = static_cast<BinaryInputState>(reader.getValueAsInt());
             continue;
         }
       }
       {
         VdcElementReader reader = biStateReader["value"];
         if (reader.isValid()) {
-            binaryInputStates[biStateIndex] = reader.getValueAsBool() ? 1 : 0;
-            continue;
+           binaryInputStates[biStateIndex] =
+                reader.getValueAsBool() ? BinaryInputState::Active : BinaryInputState::Inactive;
+           continue;
         }
       }
     }
@@ -297,9 +298,9 @@ namespace dss {
       deviceStates.push_back(std::pair<std::string, std::string>(reader.getName(), reader["value"].getValueAsString()));
     }
 
-    for (std::map<int,int64_t>::const_iterator it = binaryInputStates.begin(); it != binaryInputStates.end(); ++it ) {
+    for (auto it = binaryInputStates.begin(); it != binaryInputStates.end(); ++it ) {
       Logger::getInstance()->log("VdcHelper::getState: device " + dsuid2str(_device) +
-          ": " + intToString(it->first) + "=" + intToString(it->second), lsDebug);
+          ": " + intToString(it->first) + "=" + intToString((int)it->second), lsDebug);
     }
     for (std::vector<std::pair<std::string, std::string> >::const_iterator it = deviceStates.begin();
         it != deviceStates.end(); ++it ) {

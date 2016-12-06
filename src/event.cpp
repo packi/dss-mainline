@@ -40,6 +40,7 @@
 #include "src/model/device.h"
 #include "src/model/devicereference.h"
 #include "src/model/set.h"
+#include "src/model/modelconst.h"
 #include "src/security/security.h"
 
 #include <set>
@@ -127,6 +128,15 @@ namespace dss {
     return m_Properties.get(_name, empty_string);
   } // getPropertyByName
 
+  template <>
+  SensorType Event::getPropertyByName<SensorType>(const std::string& value) const {
+    auto&& strValue = getPropertyByName(value);
+    if (strValue.empty()) {
+      return SensorType::UnknownType;
+    }
+    return static_cast<SensorType>(strToInt(strValue));
+  }
+
   bool Event::hasPropertySet(const std::string& _name) const {
     if (_name == EventProperty::Name) {
       return true;
@@ -172,6 +182,12 @@ namespace dss {
       return true;
     }
     return false;
+  }
+
+  bool Event::setProperty(const std::string& name, SensorType value) {
+    // TODO(someday) use proper structure to preserve type
+    m_Properties.set(name, intToString(static_cast<int>(value)));
+    return true;
   }
 
   boost::shared_ptr<const Group> Event::getRaisedAtGroup(Apartment& _apartment) const {

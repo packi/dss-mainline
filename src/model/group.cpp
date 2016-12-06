@@ -43,6 +43,7 @@ namespace dss {
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
     m_StandardGroupID(0),
+    m_Configuration(0),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
@@ -84,6 +85,10 @@ namespace dss {
       } catch (ItemDuplicateException& ex) {} // we only care that it exists
     }
   } // getID
+
+  void Group::setConfiguration(const int _configuration) {
+    m_Configuration = _configuration;
+  }
 
   Set Group::getDevices() const {
     return m_pApartment->getZone(m_ZoneID)->getDevices().getByGroup(m_GroupID);
@@ -242,42 +247,44 @@ namespace dss {
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
         m_pPropertyNode->createProperty("connectedDevices")
           ->linkToProxy(PropertyProxyReference<int>(m_connectedDevices, false));
+        m_pPropertyNode->createProperty("configuration")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getConfiguration, &Group::setConfiguration));          
       }
     }
   } // publishToPropertyTree
 
-  void Group::sensorPush(const dsuid_t& _sourceID, int _type, double _value) {
+  void Group::sensorPush(const dsuid_t& _sourceID, SensorType _type, double _value) {
     DateTime now;
     boost::shared_ptr<Zone> pZone = m_pApartment->getZone(m_ZoneID);
 
     if (m_ZoneID == 0) {
       switch (_type) {
-        case SensorIDTemperatureOutdoors: m_pApartment->setTemperature(_value, now); break;
-        case SensorIDHumidityOutdoors: m_pApartment->setHumidityValue(_value, now); break;
-        case SensorIDBrightnessOutdoors: m_pApartment->setBrightnessValue(_value, now); break;
-        case SensorIDWindSpeed: m_pApartment->setWindSpeed(_value, now); break;
-        case SensorIDWindDirection: m_pApartment->setWindDirection(_value, now); break;
-        case SensorIDGustSpeed: m_pApartment->setGustSpeed(_value, now); break;
-        case SensorIDGustDirection: m_pApartment->setGustDirection(_value, now); break;
-        case SensorIDPrecipitation: m_pApartment->setPrecipitation(_value, now); break;
-        case SensorIDAirPressure: m_pApartment->setAirPressure(_value, now); break;
+        case SensorType::TemperatureOutdoors: m_pApartment->setTemperature(_value, now); break;
+        case SensorType::HumidityOutdoors: m_pApartment->setHumidityValue(_value, now); break;
+        case SensorType::BrightnessOutdoors: m_pApartment->setBrightnessValue(_value, now); break;
+        case SensorType::WindSpeed: m_pApartment->setWindSpeed(_value, now); break;
+        case SensorType::WindDirection: m_pApartment->setWindDirection(_value, now); break;
+        case SensorType::GustSpeed: m_pApartment->setGustSpeed(_value, now); break;
+        case SensorType::GustDirection: m_pApartment->setGustDirection(_value, now); break;
+        case SensorType::Precipitation: m_pApartment->setPrecipitation(_value, now); break;
+        case SensorType::AirPressure: m_pApartment->setAirPressure(_value, now); break;
         default: break;
       }
     } else {
       switch (_type) {
-        case SensorIDTemperatureIndoors: pZone->setTemperature(_value, now); break;
-        case SensorIDRoomTemperatureSetpoint: pZone->setNominalValue(_value, now); break;
-        case SensorIDRoomTemperatureControlVariable: pZone->setControlValue(_value, now); break;
-        case SensorIDHumidityIndoors: pZone->setHumidityValue(_value, now); break;
-        case SensorIDBrightnessIndoors: pZone->setBrightnessValue(_value, now); break;
-        case SensorIDCO2Concentration: pZone->setCO2ConcentrationValue(_value, now); break;
+        case SensorType::TemperatureIndoors: pZone->setTemperature(_value, now); break;
+        case SensorType::RoomTemperatureSetpoint: pZone->setNominalValue(_value, now); break;
+        case SensorType::RoomTemperatureControlVariable: pZone->setControlValue(_value, now); break;
+        case SensorType::HumidityIndoors: pZone->setHumidityValue(_value, now); break;
+        case SensorType::BrightnessIndoors: pZone->setBrightnessValue(_value, now); break;
+        case SensorType::CO2Concentration: pZone->setCO2ConcentrationValue(_value, now); break;
         default: break;
       }
     }
 
     if (m_pPropertyNode != NULL) {
-      PropertyNodePtr node = m_pPropertyNode->createProperty("sensor/type" + intToString(_type));
-      node->createProperty("type")->setIntegerValue(_type);
+      PropertyNodePtr node = m_pPropertyNode->createProperty("sensor/type" + intToString(static_cast<int>(_type)));
+      node->createProperty("type")->setIntegerValue(static_cast<int>(_type));
       node->createProperty("value")->setFloatingValue(_value);
       node->createProperty("sourcedsuid")->setStringValue(dsuid2str(_sourceID));
       node->createProperty("time")->setIntegerValue(now.secondsSinceEpoch());
@@ -285,9 +292,9 @@ namespace dss {
     }
   } // sensorPush
 
-  void Group::sensorInvalid(int _type) {
+  void Group::sensorInvalid(SensorType _type) {
     if (m_pPropertyNode != NULL) {
-      PropertyNodePtr node = m_pPropertyNode->getProperty("sensor/type" + intToString(_type));
+      PropertyNodePtr node = m_pPropertyNode->getProperty("sensor/type" + intToString(static_cast<int>(_type)));
       if (node) {
         node->getParentNode()->removeChild(node);
       }
@@ -304,6 +311,17 @@ namespace dss {
     if (m_connectedDevices > 0) {
       --m_connectedDevices;
     }
+  }
+
+  boost::shared_ptr<Group> Group::make(const GroupSpec_t& _groupSpec, boost::shared_ptr<Zone> _pZone, Apartment& _apartment)
+  {
+    boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone, _apartment));
+
+    pGroup->setName(_groupSpec.Name);
+    pGroup->setStandardGroupID(_groupSpec.StandardGroupID);
+    pGroup->setConfiguration(_groupSpec.configuration);
+
+    return pGroup;
   }
 
 } // namespace dss

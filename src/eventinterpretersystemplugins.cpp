@@ -47,6 +47,7 @@
 #include "model/modelconst.h"
 #include "model/scenehelper.h"
 #include "model/modulator.h"
+#include "model/data_types.h"
 #include "propertysystem.h"
 #include "security/security.h"
 #include "structuremanipulator.h"
@@ -410,6 +411,69 @@ namespace dss {
     } catch (std::runtime_error& e) {
       Logger::getInstance()->log("SystemEventActionExecute::"
               "executeDeviceScene: could not call scene on zone " +
+              std::string(e.what()));
+    }
+  }
+
+  void SystemEventActionExecute::executeDeviceChannelValue(PropertyNodePtr _actionNode) {
+    try {
+      boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
+      if (target == NULL) {
+        Logger::getInstance()->log("SystemEventActionExecute::"
+                 "executeDeviceChannelValue: could not set value on device - device "
+                 "was not found", lsError);
+        return;
+      }
+
+      struct channel {
+        int id;
+        int value;
+      };
+      std::vector<channel> vChannels;
+
+      int i = 0;
+      while (true) {
+        auto oChannelIdNode = _actionNode->getPropertyByName(std::string("channelid-") + intToString(i));
+        auto oChannelValueNode = _actionNode->getPropertyByName(std::string("channelvalue-") + intToString(i));
+        if ((oChannelIdNode == NULL) || (oChannelValueNode == NULL)) {
+          break;
+        }
+        i++;
+        vChannels.push_back(channel{oChannelIdNode->getIntegerValue(), oChannelValueNode->getIntegerValue()});
+      }
+
+      auto numNonApplyChannels = static_cast <int>(vChannels.size()) - 1;
+
+      if (numNonApplyChannels < 0) {
+        Logger::getInstance()->log("SystemEventActionExecute::"
+                 "executeDeviceChannelValue: no channel settings found", lsWarning);
+        return;
+      }
+
+      for (int i = 0; i < numNonApplyChannels; ++i) {
+        auto ch = vChannels[i];
+        target->setDeviceOutputChannelValue(ch.id, getOutputChannelSize(ch.id), ch.value, false);
+      }
+      auto ch = vChannels[numNonApplyChannels];
+      target->setDeviceOutputChannelValue(ch.id, getOutputChannelSize(ch.id), ch.value, true);
+
+    } catch(SceneAccessException& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+                    "executeDeviceChannelValue: execution not allowed: " +
+                    std::string(e.what()));
+      std::string action_name = getActionName(_actionNode);
+      boost::shared_ptr<Event> pEvent;
+      pEvent.reset(new Event(EventName::ExecutionDenied));
+      pEvent->setProperty("action-type", "device-moc-value");
+      pEvent->setProperty("action-name", action_name);
+      pEvent->setProperty("source-name", m_properties.get("source-name", ""));
+      pEvent->setProperty("reason", std::string(e.what()));
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+      }
+    } catch (std::runtime_error& e) {
+      Logger::getInstance()->log("SystemEventActionExecute::"
+              "executeDeviceChannelValue: could not set value on device " +
               std::string(e.what()));
     }
   }
@@ -793,6 +857,9 @@ namespace dss {
           return ACTION_DURATION_DEVICE_SCENE;
         } else if (sActionType == "device-value") {
           executeDeviceValue(_actionNode);
+          return ACTION_DURATION_DEVICE_VALUE;
+        } else if (sActionType == "device-moc-value") {
+          executeDeviceChannelValue(_actionNode);
           return ACTION_DURATION_DEVICE_VALUE;
         } else if (sActionType == "device-blink") {
           executeDeviceBlink(_actionNode);
@@ -2662,9 +2729,9 @@ namespace dss {
       sensorIndex = m_properties.get("sensorIndex");
     }
 
-    uint8_t sensorType = SensorIDUnknownType;
+    auto sensorType = SensorType::UnknownType;
     if (m_properties.has("sensorType")) {
-      sensorType = strToInt(m_properties.get("sensorType"));
+      sensorType = static_cast<SensorType>(strToInt(m_properties.get("sensorType")));
     } else {
       try {
         boost::shared_ptr<DeviceSensor_t> pSensor = _device->getSensor(strToInt(sensorIndex));
@@ -2683,8 +2750,8 @@ namespace dss {
     }
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-    _logger->logln(";SensorValue;" + SceneHelper::sensorName(sensorType) +
-        " [" + intToString(sensorType) + '/' + sensorIndex + "];" +
+    _logger->logln(";SensorValue;" + sensorName(sensorType) +
+        " [" + intToString(static_cast<int>(sensorType)) + '/' + sensorIndex + "];" +
         sensorValueFloat + " [" + sensorValue + "];" +
         zoneName + ";;;" + devName + ";");
   }
@@ -2699,7 +2766,7 @@ namespace dss {
     std::string sensorValue = m_properties.get("sensorValue");
     std::string sensorValueFloat = m_properties.get("sensorValueFloat");
 
-    std::string typeName = SceneHelper::sensorName(sensorType);
+    std::string typeName = sensorName(static_cast<SensorType>(sensorType));
     std::string origName = getDeviceName(m_properties.get("originDSID"));
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
@@ -3499,11 +3566,11 @@ namespace dss {
   void SystemZoneSensorForward::deviceSensorValue() {
     if (m_raisedAtDevice != NULL) {
       try {
-        uint8_t sensorType = SensorIDUnknownType;
+        auto sensorType = SensorType::UnknownType;
         boost::shared_ptr<const Device> pDevice = m_raisedAtDevice->getDevice();
 
         if (m_properties.has("sensorType")) {
-          sensorType = strToInt(m_properties.get("sensorType"));
+          sensorType = static_cast<SensorType>(strToInt(m_properties.get("sensorType")));
         } else {
           try {
             std::string sensorIndex("-1");
@@ -3518,21 +3585,24 @@ namespace dss {
         // filter out sensor types that are handled by the (v)dSM
         int zoneId = m_raisedAtDevice->getDevice()->getZoneID();
         switch (sensorType) {
-          case SensorIDTemperatureIndoors:
-          case SensorIDHumidityIndoors:
-          case SensorIDBrightnessIndoors:
-          case SensorIDCO2Concentration:
+          case SensorType::TemperatureIndoors:
+          case SensorType::HumidityIndoors:
+          case SensorType::BrightnessIndoors:
+          case SensorType::CO2Concentration:
             return;
-          case SensorIDTemperatureOutdoors:
-          case SensorIDBrightnessOutdoors:
-          case SensorIDHumidityOutdoors:
-          case SensorIDWindSpeed:
-          case SensorIDWindDirection:
-          case SensorIDGustSpeed:
-          case SensorIDGustDirection:
-          case SensorIDPrecipitation:
-          case SensorIDAirPressure:
+          case SensorType::TemperatureOutdoors:
+          case SensorType::BrightnessOutdoors:
+          case SensorType::HumidityOutdoors:
+          case SensorType::WindSpeed:
+          case SensorType::WindDirection:
+          case SensorType::GustSpeed:
+          case SensorType::GustDirection:
+          case SensorType::Precipitation:
+          case SensorType::AirPressure:
             zoneId = 0;
+            break;
+          default:
+            // for other types we just try to find proper device if it exist
             break;
         }
         boost::shared_ptr<Zone> pZone = DSS::getInstance()->getApartment().getZone(zoneId);

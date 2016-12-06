@@ -280,7 +280,7 @@ namespace dss {
     }
   }
 
-  void DSActionRequest::pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, double _sensorValueFloat, const std::string _token) {
+  void DSActionRequest::pushSensor(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, SensorType _sensorType, double _sensorValueFloat, const std::string _token) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if (m_DSMApiHandle == NULL) {
       return;
@@ -288,11 +288,11 @@ namespace dss {
 
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     if (pGroup) {
-      uint16_t convertedSensorValue = SceneHelper::sensorToSystem(_sensorType, _sensorValueFloat);
-      uint8_t precisionvalue = SceneHelper::sensorToPrecision(_sensorType);
+      uint16_t convertedSensorValue = sensorToSystem(_sensorType, _sensorValueFloat);
+      uint8_t precisionvalue = sensorToPrecision(_sensorType);
 
       int ret = ZoneGroupSensorPush(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(),
-          _sourceID, _sensorType, convertedSensorValue, precisionvalue);
+          _sourceID, static_cast<uint8_t>(_sensorType), convertedSensorValue, precisionvalue);
       DSBusInterface::checkBroadcastResultCode(ret);
 
       if (m_pBusEventSink) {

@@ -60,11 +60,14 @@ public:
   }
   virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
   }
+  virtual void groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration) {
+  }
   virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) {}
-  virtual void clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) {}
+  virtual void clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) {}  
   virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) {}
   virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) {}
   virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) {}
+  virtual void clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration) {}
   virtual void sensorPush(uint16_t _zoneID, uint8_t groupID, dsuid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
   }
   virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {
@@ -75,8 +78,8 @@ public:
   virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) {}
   virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) {}
   virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) {}
-  virtual void setZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType, const dsuid_t& _sensorDSUID) {}
-  virtual void resetZoneSensor(const uint16_t _zoneID, const uint8_t _sensorType) {}
+  virtual void setZoneSensor(const uint16_t _zoneID, SensorType _sensorType, const dsuid_t& _sensorDSUID) {}
+  virtual void resetZoneSensor(const uint16_t _zoneID, SensorType _sensorType) {}
   virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) {}
 };
 
@@ -142,10 +145,10 @@ public:
   virtual ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) {
     return ZoneHeatingOperationModeSpec_t();
   }
-  virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType) {
+  virtual dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, SensorType _sensorType) {
     return DSUID_NULL;
   }
-  virtual void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, const uint8_t _sensorType, uint16_t *_sensorValue, uint32_t *_sensorAge) {
+  virtual void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, SensorType _sensorType, uint16_t *_sensorValue, uint32_t *_sensorAge) {
   }
   virtual int getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool _onlyActive = false) {
     return 0;
@@ -219,7 +222,7 @@ public:
   }
   virtual void stopOutputChannelValue(AddressableModelItem*, const callOrigin_t _origin, SceneAccessCategory, uint8_t, std::string) {
   }
-  virtual void pushSensor(AddressableModelItem*, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, uint8_t _sensorType, double _sensorValueFloat, const std::string _token) {
+  virtual void pushSensor(AddressableModelItem*, const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, SensorType _sensorType, double _sensorValueFloat, const std::string _token) {
   }
 
   virtual bool isOperationLock(const dsuid_t &_dSM, int _clusterId) {

@@ -40,6 +40,7 @@ namespace dss {
                                public boost::enable_shared_from_this<AddressableModelItem> {
   public:
     AddressableModelItem(Apartment* _pApartment);
+    Apartment& getApartment() { return *m_pApartment; }
 
     virtual void increaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void decreaseValue(const callOrigin_t _origin, const SceneAccessCategory _category);
@@ -58,7 +59,7 @@ namespace dss {
     virtual void decreaseOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
     virtual void stopOutputChannelValue(const callOrigin_t _origin, const SceneAccessCategory _category, const uint8_t channel, const std::string _token);
 
-    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, const dsuid_t _sourceID, const uint8_t _sensorType, const double _sensorValueFloat, const std::string _token);
+    virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, const dsuid_t _sourceID, SensorType _sensorType, const double _sensorValueFloat, const std::string _token);
   protected:
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;

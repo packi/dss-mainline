@@ -71,6 +71,7 @@ namespace dss {
   std::string unsignedLongIntToString(const unsigned long long _value);
 
   std::string doubleToString(const double _value);
+  double roundDigits(const double input, const int digits);
 
   std::vector<std::string> splitString(const std::string& _source, const char _delimiter, bool _trimEntries = false);
   void replaceAll(std::string& s, const std::string& a, const std::string& b);
