@@ -356,6 +356,7 @@ namespace dss {
     Device(const dsuid_t _dsid, Apartment* _pApartment);
     virtual ~Device();
 
+    boost::shared_ptr<Device> sharedFromThis() { return boost::static_pointer_cast<Device>(shared_from_this()); }
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 
