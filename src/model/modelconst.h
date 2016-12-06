@@ -188,7 +188,7 @@ namespace dss {
 
   const int SensorMaxLifeTime = 3600; /* 1h */
 
-  double sensorToFloat12(SensorType _sensorType, const int _sensorValue);
+  double sensorValueToDouble(SensorType _sensorType, const int _sensorValue);
   int sensorToSystem(SensorType _sensorType, const double _sensorValue);
   uint8_t sensorToPrecision(SensorType _sensorType);
   std::string sensorName(SensorType _sensorType);

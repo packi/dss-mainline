@@ -3482,7 +3482,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        double sensorValueFloat = sensorToFloat12(sensorType, sensorValue);
+        double sensorValueFloat = sensorValueToDouble(sensorType, sensorValue);
         pGroup->pushSensor(coJSScripting, category, sourceDSID, sensorType, sensorValueFloat, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
@@ -3842,41 +3842,41 @@ namespace dss {
         break;
       case HeatingControlModeIDPID:
         obj.setProperty<double>("Off",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
         obj.setProperty<double>("Cooling",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
         obj.setProperty<double>("CoolingOff",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
         break;
       case HeatingControlModeIDZoneFollower:
         break;
       case HeatingControlModeIDFixed:
         obj.setProperty<double>("Off",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
         obj.setProperty<double>("Cooling",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
         obj.setProperty<double>("CoolingOff",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
         break;
       }
       return JS_TRUE;

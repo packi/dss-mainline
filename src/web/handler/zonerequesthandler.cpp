@@ -404,41 +404,41 @@ namespace dss {
             break;
           case HeatingControlModeIDPID:
             json.add("Off",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
             json.add("Comfort",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
             json.add("Economy",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
             json.add("NotUsed",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
             json.add("Night",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
             json.add("Holiday",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
             json.add("Cooling",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
             json.add("CoolingOff",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
             json.add("Off",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
             json.add("Comfort",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
             json.add("Economy",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
             json.add("NotUsed",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
             json.add("Night",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
             json.add("Holiday",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
             json.add("Cooling",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
             json.add("CoolingOff",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
             break;
 
           }
@@ -630,15 +630,15 @@ namespace dss {
           hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
               hProp.m_HeatingControlDSUID, pZone->getID());
 
-          json.add("CtrlTRecent", (double) sensorToFloat12(SensorType::TemperatureIndoors, hInternals.Trecent));
-          json.add("CtrlTReference", (double) sensorToFloat12(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
+          json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
+          json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
           json.add("CtrlTError", (double) hInternals.TError * 0.025);
           json.add("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
           json.add("CtrlIntegral", (double) hInternals.Integral * 0.025);
           json.add("CtrlYp", (double) hInternals.Yp * 0.01);
           json.add("CtrlYi", (double) hInternals.Yi * 0.01);
           json.add("CtrlYd", (double) hInternals.Yd *0.01);
-          json.add("CtrlY", (double) sensorToFloat12(SensorType::RoomTemperatureControlVariable, hInternals.Y));
+          json.add("CtrlY", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hInternals.Y));
           json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
 
           return json.successJSON();

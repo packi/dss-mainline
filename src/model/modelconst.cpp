@@ -29,7 +29,7 @@
 #include "base.h"
 
 namespace dss {
-  double sensorToFloat12(SensorType _sensorType, int _sensorValue) {
+  double sensorValueToDouble(SensorType _sensorType, int _sensorValue) {
     double convertedSensorValue;
     switch (_sensorType) {
     case SensorType::ActivePower:
@@ -92,7 +92,7 @@ namespace dss {
       break;
     }
     return convertedSensorValue;
-  } // sensorToFloat12
+  } // sensorValueToDouble
 
   int sensorToSystem(SensorType _sensorType, double _sensorValue) {
     int convertedSensorValue;
