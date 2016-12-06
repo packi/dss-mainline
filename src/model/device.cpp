@@ -2553,7 +2553,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValue =
-            sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+            doubleToSensorValue(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }

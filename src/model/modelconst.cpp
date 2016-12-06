@@ -94,7 +94,7 @@ namespace dss {
     return convertedSensorValue;
   } // sensorValueToDouble
 
-  int sensorToSystem(SensorType _sensorType, double _sensorValue) {
+  int doubleToSensorValue(SensorType _sensorType, double _sensorValue) {
     int convertedSensorValue;
     switch (_sensorType) {
     case SensorType::ActivePower:
@@ -184,7 +184,7 @@ namespace dss {
       break;
     }
     return convertedSensorValue;
-  } // sensorToSystem
+  } // doubleToSensorValue
 
   uint8_t sensorToPrecision(SensorType _sensorType) {
     switch (_sensorType) {
