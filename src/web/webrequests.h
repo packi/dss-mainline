@@ -95,6 +95,7 @@ namespace dss {
     void add(std::string _name, bool _value);
     void add(std::string _name, double _value);
     void add(std::string _name, SensorType sensorType);
+    void add(const std::string& _name, BinaryInputType value);
     void add(std::string _value);
     void add(const char* _value);
     void add(int _value);

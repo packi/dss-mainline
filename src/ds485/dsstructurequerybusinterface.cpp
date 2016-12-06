@@ -383,7 +383,7 @@ namespace dss {
           DeviceBinaryInputSpec_t binaryInput;
           binaryInput.TargetGroupType = TargetGroupType;
           binaryInput.TargetGroup = TargetGroup;
-          binaryInput.InputType = InputType;
+          binaryInput.InputType = static_cast<BinaryInputType>(InputType);
           binaryInput.InputID = InputID;
           _spec.binaryInputs.push_back(binaryInput);
         }

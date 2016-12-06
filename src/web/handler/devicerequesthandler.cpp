@@ -1107,7 +1107,7 @@ namespace dss {
       if (type < 0 || type > 254) {
         return JSONWriter::failure("Invalid or missing parameter 'type'");
       }
-      pDevice->setDeviceBinaryInputType(index, type);
+      pDevice->setDeviceBinaryInputType(index, static_cast<BinaryInputType>(type));
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputTarget") {
       int index = strToIntDef(_request.getParameter("index"), -1);

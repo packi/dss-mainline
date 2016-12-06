@@ -160,7 +160,7 @@ namespace dss {
   class Device;
   struct DeviceBinaryInput {
     int m_inputIndex;        // input line index
-    int m_inputType;         // type of input signal
+    BinaryInputType m_inputType; // type of input signal
     int m_inputId;           // target Id, like ButtonId
     int m_targetGroupType;   // type of target group: standard, user, apartment
     int m_targetGroupId;     // index of target group, 0..63
@@ -348,7 +348,7 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     std::string getAKMButtonInputString(const int _mode);
-    void assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state);
+    void assignCustomBinaryInputValues(BinaryInputType inputType, boost::shared_ptr<State> state);
     bool hasBlinkSettings();
 
   public:
@@ -425,8 +425,8 @@ namespace dss {
     /** Binary input devices */
     void setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId);
     void setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup);
-    void setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType);
-    uint8_t getDeviceBinaryInputType(uint8_t _inputIndex);
+    void setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType _inputType);
+    BinaryInputType getDeviceBinaryInputType(uint8_t _inputIndex);
     /** AKM2xx timeout settings */
     void setDeviceAKMInputTimeouts(int _onDelay, int _offDelay);
     void getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay);
@@ -728,7 +728,7 @@ namespace dss {
     const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
     void setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup);
     void setBinaryInputId(uint8_t _index, uint8_t _inputId);
-    void setBinaryInputType(uint8_t _index, uint8_t _inputType);
+    void setBinaryInputType(uint8_t _index, BinaryInputType _inputType);
     void clearBinaryInputs();
 
     void initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& specs);

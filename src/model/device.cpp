@@ -2050,13 +2050,13 @@ namespace dss {
     dirty();
   }
 
-  void Device::setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType) {
+  void Device::setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType inputType) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     lock.unlock();
-    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, _inputType);
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, static_cast<int>(inputType));
   }
 
   void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup)
@@ -2070,7 +2070,7 @@ namespace dss {
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, val);
   }
 
-  uint8_t Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
+  BinaryInputType Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
@@ -2153,7 +2153,7 @@ namespace dss {
     m_binaryInputs[_index]->m_inputId = _inputId;
   }
 
-  void Device::setBinaryInputType(uint8_t _index, uint8_t _inputType) {
+  void Device::setBinaryInputType(uint8_t _index, BinaryInputType _inputType) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_index >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
@@ -2260,9 +2260,9 @@ namespace dss {
   }
 
 
-  void Device::assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state) {
+  void Device::assignCustomBinaryInputValues(BinaryInputType inputType, boost::shared_ptr<State> state) {
     // Window Tilt Binary Input
-    if (inputType == BinaryInputIDWindowTilt) {
+    if (inputType == BinaryInputType::WindowTilt) {
       State::ValueRange_t windowTiltValues;
       windowTiltValues.push_back("invalid");
       windowTiltValues.push_back("closed");
@@ -2278,7 +2278,7 @@ namespace dss {
     try {
       auto&& state = m_binaryInputs.at(index)->m_state;
       auto&& inputType = getDeviceBinaryInputType(index);
-      if (inputType == BinaryInputIDWindowTilt) {
+      if (inputType == BinaryInputType::WindowTilt) {
         state->setState(coSystem,
             [&]() {
               switch (static_cast<BinaryInputWindowHandleState>(inputState)) {
@@ -2347,7 +2347,7 @@ namespace dss {
         entry->createProperty("targetGroupId")
                 ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_targetGroupId));
         entry->createProperty("inputType")
-                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputType));
+                ->linkToProxy(PropertyProxyReference<int, BinaryInputType>(binaryInput->m_inputType));
         entry->createProperty("inputId")
                 ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputId));
         entry->createProperty("inputIndex")

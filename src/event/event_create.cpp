@@ -104,12 +104,12 @@ createDeviceStatusEvent(boost::shared_ptr<DeviceReference> _devRef,
 
 boost::shared_ptr<Event>
 createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> _devRef,
-                             int _index, int _type, BinaryInputState _state)
+                             int _index, BinaryInputType _type, BinaryInputState _state)
 {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::DeviceBinaryInputEvent, _devRef);
   event->setProperty("inputIndex", intToString(_index));
-  event->setProperty("inputType", intToString(_type));
+  event->setProperty("inputType", _type);
   event->setProperty("inputState", _state);
   return event;
 }

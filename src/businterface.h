@@ -91,7 +91,7 @@ namespace dss {
   typedef struct {
     uint8_t TargetGroupType;
     uint8_t TargetGroup;
-    uint8_t InputType;
+    BinaryInputType InputType;
     uint8_t InputID;
   } DeviceBinaryInputSpec_t;
 
