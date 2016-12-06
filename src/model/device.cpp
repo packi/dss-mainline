@@ -2284,7 +2284,6 @@ namespace dss {
   }
 
   void Device::handleBinaryInputEvent(const int index, BinaryInputState inputState) {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     try {
       auto&& state = m_binaryInputStates.at(index);
       auto&& inputType = getDeviceBinaryInputType(index);
