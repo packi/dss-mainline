@@ -170,7 +170,9 @@ namespace dss {
     bool hasPropertySet(const std::string& _name) const;
     void unsetProperty(const std::string& _name);
     bool setProperty(const std::string& _name, const std::string& _value);
-    bool setProperty(const std::string& name, SensorType value);
+    void setProperty(const std::string& name, int value);
+    void setProperty(const std::string& name, SensorType x) { setProperty(name, static_cast<int>(x)); }
+    void setProperty(const std::string& name, BinaryInputState x) { setProperty(name, static_cast<int>(x)); }
 
     template<typename T>
     T getPropertyByName(const std::string &name) const;
