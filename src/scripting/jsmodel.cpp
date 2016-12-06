@@ -56,6 +56,11 @@
 #include "src/stringconverter.h"
 #include "src/sceneaccess.h"
 #include "src/util.h"
+#include "src/messages/vdc-messages.pb.h"
+#include "src/vdc-element-reader.h"
+#include "src/web/webrequests.h"
+#include "src/protobufjson.h"
+#include "src/stringconverter.h"
 
 namespace dss {
   const std::string ModelScriptcontextExtensionName = "modelextension";
@@ -2200,6 +2205,151 @@ namespace dss {
     return JS_FALSE;
   } // dev_get_output_value
 
+  JSBool dev_get_vdc_property(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+      if(self.is("Device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
+
+        if (!pDev->isVdcDevice()) {
+          JS_ReportError(cx, "Device is not a vdc device");
+          return JS_FALSE;
+        }
+        if(argc == 1) {
+          std::string path;
+          try {
+            path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, "Convert arguments: %s", ex.what());
+            return JS_FALSE;
+          }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            std::vector<std::string> parts = splitString(path, '/');
+            google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+            vdcapi::PropertyElement* currentElement;
+            bool firstElement = true;
+            foreach(std::string part, parts) {
+              if (firstElement) {
+                currentElement = query.Add();
+                firstElement = false;
+              } else {
+                currentElement = currentElement->add_elements();
+              }
+              currentElement->set_name(part);
+            }
+            vdcapi::Message message = pDev->getVdcProperty(query);
+            VdcElementReader reader(message.vdc_response_get_property().properties());
+            JSONWriter json(JSONWriter::jsonNoneResult);
+            json.add("result");
+            ProtobufToJSon::processElementsPretty(reader.childElements(), json);
+
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, json.successJSON().c_str())));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "General failure: %s", ex.what());
+          }
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dev_get_vdc_property
+
+  JSBool dev_set_vdc_property(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+      if(self.is("Device")) {
+        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+        boost::shared_ptr<Device> pDev(intf->getDevice());
+        if (!pDev->isVdcDevice()) {
+          JS_ReportError(cx, "Device is not a vdc device");
+          return JS_FALSE;
+        }
+
+        if (argc == 2) {
+          std::string path;
+          std::string value;
+          try {
+            path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          } catch (ScriptException& ex) {
+            JS_ReportError(cx, ex.what());
+            return JS_FALSE;
+          }
+          jsrefcount ref = JS_SuspendRequest(cx);
+          try {
+            std::vector<std::string> parts = splitString(path, '/');
+            google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+            vdcapi::PropertyElement* currentElement;
+            bool firstElement = true;
+            foreach(std::string part, parts) {
+              if (firstElement) {
+                currentElement = query.Add();
+                firstElement = false;
+              } else {
+                currentElement = currentElement->add_elements();
+              }
+              currentElement->set_name(part);
+            }
+
+            if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[1])) {
+              StringConverter st("UTF-8", "UTF-8");
+              std::string propValue = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]));
+              currentElement->mutable_value()->set_v_string(propValue);
+            } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[1])) {
+              currentElement->mutable_value()->set_v_bool(ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]));
+            } else if (JSVAL_IS_INT(JS_ARGV(cx, vp)[1])) {
+              currentElement->mutable_value()->set_v_int64(ctx->convertTo<int>(JS_ARGV(cx, vp)[1]));
+            } else if(JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[1])) {
+              currentElement->mutable_value()->set_v_double(ctx->convertTo<double>(JS_ARGV(cx, vp)[1]));
+            } else {
+              JS_ReportWarning(cx, "Property.setVdcProperty: unknown type of argument 2");
+              JS_ResumeRequest(cx, ref);
+              return JS_FALSE;
+            }
+            pDev->setVdcProperty(query);
+
+            JS_ResumeRequest(cx, ref);
+            JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+            return JS_TRUE;
+          } catch(const BusApiError& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Bus failure: %s", ex.what());
+          } catch (DSSException& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "Failure: %s", ex.what());
+          } catch (std::exception& ex) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "General failure: %s", ex.what());
+          }
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dev_set_output_value
+
   JSBool dev_set_output_value(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -2618,6 +2768,8 @@ namespace dss {
     JS_FS("getPropertyNode", dev_get_property_node, 0, 0),
     JS_FS("setJokerGroup", dev_set_joker_group, 1, 0),
     JS_FS("setButtonID", dev_set_button_id, 1, 0),
+    JS_FS("setVdcProperty", dev_set_vdc_property, 2, 0),
+    JS_FS("getVdcProperty", dev_get_vdc_property, 1, 0),
     JS_FS_END
   };
 
