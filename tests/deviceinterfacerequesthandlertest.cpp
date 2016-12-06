@@ -175,7 +175,7 @@ private:
     RestfulRequest req("bla/" + _functionName, _params);
     std::string temp;
     BOOST_CHECK_THROW(temp =
-      m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession), SensorOutOfRangeException);
+      m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession), DSSException);
   }
 
   DeviceInterfaceRequestHandlerValid m_RequestHandler;

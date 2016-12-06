@@ -467,19 +467,19 @@ namespace dss {
     case SensorType::OutputCurrent:
     case SensorType::ActivePowerVA:
       if (_sensorValue < 0 || _sensorValue > 4095) {
-        throw SensorOutOfRangeException("Value must be in range [0..4095]");
+        throw DSSException("Value must be in range [0..4095]");
       }
       convertedSensorValue = (int) (_sensorValue + 0.5);
       break;
     case SensorType::ElectricMeter:
       if (_sensorValue < 0 || _sensorValue > 40.95) {
-        throw SensorOutOfRangeException("Value must be in range [0..40.95]");
+        throw DSSException("Value must be in range [0..40.95]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.005) / 0.01);
       break;
     case SensorType::OutputCurrent16A:
       if (_sensorValue < 0 || _sensorValue > 16380) {
-        throw SensorOutOfRangeException("Value must be in range [0..16380]");
+        throw DSSException("Value must be in range [0..16380]");
       }
       convertedSensorValue = (int) ((_sensorValue + 2) / 4);
       break;
@@ -487,7 +487,7 @@ namespace dss {
     case SensorType::TemperatureOutdoors:
     case SensorType::RoomTemperatureSetpoint:
       if (_sensorValue < -43.15 || _sensorValue > 59.225) {
-        throw SensorOutOfRangeException("Value must be in range [-43.15..59.225]");
+        throw DSSException("Value must be in range [-43.15..59.225]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.0125 + 273.15 - 230.0) * 4 / 0.1);
       break;
@@ -496,52 +496,52 @@ namespace dss {
     case SensorType::CO2Concentration:
     case SensorType::COConcentration:
       if (_sensorValue < 1 || _sensorValue > 131446.795) {
-        throw SensorOutOfRangeException("Value must be in range [1..131446.795]");
+        throw DSSException("Value must be in range [1..131446.795]");
       }
       convertedSensorValue = (int) (800 * log10(_sensorValue));
       break;
     case SensorType::HumidityIndoors:
     case SensorType::HumidityOutdoors:
       if (_sensorValue < 0 || _sensorValue > 102.375) {
-        throw SensorOutOfRangeException("Value must be in range [0..102.375]");
+        throw DSSException("Value must be in range [0..102.375]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
     case SensorType::WindSpeed:
     case SensorType::GustSpeed:
       if (_sensorValue < 0 || _sensorValue > 102.375) {
-        throw SensorOutOfRangeException("Value must be in range [0..102.375]");
+        throw DSSException("Value must be in range [0..102.375]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
     case SensorType::SoundPressureLevel:
       if (_sensorValue < 0 || _sensorValue > 255.938) {
-        throw SensorOutOfRangeException("Value must be in range [0..255.938]");
+        throw DSSException("Value must be in range [0..255.938]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.25);
       break;
     case SensorType::RoomTemperatureControlVariable:
       if (_sensorValue < -100 || _sensorValue > 100) {
-        throw SensorOutOfRangeException("Value must be in range [-100..100]");
+        throw DSSException("Value must be in range [-100..100]");
       }
       convertedSensorValue = (int) (_sensorValue + 0.5 + 100);
       break;
     case SensorType::WindDirection:
     case SensorType::GustDirection:
       if (_sensorValue < 0 || _sensorValue > 511.875) {
-        throw SensorOutOfRangeException("Value must be in range [0..511.875]");
+        throw DSSException("Value must be in range [0..511.875]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.0625) * 8);
       break;
     case SensorType::Precipitation:
       if (_sensorValue < 0 || _sensorValue > 102.375) {
-        throw SensorOutOfRangeException("Value must be in range [0..102.375]");
+        throw DSSException("Value must be in range [0..102.375]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.0125) * 4 / 0.1);
       break;
     case SensorType::AirPressure:
       if (_sensorValue < 200 || _sensorValue > 1223.75) {
-        throw SensorOutOfRangeException("Value must be in range [200..1223.75]");
+        throw DSSException("Value must be in range [200..1223.75]");
       }
       convertedSensorValue = (int) ((_sensorValue + 0.125 - 200) * 4);
       break;

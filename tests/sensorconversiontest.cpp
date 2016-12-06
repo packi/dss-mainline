@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(test_sensor_conversion)
   BOOST_CHECK_NO_THROW(sensorToSystem(SensorType::TemperatureIndoors, sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MIN)));
   BOOST_CHECK_NO_THROW(sensorToSystem(SensorType::TemperatureIndoors, sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MAX)));
 
-  BOOST_CHECK_THROW(sensorToSystem(SensorType::TemperatureIndoors, (float)sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MIN)), SensorOutOfRangeException);
+  BOOST_CHECK_THROW(sensorToSystem(SensorType::TemperatureIndoors, (float)sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MIN)), DSSException);
   BOOST_CHECK_NO_THROW(sensorToSystem(SensorType::TemperatureIndoors, (float)sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MAX)));
 }
 

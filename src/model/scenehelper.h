@@ -31,12 +31,6 @@
 
 namespace dss {
 
-  class SensorOutOfRangeException : public DSSException {
-  public:
-    SensorOutOfRangeException(const std::string& _what)
-    : DSSException(_what) {}
-  }; // SensorOutOfRangeException
-
   /** Helper functions for scene management. */
   class SceneHelper {
   private:
