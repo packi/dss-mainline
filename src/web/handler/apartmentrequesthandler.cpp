@@ -45,7 +45,6 @@
 #include "src/model/cluster.h"
 #include "src/model/set.h"
 #include "src/model/modelmaintenance.h"
-#include "src/model/scenehelper.h"
 #include "src/stringconverter.h"
 #include "src/model-features.h"
 #include "src/vdc-db.h"
@@ -402,26 +401,26 @@ namespace dss {
           case HeatingControlModeIDOff:
             break;
           case HeatingControlModeIDPID:
-            json.add("Off", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
-            json.add("Comfort", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
-            json.add("Economy", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
-            json.add("NotUsed", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
-            json.add("Night", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
-            json.add("Holiday", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
-            json.add("Cooling", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+            json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+            json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+            json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+            json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+            json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+            json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+            json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+            json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
-            json.add("Off", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
-            json.add("Comfort", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
-            json.add("Economy", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
-            json.add("NotUsed", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
-            json.add("Night", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
-            json.add("Holiday", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
-            json.add("Cooling", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+            json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+            json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+            json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+            json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+            json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+            json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+            json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+            json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
             break;
           }
           json.endObject();

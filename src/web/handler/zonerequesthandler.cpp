@@ -404,41 +404,41 @@ namespace dss {
             break;
           case HeatingControlModeIDPID:
             json.add("Off",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
             json.add("Comfort",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
             json.add("Economy",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
             json.add("NotUsed",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
             json.add("Night",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
             json.add("Holiday",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
             json.add("Cooling",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
             json.add("CoolingOff",
-                sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
             json.add("Off",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
             json.add("Comfort",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
             json.add("Economy",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
             json.add("NotUsed",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
             json.add("Night",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
             json.add("Holiday",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
             json.add("Cooling",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
             json.add("CoolingOff",
-                sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
             break;
 
           }
@@ -476,88 +476,88 @@ namespace dss {
           if (_request.hasParameter("Off")) {
             try {
               iValue = strToUInt(_request.getParameter("Off"));
-              hOpValues.OpMode0 = sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode0 = doubleToSensorValue(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Off"));
-                hOpValues.OpMode0 = sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode0 = doubleToSensorValue(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Comfort")) {
             try {
               iValue = strToUInt(_request.getParameter("Comfort"));
-              hOpValues.OpMode1 = sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode1 = doubleToSensorValue(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Comfort"));
-                hOpValues.OpMode1 = sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode1 = doubleToSensorValue(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Economy")) {
             try {
               iValue = strToUInt(_request.getParameter("Economy"));
-              hOpValues.OpMode2 = sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode2 = doubleToSensorValue(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Economy"));
-                hOpValues.OpMode2 = sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode2 = doubleToSensorValue(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("NotUsed")) {
             try {
               iValue = strToUInt(_request.getParameter("NotUsed"));
-              hOpValues.OpMode3 = sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode3 = doubleToSensorValue(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("NotUsed"));
-                hOpValues.OpMode3 = sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode3 = doubleToSensorValue(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Night")) {
             try {
               iValue = strToUInt(_request.getParameter("Night"));
-              hOpValues.OpMode4 = sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode4 = doubleToSensorValue(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Night"));
-                hOpValues.OpMode4 = sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode4 = doubleToSensorValue(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Holiday")) {
             try {
               iValue = strToUInt(_request.getParameter("Holiday"));
-              hOpValues.OpMode5 = sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode5 = doubleToSensorValue(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Holiday"));
-                hOpValues.OpMode5 = sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode5 = doubleToSensorValue(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("Cooling")) {
             try {
               iValue = strToUInt(_request.getParameter("Cooling"));
-              hOpValues.OpMode6 = sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode6 = doubleToSensorValue(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("Cooling"));
-                hOpValues.OpMode6 = sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode6 = doubleToSensorValue(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
           if (_request.hasParameter("CoolingOff")) {
             try {
               iValue = strToUInt(_request.getParameter("CoolingOff"));
-              hOpValues.OpMode7 = sensorToSystem(SensorConversion, iValue);
+              hOpValues.OpMode7 = doubleToSensorValue(SensorConversion, iValue);
             } catch(std::invalid_argument& e) {
               try {
                 fValue = strToDouble(_request.getParameter("CoolingOff"));
-                hOpValues.OpMode7 = sensorToSystem(SensorConversion, fValue);
+                hOpValues.OpMode7 = doubleToSensorValue(SensorConversion, fValue);
               } catch(std::invalid_argument& e) {}
             }
           }
@@ -630,15 +630,15 @@ namespace dss {
           hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
               hProp.m_HeatingControlDSUID, pZone->getID());
 
-          json.add("CtrlTRecent", (double) sensorToFloat12(SensorType::TemperatureIndoors, hInternals.Trecent));
-          json.add("CtrlTReference", (double) sensorToFloat12(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
+          json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
+          json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
           json.add("CtrlTError", (double) hInternals.TError * 0.025);
           json.add("CtrlTErrorPrev", (double) hInternals.TErrorPrev * 0.025);
           json.add("CtrlIntegral", (double) hInternals.Integral * 0.025);
           json.add("CtrlYp", (double) hInternals.Yp * 0.01);
           json.add("CtrlYi", (double) hInternals.Yi * 0.01);
           json.add("CtrlYd", (double) hInternals.Yd *0.01);
-          json.add("CtrlY", (double) sensorToFloat12(SensorType::RoomTemperatureControlVariable, hInternals.Y));
+          json.add("CtrlY", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hInternals.Y));
           json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
 
           return json.successJSON();

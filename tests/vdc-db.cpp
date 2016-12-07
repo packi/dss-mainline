@@ -63,6 +63,7 @@ public:
 };
 } // namespace
 
+#if 0
 static void dumpStates(std::vector<DeviceStateSpec_t> states) {
   foreach (const DeviceStateSpec_t &state, states) {
     std::string values;
@@ -75,6 +76,7 @@ static void dumpStates(std::vector<DeviceStateSpec_t> states) {
     Logger::getInstance()->log(state.Name + ": [" + values + "]", lsWarning);
   }
 }
+#endif
 
 static bool jsonStringsAreEqual(const std::string& expected, const std::string& result, std::string& errorString) {
   rapidjson::Document returnedResult;
@@ -167,6 +169,7 @@ BOOST_FIXTURE_TEST_CASE(getStates, Fixture) {
   BOOST_CHECK_EQUAL(states_i[0].values[0].second, "d");
 }
 
+#if 0
 static void dumpProperties(const std::vector<VdcDb::PropertyDesc> &props) {
   std::string out;
   foreach (const VdcDb::PropertyDesc &prop, props) {
@@ -174,6 +177,7 @@ static void dumpProperties(const std::vector<VdcDb::PropertyDesc> &props) {
   }
   Logger::getInstance()->log("properties: \n" + out, lsWarning);
 }
+#endif
 
 BOOST_FIXTURE_TEST_CASE(lookupProperties, Fixture) {
   std::vector<VdcDb::PropertyDesc> props;
@@ -222,6 +226,7 @@ BOOST_FIXTURE_TEST_CASE(lookupActions, Fixture) {
   dumpActionDesc(actions);
 }
 
+#if 0
 static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
   std::string out;
   foreach (auto action, actions) {
@@ -232,6 +237,7 @@ static void dumpDesc(const std::vector<VdcDb::StandardActionDesc> &actions) {
   }
   Logger::getInstance()->log("standard actions: \n" + out, lsWarning);
 }
+#endif
 
 BOOST_FIXTURE_TEST_CASE(lookupStandardActions, Fixture) {
   std::vector<VdcDb::StandardActionDesc> stdActions;

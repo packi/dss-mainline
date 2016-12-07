@@ -41,7 +41,6 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/model/modelconst.h"
-#include "src/model/scenehelper.h"
 #include "src/util.h"
 #include "src/event.h"
 #include "src/dss.h"
@@ -785,7 +784,7 @@ namespace dss {
                                            SensorType _sensorType,
                                            boost::shared_ptr<Device> _dev) {
     Logger::getInstance()->log("SensorAssignment: assign zone: " + intToString(_zone->getID()) +
-        ", type: " + sensorName(_sensorType) +
+        ", type: " + sensorTypeName(_sensorType) +
         " => " + dsuid2str(_dev->getDSID()), lsInfo);
 
     _zone->setSensor(_dev, _sensorType);
@@ -795,7 +794,7 @@ namespace dss {
   void StructureManipulator::resetZoneSensor(boost::shared_ptr<Zone> _zone,
                                              SensorType _sensorType) {
     Logger::getInstance()->log("SensorAssignment: reset zone: " + intToString(_zone->getID()) +
-        ", type: " + sensorName(_sensorType) +
+        ", type: " + sensorTypeName(_sensorType) +
         " => none", lsInfo);
 
     _zone->resetSensor(_sensorType);
@@ -855,7 +854,7 @@ namespace dss {
         for (size_t index = 0; index < sUnasList->size(); ++index) {
           Logger::getInstance()->log(std::string("SensorAssignment: sync reset ") +
                   "zone: " + intToString(zone->getID()) +
-                  ", type: " + sensorName(sUnasList->at(index)) +
+                  ", type: " + sensorTypeName(sUnasList->at(index)) +
                   " => none", lsInfo);
 
           m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
@@ -867,7 +866,7 @@ namespace dss {
             it != sAsList.end();
             ++it) {
           Logger::getInstance()->log("SensorAssignment: sync assign zone: " + intToString(zone->getID()) +
-                  ", type: " + sensorName((*it)->m_sensorType) +
+                  ", type: " + sensorTypeName((*it)->m_sensorType) +
                   " => " + dsuid2str((*it)->m_DSUID), lsInfo);
 
           m_Interface.setZoneSensor(zone->getID(), (*it)->m_sensorType, (*it)->m_DSUID);

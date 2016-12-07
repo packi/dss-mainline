@@ -28,7 +28,6 @@
   #include "build_info.h"
 #endif
 
-
 #include "dss.h"
 
 #include <cassert>
@@ -44,6 +43,10 @@
 #include <sys/resource.h>
 #include <boost/asio/io_service.hpp>
 #include <thread>
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/algorithm/string/finder.hpp>
 
 #include "logger.h"
 #include "propertysystem.h"
@@ -78,10 +81,6 @@
 #include "scripting/jsmodel.h"
 #include "scripting/jsevent.h"
 #include "scripting/jsmetering.h"
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/algorithm/string/finder.hpp>
 
 #include "webservice_connection.h"
 #include "model-features.h"

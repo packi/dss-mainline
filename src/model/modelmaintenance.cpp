@@ -2139,7 +2139,7 @@ namespace dss {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
-      double fValue = sensorToFloat12(_sensorType, _sensorValue);
+      double fValue = sensorValueToDouble(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
       // check for a valid dsuid

@@ -30,7 +30,6 @@
 
 #include "event.h"
 #include "foreach.h"
-#include "model/scenehelper.h"
 #include "model/group.h"
 #include "webservice_api.h"
 

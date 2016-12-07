@@ -24,6 +24,7 @@
 #define DS485GROUPSCENECONST_H_
 
 #include <stdint.h>
+#include <string>
 
 namespace dss {
 
@@ -187,10 +188,11 @@ namespace dss {
 
   const int SensorMaxLifeTime = 3600; /* 1h */
 
-  double sensorToFloat12(SensorType _sensorType, const int _sensorValue);
-  int sensorToSystem(SensorType _sensorType, const double _sensorValue);
-  uint8_t sensorToPrecision(SensorType _sensorType);
-  std::string sensorName(SensorType _sensorType);
+  double sensorValueToDouble(SensorType _sensorType, const int _sensorValue);
+  int doubleToSensorValue(SensorType _sensorType, const double _sensorValue);
+  uint8_t sensorTypeToPrecision(SensorType _sensorType);
+  std::string sensorTypeName(SensorType _sensorType);
+  std::ostream& operator<<(std::ostream& stream, SensorType type);
 
   // BinaryInput Type IDs
   const int BinaryInputIDPresence = 1;

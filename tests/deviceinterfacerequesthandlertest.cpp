@@ -30,7 +30,6 @@
 #include "src/model/deviceinterface.h"
 #include "src/web/handler/deviceinterfacerequesthandler.h"
 #include "src/session.h"
-#include "src/model/scenehelper.h"
 
 using namespace dss;
 
@@ -96,7 +95,7 @@ BOOST_AUTO_TEST_SUITE(WebDeviceInterface)
       functionCalled("stopOutputChannelValue(" + intToString(_channel) + ")");
     }
     virtual void pushSensor(const callOrigin_t _origin, const SceneAccessCategory _category, dsuid_t _sourceID, SensorType _sensorType, double _sensorValueFloat, const std::string _token) {
-      (void)sensorToSystem(_sensorType, _sensorValueFloat);
+      (void)doubleToSensorValue(_sensorType, _sensorValueFloat);
       functionCalled("pushSensorValue");
     }
 
@@ -175,7 +174,7 @@ private:
     RestfulRequest req("bla/" + _functionName, _params);
     std::string temp;
     BOOST_CHECK_THROW(temp =
-      m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession), SensorOutOfRangeException);
+      m_RequestHandler.handleDeviceInterfaceRequest(req, dummy, dummySession), DSSException);
   }
 
   DeviceInterfaceRequestHandlerValid m_RequestHandler;

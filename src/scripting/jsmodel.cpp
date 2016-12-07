@@ -48,7 +48,6 @@
 #include "src/model/cluster.h"
 #include "src/model/zone.h"
 #include "src/model/state.h"
-#include "src/model/scenehelper.h"
 #include "src/metering/metering.h"
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsproperty.h"
@@ -3634,7 +3633,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        double sensorValueFloat = sensorToFloat12(sensorType, sensorValue);
+        double sensorValueFloat = sensorValueToDouble(sensorType, sensorValue);
         pGroup->pushSensor(coJSScripting, category, sourceDSID, sensorType, sensorValueFloat, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
@@ -3994,41 +3993,41 @@ namespace dss {
         break;
       case HeatingControlModeIDPID:
         obj.setProperty<double>("Off",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
         obj.setProperty<double>("Cooling",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
         obj.setProperty<double>("CoolingOff",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
         break;
       case HeatingControlModeIDZoneFollower:
         break;
       case HeatingControlModeIDFixed:
         obj.setProperty<double>("Off",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
         obj.setProperty<double>("Cooling",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
         obj.setProperty<double>("CoolingOff",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
         break;
       }
       return JS_TRUE;
@@ -4219,21 +4218,21 @@ namespace dss {
 
         double fValue = strToDouble(propValue);
         if (propKey == "Off") {
-          hOpValues.OpMode0 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode0 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Comfort") {
-          hOpValues.OpMode1 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode1 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Economy") {
-          hOpValues.OpMode2 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode2 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "NotUsed") {
-          hOpValues.OpMode3 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode3 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Night") {
-          hOpValues.OpMode4 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode4 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Holiday") {
-          hOpValues.OpMode5 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode5 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Cooling") {
-          hOpValues.OpMode6 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode6 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "CoolingOff") {
-          hOpValues.OpMode7 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode7 = doubleToSensorValue(SensorConversion, fValue);
         } else {
           JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: unknown opmode \"%s\"", propKey.c_str());
         }
