@@ -250,4 +250,9 @@ namespace dss {
     }
     return _name;
   } // sensorTypeName
+
+  std::ostream& operator<<(std::ostream& stream, SensorType type) {
+    stream << dss::sensorTypeName(type);
+    return stream;
+  }
 }

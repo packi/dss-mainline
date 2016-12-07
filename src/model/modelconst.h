@@ -192,6 +192,7 @@ namespace dss {
   int doubleToSensorValue(SensorType _sensorType, const double _sensorValue);
   uint8_t sensorTypeToPrecision(SensorType _sensorType);
   std::string sensorTypeName(SensorType _sensorType);
+  std::ostream& operator<<(std::ostream& stream, SensorType type);
 
   // BinaryInput Type IDs
   const int BinaryInputIDPresence = 1;
