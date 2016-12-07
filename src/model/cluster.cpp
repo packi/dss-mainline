@@ -26,7 +26,6 @@
 
 
 #include "cluster.h"
-#include "scenehelper.h"
 #include "apartment.h"
 #include "src/propertysystem.h"
 #include "src/foreach.h"

@@ -41,7 +41,6 @@
 #include "src/event.h"
 
 #include "src/model/busscanner.h"
-#include "src/model/scenehelper.h"
 #include "src/model/modelevent.h"
 #include "src/model/modelmaintenance.h"
 

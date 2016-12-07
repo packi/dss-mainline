@@ -48,7 +48,6 @@
 #include "src/model/cluster.h"
 #include "src/model/zone.h"
 #include "src/model/state.h"
-#include "src/model/scenehelper.h"
 #include "src/metering/metering.h"
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsproperty.h"

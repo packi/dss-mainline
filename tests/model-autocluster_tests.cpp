@@ -46,7 +46,6 @@
 #include "src/propertysystem.h"
 #include "src/structuremanipulator.h"
 #include "src/businterface.h"
-#include "src/model/scenehelper.h"
 #include "util/ds485-bus-mockups.h"
 #include "util/modelmaintenance-mockup.h"
 

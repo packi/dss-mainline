@@ -41,7 +41,6 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/model/modelconst.h"
-#include "src/model/scenehelper.h"
 #include "src/util.h"
 #include "src/event.h"
 #include "src/dss.h"

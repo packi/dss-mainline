@@ -45,7 +45,6 @@
 #include "model/apartment.h"
 #include "model/state.h"
 #include "model/modelconst.h"
-#include "model/scenehelper.h"
 #include "model/modulator.h"
 #include "model/data_types.h"
 #include "propertysystem.h"

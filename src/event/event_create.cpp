@@ -24,7 +24,6 @@
 
 #include "event/event_fields.h"
 #include "ds485types.h"
-#include "model/scenehelper.h"
 #include "model/state.h"
 #include "util.h"
 

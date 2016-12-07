@@ -45,7 +45,6 @@
 #include "src/model/cluster.h"
 #include "src/model/set.h"
 #include "src/model/modelmaintenance.h"
-#include "src/model/scenehelper.h"
 #include "src/stringconverter.h"
 #include "src/model-features.h"
 #include "src/vdc-db.h"

@@ -30,7 +30,6 @@
 #include "src/model/deviceinterface.h"
 #include "src/web/handler/deviceinterfacerequesthandler.h"
 #include "src/session.h"
-#include "src/model/scenehelper.h"
 
 using namespace dss;
 
