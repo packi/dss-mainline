@@ -24,6 +24,7 @@
 #define DS485GROUPSCENECONST_H_
 
 #include <stdint.h>
+#include <string>
 
 namespace dss {
 

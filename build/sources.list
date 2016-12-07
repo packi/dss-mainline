@@ -91,6 +91,7 @@ libdsscore_a_SOURCES =  \
 	../src/model/devicereference.h \
 	../src/model/group.cpp \
 	../src/model/group.h \
+	../src/model/modelconst.cpp \
 	../src/model/modelconst.h \
 	../src/model/modelevent.cpp \
 	../src/model/modelevent.h \
