@@ -158,7 +158,7 @@ namespace dss {
   } DeviceFeatures_t;
 
   class Device;
-  struct DeviceBinaryInput {
+  struct DeviceBinaryInput : boost::noncopyable {
     int m_inputIndex;        // input line index
     BinaryInputType m_inputType; // type of input signal
     BinaryInputId m_inputId;           // target Id, like ButtonId
@@ -166,8 +166,13 @@ namespace dss {
     int m_targetGroupId;     // index of target group, 0..63
     boost::shared_ptr<State> m_state;
 
-    DeviceBinaryInput(Device& device);
+    DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index);
     ~DeviceBinaryInput();
+
+    void setTarget(GroupType type, uint8_t group);
+    void setInputId(BinaryInputId inputId);
+    void setInputType(BinaryInputType inputType);
+    void handleEvent(BinaryInputState inputState);
   private:
     Device& m_device;
   };
