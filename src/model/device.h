@@ -513,6 +513,8 @@ namespace dss {
     /** Retuturns group to which the joker is configured or -1 if device is not
         a joker */
     int getJokerGroup() const;
+    /** Returns the zoneID that this device group is in. */
+    int getGroupZoneID(int groupID);
 
     /** Removes the device from all group.
      * The device will remain in the broadcastgroup though.

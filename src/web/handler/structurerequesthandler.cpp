@@ -506,6 +506,8 @@ namespace dss {
         groupID = -1;
       } else if (grType == "global") {
         groupID = -2;
+      } else if (grType == "globalApp") {
+        groupID = -3;
       }
     } else {
       return JSONWriter::failure("Parameter groupID or groupAutoSelect missing");
@@ -529,6 +531,14 @@ namespace dss {
       }
       if (pGroup->getStandardGroupID() > 0) {
         pGroup.reset();
+      }
+    } else if (groupID == -3) {
+      if (zoneID != 0) {
+        return JSONWriter::failure("Global application groups only allowed in Zone 0");
+      }
+      // find any free user global application slot
+      for (groupID = GroupIDGlobalAppUserMin; (pGroup == NULL) && (groupID < GroupIDGlobalAppUserMax); groupID ++) {
+        pGroup = zone->getGroup(groupID);
       }
     }
 
