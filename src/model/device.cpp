@@ -2363,7 +2363,7 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int, BinaryInputId>(binaryInput->m_inputId));
         entry->createProperty("inputIndex")
                 ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputIndex));
-        PropertyNodePtr stateNode = binaryInput->m_state->getPropertyNode();
+        PropertyNodePtr stateNode = binaryInput->getState().getPropertyNode();
         PropertyNodePtr stateValueNode = stateNode->getProperty("value");
         if (stateValueNode != NULL) {
           PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
