@@ -400,8 +400,8 @@ namespace dss {
     dev->setOutputMode(_spec.OutputMode);
 
     if (_dsMeter->getApiVersion() >= 0x303) {
-      dev->setActiveGroup(_spec.deviceActiveGroup);
-      dev->setDefaultGroup(_spec.deviceDefaultGroup);
+      dev->setActiveGroup(_spec.activeGroup);
+      dev->setDefaultGroup(_spec.defaultGroup);
     }
 
     dev->setButtonActiveGroup(_spec.buttonActiveGroup);

@@ -139,8 +139,8 @@ namespace dss {
     bool sensorInputsValid;
     std::vector<int> outputChannels;
     bool outputChannelsValid;
-    uint8_t deviceActiveGroup;
-    uint8_t deviceDefaultGroup;
+    uint8_t activeGroup;
+    uint8_t defaultGroup;
   } DeviceSpec_t;
 
   typedef struct {
