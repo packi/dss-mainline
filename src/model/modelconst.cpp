@@ -30,71 +30,51 @@
 
 namespace dss {
   double sensorValueToDouble(SensorType _sensorType, int _sensorValue) {
-    double convertedSensorValue;
     switch (_sensorType) {
     case SensorType::ActivePower:
     case SensorType::OutputCurrent:
     case SensorType::ActivePowerVA:
-      convertedSensorValue = static_cast<double>(_sensorValue);
-      break;
+      return static_cast<double>(_sensorValue);
     case SensorType::ElectricMeter:
-      convertedSensorValue = roundDigits(_sensorValue * 0.01, 2);
-      break;
+      return roundDigits(_sensorValue * 0.01, 2);
     case SensorType::OutputCurrent16A:
-      convertedSensorValue = static_cast<double>(_sensorValue * 4);
-      break;
+      return static_cast<double>(_sensorValue * 4);
     case SensorType::TemperatureIndoors:
     case SensorType::TemperatureOutdoors:
     case SensorType::RoomTemperatureSetpoint:
-      convertedSensorValue = _sensorValue * 0.1 / 4 - 273.15 + 230.0;
-      convertedSensorValue = roundDigits(convertedSensorValue, 3);
-      break;
+      return roundDigits(_sensorValue * 0.1 / 4 - 273.15 + 230.0, 3);
     case SensorType::BrightnessIndoors:
     case SensorType::BrightnessOutdoors:
     case SensorType::CO2Concentration:
     case SensorType::COConcentration:
-      convertedSensorValue = pow(10, static_cast<double>(_sensorValue) / 800);
-      convertedSensorValue = roundDigits(convertedSensorValue, 4);
-      break;
+      return roundDigits(pow(10, _sensorValue / 800.0), 4);
     case SensorType::HumidityIndoors:
     case SensorType::HumidityOutdoors:
-      convertedSensorValue = _sensorValue * 0.1 / 4;
-      convertedSensorValue= roundDigits(convertedSensorValue, 3);
-      break;
+      return roundDigits(_sensorValue * 0.1 / 4 , 3);
     case SensorType::WindSpeed:
     case SensorType::GustSpeed:
-      convertedSensorValue = _sensorValue * 0.1 / 4;
-      convertedSensorValue = roundDigits(convertedSensorValue, 3);
-      break;
+      return roundDigits(_sensorValue * 0.1 / 4, 3);
     case SensorType::SoundPressureLevel:
-      convertedSensorValue = _sensorValue * 0.25 / 4;
-      convertedSensorValue= roundDigits(convertedSensorValue, 3);
-      break;
+      return roundDigits(_sensorValue * 0.25 / 4, 3);
     case SensorType::RoomTemperatureControlVariable:
-      convertedSensorValue = static_cast<double>(_sensorValue - 100);
-      break;
+      return static_cast<double>(_sensorValue - 100);
     case SensorType::WindDirection:
     case SensorType::GustDirection:
-      convertedSensorValue = _sensorValue * 0.5 / 4;
-      convertedSensorValue= roundDigits(convertedSensorValue, 3);
-      break;
+      return roundDigits(_sensorValue * 0.5 / 4, 3);
     case SensorType::Precipitation:
-      convertedSensorValue = _sensorValue * 0.1 / 4;
-      convertedSensorValue= roundDigits(convertedSensorValue, 3);
-      break;
+      return roundDigits(_sensorValue * 0.1 / 4, 3);
     case SensorType::AirPressure:
-      convertedSensorValue = static_cast<double>((_sensorValue / 4) + 200);
-      convertedSensorValue= roundDigits(convertedSensorValue, 3);
-      break;
-    default:
-      convertedSensorValue = static_cast<double>(_sensorValue);
-      break;
+      return roundDigits(_sensorValue / 4.0 + 200, 3);
+    case SensorType::Reserved1:
+    case SensorType::Reserved2:
+    case SensorType::NotUsed:
+    case SensorType::UnknownType:
+      return static_cast<double>(_sensorValue);
     }
-    return convertedSensorValue;
+    return static_cast<double>(_sensorValue);
   } // sensorValueToDouble
 
   int doubleToSensorValue(SensorType _sensorType, double _sensorValue) {
-    int convertedSensorValue;
     switch (_sensorType) {
     case SensorType::ActivePower:
     case SensorType::OutputCurrent:
@@ -102,28 +82,24 @@ namespace dss {
       if (_sensorValue < 0 || _sensorValue > 4095) {
         throw DSSException("Value must be in range [0..4095]");
       }
-      convertedSensorValue = static_cast<int>(_sensorValue + 0.5);
-      break;
+      return static_cast<int>(_sensorValue + 0.5);
     case SensorType::ElectricMeter:
       if (_sensorValue < 0 || _sensorValue > 40.95) {
         throw DSSException("Value must be in range [0..40.95]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 0.005) / 0.01);
-      break;
+      return static_cast<int>((_sensorValue + 0.005) / 0.01);
     case SensorType::OutputCurrent16A:
       if (_sensorValue < 0 || _sensorValue > 16380) {
         throw DSSException("Value must be in range [0..16380]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 2) / 4);
-      break;
+      return static_cast<int>((_sensorValue + 2) / 4);
     case SensorType::TemperatureIndoors:
     case SensorType::TemperatureOutdoors:
     case SensorType::RoomTemperatureSetpoint:
       if (_sensorValue < -43.15 || _sensorValue > 59.225) {
         throw DSSException("Value must be in range [-43.15..59.225]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 0.0125 + 273.15 - 230.0) * 4 / 0.1);
-      break;
+      return static_cast<int>((_sensorValue + 0.0125 + 273.15 - 230.0) * 4 / 0.1);
     case SensorType::BrightnessIndoors:
     case SensorType::BrightnessOutdoors:
     case SensorType::CO2Concentration:
@@ -131,123 +107,144 @@ namespace dss {
       if (_sensorValue < 1 || _sensorValue > 131446.795) {
         throw DSSException("Value must be in range [1..131446.795]");
       }
-      convertedSensorValue = static_cast<int>(800 * log10(_sensorValue));
-      break;
+      return static_cast<int>(800 * log10(_sensorValue));
     case SensorType::HumidityIndoors:
     case SensorType::HumidityOutdoors:
       if (_sensorValue < 0 || _sensorValue > 102.375) {
         throw DSSException("Value must be in range [0..102.375]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 0.0125) * 4 / 0.1);
-      break;
+      return static_cast<int>((_sensorValue + 0.0125) * 4 / 0.1);
     case SensorType::WindSpeed:
     case SensorType::GustSpeed:
       if (_sensorValue < 0 || _sensorValue > 102.375) {
         throw DSSException("Value must be in range [0..102.375]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 0.0125) * 4 / 0.1);
-      break;
+      return static_cast<int>((_sensorValue + 0.0125) * 4 / 0.1);
     case SensorType::SoundPressureLevel:
       if (_sensorValue < 0 || _sensorValue > 255.938) {
         throw DSSException("Value must be in range [0..255.938]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 0.0125) * 4 / 0.25);
-      break;
+      return static_cast<int>((_sensorValue + 0.0125) * 4 / 0.25);
     case SensorType::RoomTemperatureControlVariable:
       if (_sensorValue < -100 || _sensorValue > 100) {
         throw DSSException("Value must be in range [-100..100]");
       }
-      convertedSensorValue = static_cast<int>(_sensorValue + 0.5 + 100);
-      break;
+      return static_cast<int>(_sensorValue + 0.5 + 100);
     case SensorType::WindDirection:
     case SensorType::GustDirection:
       if (_sensorValue < 0 || _sensorValue > 511.875) {
         throw DSSException("Value must be in range [0..511.875]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 0.0625) * 8);
-      break;
+      return static_cast<int>((_sensorValue + 0.0625) * 8);
     case SensorType::Precipitation:
       if (_sensorValue < 0 || _sensorValue > 102.375) {
         throw DSSException("Value must be in range [0..102.375]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 0.0125) * 4 / 0.1);
-      break;
+      return static_cast<int>((_sensorValue + 0.0125) * 4 / 0.1);
     case SensorType::AirPressure:
       if (_sensorValue < 200 || _sensorValue > 1223.75) {
         throw DSSException("Value must be in range [200..1223.75]");
       }
-      convertedSensorValue = static_cast<int>((_sensorValue + 0.125 - 200) * 4);
-      break;
-    default:
-      convertedSensorValue = static_cast<int>(_sensorValue + 0.5);
-      break;
+      return static_cast<int>((_sensorValue + 0.125 - 200) * 4);
+    case SensorType::Reserved1:
+    case SensorType::Reserved2:
+    case SensorType::NotUsed:
+    case SensorType::UnknownType:
+      return static_cast<int>(_sensorValue + 0.5);
     }
-    return convertedSensorValue;
+    return static_cast<int>(_sensorValue + 0.5);
   } // doubleToSensorValue
 
   uint8_t sensorTypeToPrecision(SensorType _sensorType) {
     switch (_sensorType) {
       case SensorType::RoomTemperatureControlVariable:
         return 1;
-      default:
+      case SensorType::ActivePower:
+      case SensorType::OutputCurrent:
+      case SensorType::ElectricMeter:
+      case SensorType::TemperatureIndoors:
+      case SensorType::TemperatureOutdoors:
+      case SensorType::BrightnessIndoors:
+      case SensorType::BrightnessOutdoors:
+      case SensorType::HumidityIndoors:
+      case SensorType::HumidityOutdoors:
+      case SensorType::AirPressure:
+      case SensorType::GustSpeed:
+      case SensorType::GustDirection:
+      case SensorType::WindSpeed:
+      case SensorType::WindDirection:
+      case SensorType::Precipitation:
+      case SensorType::CO2Concentration:
+      case SensorType::COConcentration:
+      case SensorType::SoundPressureLevel:
+      case SensorType::RoomTemperatureSetpoint:
+      case SensorType::Reserved1:
+      case SensorType::Reserved2:
+      case SensorType::OutputCurrent16A:
+      case SensorType::ActivePowerVA:
+      case SensorType::NotUsed:
+      case SensorType::UnknownType:
         return 0;
     }
     return 0;
   }
 
   std::string sensorTypeName(SensorType _sensorType) {
-    std::string _name;
     switch(_sensorType) {
       case SensorType::ActivePower:
-        _name = "Active Power"; break;
+        return "Active Power";
       case SensorType::OutputCurrent:
-        _name = "Output Current"; break;
+        return "Output Current";
       case SensorType::ElectricMeter:
-        _name = "Electric Meter"; break;
+        return "Electric Meter";
       case SensorType::OutputCurrent16A:
-        _name = "Output Current Ex"; break;
+        return "Output Current Ex";
       case SensorType::ActivePowerVA:
-        _name = "Active Power Ex"; break;
+        return "Active Power Ex";
       case SensorType::TemperatureIndoors:
-        _name = "Temperature Indoors"; break;
+        return "Temperature Indoors";
       case SensorType::TemperatureOutdoors:
-        _name = "Temperature Outdoors"; break;
+        return "Temperature Outdoors";
       case SensorType::BrightnessIndoors:
-        _name = "Brightness Indoors"; break;
+        return "Brightness Indoors";
       case SensorType::BrightnessOutdoors:
-        _name = "Brightness Outdoors"; break;
+        return "Brightness Outdoors";
       case SensorType::HumidityIndoors:
-        _name = "Humidity Indoors"; break;
+        return "Humidity Indoors";
       case SensorType::HumidityOutdoors:
-        _name = "Humidity Outdoors"; break;
+        return "Humidity Outdoors";
       case SensorType::AirPressure:
-        _name = "Air Pressure"; break;
+        return "Air Pressure";
       case SensorType::GustSpeed:
-        _name = "Gust Speed"; break;
+        return "Gust Speed";
       case SensorType::GustDirection:
-        _name = "Gust Direction"; break;
+        return "Gust Direction";
       case SensorType::WindSpeed:
-        _name = "Wind Speed"; break;
+        return "Wind Speed";
       case SensorType::WindDirection:
-        _name = "Wind Direction"; break;
+        return "Wind Direction";
       case SensorType::SoundPressureLevel:
-        _name = "Sound Pressure Level"; break;
+        return "Sound Pressure Level";
       case SensorType::Precipitation:
-        _name = "Precipitation"; break;
+        return "Precipitation";
       case SensorType::RoomTemperatureSetpoint:
-        _name = "Nominal Temperature"; break;
+        return "Nominal Temperature";
       case SensorType::RoomTemperatureControlVariable:
-        _name = "Temperature Control Value"; break;
+        return "Temperature Control Value";
       case SensorType::CO2Concentration:
-        _name = "Carbon Dioxide Concentration"; break;
+        return "Carbon Dioxide Concentration";
       case SensorType::COConcentration:
-        _name = "Carbon Monoxide Concentration"; break;
+        return "Carbon Monoxide Concentration";
       case SensorType::UnknownType:
-        _name = "Unknown Type"; break;
-      default:
-        _name = "Invalid Type: " +  intToString(static_cast<int>(_sensorType)); break;
+        return "Unknown Type";
+      case SensorType::Reserved1:
+        return "Reserved1";
+      case SensorType::Reserved2:
+        return "Reserved2";
+      case SensorType::NotUsed:
+        return "NotUsed";
     }
-    return _name;
+    return "Invalid Type: " +  intToString(static_cast<int>(_sensorType));
   } // sensorTypeName
 
   std::ostream& operator<<(std::ostream& stream, SensorType type) {
