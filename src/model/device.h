@@ -353,7 +353,6 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     std::string getAKMButtonInputString(const int _mode);
-    void assignCustomBinaryInputValues(BinaryInputType inputType, boost::shared_ptr<State> state);
     bool hasBlinkSettings();
 
   public:
