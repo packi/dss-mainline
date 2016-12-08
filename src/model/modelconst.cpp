@@ -65,7 +65,10 @@ namespace dss {
       return roundDigits(_sensorValue * 0.1 / 4, 3);
     case SensorType::AirPressure:
       return roundDigits(_sensorValue / 4.0 + 200, 3);
-    default:
+    case SensorType::Reserved1:
+    case SensorType::Reserved2:
+    case SensorType::NotUsed:
+    case SensorType::UnknownType:
       return static_cast<double>(_sensorValue);
     }
     return static_cast<double>(_sensorValue);
@@ -143,7 +146,10 @@ namespace dss {
         throw DSSException("Value must be in range [200..1223.75]");
       }
       return static_cast<int>((_sensorValue + 0.125 - 200) * 4);
-    default:
+    case SensorType::Reserved1:
+    case SensorType::Reserved2:
+    case SensorType::NotUsed:
+    case SensorType::UnknownType:
       return static_cast<int>(_sensorValue + 0.5);
     }
     return static_cast<int>(_sensorValue + 0.5);
@@ -153,7 +159,31 @@ namespace dss {
     switch (_sensorType) {
       case SensorType::RoomTemperatureControlVariable:
         return 1;
-      default:
+      case SensorType::ActivePower:
+      case SensorType::OutputCurrent:
+      case SensorType::ElectricMeter:
+      case SensorType::TemperatureIndoors:
+      case SensorType::TemperatureOutdoors:
+      case SensorType::BrightnessIndoors:
+      case SensorType::BrightnessOutdoors:
+      case SensorType::HumidityIndoors:
+      case SensorType::HumidityOutdoors:
+      case SensorType::AirPressure:
+      case SensorType::GustSpeed:
+      case SensorType::GustDirection:
+      case SensorType::WindSpeed:
+      case SensorType::WindDirection:
+      case SensorType::Precipitation:
+      case SensorType::CO2Concentration:
+      case SensorType::COConcentration:
+      case SensorType::SoundPressureLevel:
+      case SensorType::RoomTemperatureSetpoint:
+      case SensorType::Reserved1:
+      case SensorType::Reserved2:
+      case SensorType::OutputCurrent16A:
+      case SensorType::ActivePowerVA:
+      case SensorType::NotUsed:
+      case SensorType::UnknownType:
         return 0;
     }
     return 0;
@@ -207,8 +237,12 @@ namespace dss {
         return "Carbon Monoxide Concentration";
       case SensorType::UnknownType:
         return "Unknown Type";
-      default:
-        return "Invalid Type: " +  intToString(static_cast<int>(_sensorType));
+      case SensorType::Reserved1:
+        return "Reserved1";
+      case SensorType::Reserved2:
+        return "Reserved2";
+      case SensorType::NotUsed:
+        return "NotUsed";
     }
     return "Invalid Type: " +  intToString(static_cast<int>(_sensorType));
   } // sensorTypeName
