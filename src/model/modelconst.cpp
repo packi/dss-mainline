@@ -83,7 +83,7 @@ namespace dss {
       convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
     case SensorType::AirPressure:
-      convertedSensorValue = static_cast<double>((_sensorValue / 4) + 200);
+      convertedSensorValue = _sensorValue / 4.0 + 200;
       convertedSensorValue= roundDigits(convertedSensorValue, 3);
       break;
     default:
