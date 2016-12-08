@@ -126,11 +126,11 @@ namespace dss {
     uint8_t LTMode;
     std::vector<int> Groups;
     dsuid_t DSID;
-    uint8_t ButtonID;
-    uint8_t GroupMembership;
-    uint8_t ActiveGroup;
-    bool SetsLocalPriority;
-    bool CallsPresent;
+    uint8_t buttonID;
+    uint8_t buttonGroupMembership;
+    uint8_t buttonActiveGroup;
+    bool buttonSetsLocalPriority;
+    bool buttonCallsPresent;
     std::string Name;
     uint16_t ZoneID;
     std::vector<DeviceBinaryInputSpec_t> binaryInputs;
