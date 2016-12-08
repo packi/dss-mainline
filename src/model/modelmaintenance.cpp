@@ -2087,21 +2087,18 @@ namespace dss {
 
       // binary input state synchronization event
       if (_sensorIndex == 32) {
-        for (int index = 0; index < pDev->getBinaryInputCount(); index++) {
-          boost::shared_ptr<State> state;
-          try {
-            state = pDev->getBinaryInput(index)->m_state;
-          } catch (ItemNotFoundException& e) {
-            continue;
-          }
+        int index = 0;
+        foreach (auto&& binaryInput, pDev->getBinaryInputs()) {
+          index++;
+          auto&& state = binaryInput->m_state;
           int oldState = state->getState();
           auto binaryInputState =
               (_sensorValue & (1 << index)) ? BinaryInputState::Active : BinaryInputState::Inactive;
           int newState = binaryInputState == BinaryInputState::Active ? State_Active : State_Inactive;
           if (newState != oldState) {
             state->setState(coSystem, newState);
-            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index, // HERE
-                                                    pDev->getDeviceBinaryInputType(index),
+            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
+                                                    binaryInput->m_inputType,
                                                     binaryInputState));
           }
         }
