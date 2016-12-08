@@ -27,6 +27,9 @@
 
 #include "dsbusinterfaceobj.h"
 
+#include "src/ds485/dsbusinterface.h"
+#include "src/messages/vdc-messages.pb.h"
+
 namespace dss {
 
   boost::recursive_mutex DSBusInterfaceObj::m_DSMApiHandleMutex;
@@ -36,6 +39,72 @@ namespace dss {
   void DSBusInterfaceObj::setDSMApiHandle(DsmApiHandle_t _value) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     m_DSMApiHandle = _value;
+  }
+
+  vdcapi::Message DSBusInterfaceObj::getVdcProperty(const dsuid_t& _dsuid, const dsuid_t& _meterDsuid,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_GET_PROPERTY);
+    vdcapi::vdsm_RequestGetProperty* getPropertyRequest = message.mutable_vdsm_request_get_property();
+    getPropertyRequest->set_dsuid(dsuid2str(_dsuid));
+    *getPropertyRequest->mutable_query() = query;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    int ret = UserProtobufMessageRequest(m_DSMApiHandle, _meterDsuid,
+                                         message.ByteSize(), arrayOut,
+                                         &arrayInSize, arrayIn);
+    DSBusInterface::checkResultCode(ret);
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::VDC_RESPONSE_GET_PROPERTY) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    return message;
+  }
+
+  void DSBusInterfaceObj::setVdcProperty(const dsuid_t& _dsuid, const dsuid_t& _meterDsuid,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    if (m_DSMApiHandle == NULL) {
+      throw std::runtime_error("Invalid libdsm api handle");
+    }
+
+    vdcapi::Message message;
+    message.set_type(vdcapi::VDSM_REQUEST_SET_PROPERTY);
+    vdcapi::vdsm_RequestSetProperty* setPropertyRquest = message.mutable_vdsm_request_set_property();
+    setPropertyRquest->set_dsuid(dsuid2str(_dsuid));
+    *setPropertyRquest->mutable_properties() = properties;
+    uint8_t arrayOut[REQUEST_LEN];
+    if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
+      throw std::runtime_error("SerializeToArray failed");
+    }
+    uint8_t arrayIn[RESPONSE_LEN];
+    uint16_t arrayInSize;
+    int ret = UserProtobufMessageRequest(m_DSMApiHandle, _meterDsuid,
+                                         message.ByteSize(), arrayOut,
+                                         &arrayInSize, arrayIn);
+    DSBusInterface::checkResultCode(ret);
+    if (!message.ParseFromArray(arrayIn, arrayInSize)) {
+      throw std::runtime_error("ParseFromArray failed");
+    }
+    if (message.type() != vdcapi::GENERIC_RESPONSE) {
+      throw std::runtime_error("Invalid vdc response");
+    }
+    const vdcapi::GenericResponse& response = message.generic_response();
+    if (response.code() != vdcapi::ERR_OK) {
+      throw std::runtime_error(std::string("Vdc error code:") + intToString(response.code())
+          + " message:" + response.description());
+    }
   }
     
 } // namespace dss
