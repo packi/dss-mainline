@@ -2094,9 +2094,9 @@ namespace dss {
           int oldState = state->getState();
           auto binaryInputState =
               (_sensorValue & (1 << index)) ? BinaryInputState::Active : BinaryInputState::Inactive;
-          int newState = binaryInputState == BinaryInputState::Active ? State_Active : State_Inactive;
+          pDev->handleBinaryInputEvent(index, binaryInputState);
+          int newState = state->getState();
           if (newState != oldState) {
-            state->setState(coSystem, newState);
             raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
                                                     binaryInput->m_inputType,
                                                     binaryInputState));
