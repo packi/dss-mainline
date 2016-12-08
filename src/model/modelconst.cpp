@@ -25,6 +25,7 @@
 #include "modelconst.h"
 
 #include <math.h>
+#include <ds/string.h>
 
 #include "base.h"
 
@@ -253,5 +254,34 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, SensorType type) {
     stream << dss::sensorTypeName(type);
     return stream;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, BinaryInputType x) {
+    switch (x) {
+      case BinaryInputType::Presence: return stream << "presence";
+      case BinaryInputType::RoomBrightness: return stream << "roomBrightness";
+      case BinaryInputType::PresenceInDarkness: return stream << "presenceInDarkness";
+      case BinaryInputType::TwilightExternal: return stream << "twilightExternal";
+      case BinaryInputType::Movement: return stream << "movement";
+      case BinaryInputType::MovementInDarkness: return stream << "movementInDarkness";
+      case BinaryInputType::SmokeDetector: return stream << "smokeDetector";
+      case BinaryInputType::WindDetector: return stream << "windDetector";
+      case BinaryInputType::RainDetector: return stream << "rainDetector";
+      case BinaryInputType::SunRadiation: return stream << "sunRadiation";
+      case BinaryInputType::RoomThermostat: return stream << "roomThermostat";
+      case BinaryInputType::BatteryLow: return stream << "batteryLow";
+      case BinaryInputType::WindowContact: return stream << "windowContact";
+      case BinaryInputType::DoorContact: return stream << "doorContact";
+      case BinaryInputType::WindowTilt: return stream << "windowTilt";
+      case BinaryInputType::GarageDoorContact: return stream << "garageDoorContact";
+      case BinaryInputType::SunProtection: return stream << "sunProtection";
+      case BinaryInputType::FrostDetector: return stream << "frostDetector";
+      case BinaryInputType::HeatingSystem: return stream << "heatingSystem";
+      case BinaryInputType::HeatingSystemMode: return stream << "heatingSystemMode";
+      case BinaryInputType::PowerUp: return stream << "powerUp";
+      case BinaryInputType::Malfunction: return stream << "malfunction";
+      case BinaryInputType::Service: return stream << "service";
+    }
+    return stream << "unknown" << static_cast<int>(x);
   }
 }
