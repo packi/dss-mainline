@@ -455,7 +455,7 @@ namespace dss {
 
     if ((dev->getDeviceType() == DEVICE_TYPE_AKM) &&
         (dev->getBinaryInputCount() > 0) &&
-        (dev->getBinaryInput(0)->m_targetGroupType == 0) &&
+        (dev->getBinaryInput(0)->m_targetGroupType == GroupType::Standard) &&
         (!dev->isInGroup(dev->getBinaryInput(0)->m_targetGroupId))) {
       /* group is only added in dSS datamodel, not on the dSM and device */
       dev->addToGroup(dev->getBinaryInput(0)->m_targetGroupId);

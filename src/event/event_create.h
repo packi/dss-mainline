@@ -38,7 +38,7 @@ boost::shared_ptr<Event>
 
 boost::shared_ptr<Event>
   createDeviceBinaryInputEvent(boost::shared_ptr<DeviceReference> _devRef,
-                               int _index, int _type, BinaryInputState _state);
+                               int _index, BinaryInputType _type, BinaryInputState _state);
 
 boost::shared_ptr<Event>
 createDeviceCustomActionChangedEvent(boost::shared_ptr<DeviceReference> _devRef,

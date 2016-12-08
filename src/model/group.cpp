@@ -69,7 +69,7 @@ namespace dss {
       // zone.123.light
       boost::shared_ptr<Group> me =
           boost::static_pointer_cast<Group>(shared_from_this());
-      boost::shared_ptr<State> state = boost::make_shared<State>(me);
+      boost::shared_ptr<State> state = boost::make_shared<State>(me, State::makeGroupName(*this));
 
       try {
         m_pApartment->allocateState(state);
@@ -78,7 +78,7 @@ namespace dss {
       // zone.123.heating
       boost::shared_ptr<Group> me =
           boost::static_pointer_cast<Group>(shared_from_this());
-      boost::shared_ptr<State> state = boost::make_shared<State>(me);
+      boost::shared_ptr<State> state = boost::make_shared<State>(me, State::makeGroupName(*this));
 
       try {
         m_pApartment->allocateState(state);

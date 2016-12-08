@@ -397,7 +397,7 @@ namespace dss {
           Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown dSM: ") + e.what(), lsWarning);
         }
 
-        pDevice->clearBinaryInputStates(); // calls apartment->removeState from inside
+        pDevice->clearBinaryInputs(); // calls apartment->removeState from inside
         pDevice->clearStates(); // calls apartment->removeState() from inside
 
         // Erase

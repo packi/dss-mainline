@@ -194,30 +194,31 @@ namespace dss {
   std::string sensorTypeName(SensorType _sensorType);
   std::ostream& operator<<(std::ostream& stream, SensorType type);
 
-  // BinaryInput Type IDs
-  const int BinaryInputIDPresence = 1;
-  const int BinaryInputIDRoomBrightness = 2;
-  const int BinaryInputIDPresenceInDarkness = 3;
-  const int BinaryInputIDTwilightExternal = 4;
-  const int BinaryInputIDMovement = 5;
-  const int BinaryInputIDMovementInDarkness = 6;
-  const int BinaryInputIDSmokeDetector = 7;
-  const int BinaryInputIDWindDetector = 8;
-  const int BinaryInputIDRainDetector = 9;
-  const int BinaryInputIDSunRadiation = 10;
-  const int BinaryInputIDRoomThermostat = 11;
-  const int BinaryInputIDBatteryLow = 12;
-  const int BinaryInputIDWindowContact = 13;
-  const int BinaryInputIDDoorContact = 14;
-  const int BinaryInputIDWindowTilt = 15;
-  const int BinaryInputIDGarageDoorContact = 16;
-  const int BinaryInputIDSunProtection = 17;
-  const int BinaryInputIDFrostDetector = 18;
-  const int BinaryInputIDHeatingSystem = 19;
-  const int BinaryInputIDHeatingSystemMode = 20;
-  const int BinaryInputIDPowerUp = 21;
-  const int BinaryInputIDMalfunction = 22;
-  const int BinaryInputIDService = 23;
+  enum class BinaryInputType {
+    Presence = 1,
+    RoomBrightness = 2,
+    PresenceInDarkness = 3,
+    TwilightExternal = 4,
+    Movement = 5,
+    MovementInDarkness = 6,
+    SmokeDetector = 7,
+    WindDetector = 8,
+    RainDetector = 9,
+    SunRadiation = 10,
+    RoomThermostat = 11,
+    BatteryLow = 12,
+    WindowContact = 13,
+    DoorContact = 14,
+    WindowTilt = 15,
+    GarageDoorContact = 16,
+    SunProtection = 17,
+    FrostDetector = 18,
+    HeatingSystem = 19,
+    HeatingSystemMode = 20,
+    PowerUp = 21,
+    Malfunction = 22,
+    Service = 23,
+  };
 
   enum class BinaryInputState {
     Inactive = 0,
@@ -231,6 +232,8 @@ namespace dss {
     Tilted = 2,
     Unknown = -1
   };
+
+  enum class BinaryInputId;
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
@@ -285,6 +288,15 @@ namespace dss {
   const int ColorIDRed = 6;
   const int ColorIDGreen = 7;
   const int ColorIDBlack = 8;
+
+  enum class GroupType {
+    Standard = 0, // (from dsm-api doc) 0 = Standard Groups
+    Todo1 = 1, // (from dsm-api doc) 1 = Global groups
+    Todo2 = 2, // (from dsm-api doc) 2 = Apartment-wide signals
+    Todo3 = 3, // ???
+    Todo4 = 4, // ???
+    End
+  };
 
   // Group ID"s
   const int GroupIDBroadcast = 0;

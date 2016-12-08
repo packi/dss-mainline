@@ -136,8 +136,8 @@ namespace dss {
     return "zone." + intToString(group.getZoneID()) + "." + logicalName;
   }
 
-  State::State(boost::shared_ptr<Group> _group) :
-    m_name(makeGroupName(*_group)),
+  State::State(boost::shared_ptr<Group> _group, const std::string& name) :
+    m_name(name),
     m_IsPersistent(false),
     m_callOrigin(coUnknown),
     m_originDeviceDSUID(DSUID_NULL),

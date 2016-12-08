@@ -1037,7 +1037,8 @@ namespace dss {
         log("Expected at least 4 parameter for ModelEvent::etDeviceBinaryStateEvent");
       } else {
         onBinaryInputEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1),
-            event->getParameter(2), static_cast<BinaryInputState>(event->getParameter(3)));
+            static_cast<BinaryInputType>(event->getParameter(2)),
+            static_cast<BinaryInputState>(event->getParameter(3)));
       }
       break;
     case ModelEvent::etDeviceSensorValue:
@@ -1986,13 +1987,13 @@ namespace dss {
           uint8_t offset = (_configIndex - 0x40) % 3;
           switch (offset) {
           case 0:
-            device->setBinaryInputTarget(inputIndex, _value >> 6, _value & 0x3f);
+            device->setBinaryInputTarget(inputIndex, static_cast<GroupType>(_value >> 6), _value & 0x3f);
             break;
           case 1:
-            device->setBinaryInputType(inputIndex, _value & 0xff);
+            device->setBinaryInputType(inputIndex, static_cast<BinaryInputType>(_value & 0xff));
             break;
           case 2:
-            device->setBinaryInputId(inputIndex, _value >> 4);
+            device->setBinaryInputId(inputIndex, static_cast<BinaryInputId>(_value >> 4));
             break;
           }
         }
@@ -2037,7 +2038,7 @@ namespace dss {
   } // onSensorEvent
 
   void ModelMaintenance::onBinaryInputEvent(dsuid_t _meterID,
-      const devid_t _deviceID, const int& _eventIndex, const int& _eventType, BinaryInputState _state) {
+      const devid_t _deviceID, const int& _eventIndex, BinaryInputType _eventType, BinaryInputState _state) {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
@@ -2089,7 +2090,7 @@ namespace dss {
         for (int index = 0; index < pDev->getBinaryInputCount(); index++) {
           boost::shared_ptr<State> state;
           try {
-            state = pDev->getBinaryInputState(index);
+            state = pDev->getBinaryInput(index)->m_state;
           } catch (ItemNotFoundException& e) {
             continue;
           }

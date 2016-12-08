@@ -8,3 +8,6 @@
 #ifndef DS_OVERRIDE
     #define DS_OVERRIDE override
 #endif
+
+// define to `[[fallthrough]]` on c++17 complaint compilers
+#define DS_FALLTHROUGH

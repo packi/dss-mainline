@@ -381,10 +381,10 @@ namespace dss {
                                                &InputType, &InputID);
           DSBusInterface::checkResultCode(ret);
           DeviceBinaryInputSpec_t binaryInput;
-          binaryInput.TargetGroupType = TargetGroupType;
+          binaryInput.TargetGroupType = static_cast<GroupType>(TargetGroupType);
           binaryInput.TargetGroup = TargetGroup;
-          binaryInput.InputType = InputType;
-          binaryInput.InputID = InputID;
+          binaryInput.InputType = static_cast<BinaryInputType>(InputType);
+          binaryInput.InputID = static_cast<BinaryInputId>(InputID);
           _spec.binaryInputs.push_back(binaryInput);
         }
         _spec.binaryInputsValid = true;

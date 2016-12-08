@@ -83,9 +83,7 @@ namespace dss {
       void startup();
       void callscene();
       void undoscene();
-      void stateBinaryInputGeneric(State &_state,
-                                   int targetGroupType,
-                                   int targetGroupId);
+      void stateBinaryInputGeneric(State &_state, GroupType targetGroupType, int targetGroupId);
       void stateBinaryinput();
       void stateApartment();
   };

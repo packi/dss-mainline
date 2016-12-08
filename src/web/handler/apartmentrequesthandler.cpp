@@ -711,7 +711,7 @@ namespace dss {
           boost::shared_ptr<Device> device = devices.get(d).getDevice();
           if ((device->getDeviceType() == DEVICE_TYPE_AKM) &&
               (device->isPresent() == true)) {
-            const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = device->getBinaryInputs();
+            auto&& binaryInputs = device->getBinaryInputs();
 
             if (!binaryInputs.empty()) {
               json.startObject();
@@ -720,14 +720,13 @@ namespace dss {
               json.startArray("binaryInputs");
 
               for (size_t i = 0; i < binaryInputs.size(); i++) {
-                boost::shared_ptr<DeviceBinaryInput_t> input = binaryInputs.at(i);
+                auto&& input = binaryInputs.at(i);
                 json.startObject();
                 json.add("targetGroupType", input->m_targetGroupType);
                 json.add("targetGroup", input->m_targetGroupId);
                 json.add("inputType", input->m_inputType);
                 json.add("inputId", input->m_inputId);
-                json.add("state",
-                        device->getBinaryInputState(input->m_inputIndex)->getState());
+                json.add("state", input->m_state->getState());
                 json.endObject();
               }
 

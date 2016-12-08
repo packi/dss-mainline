@@ -89,10 +89,10 @@ namespace dss {
   } ClusterSpec_t;
 
   typedef struct {
-    uint8_t TargetGroupType;
+    GroupType TargetGroupType;
     uint8_t TargetGroup;
-    uint8_t InputType;
-    uint8_t InputID;
+    BinaryInputType InputType;
+    BinaryInputId InputID;
   } DeviceBinaryInputSpec_t;
 
   typedef struct {
