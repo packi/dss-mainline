@@ -277,6 +277,16 @@ namespace dss {
     return boost::shared_ptr<Cluster> ();
   }
 
+  std::vector<boost::shared_ptr<Group> > Apartment::getGlobalApps() {
+    std::vector<boost::shared_ptr<Group> > result;
+    foreach(boost::shared_ptr<Group> pGroup, getZone(0)->getGroups()) {
+      if (isGlobalAppGroup(pGroup->getID())) {
+        result.push_back(pGroup);
+      }
+    }
+    return result;
+  }
+
   boost::shared_ptr<Device> Apartment::allocateDevice(const dsuid_t _dsid) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     boost::shared_ptr<Device> pResult;

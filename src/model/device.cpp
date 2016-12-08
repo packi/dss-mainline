@@ -227,6 +227,10 @@ namespace dss {
     removeFromPropertyTree();
   }
 
+  int Device::getGroupZoneID(int groupID) {
+    return (isAppUserGroup(groupID) || isGlobalAppGroup(groupID)) ? 0 : (m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID);
+  }
+
   void Device::removeFromPropertyTree() {
     if (m_pPropertyNode != NULL) {
       try {
@@ -242,8 +246,7 @@ namespace dss {
 
       if (m_pApartment->getPropertyNode() != NULL) {
         foreach(auto&& g, m_Groups) {
-          int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
-          std::string gPath = "zones/zone" + intToString(zid) +
+          std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
               "/groups/group" + intToString(g) + "/devices/" +
               dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
@@ -472,7 +475,7 @@ namespace dss {
     }
 
     foreach (auto&& g, m_Groups) {
-      std::string gPath = "zones/zone" + intToString(m_ZoneID) +
+      std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
                           "/groups/group" + intToString(g) + "/devices/" +
                           dsuid2str(m_DSID);
       PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
@@ -1250,7 +1253,7 @@ namespace dss {
     return m_pApartment->getGroup(getGroupIdByIndex(_index));
   } // getGroupByIndex
 
-  std::vector<int> Device::getGroups() const {
+  const std::vector<int>& Device::getGroups() const {
     return m_Groups;
   }
 
@@ -1261,8 +1264,7 @@ namespace dss {
         m_Groups.push_back(_groupID);
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // create alias in group list
-          int zone = isAppUserGroup(_groupID) ? 0 : m_ZoneID;
-          std::string gPath = "zones/zone" + intToString(zone) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
+          std::string gPath = "zones/zone" + intToString(getGroupZoneID(_groupID)) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
           if (gnode) {
             gnode->alias(m_pPropertyNode);
@@ -1287,20 +1289,11 @@ namespace dss {
         m_Groups.erase(it);
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // remove alias in group list
-          int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
-          std::string gPath = "zones/zone" + intToString(zid) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
+          std::string gPath = "zones/zone" + intToString(getGroupZoneID(_groupID)) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
           if (gnode) {
             gnode->getParentNode()->removeChild(gnode);
           }
-
-          // remove from zone 0
-          gPath = "zones/zone0/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
-          gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
-          if (gnode) {
-            gnode->getParentNode()->removeChild(gnode);
-          }
-
           // remove property in device group list
           PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(_groupID));
           if (gsubnode) {

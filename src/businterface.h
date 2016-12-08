@@ -126,11 +126,11 @@ namespace dss {
     uint8_t LTMode;
     std::vector<int> Groups;
     dsuid_t DSID;
-    uint8_t ButtonID;
-    uint8_t GroupMembership;
-    uint8_t ActiveGroup;
-    bool SetsLocalPriority;
-    bool CallsPresent;
+    uint8_t buttonID;
+    uint8_t buttonGroupMembership;
+    uint8_t buttonActiveGroup;
+    bool buttonSetsLocalPriority;
+    bool buttonCallsPresent;
     std::string Name;
     uint16_t ZoneID;
     std::vector<DeviceBinaryInputSpec_t> binaryInputs;
@@ -139,8 +139,8 @@ namespace dss {
     bool sensorInputsValid;
     std::vector<int> outputChannels;
     bool outputChannelsValid;
-    uint8_t deviceActiveGroup;
-    uint8_t deviceDefaultGroup;
+    uint8_t activeGroup;
+    uint8_t defaultGroup;
   } DeviceSpec_t;
 
   typedef struct {

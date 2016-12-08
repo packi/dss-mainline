@@ -400,15 +400,15 @@ namespace dss {
     dev->setOutputMode(_spec.OutputMode);
 
     if (_dsMeter->getApiVersion() >= 0x303) {
-      dev->setActiveGroup(_spec.deviceActiveGroup);
-      dev->setDefaultGroup(_spec.deviceDefaultGroup);
+      dev->setActiveGroup(_spec.activeGroup);
+      dev->setDefaultGroup(_spec.defaultGroup);
     }
 
-    dev->setButtonActiveGroup(_spec.ActiveGroup);
-    dev->setButtonGroupMembership(_spec.GroupMembership);
-    dev->setButtonSetsLocalPriority(_spec.SetsLocalPriority);
-    dev->setButtonCallsPresent(_spec.CallsPresent);
-    dev->setButtonID(_spec.ButtonID);
+    dev->setButtonActiveGroup(_spec.buttonActiveGroup);
+    dev->setButtonGroupMembership(_spec.buttonGroupMembership);
+    dev->setButtonSetsLocalPriority(_spec.buttonSetsLocalPriority);
+    dev->setButtonCallsPresent(_spec.buttonCallsPresent);
+    dev->setButtonID(_spec.buttonID);
 
     uint8_t inputCount = 0;
     uint8_t inputIndex = 0;

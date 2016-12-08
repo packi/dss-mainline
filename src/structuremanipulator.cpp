@@ -480,7 +480,7 @@ namespace dss {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
 
-    if (isDefaultGroup(_groupNumber)) {
+    if (isDefaultGroup(_groupNumber) || isGlobalAppDsGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
@@ -505,8 +505,8 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<Group> pGroup;
     if (isZoneUserGroup(_groupNumber)) {
+      boost::shared_ptr<Group> pGroup;
       try {
         pGroup = _zone->getGroup(_groupNumber);
         throw DSSException("Group id " + intToString(_groupNumber) + " already exists");
@@ -514,6 +514,26 @@ namespace dss {
         Logger::getInstance()->log("Creating user group " + intToString(_groupNumber) +
             " in zone " + intToString(_zone->getID()), lsInfo);
         pGroup = boost::make_shared<Group>(_groupNumber, _zone, boost::ref<Apartment>(m_Apartment));
+        _zone->addGroup(pGroup);
+        m_Interface.createGroup(_zone->getID(), _groupNumber, _standardGroupNumber, _name);
+      }
+      return;
+    }
+
+    // for groups in User Global Application range, we are locked to zone 0, but we create Groups not clusters
+    if (isGlobalAppUserGroup(_groupNumber)) {
+      boost::shared_ptr<Group> pGroup;
+      if (_zone->getID() != 0) {
+        throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
+      }
+      try {
+        pGroup = _zone->getGroup(_groupNumber);
+        throw DSSException("Group id " + intToString(_groupNumber) + " already exists");
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log("Creating user global application group " + intToString(_groupNumber), lsInfo);
+        pGroup = boost::make_shared<Group>(_groupNumber, _zone, boost::ref<Apartment>(m_Apartment));
+        pGroup->setName(_name);
+        pGroup->setStandardGroupID(_standardGroupNumber);
         _zone->addGroup(pGroup);
         m_Interface.createGroup(_zone->getID(), _groupNumber, _standardGroupNumber, _name);
       }
@@ -528,7 +548,7 @@ namespace dss {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
 
-    if (isDefaultGroup(_groupNumber)) {
+    if (isDefaultGroup(_groupNumber) || isGlobalAppDsGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
@@ -578,16 +598,38 @@ namespace dss {
       return;
     }
 
-    throw DSSException("Remove group: id " + intToString(_groupNumber) + " too large");
+    // for groups in User Global Application range, we are locked to zone 0, but we remove Groups not clusters
+    if (isGlobalAppUserGroup(_groupNumber)) {
+      boost::shared_ptr<Group> pGroup;
+      if (_zone->getID() != 0) {
+        throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
+      }
+      try {
+        pGroup = _zone->getGroup(_groupNumber);
+      } catch (ItemNotFoundException& e) {
+        throw DSSException("Group id " + intToString(_groupNumber) + " does not exist");
+      }
+      try {
+        Logger::getInstance()->log("Removing user global application group " + intToString(_groupNumber), lsInfo);
+        _zone->removeGroup(pGroup);
+        m_Interface.removeGroup(_zone->getID(), _groupNumber);
+      } catch (BusApiError& e) {
+        Logger::getInstance()->log("Bus-Error removing user group " + intToString(_groupNumber) +
+            ": " + e.what(), lsWarning);
+      }
+      return;
+    }
+
+    throw DSSException("Remove group: id " + intToString(_groupNumber) + " not found");
   } // removeGroup
 
   void StructureManipulator::groupSetName(boost::shared_ptr<Group> _group,
                                           const std::string& _name) {
-    if (isDefaultGroup(_group->getID())) {
+    if (isDefaultGroup(_group->getID()) || isGlobalAppDsGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (isAppUserGroup(_group->getID()) || isZoneUserGroup(_group->getID())) {
+    if (isAppUserGroup(_group->getID()) || isZoneUserGroup(_group->getID()) || isGlobalAppUserGroup(_group->getID())) {
       _group->setName(_name);
       m_Interface.groupSetName(_group->getZoneID(), _group->getID(), _name);
       return;
@@ -598,7 +640,7 @@ namespace dss {
 
   void StructureManipulator::groupSetStandardID(boost::shared_ptr<Group> _group,
                                                 const int _standardGroupNumber) {
-    if (isDefaultGroup(_group->getID())) {
+    if (isDefaultGroup(_group->getID()) || isGlobalAppDsGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
@@ -612,7 +654,7 @@ namespace dss {
       return;
     }
 
-    if (isZoneUserGroup(_group->getID())) {
+    if (isZoneUserGroup(_group->getID()) || isGlobalAppUserGroup(_group->getID())) {
       _group->setStandardGroupID(_standardGroupNumber);
       m_Interface.groupSetStandardID(_group->getZoneID(), _group->getID(), _standardGroupNumber);
       return;

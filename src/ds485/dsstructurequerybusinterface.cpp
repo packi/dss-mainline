@@ -319,6 +319,21 @@ namespace dss {
     return numberOfDevices;
   } // getDevicesCountInZone
 
+  // This functions returns groups the device is in
+  std::vector<int> DSStructureQueryBusInterface::makeDeviceGroups(const uint8_t* bitfield, int bits, const DeviceSpec_t& spec) {
+    std::vector<int> result = parseBitfield(bitfield, bits);
+
+    // check for subclass in the FunctionID and check that it supports global application addressing
+    if (((spec.FunctionID >> 6) & 0x3F) == 0x07) {
+      // add the active group if it is not already added
+      if (std::find(result.begin(), result.end(), spec.activeGroup) == result.end()) {
+        result.push_back(spec.activeGroup);
+      }
+    }
+
+    return result;
+  }
+
   void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
     int ret = -1;
     try {
@@ -331,18 +346,18 @@ namespace dss {
         };
       } flags;
 
-      ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.ButtonID,
-                                       &_spec.GroupMembership, &_spec.ActiveGroup,
+      ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.buttonID,
+                                       &_spec.buttonGroupMembership, &_spec.buttonActiveGroup,
                                        &flags.flags, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
-      _spec.SetsLocalPriority = (flags.setLocalPriority == 1);
-      _spec.CallsPresent = (flags.callsNoPresent == 0);
+      _spec.buttonSetsLocalPriority = (flags.setLocalPriority == 1);
+      _spec.buttonCallsPresent = (flags.callsNoPresent == 0);
     } catch(BusApiError& e) {
-      _spec.ButtonID = 0xff;
-      _spec.ActiveGroup = 0xff;
-      _spec.GroupMembership = 0xff;
-      _spec.SetsLocalPriority = false;
-      _spec.CallsPresent = true;
+      _spec.buttonID = 0xff;
+      _spec.buttonActiveGroup = 0xff;
+      _spec.buttonGroupMembership = 0xff;
+      _spec.buttonSetsLocalPriority = false;
+      _spec.buttonCallsPresent = true;
       if (ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
         Logger::getInstance()->log("Unsupported message-id DeviceButtonInfo", lsWarning);
       } else if (ret == ERROR_WRONG_PARAMETER) {
@@ -484,7 +499,7 @@ namespace dss {
           &spec.LTMode, groups, name, &spec.DSID);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
-      spec.Groups = parseBitfield(groups, sizeof(groups) * 8);
+      spec.Groups = makeDeviceGroups(groups, sizeof(groups) * 8, spec);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
       if (complete) {
@@ -520,7 +535,7 @@ namespace dss {
           &spec.LTMode, groups, name, &spec.DSID);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
-      spec.Groups = parseBitfield(groups, sizeof(groups) * 8);
+      spec.Groups = makeDeviceGroups(groups, sizeof(groups) * 8, spec);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
       updateButtonGroupFromMeter(_dsMeterID, spec);
@@ -551,7 +566,7 @@ namespace dss {
       throw BusApiError("DeviceInfo returned answer from a different device (" + intToString(_id) + " != " + intToString(result.ShortAddress) + ")");
     }
     result.Locked = (locked != 0);
-    result.Groups = parseBitfield(groups, sizeof(groups) * 8);
+    result.Groups = makeDeviceGroups(groups, sizeof(groups) * 8, result);
     result.Name = std::string(reinterpret_cast<char*>(name));
 
     updateButtonGroupFromMeter(_dsMeterID, result);

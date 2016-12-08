@@ -1091,12 +1091,38 @@ namespace dss {
 
   void groupToXML(boost::shared_ptr<Group> _pGroup, std::ofstream& _ofs, const int _indent) {
     bool headerWritten = false;
+    bool sceneTagWritten = false;
+
+    // in case of GA we always need to serialize the group even if it do not have custom scenes
+    if (isGlobalAppGroup(_pGroup->getID())) {
+      headerWritten = true;
+      _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
+      if (!_pGroup->getName().empty()) {
+        addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
+      }
+      addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getStandardGroupID()));
+      addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getConfiguration()));
+      if (!_pGroup->getAssociatedSet().empty()) {
+        addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
+      }
+    }
+
     for (int iScene = 0; iScene < MaxSceneNumber; iScene++) {
       std::string name = _pGroup->getSceneName(iScene);
       if (!name.empty()) {
         if (!headerWritten) {
           headerWritten = true;
           _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
+          if (!_pGroup->getName().empty()) {
+            addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
+          }
+          addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getStandardGroupID()));
+          addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getConfiguration()));
+          if (!_pGroup->getAssociatedSet().empty()) {
+            addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
+          }
+
+          sceneTagWritten = true;
           _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
         }
         _ofs << doIndent(_indent + 2) << "<scene id=\"" << intToString(iScene) << "\">" << std::endl;
@@ -1105,8 +1131,11 @@ namespace dss {
       }
     }
 
-    if (headerWritten) {
+    if (sceneTagWritten) {
       _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
+    }
+
+    if (headerWritten) {
       _ofs << doIndent(_indent) << "</group>" << std::endl;
     }
   } // groupToXML

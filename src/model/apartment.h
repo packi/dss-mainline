@@ -181,6 +181,9 @@ typedef struct {
     /** Return an Empty Cluster, if available. */
     boost::shared_ptr<Cluster> getEmptyCluster();
 
+    /** Returns a vector of Global Application Groups */
+    std::vector<boost::shared_ptr<Group> > getGlobalApps();
+
     /// @return nullptr on failure
     boost::shared_ptr<State> tryGetState(const eStateType _type, const std::string& _stateName) const;
     /// @throw ItemNotFoundException on failure
