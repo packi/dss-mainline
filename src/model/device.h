@@ -174,7 +174,9 @@ namespace dss {
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
   private:
+    __DECL_LOG_CHANNEL__;
     Device& m_device;
+    std::string m_name;
     boost::shared_ptr<State> m_state;
   };
 

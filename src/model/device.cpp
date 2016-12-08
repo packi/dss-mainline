@@ -67,7 +67,13 @@ namespace dss {
       , m_inputId(spec.InputID)
       , m_targetGroupType(spec.TargetGroupType)
       , m_targetGroupId(spec.TargetGroup)
-      , m_device(device) {
+      , m_device(device)
+      , m_name(m_device.getName() + "/" + intToString(index)) {
+    log(std::string("DeviceBinaryInput this:") + m_name
+        + " inputType:" + intToString(static_cast<int>(m_inputType))
+        + " inputId:" + intToString(static_cast<int>(m_inputId))
+        + " targetGroupType:" + intToString(static_cast<int>(m_targetGroupType))
+        + " targetGroupId:" + intToString(m_targetGroupId), lsInfo);
     m_state = boost::make_shared<State>(device.sharedFromThis(), index);
 
     // assignCustomBinaryInputValues
@@ -89,6 +95,7 @@ namespace dss {
   }
 
   DeviceBinaryInput::~DeviceBinaryInput() {
+    log(std::string("~DeviceBinaryInput this:") + m_name, lsInfo);
     try {
       m_device.getApartment().removeState(m_state);
     } catch (const std::exception& e) {
@@ -100,6 +107,9 @@ namespace dss {
     if (m_targetGroupType == targetGroupType && m_targetGroupId == targetGroupId) {
       return;
     }
+    log(std::string("setTarget this:") + m_name
+        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType))
+        + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
     m_targetGroupType = targetGroupType;
   }
@@ -108,6 +118,8 @@ namespace dss {
     if (m_inputId == inputId) {
       return;
     }
+    log(std::string("setInputId this:") + m_name
+        + " inputId:" + intToString(static_cast<int>(inputId)), lsInfo);
     m_inputId = inputId;
   }
 
@@ -115,10 +127,15 @@ namespace dss {
     if (m_inputType == inputType) {
       return;
     }
+    log(std::string("setInputType this:") + m_name
+        + " inputType:" + intToString(static_cast<int>(inputType)), lsInfo);
     m_inputType = inputType;
   }
 
   void DeviceBinaryInput::handleEvent(BinaryInputState inputState) {
+    log(std::string("handleEvent this:") + m_name
+        + " m_inputType:" + intToString(static_cast<int>(m_inputType))
+        + " inputState:" + intToString(static_cast<int>(inputState)), lsInfo);
     try {
       if (m_inputType == BinaryInputType::WindowTilt) {
         m_state->setState(coSystem,
@@ -143,7 +160,7 @@ namespace dss {
             }());
       }
     } catch (const std::exception& e) {
-      Logger::getInstance()->log(std::string("Device::handleBinaryInputEvent: what:")+ e.what(), lsWarning);
+      log(std::string("handleEvent: what:")+ e.what(), lsWarning);
     }
   }
 
