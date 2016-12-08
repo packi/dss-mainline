@@ -30,7 +30,6 @@
 
 namespace dss {
   double sensorValueToDouble(SensorType _sensorType, int _sensorValue) {
-    double convertedSensorValue;
     switch (_sensorType) {
     case SensorType::ActivePower:
     case SensorType::OutputCurrent:
@@ -43,37 +42,29 @@ namespace dss {
     case SensorType::TemperatureIndoors:
     case SensorType::TemperatureOutdoors:
     case SensorType::RoomTemperatureSetpoint:
-      convertedSensorValue = _sensorValue * 0.1 / 4 - 273.15 + 230.0;
-      return roundDigits(convertedSensorValue, 3);
+      return roundDigits(_sensorValue * 0.1 / 4 - 273.15 + 230.0, 3);
     case SensorType::BrightnessIndoors:
     case SensorType::BrightnessOutdoors:
     case SensorType::CO2Concentration:
     case SensorType::COConcentration:
-      convertedSensorValue = pow(10, static_cast<double>(_sensorValue) / 800);
-      return roundDigits(convertedSensorValue, 4);
+      return roundDigits(pow(10, _sensorValue / 800.0), 4);
     case SensorType::HumidityIndoors:
     case SensorType::HumidityOutdoors:
-      convertedSensorValue = _sensorValue * 0.1 / 4;
-      return roundDigits(convertedSensorValue, 3);
+      return roundDigits(_sensorValue * 0.1 / 4 , 3);
     case SensorType::WindSpeed:
     case SensorType::GustSpeed:
-      convertedSensorValue = _sensorValue * 0.1 / 4;
-      return roundDigits(convertedSensorValue, 3);
+      return roundDigits(_sensorValue * 0.1 / 4, 3);
     case SensorType::SoundPressureLevel:
-      convertedSensorValue = _sensorValue * 0.25 / 4;
-      return roundDigits(convertedSensorValue, 3);
+      return roundDigits(_sensorValue * 0.25 / 4, 3);
     case SensorType::RoomTemperatureControlVariable:
       return static_cast<double>(_sensorValue - 100);
     case SensorType::WindDirection:
     case SensorType::GustDirection:
-      convertedSensorValue = _sensorValue * 0.5 / 4;
-      return roundDigits(convertedSensorValue, 3);
+      return roundDigits(_sensorValue * 0.5 / 4, 3);
     case SensorType::Precipitation:
-      convertedSensorValue = _sensorValue * 0.1 / 4;
-      return roundDigits(convertedSensorValue, 3);
+      return roundDigits(_sensorValue * 0.1 / 4, 3);
     case SensorType::AirPressure:
-      convertedSensorValue = _sensorValue / 4.0 + 200;
-      return roundDigits(convertedSensorValue, 3);
+      return roundDigits(_sensorValue / 4.0 + 200, 3);
     default:
       return static_cast<double>(_sensorValue);
     }
