@@ -39,3 +39,5 @@ INSTALL
 *.pb.*
 *.rrd
 .dirstamp
+# kate temporary files
+*.orig
