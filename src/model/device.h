@@ -178,6 +178,11 @@ namespace dss {
     Device& m_device;
     std::string m_name;
     boost::shared_ptr<State> m_state;
+    class GroupStateHandle;
+    friend class GroupStateHandle;
+    std::unique_ptr<GroupStateHandle> m_groupState;
+
+    void updateGroupState();
   };
 
   typedef struct {

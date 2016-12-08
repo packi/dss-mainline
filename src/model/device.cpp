@@ -34,6 +34,7 @@
 
 #include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include <ds/string.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -55,11 +56,34 @@
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
 #include "src/protobufjson.h"
+#include "composed-group-state.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
 
   //================================================== DeviceBinaryInput
+
+  __DEFINE_LOG_CHANNEL__(DeviceBinaryInput, lsNotice);
+
+  // RAII class to handling stream to ComposedGroupState
+  class DeviceBinaryInput::GroupStateHandle: boost::noncopyable {
+  public:
+    GroupStateHandle(DeviceBinaryInput& parent, const boost::shared_ptr<ComposedGroupState>& ptr)
+        : m_parent(parent), m_ptr(ptr) {
+      assert(ptr);
+      m_ptr->addSubState(*m_parent.m_state);
+    }
+    ~GroupStateHandle() {
+      m_ptr->removeSubState(*m_parent.m_state);
+    }
+    void update() {
+log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
+      m_ptr->updateSubState(*m_parent.m_state);
+    }
+  private:
+    DeviceBinaryInput& m_parent;
+    boost::shared_ptr<ComposedGroupState> m_ptr;
+  };
 
   DeviceBinaryInput::DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index)
       : m_inputIndex(index)
@@ -92,6 +116,8 @@ namespace dss {
     } catch (ItemDuplicateException& ex) {
       m_state = device.getApartment().getNonScriptState(m_state->getName());
     }
+
+    updateGroupState();
   }
 
   DeviceBinaryInput::~DeviceBinaryInput() {
@@ -112,6 +138,7 @@ namespace dss {
         + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
     m_targetGroupType = targetGroupType;
+    updateGroupState();
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
@@ -162,6 +189,57 @@ namespace dss {
     } catch (const std::exception& e) {
       log(std::string("handleEvent: what:")+ e.what(), lsWarning);
     }
+    if (m_groupState) {
+      m_groupState->update();
+    }
+  }
+
+  void DeviceBinaryInput::updateGroupState() {
+    // remove link to old group state
+    m_groupState.reset();
+
+    auto composedGroupStateType = composedGroupStateTypeForBinaryInputType(m_inputType);
+    log(std::string("updateGroupState ENTER this:") + m_name
+        + " m_inputType:" + intToString(static_cast<int>(m_inputType))
+        + " composedGroupStateType:" + intToString(static_cast<int>(composedGroupStateType))
+        + " m_targetGroupId:" + intToString(m_targetGroupId), lsInfo);
+    if (composedGroupStateType == ComposedGroupStateType::NONE) {
+      return;
+    }
+    auto&& targetGroupId = m_targetGroupId;
+    if (targetGroupId == 0) {
+      return;
+    }
+    auto&& apartment = m_device.getApartment();
+    auto&& zoneId = m_device.getZoneID();
+    auto&& zone = apartment.getZone(zoneId);
+    auto&& targetGroup = zone->getGroup(targetGroupId);
+    if (!targetGroup) {
+      // TODO(soon): Is it ok to create the zone here?
+      // Or is it an error? If so, how do we recover?
+      log(std::string("updateGroupState Create group this:") + m_name
+          + " zoneId:" + intToString(zoneId)
+          + " targetGroupId:" + intToString(targetGroupId), lsNotice);
+      targetGroup.reset(new Group(targetGroupId, zone, apartment));
+      targetGroup->setStandardGroupID(targetGroupId);
+      targetGroup->setIsValid(true);
+      zone->addGroup(targetGroup);
+    }
+    auto&& targetGroupZoneId = targetGroup->getZoneID();
+    std::string composedGroupName;
+    if (targetGroupZoneId != 0) {
+      composedGroupName += ds::str("zone.",targetGroupZoneId);
+    }
+    composedGroupName += ds::str(".group.", targetGroupId, ".inputType.", m_inputType);
+    auto composedGroupState = boost::dynamic_pointer_cast<ComposedGroupState>(
+        apartment.tryGetState(StateType_Group, composedGroupName));
+    if (!composedGroupState) {
+      composedGroupState = boost::make_shared<ComposedGroupState>(targetGroup, composedGroupName,
+          composedGroupStateType);
+      apartment.allocateState(composedGroupState); // no ItemNotFoundException, we know it does not exist
+    }
+    m_groupState.reset(new GroupStateHandle(*this, composedGroupState));
+    log(std::string("updateGroupState LEAVE this:") + m_name + " composedGroupName:" + composedGroupName, lsInfo);
   }
 
   //================================================== Device
