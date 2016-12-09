@@ -611,10 +611,10 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<MainZoneSensor_t> ms = boost::make_shared<MainZoneSensor_t>();
-    ms->m_DSUID = _dsuid;
-    ms->m_sensorType = _sensorType;
-    ms->m_sensorIndex = _sensorIndex;
+    MainZoneSensor_t ms;
+    ms.m_DSUID = _dsuid;
+    ms.m_sensorType = _sensorType;
+    ms.m_sensorIndex = _sensorIndex;
 
     try {
       m_tempZone->setSensor(ms);

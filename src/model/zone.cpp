@@ -406,20 +406,19 @@ namespace dss {
     m_MainSensors.back().m_sensorType = sensor->m_sensorType;
   }
 
-  void Zone::setSensor(boost::shared_ptr<MainZoneSensor_t> _mainZoneSensor) {
-    if (!isAllowedSensorType(_mainZoneSensor->m_sensorType)) {
-      throw std::runtime_error("Assignment of sensor type " + sensorTypeName(_mainZoneSensor->m_sensorType) + " is not allowed!");
+  void Zone::setSensor(const MainZoneSensor_t &_mainZoneSensor) {
+    if (!isAllowedSensorType(_mainZoneSensor.m_sensorType)) {
+      throw std::runtime_error("Assignment of sensor type " + sensorTypeName(_mainZoneSensor.m_sensorType) + " is not allowed!");
     }
 
     foreach (auto&& ms, m_MainSensors) {
-      if (ms.m_sensorType == _mainZoneSensor->m_sensorType) {
-        ms.m_DSUID = _mainZoneSensor->m_DSUID;
-        ms.m_sensorIndex = _mainZoneSensor->m_sensorIndex;
+      if (ms.m_sensorType == _mainZoneSensor.m_sensorType) {
+        ms.m_DSUID = _mainZoneSensor.m_DSUID;
+        ms.m_sensorIndex = _mainZoneSensor.m_sensorIndex;
         return;
       }
     }
-    // TODO(now) drop shared_ptr from method argument
-    m_MainSensors.push_back(*_mainZoneSensor);
+    m_MainSensors.push_back(_mainZoneSensor);
   }
 
   void Zone::resetSensor(SensorType _sensorType) {

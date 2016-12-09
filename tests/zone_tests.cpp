@@ -40,11 +40,8 @@ BOOST_AUTO_TEST_CASE(testSensorSetReset) {
   MainZoneSensor_t ms1 = { dsuid1, SensorType::CO2Concentration, 1 };
   MainZoneSensor_t ms3 = { dsuid3, SensorType::HumidityIndoors, 3 };
 
-  auto tmp = boost::make_shared<MainZoneSensor_t>();
-  *tmp = ms1;
-  zone.setSensor(tmp);
-  *tmp = ms3;
-  zone.setSensor(tmp);
+  zone.setSensor(ms1);
+  zone.setSensor(ms3);
 
   BOOST_CHECK(zone.isSensorAssigned(ms1.m_sensorType));
   BOOST_CHECK(zone.isSensorAssigned(ms3.m_sensorType));
@@ -68,13 +65,9 @@ BOOST_AUTO_TEST_CASE(testRemovInvalidSensors) {
   MainZoneSensor_t ms2 = { dsuid2, SensorType::HumidityIndoors, 2 };
   MainZoneSensor_t ms3 = { dsuid3, SensorType::TemperatureIndoors, 3 };
 
-  auto tmp = boost::make_shared<MainZoneSensor_t>();
-  *tmp = ms1;
-  zone.setSensor(tmp);
-  *tmp = ms2;
-  zone.setSensor(tmp);
-  *tmp = ms3;
-  zone.setSensor(tmp);
+  zone.setSensor(ms1);
+  zone.setSensor(ms2);
+  zone.setSensor(ms3);
 
   // device with dsuid2 is not in zone
   BOOST_CHECK_EQUAL(zone.getAssignedSensors().size(), 3);

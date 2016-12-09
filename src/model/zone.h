@@ -256,7 +256,7 @@ namespace dss {
     void setCO2ConcentrationValue(double _value, DateTime& _ts);
 
     void setSensor(boost::shared_ptr<const Device> _device, SensorType _sensorType);
-    void setSensor(boost::shared_ptr<MainZoneSensor_t> _mainZoneSensor);
+    void setSensor(const MainZoneSensor_t &_mainZoneSensor);
     void resetSensor(SensorType _sensorType);
     bool isSensorAssigned(SensorType _sensorType) const;
     const std::vector<MainZoneSensor_t>& getAssignedSensors() const { return m_MainSensors; }
