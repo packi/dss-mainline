@@ -234,6 +234,9 @@ namespace dss {
   };
 
   enum class BinaryInputId {
+    // https://intranet.aizo.net/Wiki/Automatisierungsklemme.aspx
+    APP_MODE = 15, // dSS will interpret and react (not the dSM).
+    // other values are not interpreted by dss
   };
 
   // Click type constants for devices
