@@ -169,7 +169,7 @@ namespace dss {
         boost::shared_ptr<const DeviceReference> device = evt.getRaisedAtDevice();
         try {
           json.add("set", "dsid(" + dsuid2str(device->getDSID()) + ")");
-          json.add("dsid", dsuid2str(device->getDSID()));
+          json.add("dsid", device->getDSID());
           json.add("zoneID", device->getDevice()->getZoneID());
         } catch (ItemNotFoundException& e) {
         }
@@ -186,7 +186,7 @@ namespace dss {
           } else {
             json.add("dsid", "");
           }
-          json.add("dSUID", dsuid2str(device->getDSID()));
+          json.add("dSUID", device->getDSID());
           json.add("zoneID", device->getZoneID());
           json.add("isApartment", false);
           json.add("isGroup", false);
@@ -220,7 +220,7 @@ namespace dss {
           } else {
             json.add("dsid", "");
           }
-          json.add("dSUID", dsuid2str(meter->getDSID()));
+          json.add("dSUID", meter->getDSID());
           json.add("isApartment", false);
           json.add("isGroup", false);
           json.add("isDevice", true);
