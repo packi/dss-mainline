@@ -33,6 +33,7 @@
 #include "src/model/modulator.h"
 #include "src/model/apartment.h"
 #include "src/foreach.h"
+#include "src/messages/vdc-messages.pb.h"
 
 #define BROADCAST_SLEEP_MICROSECONDS    50000 // 50ms
 #define BROADCAST_CLUSTER_SLEEP_MICROSECONDS  150000 // 150ms
@@ -159,6 +160,16 @@ namespace dss {
     int ret = dSMProperties_set_name(m_DSMApiHandle, _meterDSID, (unsigned char*)nameStr.c_str());
     DSBusInterface::checkResultCode(ret);
   } // meterSetName
+
+  void DSStructureModifyingBusInterface::setProperty(const dsuid_t& _meter,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) {
+    return setVdcProperty(_meter, _meter, properties);
+  }
+
+  vdcapi::Message DSStructureModifyingBusInterface::getProperty(const dsuid_t& _meter,
+      const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    return getVdcProperty(_meter, _meter, query);
+  }
 
   void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);

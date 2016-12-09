@@ -79,6 +79,9 @@ namespace dss {
     virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold);
 
     void setModelMaintenace(ModelMaintenance* _modelMaintenance);
+
+    virtual void setProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties);
+    virtual vdcapi::Message getProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
 private:
     ModelMaintenance* m_pModelMaintenance;
   }; // DSStructureModifyingBusInterface

@@ -27,6 +27,17 @@
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 #include <boost/thread/recursive_mutex.hpp>
 
+namespace google {
+  namespace protobuf {
+    template <typename T>
+    class RepeatedPtrField;
+  }
+}
+namespace vdcapi {
+  class PropertyElement;
+  class Message;
+}
+
 namespace dss {
 
   class DSBusInterfaceObj {
@@ -37,6 +48,11 @@ namespace dss {
   protected:
     static boost::recursive_mutex m_DSMApiHandleMutex;
     DsmApiHandle_t m_DSMApiHandle;
+
+    vdcapi::Message getVdcProperty(const dsuid_t& _dsuid, const dsuid_t& _meterDsuid,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
+    void setVdcProperty(const dsuid_t& _dsuid, const dsuid_t& _meterDsuid,
+          const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties);
   };
 
 } // namespace dss

@@ -96,6 +96,9 @@ namespace dss {
      */
     bool setJokerGroup(boost::shared_ptr<Device> device,
                        boost::shared_ptr<Group> pGroup);
+
+    void setProperty(boost::shared_ptr<DSMeter> _dsMeter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties);
+    vdcapi::Message getProperty(boost::shared_ptr<DSMeter> _dsMeter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
 }; // StructureManipulator
 
 

@@ -21,6 +21,7 @@
 #define __DS485_DUMMY_INTERFACES__
 
 #include "dss.h"
+#include "src/messages/vdc-messages.pb.h"
 
 namespace dss {
 
@@ -81,6 +82,9 @@ public:
   virtual void setZoneSensor(const uint16_t _zoneID, SensorType _sensorType, const dsuid_t& _sensorDSUID) {}
   virtual void resetZoneSensor(const uint16_t _zoneID, SensorType _sensorType) {}
   virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) {}
+
+  virtual void setProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) {}
+  virtual vdcapi::Message getProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) { return vdcapi::Message(); }
 };
 
 class DummyStructureQueryBusInterface: public StructureQueryBusInterface {

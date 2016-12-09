@@ -395,11 +395,15 @@ namespace dss {
 
     virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) = 0;
 
+    virtual void setProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) = 0;
+    virtual vdcapi::Message getProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) = 0;
+
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface
 
   class ActionRequestInterface {
   public:
+    virtual ~ActionRequestInterface() {}; // please the compiler (virtual dtor)
     virtual void callScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) = 0;
     virtual void callSceneMin(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t _scene, const std::string _token) = 0;
     virtual void saveScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const uint16_t scene, const std::string _token) = 0;

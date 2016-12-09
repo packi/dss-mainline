@@ -45,6 +45,7 @@
 #include "src/event.h"
 #include "src/dss.h"
 #include "src/base.h"
+#include "src/messages/vdc-messages.pb.h"
 
 namespace dss {
 
@@ -968,5 +969,15 @@ namespace dss {
 
     throw DSSException("set cluster lock: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetLockedState
+
+  void StructureManipulator::setProperty(boost::shared_ptr<DSMeter> _dsMeter,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) {
+    return m_Interface.setProperty(_dsMeter->getDSID(), properties);
+  }
+
+  vdcapi::Message StructureManipulator::getProperty(boost::shared_ptr<DSMeter> _dsMeter,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    return m_Interface.getProperty(_dsMeter->getDSID(), query);
+  }
 
 } // namespace dss
