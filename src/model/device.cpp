@@ -2227,7 +2227,7 @@ namespace dss {
     m_binaryInputs.clear();
   }
 
-  void Device::initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& stateSpecs) {
+  void Device::initStates(const std::vector<DeviceStateSpec_t>& stateSpecs) {
     if (stateSpecs.empty()) {
       return;
     }
@@ -2245,7 +2245,7 @@ namespace dss {
     BOOST_FOREACH(const DeviceStateSpec_t& stateSpec, stateSpecs) {
       const std::string& stateName = stateSpec.Name;
       try {
-        boost::shared_ptr<State> state = boost::make_shared<State>(me, stateName);
+        boost::shared_ptr<State> state = boost::make_shared<State>(sharedFromThis(), stateName);
         std::vector<std::string> values;
         values.push_back(State::INVALID);
         values.insert(values.end(), stateSpec.Values.begin(), stateSpec.Values.end());
@@ -2324,7 +2324,7 @@ namespace dss {
     getBinaryInput(index)->handleEvent(inputState);
   }
 
-  void Device::setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
+  void Device::setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr binaryInputNode;
     if (m_pPropertyNode != NULL) {
@@ -2381,7 +2381,7 @@ namespace dss {
     return (uint8_t) m_sensorInputCount;
   }
 
-  void Device::setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _sensorInputs) {
+  void Device::setSensors(const std::vector<DeviceSensorSpec_t>& _sensorInputs) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr sensorInputNode;
     if (m_pPropertyNode != NULL) {
@@ -2437,7 +2437,7 @@ namespace dss {
     }
   }
 
-  void Device::setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels) {
+  void Device::setOutputChannels(const std::vector<int>& _outputChannels) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr outputChannelNode;
     if (m_pPropertyNode != NULL) {
