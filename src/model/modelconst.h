@@ -293,6 +293,8 @@ namespace dss {
   const int ColorIDGreen = 7;
   const int ColorIDBlack = 8;
 
+  // TODO(someday): Remove this type and variables that use it altogether?
+  // https://git.digitalstrom.org/brano/dss-mainline/commit/d17f16eb550c0cb32c910372f8d137ba32338a68#note_35767
   enum class GroupType {
     Standard = 0, // (from dsm-api doc) 0 = Standard Groups
     Todo1 = 1, // (from dsm-api doc) 1 = Global groups
