@@ -233,7 +233,8 @@ namespace dss {
     Unknown = -1
   };
 
-  enum class BinaryInputId;
+  enum class BinaryInputId {
+  };
 
   // Click type constants for devices
   const uint8_t ClickType1T = 0x00;     // Tipp 1
