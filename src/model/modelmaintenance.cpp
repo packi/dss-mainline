@@ -462,7 +462,7 @@ namespace dss {
                                      *m_pApartment);
 
     foreach (boost::shared_ptr<Zone> zone, m_pDSS->getApartment().getZones()) {
-      manipulator.autoAssignZoneSensors(zone);
+      manipulator.autoAssignZoneSensors(*zone);
     }
   }
 
@@ -1879,7 +1879,7 @@ namespace dss {
       StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
                                        *m_pStructureQueryBusInterface,
                                        *m_pApartment);
-      manipulator.autoAssignZoneSensors(zone);
+      manipulator.autoAssignZoneSensors(*zone);
 
       pollSensors(pDevRef);
     }
