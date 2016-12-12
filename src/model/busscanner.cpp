@@ -931,9 +931,7 @@ namespace dss {
                 " for zone " + intToString(_zone->getID()) +
                 " on dsm " + dsuid2str(_dsMeter->getDSID()) +
                 ": mode " + intToString(hConfig.ControllerMode), lsInfo);
-            manip.setZoneHeatingConfig(_zone,
-                (const dsuid_t) _dsMeter->getDSID(),
-                (const ZoneHeatingConfigSpec_t) _zone->getHeatingControlMode());
+            manip.setZoneHeatingConfig(_zone, _dsMeter->getDSID(), _zone->getHeatingControlMode());
           }
         } else {
           if (hConfig.ControllerMode > 0) {
