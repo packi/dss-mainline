@@ -134,6 +134,36 @@ namespace dss {
         json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
+      } else if(_request.getMethod() == "storeAccessToken") {
+        std::string authdata;
+        std::string vdcPath("authentication");
+        std::string vdcScope;
+        if (_request.hasParameter("authdata")) {
+          authdata = _request.getParameter("authdata");
+        } else {
+          return json.failure("missing parameter authdata");
+        }
+        if (_request.hasParameter("path")) {
+          vdcPath = _request.getParameter("path");
+        }
+        if (_request.hasParameter("scope")) {
+          vdcScope = _request.getParameter("scope");
+        }
+        google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+        vdcapi::PropertyElement* param0 = query.Add();
+        param0->set_name(vdcPath);
+        vdcapi::PropertyElement* param1 = param0->add_elements();
+        param1->set_name("authdata");
+        param1->mutable_value()->set_v_string(authdata);
+        if (!vdcScope.empty()) {
+          vdcapi::PropertyElement* param2 = param0->add_elements();
+          param2->set_name("scope");
+          param2->mutable_value()->set_v_string(vdcScope);
+        }
+        vdcapi::Message res = VdcConnection::setProperty(dsMeter->getDSID(), dsMeter->getDSID(), query);
+        json.add("response");
+        ProtobufToJSon::protoPropertyToJson(res, json);
+        return json.successJSON();
       } else {
         throw std::runtime_error("Unhandled function");
       }
