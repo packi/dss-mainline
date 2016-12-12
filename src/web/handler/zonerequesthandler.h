@@ -41,6 +41,25 @@ namespace dss {
     Apartment& m_Apartment;
     StructureModifyingBusInterface* m_pStructureBusInterface;
     StructureQueryBusInterface* m_pStructureQueryBusInterface;
+
+    std::string getLastCalledScene(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getName(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string setName(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string sceneSetName(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string sceneGetName(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getReachableScenes(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getTemperatureControlStatus(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getTemperatureControlConfig(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string setTemperatureControlConfig(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getTemperatureControlValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string setTemperatureControlValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string setTemperatureControlState(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getTemperatureControlInternals(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string setSensorSource(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string clearSensorSource(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getAssignedSensors(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getSensorValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+
   }; // ZoneRequestHandler
 
 }
