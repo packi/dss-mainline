@@ -40,9 +40,10 @@ ComposedGroupStateType composedGroupStateTypeForBinaryInputType(BinaryInputType 
 /// but the coupling is very weak. State object is accessed only inside the called method.
 class ComposedGroupState : public State {
 public:
-  ComposedGroupState(const boost::shared_ptr<Group>& group, const std::string& name, ComposedGroupStateType type);
+  ComposedGroupState(const std::string& name, ComposedGroupStateType type);
   ~ComposedGroupState();
 
+  static constexpr eStateType STATE_TYPE = StateType_Service;
   void addSubState(const State& subState);
   void updateSubState(const State& subState);
   void removeSubState(const State& subState);

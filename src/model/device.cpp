@@ -212,31 +212,21 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
     }
     auto&& apartment = m_device.getApartment();
     auto&& zoneId = m_device.getZoneID();
-    auto&& zone = apartment.getZone(zoneId);
-    auto&& targetGroup = zone->getGroup(targetGroupId);
-    if (!targetGroup) {
-      // TODO(soon): Is it ok to create the zone here?
-      // Or is it an error? If so, how do we recover?
-      log(std::string("updateGroupState Create group this:") + m_name
-          + " zoneId:" + intToString(zoneId)
-          + " targetGroupId:" + intToString(targetGroupId), lsNotice);
-      targetGroup.reset(new Group(targetGroupId, zone, apartment));
-      targetGroup->setStandardGroupID(targetGroupId);
-      targetGroup->setIsValid(true);
-      zone->addGroup(targetGroup);
+    if (isGlobalAppGroup(targetGroupId)) {
+      zoneId = 0;
     }
-    auto&& targetGroupZoneId = targetGroup->getZoneID();
-    std::string composedGroupName;
-    if (targetGroupZoneId != 0) {
-      composedGroupName += ds::str("zone.",targetGroupZoneId);
-    }
-    composedGroupName += ds::str(".group.", targetGroupId, ".inputType.", m_inputType);
-    auto composedGroupState = boost::dynamic_pointer_cast<ComposedGroupState>(
-        apartment.tryGetState(StateType_Group, composedGroupName));
-    if (!composedGroupState) {
-      composedGroupState = boost::make_shared<ComposedGroupState>(targetGroup, composedGroupName,
-          composedGroupStateType);
-      apartment.allocateState(composedGroupState); // no ItemNotFoundException, we know it does not exist
+    auto&& composedGroupName = ds::str("zone.", zoneId, ".group.", targetGroupId, ".inputType.",
+        static_cast<int>(m_inputType));
+    boost::shared_ptr<ComposedGroupState> composedGroupState;
+    {
+      auto&& base = apartment.tryGetState(ComposedGroupState::STATE_TYPE, composedGroupName);
+      if (base) {
+        composedGroupState = boost::dynamic_pointer_cast<ComposedGroupState>(base);
+        assert(composedGroupState);
+      } else {
+        composedGroupState = boost::make_shared<ComposedGroupState>(composedGroupName, composedGroupStateType);
+        apartment.allocateState(composedGroupState); // no ItemNotFoundException, we know it does not exist
+      }
     }
     m_groupState.reset(new GroupStateHandle(*this, composedGroupState));
     log(std::string("updateGroupState LEAVE this:") + m_name + " composedGroupName:" + composedGroupName, lsInfo);

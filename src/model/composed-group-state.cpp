@@ -89,9 +89,8 @@ struct ComposedGroupState::SubStateItem {
   bool operator==(const State& subState) { return m_ptr == &subState; }
 };
 
-ComposedGroupState::ComposedGroupState(
-    const boost::shared_ptr<Group>& group, const std::string& name, ComposedGroupStateType type)
-    : State(group, name), m_type(type) {
+ComposedGroupState::ComposedGroupState(const std::string& name, ComposedGroupStateType type)
+    : State(STATE_TYPE, name, std::string()), m_type(type) {
   log(std::string("ComposedGroupState this:") + getName(), lsInfo);
   assert(type != ComposedGroupStateType::NONE); // precondition
 }
