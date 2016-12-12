@@ -828,7 +828,7 @@ namespace dss {
         ", type: " + sensorTypeName(_sensorType) +
         " => " + dsuid2str(_dev->getDSID()), lsInfo);
 
-    _zone->setSensor(_dev, _sensorType);
+    _zone->setSensor(*_dev, _sensorType);
     m_Interface.setZoneSensor(_zone->getID(), _sensorType, _dev->getDSID());
   }
 
