@@ -691,7 +691,7 @@ void SystemState::stateBinaryinput() {
   uint8_t inputIndex = (uint8_t)iiNode->getIntegerValue();
   auto&& devInput = pDev->getBinaryInput(inputIndex);
 
-  if (static_cast<int>(devInput->m_inputId) != 15) { // TODO(someday): introduce enum constant
+  if (devInput->m_inputId != BinaryInputId::APP_MODE) {
     return;
   }
 

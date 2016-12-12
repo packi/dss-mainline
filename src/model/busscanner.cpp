@@ -450,7 +450,7 @@ namespace dss {
 
     // synchronize binary input configuration
     if (_spec.binaryInputsValid) {
-      dev->setBinaryInputs(dev, _spec.binaryInputs);
+      dev->setBinaryInputs(_spec.binaryInputs);
     }
 
     if ((dev->getDeviceType() == DEVICE_TYPE_AKM) &&
@@ -484,7 +484,7 @@ namespace dss {
         }
 
         VdcDb db(*DSS::getInstance());
-        dev->initStates(dev, db.getStatesLegacy(eanString)); // throws
+        dev->initStates(db.getStatesLegacy(eanString)); // throws
         dev->setHasActions(db.hasActionInterface(eanString)); // throws
       }
     } catch (const std::runtime_error& e) {
@@ -496,12 +496,12 @@ namespace dss {
 
     // synchronize sensor configuration
     if (_spec.sensorInputsValid) {
-      dev->setSensors(dev, _spec.sensorInputs);
+      dev->setSensors(_spec.sensorInputs);
     }
 
     // synchronize output channel configuration
     if (_spec.outputChannelsValid) {
-      dev->setOutputChannels(dev, _spec.outputChannels);
+      dev->setOutputChannels(_spec.outputChannels);
     }
 
     _zone->addToDSMeter(_dsMeter);

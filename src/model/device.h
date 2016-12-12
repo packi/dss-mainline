@@ -730,7 +730,7 @@ namespace dss {
     void setHasActions(bool x) { m_hasActions = x; }
     bool getHasActions() const { return m_hasActions; }
 
-    void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
+    void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;
     const std::vector<boost::shared_ptr<DeviceBinaryInput> >& getBinaryInputs() const;
     const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
@@ -739,13 +739,13 @@ namespace dss {
     void setBinaryInputType(uint8_t _index, BinaryInputType _inputType);
     void clearBinaryInputs();
 
-    void initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& specs);
+    void initStates(const std::vector<DeviceStateSpec_t>& specs);
     const std::map<std::string, boost::shared_ptr<State> >& getStates() const { return m_states; }
     void clearStates();
     void setStateValue(const std::string& name, const std::string& value);
     void setStateValues(const std::vector<std::pair<std::string, std::string> >& values);
 
-    void setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _binaryInput);
+    void setSensors(const std::vector<DeviceSensorSpec_t>& _binaryInput);
     const uint8_t getSensorCount() const;
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
@@ -755,7 +755,7 @@ namespace dss {
     const void setSensorDataValidity(int _sensorIndex, bool _valid) const;
     bool isSensorDataValid(int _sensorIndex) const;
 
-    void setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels);
+    void setOutputChannels(const std::vector<int>& _outputChannels);
     const int getOutputChannelCount() const;
     const int getOutputChannelIndex(int _channelId) const;
     const int getOutputChannel(int _index) const;
