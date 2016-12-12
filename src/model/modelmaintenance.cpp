@@ -2089,7 +2089,6 @@ namespace dss {
       if (_sensorIndex == 32) {
         int index = 0;
         foreach (auto&& binaryInput, pDev->getBinaryInputs()) {
-          index++;
           auto&& state = binaryInput->getState();
           int oldState = state.getState();
           auto binaryInputState =
@@ -2101,6 +2100,7 @@ namespace dss {
                                                     binaryInput->m_inputType,
                                                     binaryInputState));
           }
+          index++;
         }
 
       // device status and error event
