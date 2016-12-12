@@ -158,6 +158,7 @@ namespace dss {
   const uint8_t SensorFunction_Generic11 = 11;
 
   enum class SensorType {
+    Status = 0, ///< Status sensor value. See also \ref StatusSensorBits.
     ActivePower = 4,
     OutputCurrent = 5,
     ElectricMeter = 6,
@@ -184,6 +185,12 @@ namespace dss {
     ActivePowerVA = 65,
     NotUsed = 253,
     UnknownType = 255,
+  };
+
+  // Interpretation of SensorType::Status bit values.
+  enum class StatusSensorBits {
+    MALFUNCTION = 0,
+    SERVICE = 1,
   };
 
   const int SensorMaxLifeTime = 3600; /* 1h */

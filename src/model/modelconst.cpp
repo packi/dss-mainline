@@ -33,6 +33,7 @@
 namespace dss {
   double sensorValueToDouble(SensorType _sensorType, int _sensorValue) {
     switch (_sensorType) {
+    case SensorType::Status:
     case SensorType::ActivePower:
     case SensorType::OutputCurrent:
     case SensorType::ActivePowerVA:
@@ -78,6 +79,7 @@ namespace dss {
 
   int doubleToSensorValue(SensorType _sensorType, double _sensorValue) {
     switch (_sensorType) {
+    case SensorType::Status:
     case SensorType::ActivePower:
     case SensorType::OutputCurrent:
     case SensorType::ActivePowerVA:
@@ -159,6 +161,7 @@ namespace dss {
 
   uint8_t sensorTypeToPrecision(SensorType _sensorType) {
     switch (_sensorType) {
+      case SensorType::Status:
       case SensorType::RoomTemperatureControlVariable:
         return 1;
       case SensorType::ActivePower:
@@ -193,6 +196,8 @@ namespace dss {
 
   std::string sensorTypeName(SensorType _sensorType) {
     switch(_sensorType) {
+      case SensorType::Status:
+        return "Status";
       case SensorType::ActivePower:
         return "Active Power";
       case SensorType::OutputCurrent:
