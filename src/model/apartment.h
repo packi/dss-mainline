@@ -33,7 +33,6 @@
 #include <set>
 
 #include "devicecontainer.h"
-#include "modeltypes.h"
 #include "src/subsystem.h"
 #include "src/model/state.h"
 #include "src/datetools.h"

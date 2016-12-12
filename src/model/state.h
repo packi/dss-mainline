@@ -24,11 +24,12 @@
 #define STATE_H
 
 #include "deviceinterface.h"
-#include "modeltypes.h"
 #include "propertysystem.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/smart_ptr.hpp>
+
+#include "ds485types.h"
 
 namespace dss {
   class Device;

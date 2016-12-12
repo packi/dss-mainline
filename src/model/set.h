@@ -26,7 +26,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "nonaddressablemodelitem.h"
-#include "modeltypes.h"
 
 #include "device.h"
 
@@ -59,7 +58,7 @@ namespace dss {
    */
   class Set : public NonAddressableModelItem {
   private:
-    DeviceVector m_ContainedDevices;
+    std::vector<DeviceReference> m_ContainedDevices;
   public:
     /** Constructor for an empty Set.*/
     Set();
@@ -70,7 +69,7 @@ namespace dss {
     /** Constructor for a set containing only \a _reference. */
     Set(DeviceReference& _reference);
     /** Constructor for a set containing \a _devices. */
-    Set(DeviceVector _devices);
+    Set(std::vector<DeviceReference> _devices);
     virtual ~Set() {};
 
     /** Performs the given action on all contained devices */

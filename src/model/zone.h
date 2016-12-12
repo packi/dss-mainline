@@ -28,7 +28,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "modeltypes.h"
 #include "devicecontainer.h"
 #include "nonaddressablemodelitem.h"
 #include "physicalmodelitem.h"
@@ -169,7 +168,7 @@ namespace dss {
                public boost::noncopyable {
   private:
     int m_ZoneID;
-    DeviceVector m_Devices;
+    std::vector<DeviceReference> m_Devices;
     std::vector<boost::shared_ptr<const DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Group> > m_Groups;
     std::vector<MainZoneSensor_t> m_MainSensors;

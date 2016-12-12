@@ -52,9 +52,9 @@ namespace dss {
     m_ContainedDevices.push_back(DeviceReference(_device, &_device->getApartment()));
   } // ctor(Device)
 
-  Set::Set(DeviceVector _devices) {
+  Set::Set(std::vector<DeviceReference> _devices) {
     m_ContainedDevices = _devices;
-  } // ctor(DeviceVector)
+  }
 
   Set::Set(const Set& _copy) {
     m_ContainedDevices = _copy.m_ContainedDevices;
@@ -69,7 +69,7 @@ namespace dss {
   } // previousScene
 
   void Set::perform(IDeviceAction& _deviceAction) {
-    for(DeviceIterator iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
+    for(auto iDevice = m_ContainedDevices.begin(); iDevice != m_ContainedDevices.end(); ++iDevice) {
       _deviceAction.perform(iDevice->getDevice());
     }
   } // perform
@@ -339,7 +339,7 @@ namespace dss {
   } // remove
 
   bool Set::contains(const DeviceReference& _device) const {
-    DeviceVector::const_iterator pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
+    auto pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
     return pos != m_ContainedDevices.end();
   } // contains
 
@@ -358,7 +358,7 @@ namespace dss {
   } // addDevice
 
   void Set::removeDevice(const DeviceReference& _device) {
-    DeviceVector::iterator pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
+    auto pos = find(m_ContainedDevices.begin(), m_ContainedDevices.end(), _device);
     if(pos != m_ContainedDevices.end()) {
       m_ContainedDevices.erase(pos);
     }

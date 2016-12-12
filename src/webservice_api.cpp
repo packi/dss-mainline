@@ -14,6 +14,7 @@
 #include "event/event_fields.h"
 #include "foreach.h"
 #include "propertysystem.h"
+#include "model/devicereference.h"
 #include "model/group.h"
 #include "webservice_api.h"
 #include "web/webrequests.h"
