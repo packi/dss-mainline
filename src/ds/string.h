@@ -29,21 +29,21 @@ std::string str(Args&&... args);
 
 // implementation details
 
-namespace _ { // private
+namespace _private {
 
-inline void str(std::ostream& ostream) {}
+inline void strRecursive(std::ostream& ostream) {}
 template <typename Arg, typename... Args>
-void str(std::ostream& ostream, Arg&& arg, Args&&... args) {
+void strRecursive(std::ostream& ostream, Arg&& arg, Args&&... args) {
     ostream << std::forward<Arg>(arg);
-    str(ostream, std::forward<Args>(args)...);
+    strRecursive(ostream, std::forward<Args>(args)...);
 }
 
-} // namespace _ (private)
+} // namespace _private
 
 template <typename... Args>
 std::string str(Args&&... args) {
     std::ostringstream ostream;
-    _::str(ostream, std::forward<Args>(args)...);
+    _private::strRecursive(ostream, std::forward<Args>(args)...);
     return ostream.str();
 }
 }
