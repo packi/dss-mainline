@@ -68,15 +68,15 @@ namespace dss {
     synchronizeGroups(&m_Apartment, &m_Interface);
   } // createZone
 
-  void StructureManipulator::checkSensorsOnDeviceRemoval(
-          boost::shared_ptr<Zone> _zone, boost::shared_ptr<Device> _device) {
+  void StructureManipulator::checkSensorsOnDeviceRemoval(Zone &_zone, Device &_device)
+  {
     // if the device that is being moved out of the zone was a zone sensor:
     // clear the previous sensor assignment and also check if we can reassign
     // another sensor to the zone
-    foreach (auto&& sensorType, _zone->getAssignedSensorTypes(*_device)) {
-      resetZoneSensor(*_zone, sensorType);
+    foreach (auto&& sensorType, _zone.getAssignedSensorTypes(_device)) {
+      resetZoneSensor(_zone, sensorType);
     }
-    autoAssignZoneSensors(*_zone);
+    autoAssignZoneSensors(_zone);
   }
 
   void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {
@@ -151,7 +151,7 @@ namespace dss {
       Logger::getInstance()->log("StructureManipulator::addDeviceToZone: Removing device from old zone " + intToString(oldZoneID), lsInfo);
       boost::shared_ptr<Zone> oldZone = m_Apartment.getZone(oldZoneID);
       oldZone->removeDevice(ref);
-      checkSensorsOnDeviceRemoval(oldZone, _device);
+      checkSensorsOnDeviceRemoval(*oldZone, *_device);
 
       Set presentDevicesInZoneOfDSMeter = oldZone->getDevices().getByDSMeter(targetDSMeter).getByPresence(true);
       if(presentDevicesInZoneOfDSMeter.length() == 0) {
@@ -349,7 +349,7 @@ namespace dss {
             usleep(500 * 1000); // 500ms
           }
           removeDeviceFromDSMeter(pPartnerDev);
-          checkSensorsOnDeviceRemoval(m_Apartment.getZone(pPartnerDev->getZoneID()), pPartnerDev);
+          checkSensorsOnDeviceRemoval(*m_Apartment.getZone(pPartnerDev->getZoneID()), *pPartnerDev);
           m_Apartment.removeDevice(pPartnerDev->getDSID());
           doSleep = true;
 
@@ -372,13 +372,13 @@ namespace dss {
                                  "dSM: ") + e.what(), lsError);
     }
 
-    checkSensorsOnDeviceRemoval(m_Apartment.getZone(_pDevice->getZoneID()), _pDevice);
+    checkSensorsOnDeviceRemoval(*m_Apartment.getZone(_pDevice->getZoneID()), *_pDevice);
     m_Apartment.removeDevice(_pDevice->getDSID());
     result.push_back(_pDevice);
 
     if (pPartnerDevice != NULL) {
       Logger::getInstance()->log("Also removing partner device " + dsuid2str(pPartnerDevice->getDSID()) + "'");
-      checkSensorsOnDeviceRemoval(m_Apartment.getZone(pPartnerDevice->getZoneID()), pPartnerDevice);
+      checkSensorsOnDeviceRemoval(*m_Apartment.getZone(pPartnerDevice->getZoneID()), *pPartnerDevice);
       m_Apartment.removeDevice(pPartnerDevice->getDSID());
       result.push_back(pPartnerDevice);
     }
