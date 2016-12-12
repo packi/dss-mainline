@@ -86,6 +86,7 @@ namespace dss {
 
     void setZoneHeatingConfig(boost::shared_ptr<Zone> _zone, const dsuid_t& _ctrlDSUID, const ZoneHeatingConfigSpec_t _spec);
     void clearZoneHeatingConfig(boost::shared_ptr<Zone> _zone);
+
     void setZoneSensor(Zone &_zone, SensorType _sensorType, boost::shared_ptr<Device> _dev);
     void resetZoneSensor(Zone &_zone, SensorType _sensorType);
     void autoAssignZoneSensors(Zone &_zone);

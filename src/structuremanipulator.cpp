@@ -824,9 +824,8 @@ namespace dss {
   void StructureManipulator::setZoneSensor(Zone &_zone,
                                            SensorType _sensorType,
                                            boost::shared_ptr<Device> _dev) {
-    Logger::getInstance()->log("SensorAssignment: assign zone: " + intToString(_zone.getID()) +
-        ", type: " + sensorTypeName(_sensorType) +
-        " => " + dsuid2str(_dev->getDSID()), lsInfo);
+    Logger::getInstance()->log("SensorAssignment:" + std::string(__func__) + " : " + _zone.getName() + " type: " +
+                               sensorTypeName(_sensorType) + " => " + dsuid2str(_dev->getDSID()), lsInfo);
 
     _zone.setSensor(*_dev, _sensorType);
     m_Interface.setZoneSensor(_zone.getID(), _sensorType, _dev->getDSID());
@@ -834,9 +833,8 @@ namespace dss {
 
   void StructureManipulator::resetZoneSensor(Zone &_zone,
                                              SensorType _sensorType) {
-    Logger::getInstance()->log("SensorAssignment: reset zone: " + intToString(_zone.getID()) +
-        ", type: " + sensorTypeName(_sensorType) +
-        " => none", lsInfo);
+    Logger::getInstance()->log("SensorAssignment:" + std::string(__func__) + " : " + _zone.getName() + " type: " +
+                               sensorTypeName(_sensorType) + " => none", lsInfo);
 
     _zone.resetSensor(_sensorType);
     m_Interface.resetZoneSensor(_zone.getID(), _sensorType);
@@ -850,8 +848,8 @@ namespace dss {
 
     auto&& unassigned_sensors = _zone.getUnassignedSensorTypes();
 
-    Logger::getInstance()->log("SensorAssignment: run auto-assignment for " +
-        intToString(unassigned_sensors.size()) + " sensor types:", lsInfo);
+    Logger::getInstance()->log("SensorAssignment:" + std::string(__func__) + " " + _zone.getName() + " " +
+        intToString(unassigned_sensors.size()) + " sensor types unassigned", lsInfo);
 
     // check if our set contains devices that with the matching sensor type
     // and assign the first device that we find automatically: UC 8.1
@@ -872,7 +870,7 @@ namespace dss {
 
   void StructureManipulator::synchronizeZoneSensorAssignment(Zone &zone)
   {
-    Logger::getInstance()->log("SensorAssignment: run synchronize", lsInfo);
+    Logger::getInstance()->log("SensorAssignment:" + std::string(__func__) + " " + zone.getName(), lsInfo);
 
     {
       // remove sensors that do not belong to the zone
@@ -881,24 +879,23 @@ namespace dss {
       // erase all unassigned sensors in zone
       try {
         foreach (auto&& sensorType, zone.getUnassignedSensorTypes()) {
-          Logger::getInstance()->log(std::string("SensorAssignment: sync reset ") +
-                  "zone: " + intToString(zone.getID()) +
-                  ", type: " + sensorTypeName(sensorType) +
-                  " => none", lsInfo);
+          Logger::getInstance()->log("SensorAssignment:" + std::string(__func__) + " " + zone.getName() +
+                                     " clear type: " + sensorTypeName(sensorType) + " => none (no available sensor)",
+                                     lsInfo);
 
           m_Interface.resetZoneSensor(zone.getID(), sensorType);
         }
 
         // reassign all assigned sensors in zone
         foreach (auto&& s, zone.getAssignedSensors()) {
-          Logger::getInstance()->log("SensorAssignment: sync assign zone: " + intToString(zone.getID()) +
-                  ", type: " + sensorTypeName(s.m_sensorType) +
-                  " => " + dsuid2str(s.m_DSUID), lsInfo);
+          Logger::getInstance()->log("SensorAssignment:" + std::string(__func__) + " " + zone.getName() + " set type: "
+                                     + sensorTypeName(s.m_sensorType) + " => " + dsuid2str(s.m_DSUID), lsInfo);
 
           m_Interface.setZoneSensor(zone.getID(), s.m_sensorType, s.m_DSUID);
         }
       } catch (std::runtime_error &err) {
-        Logger::getInstance()->log(std::string("StructureManipulator::synchronizeZoneSensorAssignment: can't synchronize zone sensors: ") + err.what(), lsWarning);
+        Logger::getInstance()->log(std::string("StructureManipulator::") + std::string(__func__) + " " + zone.getName()
+                                   + " failed with exception:" + err.what(), lsWarning);
       }
     }
   }
