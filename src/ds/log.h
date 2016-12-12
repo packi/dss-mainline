@@ -16,4 +16,18 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
-#include "compat.h"
+#pragma once
+
+#include <stdexcept>
+#include "string.h"
+
+namespace ds {
+
+// * `DS_ASSUME(condition)`:  Check preconditions -- e.g. to validate parameters passed from a caller.
+// A failure indicates that the caller is buggy.
+#define DS_ASSUME(cond) \
+  if (DS_LIKELY(cond)) {} else \
+    throw std::runtime_error(ds::str(__FILE__, ':', __LINE__, ' ', #cond))
+
+} // namespace ds
+

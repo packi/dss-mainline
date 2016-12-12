@@ -19,6 +19,7 @@
 #pragma once
 
 #include <sstream>
+#include "common.h"
 
 namespace ds {
 
@@ -46,4 +47,5 @@ std::string str(Args&&... args) {
     _private::strRecursive(ostream, std::forward<Args>(args)...);
     return ostream.str();
 }
-}
+
+} // namespace ds

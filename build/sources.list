@@ -12,8 +12,10 @@ libdsscore_a_SOURCES =  \
 	../src/datetools.h \
 	../src/defaultbuseventsink.cpp \
 	../src/defaultbuseventsink.h \
-	../src/ds/compat.cpp \
-	../src/ds/compat.h \
+	../src/ds/common.cpp \
+	../src/ds/common.h \
+	../src/ds/log.h \
+	../src/ds/log.cpp \
 	../src/ds/string.cpp \
 	../src/ds/string.h \
 	../src/ds485/dsactionrequest.cpp \

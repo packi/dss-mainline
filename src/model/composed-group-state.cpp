@@ -20,7 +20,7 @@
 
 */
 #include "composed-group-state.h"
-#include <ds/compat.h>
+#include <ds/log.h>
 #include <foreach.h>
 
 namespace dss {
@@ -92,7 +92,7 @@ struct ComposedGroupState::SubStateItem {
 ComposedGroupState::ComposedGroupState(const std::string& name, ComposedGroupStateType type)
     : State(STATE_TYPE, name, std::string()), m_type(type) {
   log(std::string("ComposedGroupState this:") + getName(), lsInfo);
-  assert(type != ComposedGroupStateType::NONE); // precondition
+  DS_ASSUME(type != ComposedGroupStateType::NONE);
 }
 
 ComposedGroupState::~ComposedGroupState() = default;
@@ -103,7 +103,7 @@ void ComposedGroupState::addSubState(const State& subState) {
       lsInfo);
   boost::recursive_mutex::scoped_lock lock(m_mutex);
   auto&& it = std::find(m_subStateItems.begin(), m_subStateItems.end(), subState);
-  assert(it == m_subStateItems.end());
+  DS_ASSUME(it == m_subStateItems.end());
   m_subStateItems.push_back(SubStateItem(subState));
   update();
 }
@@ -114,7 +114,7 @@ void ComposedGroupState::updateSubState(const State& subState) {
       lsInfo);
   boost::recursive_mutex::scoped_lock lock(m_mutex);
   auto&& it = std::find(m_subStateItems.begin(), m_subStateItems.end(), subState);
-  assert(it != m_subStateItems.end());
+  DS_ASSUME(it != m_subStateItems.end());
   if (it->m_value == value) {
     return;
   }
@@ -126,7 +126,7 @@ void ComposedGroupState::removeSubState(const State& subState) {
   log(std::string("removeSubState this:") + getName() + " state:" + subState.getName(), lsInfo);
   boost::recursive_mutex::scoped_lock lock(m_mutex);
   auto&& it = std::find(m_subStateItems.begin(), m_subStateItems.end(), subState);
-  assert(it != m_subStateItems.end());
+  DS_ASSUME(it != m_subStateItems.end());
   m_subStateItems.erase(it);
   update();
 }
@@ -136,7 +136,7 @@ void ComposedGroupState::update() {
   // Requirements: The composed state is:
   // * `active` if at least one sub state is `active`
   // * `inactive` otherwise
-  assert(m_type == ComposedGroupStateType::OR); // precondition: Only Or type supported now
+  DS_ASSUME(m_type == ComposedGroupStateType::OR); // Only Or type supported now
   int groupValue = State_Inactive;
   foreach (auto&& x, m_subStateItems) {
     log(std::string("update this:") + getName() + " state:" + x.m_name + " value:" + intToString(x.m_value), lsDebug);
