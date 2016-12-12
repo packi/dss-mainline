@@ -36,6 +36,7 @@
 #include "src/model/zone.h"
 #include "src/model/group.h"
 #include "src/model/set.h"
+#include "src/model/setsplitter.h"
 #include "src/model/modelpersistence.h"
 #include "src/setbuilder.h"
 #include "src/dss.h"
@@ -56,6 +57,13 @@ DSUID_DEFINE(dsuid4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4);
 DSUID_DEFINE(dsmeterDSID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
 DSUID_DEFINE(meter1DSID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10);
 DSUID_DEFINE(meter2DSID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11);
+
+// this is a friend class of SetSplitter so we are allowed to execute private members during tests
+struct dss::SetSplitterTester {
+  static boost::shared_ptr<Group> findGroupContainingAllDevices(const Set& _set, const Zone& _zone) {
+    return SetSplitter::findGroupContainingAllDevices(_set, _zone);
+  }
+};
 
 BOOST_AUTO_TEST_SUITE(Model)
 
@@ -526,6 +534,84 @@ BOOST_AUTO_TEST_CASE(testSetBuilderTag) {
   result = setBuilder.buildSet(".tag('nonexisting')", boost::shared_ptr<Zone>());
   BOOST_CHECK_EQUAL(result.length(), 0);
 } // testSetBuilderTag
+
+// this test checks if the Set::findGroupContainingAllDevices function properly finds group that contain all devices in one set
+BOOST_AUTO_TEST_CASE(testSetFindGroupContainingAllDevices) {
+  Apartment apt(NULL);
+
+  boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsmeterDSID);
+
+  boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid1);
+  dev1->setShortAddress(1);
+  dev1->setDSMeter(meter);
+  dev1->addToGroup(1);
+  dev1->addToGroup(2);
+  DeviceReference devRef1(dev1, &apt);
+
+  boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsuid2);
+  dev2->setShortAddress(2);
+  dev2->setDSMeter(meter);
+  dev2->addToGroup(1);
+  dev2->addToGroup(2);
+  DeviceReference devRef2(dev2, &apt);
+
+  boost::shared_ptr<Device> dev3 = apt.allocateDevice(dsuid3);
+  dev3->setShortAddress(3);
+  dev3->setDSMeter(meter);
+  dev3->addToGroup(1);
+  dev3->addToGroup(2);
+  DeviceReference devRef3(dev3, &apt);
+
+  boost::shared_ptr<Device> dev4 = apt.allocateDevice(dsuid4);
+  dev4->setShortAddress(4);
+  dev4->setDSMeter(meter);
+  dev4->addToGroup(1);
+  dev4->addToGroup(2);
+  DeviceReference devRef4(dev4, &apt);
+
+  boost::shared_ptr<Zone> zone1 = apt.allocateZone(1);
+  zone1->addDevice(devRef1);
+  zone1->addDevice(devRef2);
+  zone1->addDevice(devRef3);
+  zone1->addDevice(devRef4);
+
+  Set allDevices = apt.getDevices();
+
+  BOOST_CHECK_EQUAL(dev1, allDevices.getByBusID(1, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev2, allDevices.getByBusID(2, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev3, allDevices.getByBusID(3, dsmeterDSID).getDevice());
+  BOOST_CHECK_EQUAL(dev4, allDevices.getByBusID(4, dsmeterDSID).getDevice());
+
+  // all devices are both in groups 1 and 2, 1 should be returned
+  boost::shared_ptr<Group> commonGroup = SetSplitterTester::findGroupContainingAllDevices(allDevices, *zone1);
+  BOOST_CHECK_EQUAL(1, commonGroup->getID());
+  // remove one device from group 1, 2 should be returned
+  dev2->removeFromGroup(1);
+  commonGroup = SetSplitterTester::findGroupContainingAllDevices(allDevices, *zone1);
+  BOOST_CHECK_EQUAL(2, commonGroup->getID());
+  // remove one device from group 2, no common group should be found - broadcast group should be returned
+  dev3->removeFromGroup(2);
+  commonGroup = SetSplitterTester::findGroupContainingAllDevices(allDevices, *zone1);
+  BOOST_CHECK_EQUAL(0, commonGroup->getID());
+
+  // create one element set and try to find common group for it
+  Set setdev1 = Set(dev1);
+  commonGroup = SetSplitterTester::findGroupContainingAllDevices(setdev1, *zone1);
+  BOOST_CHECK_EQUAL(1, commonGroup->getID());
+  // remove device from group 1, 2 should be returned
+  dev1->removeFromGroup(1);
+  commonGroup = SetSplitterTester::findGroupContainingAllDevices(setdev1, *zone1);
+  BOOST_CHECK_EQUAL(2, commonGroup->getID());
+  // remove device from group 2, no common group should be found - broadcast group should be returned
+  dev1->removeFromGroup(2);
+  commonGroup = SetSplitterTester::findGroupContainingAllDevices(setdev1, *zone1);
+  BOOST_CHECK_EQUAL(0, commonGroup->getID());
+
+  // try empty set - only broadcast is possible
+  Set empty;
+  commonGroup = SetSplitterTester::findGroupContainingAllDevices(empty, *zone1);
+  BOOST_CHECK_EQUAL(0, commonGroup->getID());
+}
 
 BOOST_AUTO_TEST_CASE(testMeterSetBuilder) {
   Apartment apt(NULL);
