@@ -13,12 +13,12 @@
 #define DS_FALLTHROUGH
 
 #ifdef __GNUC__
-#define DS_LIKELY(condition) __builtin_expect(condition, true)
-#define DS_UNLIKELY(condition) __builtin_expect(condition, false)
 // Branch prediction macros.  Evaluates to the condition given, but also tells the compiler that we
 // expect the condition to be true/false enough of the time that it's worth hard-coding branch
 // prediction.
+#define DS_LIKELY(condition) __builtin_expect(condition, true)
+#define DS_UNLIKELY(condition) __builtin_expect(condition, false)
 #else
-#define KJ_LIKELY(condition) (condition)
-#define KJ_UNLIKELY(condition) (condition)
+#define DS_LIKELY(condition) (condition)
+#define DS_UNLIKELY(condition) (condition)
 #endif
