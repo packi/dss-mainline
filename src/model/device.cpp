@@ -77,7 +77,7 @@ namespace dss {
       m_ptr->removeSubState(*m_parent.m_state);
     }
     void update() {
-log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
+      log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
       m_ptr->updateSubState(*m_parent.m_state);
     }
   private:
