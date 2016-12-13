@@ -28,6 +28,7 @@
 
 #include <string>
 
+#include "src/base.h"
 #include "src/scripting/jshandler.h"
 #include "src/scripting/scriptobject.h"
 

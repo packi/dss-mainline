@@ -27,8 +27,8 @@
 
 #include "propertyrequesthandler.h"
 
+#include "src/base.h"
 #include "src/propertysystem.h"
-
 #include "src/propertyquery.h"
 #include "src/stringconverter.h"
 #include "util.h"

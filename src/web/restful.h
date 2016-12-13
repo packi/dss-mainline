@@ -25,7 +25,6 @@
 
 #include <boost/function.hpp>
 
-#include "src/base.h"
 
 namespace dss {
 

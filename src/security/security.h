@@ -25,8 +25,8 @@
 
 #include <boost/thread.hpp>
 
-#include "src/base.h"
 #include "logger.h"
+#include "exception.h"
 
 namespace dss {
 

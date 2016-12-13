@@ -32,7 +32,6 @@
 #else
   #include <unordered_map>
 #endif
-#include <stdexcept>
 
 #ifdef __APPLE__
 #define HASH_MAP std::unordered_map
@@ -145,20 +144,6 @@ namespace dss {
   bool syncFile(const std::string& _path);
   std::string doIndent(const int _indent);
   std::string XMLStringEscape(const std::string& str);
-
-  //============================================= Exception
-
-  class DSSException : public std::runtime_error {
-  public:
-    DSSException(const std::string& _message)
-      : runtime_error( _message )
-    { }
-
-    virtual ~DSSException() throw() {}
-  }; // DSSException
-
-
-
 }
 
 #endif

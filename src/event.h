@@ -24,7 +24,6 @@
 #ifndef EVENT_H_
 #define EVENT_H_
 
-#include "base.h"
 #include "datetools.h"
 #include "thread.h"
 #include "syncevent.h"

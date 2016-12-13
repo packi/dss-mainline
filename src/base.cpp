@@ -40,6 +40,7 @@
 #include "foreach.h"
 #include <limits>
 
+#include "exception.h"
 #include "logger.h"
 #include "stringconverter.h"
 

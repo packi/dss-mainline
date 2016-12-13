@@ -24,7 +24,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <digitalSTROM/dsuid.h>
-#include "src/base.h"
+
+#include "src/exception.h"
 #include "src/model/modelconst.h"
 
 using namespace dss;

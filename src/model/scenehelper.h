@@ -26,7 +26,6 @@
 
 #include <bitset>
 
-#include "src/base.h"
 #include "src/model/modelconst.h"
 
 namespace dss {
