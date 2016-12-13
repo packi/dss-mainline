@@ -211,11 +211,8 @@ namespace dss {
       return;
     }
     auto&& apartment = m_device.getApartment();
-    auto&& zoneId = m_device.getZoneID();
-    if (isGlobalAppGroup(targetGroupId)) {
-      zoneId = 0;
-    }
-    auto&& composedGroupName = ds::str("zone.", zoneId, ".group.", targetGroupId, ".inputType.",
+    auto&& targetGroupZoneId = m_device.getGroupZoneID(targetGroupId);
+    auto&& composedGroupName = ds::str("zone.", targetGroupZoneId, ".group.", targetGroupId, ".inputType.",
         static_cast<int>(m_inputType));
     boost::shared_ptr<ComposedGroupState> composedGroupState;
     {
