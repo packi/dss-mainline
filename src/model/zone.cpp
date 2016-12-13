@@ -511,19 +511,13 @@ namespace dss {
     return boost::shared_ptr<Device> ();
   }
 
-  bool Zone::isZoneSensor(boost::shared_ptr<Device> _device, SensorType _sensorType) const {
-    if (!_device) {
-      return false;
-    }
-
+  bool Zone::isZoneSensor(const Device &_device, SensorType _sensorType) const {
     boost::shared_ptr<Device> zoneSensor = getAssignedSensorDevice(_sensorType);
     if (!zoneSensor) {
       return false;
     }
 
-    dsuid_t dsuidDevice = _device->getDSID();
-    dsuid_t dsuidSensor = zoneSensor->getDSID();
-    return dsuid_equal (&dsuidDevice, &dsuidSensor);
+    return (_device.getDSID() == zoneSensor->getDSID());
   }
 
   void Zone::dirty() {
