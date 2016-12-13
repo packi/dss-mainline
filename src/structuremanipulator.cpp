@@ -436,7 +436,7 @@ namespace dss {
       pGroup = m_Apartment.getGroup(_groupNumber);
     } catch(ItemNotFoundException&) {
       pGroup = boost::shared_ptr<Group>(
-        new Group(_groupNumber, m_Apartment.getZone(0), m_Apartment));
+        new Group(_groupNumber, m_Apartment.getZone(0)));
       m_Apartment.getZone(0)->addGroup(pGroup);
       m_Interface.createGroup(0, _groupNumber, 0, "");
       pGroup->setAssociatedSet(_originalSet);
@@ -514,7 +514,7 @@ namespace dss {
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Creating user group " + intToString(_groupNumber) +
             " in zone " + intToString(_zone->getID()), lsInfo);
-        pGroup = boost::make_shared<Group>(_groupNumber, _zone, boost::ref<Apartment>(m_Apartment));
+        pGroup = boost::make_shared<Group>(_groupNumber, _zone);
         _zone->addGroup(pGroup);
         m_Interface.createGroup(_zone->getID(), _groupNumber, _standardGroupNumber, _name);
       }
@@ -532,7 +532,7 @@ namespace dss {
         throw DSSException("Group id " + intToString(_groupNumber) + " already exists");
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Creating user global application group " + intToString(_groupNumber), lsInfo);
-        pGroup = boost::make_shared<Group>(_groupNumber, _zone, boost::ref<Apartment>(m_Apartment));
+        pGroup = boost::make_shared<Group>(_groupNumber, _zone);
         pGroup->setName(_name);
         pGroup->setStandardGroupID(_standardGroupNumber);
         _zone->addGroup(pGroup);

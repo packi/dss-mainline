@@ -56,7 +56,7 @@ namespace dss {
     int m_connectedDevices;
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
-    Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
+    Group(const int _id, boost::shared_ptr<Zone> _pZone);
     virtual ~Group() {};
     virtual Set getDevices() const;
 
@@ -130,7 +130,7 @@ namespace dss {
     void removeConnectedDevice();
     bool hasConnectedDevices() { return (m_connectedDevices > 0); }
 
-    static boost::shared_ptr<Group> make(const GroupSpec_t& _spec, boost::shared_ptr<Zone> _pZone, Apartment& _apartment);
+    static boost::shared_ptr<Group> make(const GroupSpec_t& _spec, boost::shared_ptr<Zone> _pZone);
   }; // Group
 
 } // namespace dss

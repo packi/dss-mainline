@@ -484,7 +484,7 @@ namespace dss {
       if (m_tempZone->getID() == 0 && isAppUserGroup(groupID)) {
         m_tempGroup.reset(new Cluster(groupID, m_Apartment));
       } else {
-        m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
+        m_tempGroup.reset(new Group(groupID, m_tempZone));
       }
       m_tempZone->addGroup(m_tempGroup);
     }

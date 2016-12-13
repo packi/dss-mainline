@@ -187,6 +187,8 @@ namespace dss {
     virtual ~Zone();
     virtual Set getDevices() const;
 
+    Apartment& getApartment() { return *m_pApartment; }
+
     /** Adds the Zone to a dsMeter. */
     void addToDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
     /** Removes the Zone from a dsMeter. */
