@@ -27,18 +27,7 @@
 #include <vector>
 #include <stdint.h>
 #include <type_traits>
-
-#if !(definedWIN32 || defined(__APPLE__))
-  #include <tr1/unordered_map>
-#else
-  #include <unordered_map>
-#endif
-
-#ifdef __APPLE__
-#define HASH_MAP std::unordered_map
-#else
-#define HASH_MAP std::tr1::unordered_map
-#endif
+#include <unordered_map>
 
 // well known macro mapped to the state-of-the-art C++ construct
 #define ARRAY_SIZE(x) std::extent<decltype(x)>::value
@@ -50,9 +39,8 @@ namespace dss {
     return find(_v.begin(), _v.end(), _item) != _v.end();
   }
 
-
   //============================================= Common types
-  typedef HASH_MAP<std::string, std::string> HashMapStringString;
+  typedef std::unordered_map<std::string, std::string> HashMapStringString;
 
   //============================================= Conversion helpers
 
