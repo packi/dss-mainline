@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include <type_traits>
 
 #if !(definedWIN32 || defined(__APPLE__))
   #include <tr1/unordered_map>
@@ -38,6 +39,9 @@
 #else
 #define HASH_MAP std::tr1::unordered_map
 #endif
+
+// well known macro mapped to the state-of-the-art C++ construct
+#define ARRAY_SIZE(x) std::extent<decltype(x)>::value
 
 namespace dss {
 
