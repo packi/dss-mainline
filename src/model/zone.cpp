@@ -442,7 +442,7 @@ namespace dss {
     return false;
   }
 
-  boost::shared_ptr<std::vector<SensorType>> Zone::getUnassignedSensorTypes() const {
+  std::vector<SensorType> Zone::getUnassignedSensorTypes() const {
     SensorType sensorTypesIndoor[] = {
       SensorType::TemperatureIndoors,
       SensorType::BrightnessIndoors,
@@ -461,35 +461,27 @@ namespace dss {
       SensorType::AirPressure
     };
 
-    boost::shared_ptr<std::vector<SensorType> > ret;
-
+    std::vector<SensorType> ret;
     if (m_ZoneID == 0) {
-      ret.reset(new std::vector<SensorType>(sensorTypesOutdoor,
-          sensorTypesOutdoor + sizeof(sensorTypesOutdoor) / sizeof(int)));
+      ret.assign(sensorTypesOutdoor, sensorTypesOutdoor + ARRAY_SIZE(sensorTypesOutdoor));
     } else {
-      ret.reset(new std::vector<SensorType>(sensorTypesIndoor,
-          sensorTypesIndoor + sizeof(sensorTypesIndoor) / sizeof(int)));
+      ret.assign(sensorTypesIndoor, sensorTypesIndoor + ARRAY_SIZE(sensorTypesIndoor));
     }
 
-    foreach (auto&& s, m_MainSensors) {
-      std::vector<SensorType>::iterator it;
-      for (it = ret->begin(); it != ret->end();) {
-        if (*it == s.m_sensorType) {
-          it = ret->erase(it);
-        } else {
-          it++;
-        }
-      }
-    }
+    auto it = std::remove_if(ret.begin(), ret.end(),
+                             [this](SensorType& sensorType) {
+                                return isSensorAssigned(sensorType);
+                             });
+    ret.erase(it, ret.end());
 
     return ret;
   }
 
-  boost::shared_ptr<std::vector<SensorType> > Zone::getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const {
-    auto ret = boost::make_shared<std::vector<SensorType>>();
+  std::vector<SensorType> Zone::getAssignedSensorTypes(const Device& _device) const {
+    std::vector<SensorType> ret;
     foreach (auto&& s, m_MainSensors) {
-      if (s.m_DSUID == _device->getDSID()) {
-        ret->push_back(s.m_sensorType);
+      if (s.m_DSUID == _device.getDSID()) {
+        ret.push_back(s.m_sensorType);
       }
     }
     return ret;

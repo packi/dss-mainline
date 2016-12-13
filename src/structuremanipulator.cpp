@@ -73,9 +73,7 @@ namespace dss {
     // if the device that is being moved out of the zone was a zone sensor:
     // clear the previous sensor assignment and also check if we can reassign
     // another sensor to the zone
-    auto&& types_to_clear = _zone->getAssignedSensorTypes(_device);
-    for (size_t q = 0; q < types_to_clear->size(); ++q) {
-      auto&& sensorType = types_to_clear->at(q);
+    foreach (auto&& sensorType, _zone->getAssignedSensorTypes(*_device)) {
       resetZoneSensor(_zone, sensorType);
     }
     autoAssignZoneSensors(_zone);
@@ -857,19 +855,17 @@ namespace dss {
     auto&& unassigned_sensors = _zone->getUnassignedSensorTypes();
 
     Logger::getInstance()->log("SensorAssignment: run auto-assignment for " +
-        intToString(unassigned_sensors->size()) + " sensor types:", lsInfo);
+        intToString(unassigned_sensors.size()) + " sensor types:", lsInfo);
 
     // check if our set contains devices that with the matching sensor type
     // and assign the first device that we find automatically: UC 8.1
-    for (size_t q = 0; q < unassigned_sensors->size(); ++q) {
-      Set devicesBySensor =
-          devices.getBySensorType(unassigned_sensors->at(q));
+    foreach (auto&& sensorType, unassigned_sensors) {
+      Set devicesBySensor = devices.getBySensorType(sensorType);
       if (devicesBySensor.length() > 0) {
         // select an active sensor
         for (int i = 0; i < devicesBySensor.length(); ++i) {
           if (devicesBySensor.get(i).getDevice()->isPresent()) {
-            setZoneSensor(_zone, unassigned_sensors->at(q),
-                          devicesBySensor.get(i).getDevice());
+            setZoneSensor(_zone, sensorType, devicesBySensor.get(i).getDevice());
             break;
           }
         }
@@ -892,15 +888,14 @@ namespace dss {
       zone->removeInvalidZoneSensors();
 
       // erase all unassigned sensors in zone
-      auto&& sUnasList =  zone->getUnassignedSensorTypes();
       try {
-        for (size_t index = 0; index < sUnasList->size(); ++index) {
+        foreach (auto&& sensorType, zone->getUnassignedSensorTypes()) {
           Logger::getInstance()->log(std::string("SensorAssignment: sync reset ") +
                   "zone: " + intToString(zone->getID()) +
-                  ", type: " + sensorTypeName(sUnasList->at(index)) +
+                  ", type: " + sensorTypeName(sensorType) +
                   " => none", lsInfo);
 
-          m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
+          m_Interface.resetZoneSensor(zone->getID(), sensorType);
         }
 
         // reassign all assigned sensors in zone
