@@ -310,5 +310,6 @@ dsstests_SOURCES = \
 	../tests/vdc-db.cpp \
 	../tests/webfixture.h \
 	../tests/webserver.cpp \
-	../tests/webservice_api_tests.cpp
+	../tests/webservice_api_tests.cpp \
+	../tests/zone_tests.cpp
 

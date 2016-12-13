@@ -28,6 +28,7 @@
 
 #include <digitalSTROM/dsuid.h>
 
+#include "src/foreach.h"
 #include "src/model/apartment.h"
 #include "src/model/device.h"
 #include "src/model/group.h"
@@ -663,12 +664,10 @@ std::string ZoneRequestHandler::getAssignedSensors(
         boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
   JSONWriter json;
   json.startArray("sensors");
-  std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = pZone->getAssignedSensors();
-  for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin(); it != slist.end(); it++) {
+  foreach (auto&& devSensor, pZone->getAssignedSensors()) {
     json.startObject();
-    boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-    json.add("sensorType", devSensor->m_sensorType);
-    json.add("dsuid", devSensor->m_DSUID);
+    json.add("sensorType", devSensor.m_sensorType);
+    json.add("dsuid", devSensor.m_DSUID);
     json.endObject();
   }
   json.endArray();

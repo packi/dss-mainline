@@ -1166,12 +1166,12 @@ namespace dss {
     _ofs << doIndent(_indent) << "</cluster>" << std::endl;
   } // clusterToXML
 
-  void zoneSensorToXML(boost::shared_ptr<MainZoneSensor_t> _zoneSensor, std::ofstream& _ofs, const int _indent)
+  void zoneSensorToXML(const MainZoneSensor_t &_zoneSensor, std::ofstream& _ofs, const int _indent)
   {
     _ofs << doIndent(_indent) << "<sensor dsuid=\""
-         << dsuid2str(_zoneSensor->m_DSUID) << "\""
-         << " sensorType=\"" << intToString(static_cast<int>(_zoneSensor->m_sensorType)) << "\""
-         << " sensorIndex=\"" << intToString(_zoneSensor->m_sensorIndex)  << "\"/>"
+         << dsuid2str(_zoneSensor.m_DSUID) << "\""
+         << " sensorType=\"" << intToString(static_cast<int>(_zoneSensor.m_sensorType)) << "\""
+         << " sensorIndex=\"" << intToString(_zoneSensor.m_sensorIndex)  << "\"/>"
          << std::endl;
   } // zoneSensorToXML
 
@@ -1215,13 +1215,10 @@ namespace dss {
     _ofs << doIndent(_indent + 1) << "</groups>" << std::endl;
 
     // Zone sensors
-    std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = _pZone->getAssignedSensors();
+    auto&& slist = _pZone->getAssignedSensors();
     if ( !slist.empty() ) {
       _ofs << doIndent(_indent + 1) << "<sensors>" << std::endl;
-      for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
-          it != slist.end();
-          it ++) {
-        boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
+      foreach (auto&& devSensor,  slist) {
         zoneSensorToXML(devSensor, _ofs, _indent+2);
       }
       _ofs << doIndent(_indent + 1) << "</sensors>" << std::endl;
