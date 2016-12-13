@@ -24,17 +24,19 @@
   #include "config.h"
 #endif
 
+#include <string.h>
+#include <unordered_map>
 
-#include <jsapi.h>
 #include <boost/make_shared.hpp>
+#include <jsapi.h>
 
+#include "base.h"
 #include "security/security.h"
 #include "security/user.h"
 #include "propertysystem.h"
 #include "scriptobject.h"
 #include "jswebservice.h"
 #include "webservice_connection.h"
-#include <string.h>
 
 namespace dss {
 
@@ -218,7 +220,7 @@ namespace dss {
     std::string url;
     std::string params;
     std::string req = "GET";
-    HashMapStringString headers;
+    std::unordered_map<std::string, std::string> headers;
     std::string formdata;
     bool authenticated = false;
 

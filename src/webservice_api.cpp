@@ -12,6 +12,7 @@
 #include "dss.h"
 #include "event.h"
 #include "event/event_fields.h"
+#include "foreach.h"
 #include "propertysystem.h"
 #include "model/group.h"
 #include "webservice_api.h"
@@ -191,23 +192,20 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
     } else if (event->getName() == EventName::HeatingControllerSetup) {
       appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerSetup, event.get());
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
     } else if (event->getName() == EventName::HeatingControllerValue) {
       appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerValue, event.get());
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
     } else if (event->getName() == EventName::HeatingControllerState) {
       appendCommon(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerState, event.get());
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
     } else if (event->getName() == EventName::HeatingEnabled) {
       appendCommon(json, evtGroup_ApartmentAndDevice,
@@ -223,10 +221,9 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
     } else if (event->getName() == EventName::AddonToCloud) {
       appendCommon(json, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
       json.add("EventName", event->getPropertyByName("EventName"));
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
       json.startObject("parameter");
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
       json.endObject();
 
@@ -343,7 +340,7 @@ bool WebserviceMsHub::doUploadSensorData(Iterator begin, Iterator end,
 
   // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
   boost::shared_ptr<MsHubReplyChecker> mcb = boost::make_shared<MsHubReplyChecker>(callback);
-  HashMapStringString sensorUploadHeaders;
+  std::unordered_map<std::string, std::string> sensorUploadHeaders;
   sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
 
   WebserviceConnection::getInstanceMsHub()->request("public/dss/v1_0/DSSEventData/SaveEvent",
@@ -743,12 +740,11 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("ActionId", event->getPropertyByName("actionId"));
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       json.startArray("Parameter");
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        if (beginsWith(iParam->first, "params.")) {
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        if (beginsWith(param.first, "params.")) {
           json.startObject();
-          json.add("Name", iParam->first.substr(7));
-          json.add("Value", iParam->second);
+          json.add("Name", param.first.substr(7));
+          json.add("Value", param.second);
           json.endObject();
         }
       }
@@ -778,12 +774,11 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("CustomActionTitle", event->getPropertyByName("customActionTitle"));
       json.add("DeviceID", dsuid2str(pDeviceRef->getDSID()));
       json.startArray("Parameter");
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        if (beginsWith(iParam->first, "params.")) {
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        if (beginsWith(param.first, "params.")) {
           json.startObject();
-          json.add("Name", iParam->first.substr(7));
-          json.add("Value", iParam->second);
+          json.add("Name", param.first.substr(7));
+          json.add("Value", param.second);
           json.endObject();
         }
       }
@@ -803,27 +798,24 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerSetup, event.get());
       json.startObject("EventBody");
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
       json.endObject();
     } else if (event->getName() == EventName::HeatingControllerValueDsHub) {
       createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerValue, event.get());
       json.startObject("EventBody");
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
       json.endObject();
     } else if (event->getName() == EventName::HeatingControllerState) {
       createHeader(json, evtGroup_ApartmentAndDevice,
                    evtCategory_HeatingControllerState, event.get());
       json.startObject("EventBody");
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
       json.endObject();
     } else if (event->getName() == EventName::HeatingEnabled) {
@@ -838,10 +830,9 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       createHeader(json, evtGroup_Activity, evtCategory_AddonToCloud, event.get());
       json.startObject("EventBody");
       json.add("EventName", event->getPropertyByName("EventName"));
-      const dss::HashMapStringString& props =  event->getProperties().getContainer();
       json.startObject("Parameter");
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, event->getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
       json.endObject();
       json.endObject();
@@ -966,7 +957,7 @@ bool WebserviceDsHub::doUploadSensorData(Iterator begin, Iterator end,
 
   // https://devdsservices.aizo.com/Help/Api/POST-public-dss-v1_0-DSSEventData-SaveEvent_token_apartmentId_dssid_source
   boost::shared_ptr<DsHubReplyChecker> mcb = boost::make_shared<DsHubReplyChecker>(callback);
-  HashMapStringString sensorUploadHeaders;
+  std::unordered_map<std::string, std::string> sensorUploadHeaders;
   sensorUploadHeaders["Content-Type"] = "application/json;charset=UTF-8";
   sensorUploadHeaders["Accept"] = "application/json";
 

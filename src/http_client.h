@@ -24,9 +24,10 @@
 #ifndef __URL_H__
 #define __URL_H__
 
+#include <unordered_map>
+
 #include <curl/curl.h>
 
-#include "base.h"
 #include "logger.h"
 
 namespace dss {
@@ -47,7 +48,7 @@ namespace dss {
   struct HttpRequest {
     std::string url;
     RequestType type;
-    HashMapStringString headers;
+    std::unordered_map<std::string, std::string> headers;
     std::string postdata;
   };
 
@@ -62,7 +63,7 @@ namespace dss {
                bool insecure = false);
 
       long get(const std::string& url,
-               const HashMapStringString& headers,
+               const std::unordered_map<std::string, std::string>& headers,
                std::string *result, bool insecure = false);
 
       long post(const std::string& _url, const std::string &_postdata,
@@ -70,7 +71,7 @@ namespace dss {
 
       /* TODO make postdata const-by-reference */
       long post(const std::string& _url,
-                const HashMapStringString& _headers,
+                const std::unordered_map<std::string, std::string>& headers,
                 const std::string &_postdata, std::string *_result);
 
       long request(const HttpRequest &req, std::string *result);
@@ -81,7 +82,7 @@ namespace dss {
 
     private:
       long internalRequest(const std::string& _url, RequestType _type,
-                           const HashMapStringString& _headers,
+                           const std::unordered_map<std::string, std::string>& headers,
                            const std::string &_postdata,
                            std::string *_result, bool _insecure);
 

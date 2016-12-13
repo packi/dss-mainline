@@ -578,7 +578,7 @@ namespace dss {
   //================================================== Properties
 
   bool Properties::has(const std::string& _key) const {
-    HashMapStringString::const_iterator iEntry = m_Container.find(_key);
+    auto iEntry = m_Container.find(_key);
     return iEntry != m_Container.end();
   } // has
 
@@ -591,7 +591,7 @@ namespace dss {
       throw std::runtime_error(std::string("could not find value for '") + _key + "' in properties");
     } else {
       // not using operator[] here because its non-const
-      HashMapStringString::const_iterator iEntry = m_Container.find(_key);
+      auto iEntry = m_Container.find(_key);
       return iEntry->second;
     }
   } // get
@@ -599,7 +599,7 @@ namespace dss {
   const std::string& Properties::get(const std::string& _key, const std::string& _default) const {
     if(has(_key)) {
       // not using operator[] here because its non-const
-      HashMapStringString::const_iterator iEntry = m_Container.find(_key);
+      auto iEntry = m_Container.find(_key);
       return iEntry->second;
     } else {
       return _default;
@@ -607,7 +607,7 @@ namespace dss {
   } // get(with default)
 
   bool Properties::unset(const std::string& _key) {
-    HashMapStringString::iterator iEntry = m_Container.find(_key);
+    auto iEntry = m_Container.find(_key);
     if(iEntry != m_Container.end()) {
       m_Container.erase(iEntry);
       return true;
@@ -618,7 +618,7 @@ namespace dss {
   std::string Properties::toString() const {
     std::string ret;
     const char *delim = "";
-    foreach (HashMapStringString::value_type value, m_Container) {
+    foreach (auto&& value, m_Container) {
       ret += delim + value.first + ":" + value.second;
       delim = " ";
     }

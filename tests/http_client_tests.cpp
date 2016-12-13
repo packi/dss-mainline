@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(testBase) {
   BOOST_CHECK_EQUAL(httpClient->get(url, &result), 200);
   BOOST_CHECK_EQUAL(httpClient->post(url, "", NULL), 200);
 
-  HashMapStringString headers;
+  std::unordered_map<std::string, std::string> headers;
   headers["bar"] = "dada";
   BOOST_CHECK_EQUAL(httpClient->post(url, headers, "", &result), 200);
 }
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(testReuseHandle) {
 
 BOOST_AUTO_TEST_CASE(testEmptyHeaderMaps) {
   std::string url = "http://www.digitalstrom.com";
-  HashMapStringString headers;
+  std::unordered_map<std::string, std::string> headers;
   HttpClient httpClient(true);
 
   /* does it crash, is the test */
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(testEmptyHeaderMaps) {
 
 BOOST_AUTO_TEST_CASE(testEmptyHeaderAndFormPostMaps) {
   std::string url = "http://www.digitalstrom.com";
-  HashMapStringString headers;
+  std::unordered_map<std::string, std::string> headers;
   HttpClient httpClient(true);
 
   /* does it crash, is the test */

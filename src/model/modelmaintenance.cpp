@@ -2515,7 +2515,7 @@ namespace dss {
       boost::shared_ptr<Device> pDev = m_pApartment->getDeviceByDSID(event.m_deviceDSID);
       boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(pDev->getDSID(), &pDev->getApartment());
 
-      BOOST_FOREACH(HashMapStringString::value_type state, event.m_states.getContainer()) {
+      foreach (auto&& state, event.m_states.getContainer()) {
         const std::string& name = state.first;
         const std::string& value = state.second;
 
@@ -2935,10 +2935,9 @@ namespace dss {
     json.String("properties");
     json.StartObject();
 
-    const dss::HashMapStringString& props =  m_event->getProperties().getContainer();
-    for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-      json.String((iParam->first).c_str());
-      json.String((iParam->second).c_str());
+    foreach (auto&& param, m_event->getProperties().getContainer()) {
+      json.String((param.first).c_str());
+      json.String((param.second).c_str());
     }
     json.EndObject();
 

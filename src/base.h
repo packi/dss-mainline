@@ -39,9 +39,6 @@ namespace dss {
     return find(_v.begin(), _v.end(), _item) != _v.end();
   }
 
-  //============================================= Common types
-  typedef std::unordered_map<std::string, std::string> HashMapStringString;
-
   //============================================= Conversion helpers
 
   int strToInt(const std::string& _strValue);
@@ -106,7 +103,7 @@ namespace dss {
 
   class Properties {
   private:
-    HashMapStringString m_Container;
+    std::unordered_map<std::string, std::string> m_Container;
   public:
     bool has(const std::string& _key) const;
     void set(const std::string& _key, const std::string& _value);
@@ -115,7 +112,7 @@ namespace dss {
 
     bool unset(const std::string& _key);
 
-    const HashMapStringString& getContainer() const { return m_Container; }
+    const std::unordered_map<std::string, std::string>& getContainer() const { return m_Container; }
     std::string toString() const;
   };
 
