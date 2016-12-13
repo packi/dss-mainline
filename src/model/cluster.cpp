@@ -38,7 +38,7 @@ namespace dss {
     //============================================= Group
 
   Cluster::Cluster(const int _id, Apartment& _apartment)
-  : Group(_id, _apartment.getZone(0), _apartment),
+  : Group(_id, _apartment.getZone(0)),
     m_Location(cd_none),
     m_ProtectionClass(wpc_none),
     m_Floor(0),

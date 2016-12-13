@@ -298,11 +298,7 @@ namespace dss {
   // https://git.digitalstrom.org/brano/dss-mainline/commit/d17f16eb550c0cb32c910372f8d137ba32338a68#note_35767
   enum class GroupType {
     Standard = 0, // (from dsm-api doc) 0 = Standard Groups
-    Todo1 = 1, // (from dsm-api doc) 1 = Global groups
-    Todo2 = 2, // (from dsm-api doc) 2 = Apartment-wide signals
-    Todo3 = 3, // ???
-    Todo4 = 4, // ???
-    End
+    End = 5 // exclusive upper bound
   };
 
   // Group ID"s

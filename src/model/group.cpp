@@ -38,8 +38,8 @@ namespace dss {
 
     //============================================= Group
 
-  Group::Group(const int _id, boost::shared_ptr<Zone> _pZone, Apartment& _apartment)
-  : AddressableModelItem(&_apartment),
+  Group::Group(const int _id, boost::shared_ptr<Zone> _pZone)
+  : AddressableModelItem(&_pZone->getApartment()),
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
     m_StandardGroupID(0),
@@ -313,9 +313,9 @@ namespace dss {
     }
   }
 
-  boost::shared_ptr<Group> Group::make(const GroupSpec_t& _groupSpec, boost::shared_ptr<Zone> _pZone, Apartment& _apartment)
+  boost::shared_ptr<Group> Group::make(const GroupSpec_t& _groupSpec, boost::shared_ptr<Zone> _pZone)
   {
-    boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone, _apartment));
+    boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone));
 
     pGroup->setName(_groupSpec.Name);
     pGroup->setStandardGroupID(_groupSpec.StandardGroupID);
