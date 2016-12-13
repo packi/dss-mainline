@@ -1,0 +1,15 @@
+---
+Language:        Cpp
+BasedOnStyle: Google
+AccessModifierOffset : -2
+AlignAfterOpenBracket: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+ColumnLimit:     120
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+IndentWidth:     2
+ObjCBlockIndentWidth: 2
+SpacesBeforeTrailingComments : 1
+...
+
