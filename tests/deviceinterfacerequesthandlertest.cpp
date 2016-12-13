@@ -27,6 +27,7 @@
 #include <boost/make_shared.hpp>
 #include "webfixture.h"
 
+#include "src/base.h"
 #include "src/model/deviceinterface.h"
 #include "src/web/handler/deviceinterfacerequesthandler.h"
 #include "src/session.h"

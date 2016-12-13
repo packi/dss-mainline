@@ -27,8 +27,8 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
+#include "src/base.h"
 #include "src/ds485types.h"
-#include "base.h"
 
 namespace dss {
 

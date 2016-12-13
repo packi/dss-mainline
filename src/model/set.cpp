@@ -28,7 +28,7 @@
 #include "set.h"
 
 #include <stdexcept>
-#include "src/base.h"
+
 #include "src/util.h"
 #include "src/logger.h"
 #include "src/foreach.h"

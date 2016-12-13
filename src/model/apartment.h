@@ -35,7 +35,6 @@
 #include "devicecontainer.h"
 #include "modeltypes.h"
 #include "src/subsystem.h"
-#include "src/base.h"
 #include "src/model/state.h"
 #include "src/datetools.h"
 #include "src/model/device.h"

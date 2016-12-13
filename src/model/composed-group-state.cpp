@@ -20,8 +20,11 @@
 
 */
 #include "composed-group-state.h"
-#include <ds/log.h>
-#include <foreach.h>
+
+#include "ds/log.h"
+
+#include "base.h"
+#include "foreach.h"
 
 namespace dss {
 

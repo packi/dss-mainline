@@ -25,7 +25,8 @@
 #define SCENE_ACCESS_H_INCLUDED
 
 #include <string>
-#include <base.h>
+
+#include "src/exception.h"
 
 namespace dss {
 

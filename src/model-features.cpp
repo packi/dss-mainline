@@ -29,10 +29,11 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
+#include "base.h"
 #include "model/modelconst.h"
 #include "model-features.h"
 
-#define MF_ARRAY_SIZE(mf) mf + (sizeof(mf) / sizeof(mf[0]))
+#define ARRAY_END(mf) (mf + ARRAY_SIZE(mf))
 
 namespace dss {
 
@@ -702,202 +703,202 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   boost::shared_ptr<std::vector<int> > fv;
   fv = boost::make_shared<std::vector<int> >();
 
-  fv->assign(MF_GE_KM220, MF_ARRAY_SIZE(MF_GE_KM220));
+  fv->assign(MF_GE_KM220, ARRAY_END(MF_GE_KM220));
   setFeatures(ColorIDYellow, KM220, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_KM2, MF_ARRAY_SIZE(MF_GE_KM2));
+  fv->assign(MF_GE_KM2, ARRAY_END(MF_GE_KM2));
   setFeatures(ColorIDYellow, KM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_KL200, MF_ARRAY_SIZE(MF_GE_KL200));
+  fv->assign(MF_GE_KL200, ARRAY_END(MF_GE_KL200));
   setFeatures(ColorIDYellow, KL200, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_TKM210, MF_ARRAY_SIZE(MF_GE_TKM210));
+  fv->assign(MF_GE_TKM210, ARRAY_END(MF_GE_TKM210));
   setFeatures(ColorIDYellow, TKM210, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_TKM220, MF_ARRAY_SIZE(MF_GE_TKM220));
+  fv->assign(MF_GE_TKM220, ARRAY_END(MF_GE_TKM220));
   setFeatures(ColorIDYellow, TKM220, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_TKM230, MF_ARRAY_SIZE(MF_GE_TKM230));
+  fv->assign(MF_GE_TKM230, ARRAY_END(MF_GE_TKM230));
   setFeatures(ColorIDYellow, TKM230, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_SDM20, MF_ARRAY_SIZE(MF_GE_SDM20));
+  fv->assign(MF_GE_SDM20, ARRAY_END(MF_GE_SDM20));
   setFeatures(ColorIDYellow, SDM20, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_SDS210, MF_ARRAY_SIZE(MF_GE_SDS210));
+  fv->assign(MF_GE_SDS210, ARRAY_END(MF_GE_SDS210));
   setFeatures(ColorIDYellow, SDS210, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_SDS20, MF_ARRAY_SIZE(MF_GE_SDS20));
+  fv->assign(MF_GE_SDS20, ARRAY_END(MF_GE_SDS20));
   setFeatures(ColorIDYellow, SDS20, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_SDS22, MF_ARRAY_SIZE(MF_GE_SDS22));
+  fv->assign(MF_GE_SDS22, ARRAY_END(MF_GE_SDS22));
   setFeatures(ColorIDYellow, SDS22, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_SDS2, MF_ARRAY_SIZE(MF_GE_SDS2));
+  fv->assign(MF_GE_SDS2, ARRAY_END(MF_GE_SDS2));
   setFeatures(ColorIDYellow, SDS2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_ZWS2, MF_ARRAY_SIZE(MF_GE_ZWS2));
+  fv->assign(MF_GE_ZWS2, ARRAY_END(MF_GE_ZWS2));
   setFeatures(ColorIDYellow, ZWS2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_UMV204, MF_ARRAY_SIZE(MF_GE_UMV204));
+  fv->assign(MF_GE_UMV204, ARRAY_END(MF_GE_UMV204));
   setFeatures(ColorIDYellow, UMV204, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_UMV200, MF_ARRAY_SIZE(MF_GE_UMV200));
+  fv->assign(MF_GE_UMV200, ARRAY_END(MF_GE_UMV200));
   setFeatures(ColorIDYellow, UMV200, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_UMV210, MF_ARRAY_SIZE(MF_GE_UMV210));
+  fv->assign(MF_GE_UMV210, ARRAY_END(MF_GE_UMV210));
   setFeatures(ColorIDYellow, UMV210, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GN_KM2, MF_ARRAY_SIZE(MF_GN_KM2));
+  fv->assign(MF_GN_KM2, ARRAY_END(MF_GN_KM2));
   setFeatures(ColorIDGreen, KM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GN_TKM2, MF_ARRAY_SIZE(MF_GN_TKM2));
+  fv->assign(MF_GN_TKM2, ARRAY_END(MF_GN_TKM2));
   setFeatures(ColorIDGreen, TKM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_RT_KM2, MF_ARRAY_SIZE(MF_RT_KM2));
+  fv->assign(MF_RT_KM2, ARRAY_END(MF_RT_KM2));
   setFeatures(ColorIDRed, KM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_RT_TKM2, MF_ARRAY_SIZE(MF_RT_TKM2));
+  fv->assign(MF_RT_TKM2, ARRAY_END(MF_RT_TKM2));
   setFeatures(ColorIDRed, TKM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_RT_SDM2, MF_ARRAY_SIZE(MF_RT_SDM2));
+  fv->assign(MF_RT_SDM2, ARRAY_END(MF_RT_SDM2));
   setFeatures(ColorIDRed, SDM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GR_KL210, MF_ARRAY_SIZE(MF_GR_KL210));
+  fv->assign(MF_GR_KL210, ARRAY_END(MF_GR_KL210));
   setFeatures(ColorIDGray, KL210, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GR_KL220, MF_ARRAY_SIZE(MF_GR_KL220));
+  fv->assign(MF_GR_KL220, ARRAY_END(MF_GR_KL220));
   setFeatures(ColorIDGray, KL220, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GR_KL230, MF_ARRAY_SIZE(MF_GR_KL230));
+  fv->assign(MF_GR_KL230, ARRAY_END(MF_GR_KL230));
   setFeatures(ColorIDGray, KL230, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GR_KL2, MF_ARRAY_SIZE(MF_GR_KL2));
+  fv->assign(MF_GR_KL2, ARRAY_END(MF_GR_KL2));
   setFeatures(ColorIDGray, KL2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GR_TKM2, MF_ARRAY_SIZE(MF_GR_TKM2));
+  fv->assign(MF_GR_TKM2, ARRAY_END(MF_GR_TKM2));
   setFeatures(ColorIDGray, TKM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_BL_KM200, MF_ARRAY_SIZE(MF_BL_KM200));
+  fv->assign(MF_BL_KM200, ARRAY_END(MF_BL_KM200));
   setFeatures(ColorIDBlue, KM200, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_BL_SDS200, MF_ARRAY_SIZE(MF_BL_SDS200));
+  fv->assign(MF_BL_SDS200, ARRAY_END(MF_BL_SDS200));
   setFeatures(ColorIDBlue, SDS2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_BL_KL2, MF_ARRAY_SIZE(MF_BL_KL2));
+  fv->assign(MF_BL_KL2, ARRAY_END(MF_BL_KL2));
   setFeatures(ColorIDBlue, KL2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_GE_TKM2, MF_ARRAY_SIZE(MF_GE_TKM2));
+  fv->assign(MF_GE_TKM2, ARRAY_END(MF_GE_TKM2));
   setFeatures(ColorIDYellow, TKM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_TK_TKM2, MF_ARRAY_SIZE(MF_TK_TKM2));
+  fv->assign(MF_TK_TKM2, ARRAY_END(MF_TK_TKM2));
   setFeatures(ColorIDCyan, TKM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_TKM2, MF_ARRAY_SIZE(MF_SW_TKM2));
+  fv->assign(MF_SW_TKM2, ARRAY_END(MF_SW_TKM2));
   setFeatures(ColorIDBlack, TKM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_KL2, MF_ARRAY_SIZE(MF_SW_KL2));
+  fv->assign(MF_SW_KL2, ARRAY_END(MF_SW_KL2));
   setFeatures(ColorIDBlack, KL2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_ZWS2, MF_ARRAY_SIZE(MF_SW_ZWS2));
+  fv->assign(MF_SW_ZWS2, ARRAY_END(MF_SW_ZWS2));
   setFeatures(ColorIDBlack, ZWS2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_KL213, MF_ARRAY_SIZE(MF_SW_KL213));
+  fv->assign(MF_SW_KL213, ARRAY_END(MF_SW_KL213));
   setFeatures(ColorIDBlack, KL213, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_KL214, MF_ARRAY_SIZE(MF_SW_KL214));
+  fv->assign(MF_SW_KL214, ARRAY_END(MF_SW_KL214));
   setFeatures(ColorIDBlack, KL214, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_SDS20, MF_ARRAY_SIZE(MF_SW_SDS20));
+  fv->assign(MF_SW_SDS20, ARRAY_END(MF_SW_SDS20));
   setFeatures(ColorIDBlack, SDS20, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_SDS22, MF_ARRAY_SIZE(MF_SW_SDS22));
+  fv->assign(MF_SW_SDS22, ARRAY_END(MF_SW_SDS22));
   setFeatures(ColorIDBlack, SDS22, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_AKM2, MF_ARRAY_SIZE(MF_SW_AKM2));
+  fv->assign(MF_SW_AKM2, ARRAY_END(MF_SW_AKM2));
   setFeatures(ColorIDBlack, AKM2, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_UMR200, MF_ARRAY_SIZE(MF_SW_UMR200));
+  fv->assign(MF_SW_UMR200, ARRAY_END(MF_SW_UMR200));
   setFeatures(ColorIDBlack, UMR200, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<int> >();
-  fv->assign(MF_SW_SK20, MF_ARRAY_SIZE(MF_SW_SK20));
+  fv->assign(MF_SW_SK20, ARRAY_END(MF_SW_SK20));
   setFeatures(ColorIDBlack, SK20, fv);
   fv.reset();
 }
@@ -1160,7 +1161,7 @@ boost::shared_ptr<std::vector<int> > ModelFeatures::getAvailableFeatures()
 {
   boost::shared_ptr<std::vector<int> > ret;
   ret = boost::make_shared<std::vector<int> >();
-  ret->assign(MF_AVAILABLE, MF_ARRAY_SIZE(MF_AVAILABLE));
+  ret->assign(MF_AVAILABLE, ARRAY_END(MF_AVAILABLE));
   return ret;
 }
 

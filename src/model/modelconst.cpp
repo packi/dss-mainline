@@ -28,6 +28,7 @@
 #include <ds/string.h>
 
 #include "base.h"
+#include "exception.h"
 
 namespace dss {
   double sensorValueToDouble(SensorType _sensorType, int _sensorValue) {

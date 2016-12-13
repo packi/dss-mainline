@@ -37,8 +37,8 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "src/base.h"
 #include "src/datetools.h"
+#include "src/exception.h"
 #include "src/logger.h"
 #include "src/propertysystem.h"
 

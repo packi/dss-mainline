@@ -24,11 +24,12 @@
 #define WEBSERVER_H_
 
 #include <string>
+#include <unordered_map>
+
 #include <boost/shared_ptr.hpp>
 
 #include <external/civetweb/civetweb.h>
 
-#include "src/base.h"
 #include "src/subsystem.h"
 
 #define WEB_SESSION_TIMEOUT_MINUTES 3
@@ -65,7 +66,7 @@ namespace dss {
   private:
     struct mg_context* m_mgContext;
     int m_TrustedPort;
-    HASH_MAP<std::string, WebServerRequestHandlerJSON*> m_Handlers;
+    std::unordered_map<std::string, WebServerRequestHandlerJSON*> m_Handlers;
     boost::shared_ptr<RestfulAPI> m_pAPI;
     boost::shared_ptr<SessionManager> m_SessionManager;
     size_t m_max_ws_clients;

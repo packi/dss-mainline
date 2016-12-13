@@ -30,6 +30,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "base.h"
 #include "devicecontainer.h"
 #include "physicalmodelitem.h"
 #include "src/ds485types.h"

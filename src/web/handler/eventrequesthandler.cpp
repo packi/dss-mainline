@@ -32,6 +32,7 @@
 #include "src/eventcollector.h"
 #include "src/eventinterpreterplugins.h"
 #include "src/eventsubscriptionsession.h"
+#include "src/foreach.h"
 #include "src/stringconverter.h"
 
 #include "src/model/apartment.h"
@@ -144,9 +145,8 @@ namespace dss {
       json.add("name", evt.getName());
       json.startObject("properties");
 
-      const dss::HashMapStringString& props =  evt.getProperties().getContainer();
-      for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-        json.add(iParam->first, iParam->second);
+      foreach (auto&& param, evt.getProperties().getContainer()) {
+        json.add(param.first, param.second);
       }
       json.endObject();
 

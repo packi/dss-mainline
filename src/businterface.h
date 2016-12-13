@@ -31,7 +31,6 @@
 #include <boost/shared_ptr.hpp>
 #include <limits.h>
 
-#include "base.h"
 #include "ds485types.h"
 #include "sceneaccess.h"
 #include "model/deviceinterface.h"

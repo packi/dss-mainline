@@ -29,6 +29,7 @@
 #include <limits.h>
 #include <stdexcept>
 
+#include "src/base.h"
 #include "src/security/user.h"
 #include "src/session.h"
 #include "src/model/deviceinterface.h"

@@ -27,6 +27,7 @@
 
 #include "dsbusinterfaceobj.h"
 
+#include "src/base.h"
 #include "src/ds485/dsbusinterface.h"
 #include "src/messages/vdc-messages.pb.h"
 
