@@ -162,7 +162,7 @@ namespace dss {
       _json.add("targetGroup", (*it)->m_targetGroupId);
       _json.add("inputType", (*it)->m_inputType);
       _json.add("inputId", (*it)->m_inputId);
-      _json.add("state", (*it)->m_state->getState());
+      _json.add("state", (*it)->getState().getState());
       _json.endObject();
     }
     _json.endArray();

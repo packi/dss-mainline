@@ -726,7 +726,7 @@ namespace dss {
                 json.add("targetGroup", input->m_targetGroupId);
                 json.add("inputType", input->m_inputType);
                 json.add("inputId", input->m_inputId);
-                json.add("state", input->m_state->getState());
+                json.add("state", input->getState().getState());
                 json.endObject();
               }
 

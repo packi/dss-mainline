@@ -219,6 +219,7 @@ namespace dss {
     Malfunction = 22,
     Service = 23,
   };
+  std::ostream& operator<<(std::ostream& stream, BinaryInputType type);
 
   enum class BinaryInputState {
     Inactive = 0,

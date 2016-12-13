@@ -34,6 +34,7 @@
 
 #include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include <ds/string.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -55,11 +56,34 @@
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
 #include "src/protobufjson.h"
+#include "composed-group-state.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
 
   //================================================== DeviceBinaryInput
+
+  __DEFINE_LOG_CHANNEL__(DeviceBinaryInput, lsNotice);
+
+  // RAII class to handling stream to ComposedGroupState
+  class DeviceBinaryInput::GroupStateHandle: boost::noncopyable {
+  public:
+    GroupStateHandle(DeviceBinaryInput& parent, const boost::shared_ptr<ComposedGroupState>& ptr)
+        : m_parent(parent), m_ptr(ptr) {
+      assert(ptr);
+      m_ptr->addSubState(*m_parent.m_state);
+    }
+    ~GroupStateHandle() {
+      m_ptr->removeSubState(*m_parent.m_state);
+    }
+    void update() {
+log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
+      m_ptr->updateSubState(*m_parent.m_state);
+    }
+  private:
+    DeviceBinaryInput& m_parent;
+    boost::shared_ptr<ComposedGroupState> m_ptr;
+  };
 
   DeviceBinaryInput::DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index)
       : m_inputIndex(index)
@@ -67,7 +91,13 @@ namespace dss {
       , m_inputId(spec.InputID)
       , m_targetGroupType(spec.TargetGroupType)
       , m_targetGroupId(spec.TargetGroup)
-      , m_device(device) {
+      , m_device(device)
+      , m_name(m_device.getName() + "/" + intToString(index)) {
+    log(std::string("DeviceBinaryInput this:") + m_name
+        + " inputType:" + intToString(static_cast<int>(m_inputType))
+        + " inputId:" + intToString(static_cast<int>(m_inputId))
+        + " targetGroupType:" + intToString(static_cast<int>(m_targetGroupType))
+        + " targetGroupId:" + intToString(m_targetGroupId), lsInfo);
     m_state = boost::make_shared<State>(device.sharedFromThis(), index);
 
     // assignCustomBinaryInputValues
@@ -86,9 +116,12 @@ namespace dss {
     } catch (ItemDuplicateException& ex) {
       m_state = device.getApartment().getNonScriptState(m_state->getName());
     }
+
+    updateGroupState();
   }
 
   DeviceBinaryInput::~DeviceBinaryInput() {
+    log(std::string("~DeviceBinaryInput this:") + m_name, lsInfo);
     try {
       m_device.getApartment().removeState(m_state);
     } catch (const std::exception& e) {
@@ -100,14 +133,20 @@ namespace dss {
     if (m_targetGroupType == targetGroupType && m_targetGroupId == targetGroupId) {
       return;
     }
+    log(std::string("setTarget this:") + m_name
+        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType))
+        + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
     m_targetGroupType = targetGroupType;
+    updateGroupState();
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
     if (m_inputId == inputId) {
       return;
     }
+    log(std::string("setInputId this:") + m_name
+        + " inputId:" + intToString(static_cast<int>(inputId)), lsInfo);
     m_inputId = inputId;
   }
 
@@ -115,10 +154,15 @@ namespace dss {
     if (m_inputType == inputType) {
       return;
     }
+    log(std::string("setInputType this:") + m_name
+        + " inputType:" + intToString(static_cast<int>(inputType)), lsInfo);
     m_inputType = inputType;
   }
 
   void DeviceBinaryInput::handleEvent(BinaryInputState inputState) {
+    log(std::string("handleEvent this:") + m_name
+        + " m_inputType:" + intToString(static_cast<int>(m_inputType))
+        + " inputState:" + intToString(static_cast<int>(inputState)), lsInfo);
     try {
       if (m_inputType == BinaryInputType::WindowTilt) {
         m_state->setState(coSystem,
@@ -143,8 +187,49 @@ namespace dss {
             }());
       }
     } catch (const std::exception& e) {
-      Logger::getInstance()->log(std::string("Device::handleBinaryInputEvent: what:")+ e.what(), lsWarning);
+      log(std::string("handleEvent: what:")+ e.what(), lsWarning);
     }
+    if (m_groupState) {
+      m_groupState->update();
+    }
+  }
+
+  void DeviceBinaryInput::updateGroupState() {
+    // remove link to old group state
+    m_groupState.reset();
+
+    auto composedGroupStateType = composedGroupStateTypeForBinaryInputType(m_inputType);
+    log(std::string("updateGroupState ENTER this:") + m_name
+        + " m_inputType:" + intToString(static_cast<int>(m_inputType))
+        + " composedGroupStateType:" + intToString(static_cast<int>(composedGroupStateType))
+        + " m_targetGroupId:" + intToString(m_targetGroupId), lsInfo);
+    if (composedGroupStateType == ComposedGroupStateType::NONE) {
+      return;
+    }
+    auto&& targetGroupId = m_targetGroupId;
+    if (targetGroupId == 0) {
+      return;
+    }
+    auto&& apartment = m_device.getApartment();
+    auto&& zoneId = m_device.getZoneID();
+    if (isGlobalAppGroup(targetGroupId)) {
+      zoneId = 0;
+    }
+    auto&& composedGroupName = ds::str("zone.", zoneId, ".group.", targetGroupId, ".inputType.",
+        static_cast<int>(m_inputType));
+    boost::shared_ptr<ComposedGroupState> composedGroupState;
+    {
+      auto&& base = apartment.tryGetState(ComposedGroupState::STATE_TYPE, composedGroupName);
+      if (base) {
+        composedGroupState = boost::dynamic_pointer_cast<ComposedGroupState>(base);
+        assert(composedGroupState);
+      } else {
+        composedGroupState = boost::make_shared<ComposedGroupState>(composedGroupName, composedGroupStateType);
+        apartment.allocateState(composedGroupState); // no ItemNotFoundException, we know it does not exist
+      }
+    }
+    m_groupState.reset(new GroupStateHandle(*this, composedGroupState));
+    log(std::string("updateGroupState LEAVE this:") + m_name + " composedGroupName:" + composedGroupName, lsInfo);
   }
 
   //================================================== Device
@@ -2356,7 +2441,7 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int, BinaryInputId>(binaryInput->m_inputId));
         entry->createProperty("inputIndex")
                 ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputIndex));
-        PropertyNodePtr stateNode = binaryInput->m_state->getPropertyNode();
+        PropertyNodePtr stateNode = binaryInput->getState().getPropertyNode();
         PropertyNodePtr stateValueNode = stateNode->getProperty("value");
         if (stateValueNode != NULL) {
           PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");

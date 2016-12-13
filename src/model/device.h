@@ -164,17 +164,25 @@ namespace dss {
     BinaryInputId m_inputId;           // target Id, like ButtonId
     GroupType m_targetGroupType;   // type of target group: standard, user, apartment
     int m_targetGroupId;     // index of target group, 0..63
-    boost::shared_ptr<State> m_state;
 
     DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index);
     ~DeviceBinaryInput();
 
+    const State& getState() const { return *m_state; }
     void setTarget(GroupType type, uint8_t group);
     void setInputId(BinaryInputId inputId);
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
   private:
+    __DECL_LOG_CHANNEL__;
     Device& m_device;
+    std::string m_name;
+    boost::shared_ptr<State> m_state;
+    class GroupStateHandle;
+    friend class GroupStateHandle;
+    std::unique_ptr<GroupStateHandle> m_groupState;
+
+    void updateGroupState();
   };
 
   typedef struct {
@@ -353,7 +361,6 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     std::string getAKMButtonInputString(const int _mode);
-    void assignCustomBinaryInputValues(BinaryInputType inputType, boost::shared_ptr<State> state);
     bool hasBlinkSettings();
 
   public:

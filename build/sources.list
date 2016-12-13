@@ -12,6 +12,12 @@ libdsscore_a_SOURCES =  \
 	../src/datetools.h \
 	../src/defaultbuseventsink.cpp \
 	../src/defaultbuseventsink.h \
+	../src/ds/common.cpp \
+	../src/ds/common.h \
+	../src/ds/log.h \
+	../src/ds/log.cpp \
+	../src/ds/string.cpp \
+	../src/ds/string.h \
 	../src/ds485/dsactionrequest.cpp \
 	../src/ds485/dsactionrequest.h \
 	../src/ds485/dsbusinterface.cpp \
@@ -77,6 +83,8 @@ libdsscore_a_SOURCES =  \
 	../src/model/busscanner.h \
 	../src/model/cluster.cpp \
 	../src/model/cluster.h \
+	../src/model/composed-group-state.h \
+	../src/model/composed-group-state.cpp \
 	../src/model/data_types.cpp \
 	../src/model/data_types.cpp \
 	../src/model/data_types.h \
