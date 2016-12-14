@@ -2774,9 +2774,7 @@ namespace dss {
   std::vector<int> Device::getLockedScenes() {
     std::vector<int> ls;
 
-    for (int g = 0; g < getGroupsCount(); g++) {
-      boost::shared_ptr<Group> group = getGroupByIndex(g);
-      int gid = group->getID();
+    foreach (auto&& gid, m_groupIds) {
       if (isAppUserGroup(gid)) {
         boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
         if (cluster->isConfigurationLocked()) {
@@ -2790,9 +2788,7 @@ namespace dss {
   }
 
   bool Device::isInLockedCluster() {
-    for (int g = 0; g < getGroupsCount(); g++) {
-      boost::shared_ptr<Group> group = getGroupByIndex(g);
-      int gid = group->getID();
+    foreach (auto&& gid, m_groupIds) {
       if (isAppUserGroup(gid)) {
         boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
         if (cluster->isConfigurationLocked()) {
