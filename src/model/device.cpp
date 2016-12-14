@@ -1338,10 +1338,6 @@ namespace dss {
     return m_pApartment->getGroup(getGroupIdByIndex(_index));
   } // getGroupByIndex
 
-  const std::vector<int>& Device::getGroups() const {
-    return m_Groups;
-  }
-
   void Device::addToGroup(const int _groupID) {
     if (isValidGroup(_groupID)) {
       updateIconPath();
@@ -1415,10 +1411,6 @@ namespace dss {
     }
     return result;
   } // isInGroup
-
-  Apartment& Device::getApartment() const {
-    return *m_pApartment;
-  } // getApartment
 
   void Device::setIsLockedInDSM(const bool _value) {
     m_IsLockedInDSM = _value;
