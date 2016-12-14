@@ -1345,8 +1345,8 @@ namespace dss {
     m_LastKnownZoneID = _value;
   } // setLastKnownZoneID
 
-  int Device:: getGroupIdByIndex(const int _index) const {
-    return m_groupIds[_index];
+  int Device::getGroupIdByIndex(const int index) const {
+    return m_groupIds.at(index);
   } // getGroupIdByIndex
 
   boost::shared_ptr<Group> Device::getGroupByIndex(const int _index) {
