@@ -135,32 +135,14 @@ namespace dss {
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
       } else if(_request.getMethod() == "storeAccessToken") {
-        std::string authdata;
-        std::string vdcPath("authentication");
-        std::string vdcScope;
-        if (_request.hasParameter("authdata")) {
-          authdata = _request.getParameter("authdata");
+        std::string authData;
+        if (_request.hasParameter("authData")) {
+          authData = _request.getParameter("authData");
         } else {
-          return json.failure("missing parameter authdata");
+          return json.failure("missing parameter authData");
         }
-        if (_request.hasParameter("path")) {
-          vdcPath = _request.getParameter("path");
-        }
-        if (_request.hasParameter("scope")) {
-          vdcScope = _request.getParameter("scope");
-        }
-        google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
-        vdcapi::PropertyElement* param0 = query.Add();
-        param0->set_name(vdcPath);
-        vdcapi::PropertyElement* param1 = param0->add_elements();
-        param1->set_name("authdata");
-        param1->mutable_value()->set_v_string(authdata);
-        if (!vdcScope.empty()) {
-          vdcapi::PropertyElement* param2 = param0->add_elements();
-          param2->set_name("scope");
-          param2->mutable_value()->set_v_string(vdcScope);
-        }
-        vdcapi::Message res = VdcConnection::setProperty(dsMeter->getDSID(), dsMeter->getDSID(), query);
+        std::string authScope = _request.getParameter("authScope");
+        vdcapi::Message res = VdcHelper::callAuthenticate(dsMeter->getDSID(), authData, authScope, *paramsElement);
         json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
