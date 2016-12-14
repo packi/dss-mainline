@@ -354,6 +354,27 @@ namespace dss {
     return VdcConnection::genericRequest(vdc, vdc, "firmwareUpdate", firmwareCall);
   }
 
+  vdcapi::Message VdcHelper::callAuthenticate(dsuid_t vdc, const std::string& authData, const std::string& authScope, const vdcapi::PropertyElement& params)
+  {
+    DeviceBusInterface* deviceBusInterface = DSS::getInstance()->getApartment().getDeviceBusInterface();
+    if (!deviceBusInterface) {
+      throw std::runtime_error("Bus interface not available");
+    }
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> authenticateCall;
+    vdcapi::PropertyElement* param0 = authenticateCall.Add();
+    param0->set_name("authData");
+    param0->mutable_value()->set_v_string(authData);
+    vdcapi::PropertyElement* param1 = authenticateCall.Add();
+    param1->set_name("authScope");
+    param1->mutable_value()->set_v_string(authScope);
+    if (params.elements_size()) {
+      vdcapi::PropertyElement* paramx = authenticateCall.Add();
+      paramx->set_name("params");
+      *paramx->mutable_elements() = params.elements();
+    }
+    return VdcConnection::genericRequest(vdc, vdc, "authenticate", authenticateCall);
+  }
+
   vdcapi::Message VdcConnection::genericRequest(const dsuid_t& vdcId, const dsuid_t& targetId,
     const std::string& methodName,
     const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& params)
