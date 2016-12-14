@@ -292,8 +292,8 @@ namespace dss {
       JSONWriter json;
       json.startArray("devices");
       json.startObject();
-      json.add("id", dsuid2str(dsuid));
-      json.add("dSUID", dsuid2str(dsuid));
+      json.add("id", dsuid);
+      json.add("dSUID", dsuid);
       json.add("DisplayID", dsuid2str(dsuid));
       json.endObject();
       json.endArray();
@@ -329,7 +329,7 @@ namespace dss {
       } else {
         json.add("id", "");
       }
-      json.add("dSUID", dsuid2str(pDev->getDSID()));
+      json.add("dSUID", pDev->getDSID());
       json.add("DisplayID", pDev->getDisplayID());
       json.endObject();
     }

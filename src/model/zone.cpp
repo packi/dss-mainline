@@ -384,40 +384,37 @@ namespace dss {
     }
   }
 
-  void Zone::setSensor(boost::shared_ptr<const Device> _device, SensorType _sensorType) {
+  void Zone::setSensor(const Device &_device, SensorType _sensorType) {
     const boost::shared_ptr<DeviceSensor_t> sensor =
-                                       _device->getSensorByType(_sensorType);
+                                       _device.getSensorByType(_sensorType);
 
     if (!isAllowedSensorType(sensor->m_sensorType)) {
       throw std::runtime_error("Assignment of sensor type " + sensorTypeName(sensor->m_sensorType) + " is not allowed!");
     }
 
-    for (size_t i = 0; i < m_MainSensors.size(); i++) {
-      boost::shared_ptr<MainZoneSensor_t> ms = m_MainSensors.at(i);
-      if (ms && (ms->m_sensorType == sensor->m_sensorType)) {
-        ms->m_DSUID = _device->getDSID();
-        ms->m_sensorIndex = sensor->m_sensorIndex;
+    foreach (auto&& ms, m_MainSensors) {
+      if (ms.m_sensorType == sensor->m_sensorType) {
+        ms.m_DSUID = _device.getDSID();
+        ms.m_sensorIndex = sensor->m_sensorIndex;
         return;
       }
     }
 
-    boost::shared_ptr<MainZoneSensor_t> ms = boost::make_shared<MainZoneSensor_t>();
-    ms->m_DSUID = _device->getDSID();
-    ms->m_sensorIndex = sensor->m_sensorIndex;
-    ms->m_sensorType = sensor->m_sensorType;
-    m_MainSensors.push_back(ms);
+    m_MainSensors.push_back(MainZoneSensor_t());
+    m_MainSensors.back().m_DSUID = _device.getDSID();
+    m_MainSensors.back().m_sensorIndex = sensor->m_sensorIndex;
+    m_MainSensors.back().m_sensorType = sensor->m_sensorType;
   }
 
-  void Zone::setSensor(boost::shared_ptr<MainZoneSensor_t> _mainZoneSensor) {
-    if (!isAllowedSensorType(_mainZoneSensor->m_sensorType)) {
-      throw std::runtime_error("Assignment of sensor type " + sensorTypeName(_mainZoneSensor->m_sensorType) + " is not allowed!");
+  void Zone::setSensor(const MainZoneSensor_t &_mainZoneSensor) {
+    if (!isAllowedSensorType(_mainZoneSensor.m_sensorType)) {
+      throw std::runtime_error("Assignment of sensor type " + sensorTypeName(_mainZoneSensor.m_sensorType) + " is not allowed!");
     }
 
-    for (size_t i = 0; i < m_MainSensors.size(); i++) {
-      boost::shared_ptr<MainZoneSensor_t> ms = m_MainSensors.at(i);
-      if (ms && (ms->m_sensorType == _mainZoneSensor->m_sensorType)) {
-        ms->m_DSUID = _mainZoneSensor->m_DSUID;
-        ms->m_sensorIndex = _mainZoneSensor->m_sensorIndex;
+    foreach (auto&& ms, m_MainSensors) {
+      if (ms.m_sensorType == _mainZoneSensor.m_sensorType) {
+        ms.m_DSUID = _mainZoneSensor.m_DSUID;
+        ms.m_sensorIndex = _mainZoneSensor.m_sensorIndex;
         return;
       }
     }
@@ -429,31 +426,23 @@ namespace dss {
       return;
     }
 
-    std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it;
-    for (it = m_MainSensors.begin(); it != m_MainSensors.end();) {
-      if ((*it)->m_sensorType == _sensorType) {
-          (*it).reset();
-        it = m_MainSensors.erase(it);
-        return;
-      } else {
-        it++;
-      }
-    }
+    auto it = std::remove_if(m_MainSensors.begin(), m_MainSensors.end(),
+                             [&](MainZoneSensor_t &sensorDesc) {
+                                return sensorDesc.m_sensorType == _sensorType;
+                             });
+    m_MainSensors.erase(it, m_MainSensors.end());
   }
 
   bool Zone::isSensorAssigned(SensorType _sensorType) const {
-    for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::const_iterator it = m_MainSensors.begin();
-        it != m_MainSensors.end();
-        it ++) {
-      boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-      if (devSensor->m_sensorType == _sensorType) {
+    foreach (auto&& ms, m_MainSensors) {
+      if (ms.m_sensorType == _sensorType) {
         return true;
       }
     }
     return false;
   }
 
-  boost::shared_ptr<std::vector<SensorType>> Zone::getUnassignedSensorTypes() const {
+  std::vector<SensorType> Zone::getUnassignedSensorTypes() const {
     SensorType sensorTypesIndoor[] = {
       SensorType::TemperatureIndoors,
       SensorType::BrightnessIndoors,
@@ -472,43 +461,27 @@ namespace dss {
       SensorType::AirPressure
     };
 
-    boost::shared_ptr<std::vector<SensorType> > ret;
-
+    std::vector<SensorType> ret;
     if (m_ZoneID == 0) {
-      ret.reset(new std::vector<SensorType>(sensorTypesOutdoor,
-          sensorTypesOutdoor + sizeof(sensorTypesOutdoor) / sizeof(int)));
+      ret.assign(sensorTypesOutdoor, sensorTypesOutdoor + ARRAY_SIZE(sensorTypesOutdoor));
     } else {
-      ret.reset(new std::vector<SensorType>(sensorTypesIndoor,
-          sensorTypesIndoor + sizeof(sensorTypesIndoor) / sizeof(int)));
+      ret.assign(sensorTypesIndoor, sensorTypesIndoor + ARRAY_SIZE(sensorTypesIndoor));
     }
 
-    for (size_t i = 0; i < m_MainSensors.size(); i++) {
-      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
-
-      std::vector<SensorType>::iterator it;
-      for (it = ret->begin(); it != ret->end();) {
-        if (*it == s->m_sensorType) {
-          it = ret->erase(it);
-        } else {
-          it++;
-        }
-      }
-    }
+    auto it = std::remove_if(ret.begin(), ret.end(),
+                             [this](SensorType& sensorType) {
+                                return isSensorAssigned(sensorType);
+                             });
+    ret.erase(it, ret.end());
 
     return ret;
   }
 
-  boost::shared_ptr<std::vector<SensorType> > Zone::getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const {
-    auto ret = boost::make_shared<std::vector<SensorType>>();
-    dsuid_t dev_dsuid = _device->getDSID();
-
-    for (size_t i = 0; i < m_MainSensors.size(); i++) {
-      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
-      if (!s) {
-        continue;
-      }
-      if (s->m_DSUID == dev_dsuid) {
-        ret->push_back(s->m_sensorType);
+  std::vector<SensorType> Zone::getAssignedSensorTypes(const Device& _device) const {
+    std::vector<SensorType> ret;
+    foreach (auto&& s, m_MainSensors) {
+      if (s.m_DSUID == _device.getDSID()) {
+        ret.push_back(s.m_sensorType);
       }
     }
     return ret;
@@ -519,44 +492,32 @@ namespace dss {
   }
 
   void Zone::removeInvalidZoneSensors() {
-    std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it;
-    for (it = m_MainSensors.begin(); it != m_MainSensors.end();) {
-      DeviceReference devRef ((*it)->m_DSUID, m_pApartment);
-      if (isDeviceZoneMember(devRef)) {
-        ++it;
-      } else {
-        (*it).reset();
-        it = m_MainSensors.erase(it);
-      }
-    }
+    // bring sensors without a device to the end of the vector
+    auto it = std::remove_if(m_MainSensors.begin(), m_MainSensors.end(),
+                             [this](MainZoneSensor_t& sensorDesc) {
+                                return !isDeviceZoneMember(DeviceReference(sensorDesc.m_DSUID, m_pApartment));
+                             });
+
+    // now remove the tail
+    m_MainSensors.erase(it, m_MainSensors.end());
   }
 
   boost::shared_ptr<Device> Zone::getAssignedSensorDevice(SensorType _sensorType) const {
-    for (size_t i = 0; i < m_MainSensors.size(); i++) {
-      boost::shared_ptr<MainZoneSensor_t> s = m_MainSensors.at(i);
-      if (!s) {
-        continue;
-      }
-      if (s->m_sensorType == _sensorType) {
-        return getDevices().getByDSID(s->m_DSUID).getDevice();
+    foreach (auto&& s, m_MainSensors) {
+      if (s.m_sensorType == _sensorType) {
+        return getDevices().getByDSID(s.m_DSUID).getDevice();
       }
     }
     return boost::shared_ptr<Device> ();
   }
 
-  bool Zone::isZoneSensor(boost::shared_ptr<Device> _device, SensorType _sensorType) const {
-    if (!_device) {
-      return false;
-    }
-
+  bool Zone::isZoneSensor(const Device &_device, SensorType _sensorType) const {
     boost::shared_ptr<Device> zoneSensor = getAssignedSensorDevice(_sensorType);
     if (!zoneSensor) {
       return false;
     }
 
-    dsuid_t dsuidDevice = _device->getDSID();
-    dsuid_t dsuidSensor = zoneSensor->getDSID();
-    return dsuid_equal (&dsuidDevice, &dsuidSensor);
+    return (_device.getDSID() == zoneSensor->getDSID());
   }
 
   void Zone::dirty() {

@@ -615,7 +615,7 @@ namespace dss {
       } else {
         json.add("dsid", "");
       }
-      json.add("dSUID", dsuid2str(pDevice->getDSID()));
+      json.add("dSUID", pDevice->getDSID());
       json.add("buttonInputMode", pDevice->getButtonInputMode());
       json.endObject();
 

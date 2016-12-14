@@ -55,7 +55,7 @@ namespace dss {
       _json.add("id", "");
     }
     _json.add("DisplayID", _device.getDevice()->getDisplayID());
-    _json.add("dSUID", dsuid2str(_device.getDSID()));
+    _json.add("dSUID", _device.getDSID());
     _json.add("GTIN", _device.getDevice()->getGTIN());
     _json.add("name", _device.getName());
     _json.add("dSUIDIndex", _device.getDevice()->multiDeviceIndex());
@@ -95,7 +95,7 @@ namespace dss {
       } else {
         _json.add("meterDSID", "");
       }
-      _json.add("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
+      _json.add("meterDSUID", _device.getDevice()->getDSMeterDSID());
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
@@ -110,7 +110,7 @@ namespace dss {
       } else {
         _json.add("meterDSID", "");
       }
-      _json.add("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
+      _json.add("meterDSUID", _device.getDevice()->getLastKnownDSMeterDSID());
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
@@ -200,7 +200,7 @@ namespace dss {
       for (int pd = 0; pd < (_device.getDevice()->getPairedDevices() - 1); pd++) {
           dsuid_t next;
           dsuid_get_next_dsuid(dsuid, &next);
-          _json.add(dsuid2str(next));
+          _json.add(next);
           dsuid = next;
       }
     }
@@ -244,7 +244,7 @@ namespace dss {
         // do not render hidden TNY devices
         continue;
       }
-      _json.add(dsuid2str(devices[iDevice].getDSID()));
+      _json.add(devices[iDevice].getDSID());
     }
     _json.endArray();
     _json.endObject();
@@ -273,7 +273,7 @@ namespace dss {
         // do not render hidden TNY devices
         continue;
       }
-      _json.add(dsuid2str(devices[iDevice].getDSID()));
+      _json.add(devices[iDevice].getDSID());
     }
     _json.endArray();
     _json.endObject();

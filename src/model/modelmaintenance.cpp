@@ -3161,7 +3161,7 @@ namespace dss {
           continue;
         }
         try {
-          if (zone->isZoneSensor(device, sensor->m_sensorType)) {
+          if (zone->isZoneSensor(*device, sensor->m_sensorType)) {
             busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
           }
         } catch (std::runtime_error& e) {

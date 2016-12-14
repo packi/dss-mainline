@@ -196,7 +196,7 @@ namespace dss {
           } else {
             json.add("dsid", "");
           }
-          json.add("dSUID", dsuid2str(dsMeter->getDSID()));
+          json.add("dSUID", dsMeter->getDSID());
           json.add("DisplayID", dsMeter->getDisplayID());
           json.add("hwVersion", 0);
           json.add("hwVersionString", dsMeter->getHardwareVersion());
@@ -276,7 +276,7 @@ namespace dss {
           json.add("name", pZone->getName());
           json.add("ControlMode", hProp.m_HeatingControlMode);
           json.add("ControlState", hProp.m_HeatingControlState);
-          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
           if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             json.add("IsConfigured", false);
           } else {
@@ -322,7 +322,7 @@ namespace dss {
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           json.add("id", pZone->getID());
           json.add("name", pZone->getName());
-          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
 
           if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             json.add("IsConfigured", false);
@@ -373,7 +373,7 @@ namespace dss {
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           json.add("id", pZone->getID());
           json.add("name", pZone->getName());
-          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
 
           ZoneHeatingOperationModeSpec_t hOpValues;
           memset(&hOpValues, 0, sizeof(hOpValues));
@@ -440,14 +440,10 @@ namespace dss {
 
           json.startArray("sensors");
 
-          std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = pZone->getAssignedSensors();
-          for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
-              it != slist.end();
-              it ++) {
+          foreach (auto&& devSensor, pZone->getAssignedSensors()) {
             json.startObject();
-            boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-            json.add("sensorType", devSensor->m_sensorType);
-            json.add("dsuid", dsuid2str(devSensor->m_DSUID));
+            json.add("sensorType", devSensor.m_sensorType);
+            json.add("dsuid", devSensor.m_DSUID);
             json.endObject();
           }
           json.endArray();
@@ -613,7 +609,7 @@ namespace dss {
 
         for (size_t i = 0; i < lockedDevices.size(); i++) {
           json.startObject();
-          json.add("dsuid", dsuid2str(lockedDevices.at(i).dsuid));
+          json.add("dsuid", lockedDevices.at(i).dsuid);
 
           json.startArray("lockedScenes");
           for (size_t j = 0; j < lockedDevices.at(i).lockedScenes.size(); j++) {
@@ -715,7 +711,7 @@ namespace dss {
 
             if (!binaryInputs.empty()) {
               json.startObject();
-              json.add("dsuid", dsuid2str(device->getDSID()));
+              json.add("dsuid", device->getDSID());
 
               json.startArray("binaryInputs");
 
@@ -779,7 +775,7 @@ namespace dss {
           }
  
           json.startObject();
-          json.add("dSUID", dsuid2str(device->getDSID()));
+          json.add("dSUID", device->getDSID());
           // do not fail the whole set if one devices messes up
           try {
             vdcInfo::addByFilter(db, *device, filter, langCode, json);

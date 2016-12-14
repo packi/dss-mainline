@@ -173,7 +173,7 @@ namespace dss {
     DeviceVector m_Devices;
     std::vector<boost::shared_ptr<const DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Group> > m_Groups;
-    std::vector<boost::shared_ptr<MainZoneSensor_t> > m_MainSensors;
+    std::vector<MainZoneSensor_t> m_MainSensors;
     ZoneHeatingProperties_t m_HeatingProperties;
     ZoneHeatingStatus_t m_HeatingStatus;
     PersistentValue<int> m_HeatingOperationMode;
@@ -255,17 +255,17 @@ namespace dss {
     void setBrightnessValue(double _value, DateTime& _ts);
     void setCO2ConcentrationValue(double _value, DateTime& _ts);
 
-    void setSensor(boost::shared_ptr<const Device> _device, SensorType _sensorType);
-    void setSensor(boost::shared_ptr<MainZoneSensor_t> _mainZoneSensor);
+    void setSensor(const Device &_device, SensorType _sensorType);
+    void setSensor(const MainZoneSensor_t &_mainZoneSensor);
     void resetSensor(SensorType _sensorType);
     bool isSensorAssigned(SensorType _sensorType) const;
-    std::vector<boost::shared_ptr<MainZoneSensor_t> > getAssignedSensors() { return m_MainSensors; }
+    const std::vector<MainZoneSensor_t>& getAssignedSensors() const { return m_MainSensors; }
 
-    boost::shared_ptr<std::vector<SensorType> > getUnassignedSensorTypes() const;
-    boost::shared_ptr<std::vector<SensorType> > getAssignedSensorTypes(boost::shared_ptr<const Device> _device) const;
+    std::vector<SensorType> getUnassignedSensorTypes() const;
+    std::vector<SensorType> getAssignedSensorTypes(const Device &_device) const;
 
     boost::shared_ptr<Device> getAssignedSensorDevice(SensorType _sensorType) const;
-    bool isZoneSensor(boost::shared_ptr<Device> _device, SensorType _sensorType) const;
+    bool isZoneSensor(const Device &_device, SensorType _sensorType) const;
 
     bool isDeviceZoneMember(const DeviceReference& _device) const;
     void removeInvalidZoneSensors();

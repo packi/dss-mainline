@@ -869,7 +869,7 @@ namespace dss {
               " is zone reference, and dsuid " + dsuid2str(sensorDevice) +
               " is additionally registered on dSM " + dsuid2str(_dsMeter->getDSID()), lsWarning);
         } else {
-          _zone->setSensor(pDev, idList[i]);
+          _zone->setSensor(*pDev, idList[i]);
         }
       } catch (ItemNotFoundException& e) {
         log("Sensor on zone " + intToString(_zone->getID()) +
