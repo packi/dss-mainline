@@ -309,7 +309,7 @@ namespace dss {
     removeFromPropertyTree();
   }
 
-  int Device::getGroupZoneID(int groupID) {
+  int Device::getGroupZoneID(int groupID) const {
     return (isAppUserGroup(groupID) || isGlobalAppGroup(groupID)) ? 0 : (m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID);
   }
 
