@@ -51,6 +51,7 @@ libdsscore_a_SOURCES =  \
 	../src/eventinterpretersystemplugins.h \
 	../src/eventsubscriptionsession.cpp \
 	../src/eventsubscriptionsession.h \
+	../src/exception.cpp \
 	../src/exception.h \
 	../src/expatparser.cpp \
 	../src/expatparser.h \
