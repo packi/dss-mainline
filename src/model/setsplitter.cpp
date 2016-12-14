@@ -163,13 +163,13 @@ namespace dss {
     // if there are any devices try to find common group
     if (_set.length() > 0) {
       // start with group list from first device
-      intersection = _set[0].getDevice()->getGroups();
+      intersection = _set[0].getDevice()->getGroupIds();
       std::sort(intersection.begin(), intersection.end());
 
       // search all other devices
       for (int iDevice = 1; iDevice < _set.length(); iDevice++) {
 
-        std::vector<int> deviceGroups = _set[iDevice].getDevice()->getGroups();
+        std::vector<int> deviceGroups = _set[iDevice].getDevice()->getGroupIds();
         std::sort(deviceGroups.begin(), deviceGroups.end());
 
         // find all groups that are in common with current intersection

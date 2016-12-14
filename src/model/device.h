@@ -263,7 +263,7 @@ namespace dss {
     std::string m_DSMeterDSUIDstr; // for proptree publishing
     std::string m_LastKnownMeterDSIDstr; // for proptree publishing
     std::string m_LastKnownMeterDSUIDstr; // for proptree publishing
-    std::vector<int> m_Groups;
+    std::vector<int> m_groupIds;
     int m_ActiveGroup;
     int m_DefaultGroup;
     int m_FunctionID;
@@ -526,7 +526,7 @@ namespace dss {
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
     /** Returns the vector of groups the device is in */
-    const std::vector<int>& getGroups() const { return m_Groups; }
+    const std::vector<int>& getGroupIds() const { return m_groupIds; }
     /** Retuturns group to which the joker is configured or -1 if device is not
         a joker */
     int getJokerGroup() const;
