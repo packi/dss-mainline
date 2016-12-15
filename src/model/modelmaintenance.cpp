@@ -1973,12 +1973,18 @@ namespace dss {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
       boost::shared_ptr<Device> device = devRef.getDevice();
       if(_configClass == CfgClassFunction) {
-        if(_configIndex == CfgFunction_Mode) {
+        if (_configIndex == CfgFunction_Mode) {
           device->setOutputMode(_value);
-        } else if(_configIndex == CfgFunction_ButtonMode) {
+        } else if (_configIndex == CfgFunction_ButtonMode) {
           device->setButtonID(_value & 0xf);
-          device->setButtonGroupMembership((_value >> 4) & 0xf);
-        } else if(_configIndex == CfgFunction_LTMode) {
+          // 4 most significant bits of value are only valid in case it is != 0, otherwise it is set with
+          // CfgFunction_PbGroup configuration change.
+          if (((_value >> 4) & 0xf) != 0) {
+            device->setButtonGroupMembership((_value >> 4) & 0xf);
+          }
+        } else if (_configIndex == CfgFunction_PbGroup) {
+          device->setButtonGroupMembership(_value);
+        } else if (_configIndex == CfgFunction_LTMode) {
           device->setButtonInputMode(_value);
         }
       } else if (_configClass == CfgClassDevice) {

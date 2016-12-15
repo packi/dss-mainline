@@ -381,7 +381,7 @@ namespace dss {
     } else if (_request.getMethod() == "setJokerGroup") {
       boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
-      if (!isDefaultGroup(newGroupId)) {
+      if (!isDefaultGroup(newGroupId) && !isGlobalAppDsGroup(newGroupId)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
       if (m_pStructureBusInterface == NULL) {

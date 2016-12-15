@@ -762,8 +762,7 @@ namespace dss {
 
   void Device::setDeviceButtonID(uint8_t _buttonId) {
     setButtonID(_buttonId);
-    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
-        ((m_ButtonGroupMembership & 0xf) << 4) | (_buttonId & 0xf));
+    setDeviceButtonConfig();
   } // setDeviceButtonId
 
   void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
@@ -789,8 +788,21 @@ namespace dss {
     }
   } // setDeviceActiveGroup
 
+  void Device::setDeviceButtonConfig() {
+    if (m_ButtonGroupMembership < 16) {
+      // In case the button group is in 0-15 range just set the LTNUMGROUP register (bank 3, offset 1)
+      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, ((m_ButtonGroupMembership & 0xf) << 4) | (m_ButtonID & 0xf));
+    } else {
+      // In case the button group is greater than 0-15 then the 4-bit field in LTNUMGROUP register (bank 3, offset 1) is
+      // replaced by the PBGROUP (bank 3, offset 0x1d) register.
+      // In case of a "0" value in LTNUMGRP group bits the value should be taken from PBGROUP instead
+      setDeviceConfig(CfgClassFunction, CfgFunction_PbGroup, m_ButtonGroupMembership);
+      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, m_ButtonID & 0xf);
+    }
+  }
+
   void Device::setDeviceJokerGroup(uint8_t _groupId) {
-    if ((_groupId < GroupIDYellow) || (_groupId > GroupIDStandardMax)) {
+    if (!isDefaultGroup(_groupId) && !isGlobalAppDsGroup(_groupId)) {
       throw std::runtime_error("Invalid joker group value");
     }
     // for standard groups force that only one group is active
@@ -799,11 +811,17 @@ namespace dss {
         removeFromGroup(g);
       }
     }
+    // remove also from GA groups
+    for (int g = GroupIDGlobalAppMin; g <= GroupIDGlobalAppMax; g++) {
+      if (isInGroup(g)) {
+        removeFromGroup(g);
+      }
+    }
+
     addToGroup(_groupId);
     // propagate target group value to device
     setButtonGroupMembership(_groupId);
-    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
-        ((_groupId & 0xf) << 4) | (m_ButtonID & 0xf));
+    setDeviceButtonConfig();
 
     updateIconPath();
   } // setDeviceJokerGroup
