@@ -38,7 +38,6 @@
 #include "addressablemodelitem.h"
 #include "businterface.h"
 #include "modelevent.h"
-#include "modelconst.h"
 
 #define DEV_PARAM_BUTTONINPUT_STANDARD              0
 #define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1   5

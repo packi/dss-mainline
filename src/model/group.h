@@ -27,7 +27,6 @@
 #include <boost/thread/mutex.hpp>
 
 #include "modeltypes.h"
-#include "modelconst.h"
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
 #include "state.h"
