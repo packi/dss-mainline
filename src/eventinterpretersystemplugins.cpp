@@ -49,7 +49,6 @@
 #include "model/data_types.h"
 #include "propertysystem.h"
 #include "security/security.h"
-#include "structuremanipulator.h"
 #include "systemcondition.h"
 #include "util.h"
 #include "src/messages/vdc-messages.pb.h"
