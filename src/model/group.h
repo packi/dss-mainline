@@ -57,7 +57,7 @@ namespace dss {
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, boost::shared_ptr<Zone> _pZone);
-    virtual ~Group() {};
+    virtual ~Group();
     virtual Set getDevices() const;
 
     /** Returns the id of the group */
