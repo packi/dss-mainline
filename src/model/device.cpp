@@ -77,7 +77,7 @@ namespace dss {
       m_ptr->removeSubState(*m_parent.m_state);
     }
     void update() {
-log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
+      log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
       m_ptr->updateSubState(*m_parent.m_state);
     }
   private:
@@ -330,7 +330,7 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
       }
 
       if (m_pApartment->getPropertyNode() != NULL) {
-        foreach(auto&& g, m_Groups) {
+        foreach(auto&& g, m_groupIds) {
           std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
               "/groups/group" + intToString(g) + "/devices/" +
               dsuid2str(m_DSID);
@@ -559,7 +559,7 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
       }
     }
 
-    foreach (auto&& g, m_Groups) {
+    foreach (auto&& g, m_groupIds) {
       std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
                           "/groups/group" + intToString(g) + "/devices/" +
                           dsuid2str(m_DSID);
@@ -1331,22 +1331,18 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
   } // setLastKnownZoneID
 
   int Device:: getGroupIdByIndex(const int _index) const {
-    return m_Groups[_index];
+    return m_groupIds[_index];
   } // getGroupIdByIndex
 
   boost::shared_ptr<Group> Device::getGroupByIndex(const int _index) {
     return m_pApartment->getGroup(getGroupIdByIndex(_index));
   } // getGroupByIndex
 
-  const std::vector<int>& Device::getGroups() const {
-    return m_Groups;
-  }
-
   void Device::addToGroup(const int _groupID) {
     if (isValidGroup(_groupID)) {
       updateIconPath();
-      if (find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
-        m_Groups.push_back(_groupID);
+      if (find(m_groupIds.begin(), m_groupIds.end(), _groupID) == m_groupIds.end()) {
+        m_groupIds.push_back(_groupID);
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // create alias in group list
           std::string gPath = "zones/zone" + intToString(getGroupZoneID(_groupID)) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
@@ -1369,9 +1365,9 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
   void Device::removeFromGroup(const int _groupID) {
     if (isValidGroup(_groupID)) {
       updateIconPath();
-      std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
-      if (it != m_Groups.end()) {
-        m_Groups.erase(it);
+      std::vector<int>::iterator it = find(m_groupIds.begin(), m_groupIds.end(), _groupID);
+      if (it != m_groupIds.end()) {
+        m_groupIds.erase(it);
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // remove alias in group list
           std::string gPath = "zones/zone" + intToString(getGroupZoneID(_groupID)) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
@@ -1393,14 +1389,14 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
 
   void Device::resetGroups() {
     std::vector<int>::iterator it;
-    while (m_Groups.size() > 0) {
-      int g = m_Groups.front();
+    while (m_groupIds.size() > 0) {
+      int g = m_groupIds.front();
       removeFromGroup(g);
     }
   } // resetGroups
 
   int Device::getGroupsCount() const {
-    return m_Groups.size();
+    return m_groupIds.size();
   } // getGroupsCount
 
   bool Device::isInGroup(const int _groupID) const {
@@ -1410,15 +1406,11 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
     } else if (!isValidGroup(_groupID)) {
       result = false;
     } else {
-      auto it = find(m_Groups.begin(), m_Groups.end(), _groupID);
-      result = (it != m_Groups.end());
+      auto it = find(m_groupIds.begin(), m_groupIds.end(), _groupID);
+      result = (it != m_groupIds.end());
     }
     return result;
   } // isInGroup
-
-  Apartment& Device::getApartment() const {
-    return *m_pApartment;
-  } // getApartment
 
   void Device::setIsLockedInDSM(const bool _value) {
     m_IsLockedInDSM = _value;
@@ -2782,9 +2774,7 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
   std::vector<int> Device::getLockedScenes() {
     std::vector<int> ls;
 
-    for (int g = 0; g < getGroupsCount(); g++) {
-      boost::shared_ptr<Group> group = getGroupByIndex(g);
-      int gid = group->getID();
+    foreach (auto&& gid, m_groupIds) {
       if (isAppUserGroup(gid)) {
         boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
         if (cluster->isConfigurationLocked()) {
@@ -2798,9 +2788,7 @@ log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
   }
 
   bool Device::isInLockedCluster() {
-    for (int g = 0; g < getGroupsCount(); g++) {
-      boost::shared_ptr<Group> group = getGroupByIndex(g);
-      int gid = group->getID();
+    foreach (auto&& gid, m_groupIds) {
       if (isAppUserGroup(gid)) {
         boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
         if (cluster->isConfigurationLocked()) {
