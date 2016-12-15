@@ -870,37 +870,32 @@ namespace dss {
     }
   }
 
-  void StructureManipulator::synchronizeZoneSensorAssignment(std::vector<boost::shared_ptr<Zone> > _zones)
+  void StructureManipulator::synchronizeZoneSensorAssignment(Zone &zone)
   {
     Logger::getInstance()->log("SensorAssignment: run synchronize", lsInfo);
 
-    for (size_t i = 0; i < _zones.size(); ++i) {
-      boost::shared_ptr<Zone> zone = _zones.at(i);
-      if (!zone) {
-        continue;
-      }
-
+    {
       // remove sensors that do not belong to the zone
-      zone->removeInvalidZoneSensors();
+      zone.removeInvalidZoneSensors();
 
       // erase all unassigned sensors in zone
       try {
-        foreach (auto&& sensorType, zone->getUnassignedSensorTypes()) {
+        foreach (auto&& sensorType, zone.getUnassignedSensorTypes()) {
           Logger::getInstance()->log(std::string("SensorAssignment: sync reset ") +
-                  "zone: " + intToString(zone->getID()) +
+                  "zone: " + intToString(zone.getID()) +
                   ", type: " + sensorTypeName(sensorType) +
                   " => none", lsInfo);
 
-          m_Interface.resetZoneSensor(zone->getID(), sensorType);
+          m_Interface.resetZoneSensor(zone.getID(), sensorType);
         }
 
         // reassign all assigned sensors in zone
-        foreach (auto&& s, zone->getAssignedSensors()) {
-          Logger::getInstance()->log("SensorAssignment: sync assign zone: " + intToString(zone->getID()) +
+        foreach (auto&& s, zone.getAssignedSensors()) {
+          Logger::getInstance()->log("SensorAssignment: sync assign zone: " + intToString(zone.getID()) +
                   ", type: " + sensorTypeName(s.m_sensorType) +
                   " => " + dsuid2str(s.m_DSUID), lsInfo);
 
-          m_Interface.setZoneSensor(zone->getID(), s.m_sensorType, s.m_DSUID);
+          m_Interface.setZoneSensor(zone.getID(), s.m_sensorType, s.m_DSUID);
         }
       } catch (std::runtime_error &err) {
         Logger::getInstance()->log(std::string("StructureManipulator::synchronizeZoneSensorAssignment: can't synchronize zone sensors: ") + err.what(), lsWarning);

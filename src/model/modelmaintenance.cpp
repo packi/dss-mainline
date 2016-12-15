@@ -472,7 +472,9 @@ namespace dss {
                                      *m_pQueryBusInterface,
                                      *m_pApartment);
 
-    manipulator.synchronizeZoneSensorAssignment(DSS::getInstance()->getApartment().getZones());
+    foreach (auto&& zone, DSS::getInstance()->getApartment().getZones()) {
+        manipulator.synchronizeZoneSensorAssignment(*zone);
+    }
   }
 
   void MeterMaintenance::raiseEvent(const boost::shared_ptr<Event> &event) {
