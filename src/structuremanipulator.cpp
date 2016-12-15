@@ -651,13 +651,13 @@ namespace dss {
         throw DSSException("The group is locked and cannot be modified");
       }
       pCluster->setStandardGroupID(_standardGroupNumber);
-      m_Interface.groupSetStandardID(pCluster->getZoneID(), pCluster->getID(), _standardGroupNumber);
+      m_Interface.groupSetStateMachine(pCluster->getZoneID(), pCluster->getID(), _standardGroupNumber);
       return;
     }
 
     if (isZoneUserGroup(_group->getID()) || isGlobalAppUserGroup(_group->getID())) {
       _group->setStandardGroupID(_standardGroupNumber);
-      m_Interface.groupSetStandardID(_group->getZoneID(), _group->getID(), _standardGroupNumber);
+      m_Interface.groupSetStateMachine(_group->getZoneID(), _group->getID(), _standardGroupNumber);
       return;
     }
 
@@ -938,7 +938,7 @@ namespace dss {
         throw DSSException("The group is locked and cannot be modified");
       }
       _cluster->setStandardGroupID(_standardGroupNumber);
-      m_Interface.clusterSetStandardID(_cluster->getID(), _standardGroupNumber);
+      m_Interface.clusterSetStateMachine(_cluster->getID(), _standardGroupNumber);
       return;
     }
 

@@ -318,8 +318,8 @@ namespace dss {
     boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone));
 
     pGroup->setName(_groupSpec.Name);
-    pGroup->setStandardGroupID(_groupSpec.StandardGroupID);
-    pGroup->setConfiguration(_groupSpec.configuration);
+    pGroup->setStandardGroupID(_groupSpec.stateMachineID);
+    pGroup->setConfiguration(_groupSpec.stateMachineConfig);
 
     return pGroup;
   }

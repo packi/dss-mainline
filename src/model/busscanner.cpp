@@ -269,10 +269,10 @@ namespace dss {
 
       // in case this DSM does not provide group configuration ignore it.
       if (_dsMeter->getApiVersion() < 0x303) {
-        cluster.configuration = 0;
+        cluster.stateMachineConfig = 0;
       }
 
-      if (cluster.StandardGroupID > 0) {
+      if (cluster.stateMachineID > 0) {
         log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
             " and devices: " + intToString(cluster.NumberOfDevices));
       }
@@ -302,8 +302,8 @@ namespace dss {
        */
       if ((pCluster->getStandardGroupID() == 0) ||
           ((pCluster->getStandardGroupID() > 0) && !pCluster->isReadFromDsm())) {
-        pCluster->setStandardGroupID(cluster.StandardGroupID);
-        pCluster->setConfiguration(cluster.configuration);
+        pCluster->setStandardGroupID(cluster.stateMachineID);
+        pCluster->setConfiguration(cluster.stateMachineConfig);
         pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
         pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
         pCluster->setConfigurationLocked(cluster.configurationLocked);
@@ -737,7 +737,7 @@ namespace dss {
 
       // in case this DSM does not provide group configuration it is invalid and should be ignored
       if (_dsMeter->getApiVersion() < 0x303) {
-        group.configuration = 0;
+        group.stateMachineConfig = 0;
       }
 
       log("scanDSMeter:    Found group with id: " + intToString(group.GroupID) +
@@ -780,8 +780,8 @@ namespace dss {
           _zone->addGroup(groupOnZone);
         } else {
           if ( (groupOnZone->getName() != group.Name) ||
-               (groupOnZone->getStandardGroupID() != group.StandardGroupID) ||
-               (groupOnZone->getConfiguration() != (int)group.configuration)) {
+               (groupOnZone->getStandardGroupID() != group.stateMachineID) ||
+               (groupOnZone->getConfiguration() != (int)group.stateMachineConfig)) {
             groupOnZone->setIsSynchronized(false);
           }
         }

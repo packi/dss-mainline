@@ -96,13 +96,13 @@ namespace dss {
         return false;
       }
     }
-    return ((getStandardGroupID() == cluster.StandardGroupID) &&
+    return ((getStandardGroupID() == cluster.stateMachineID) &&
             (getName() == cluster.Name) &&
             (m_Location == cluster.location) &&
             (m_ProtectionClass == cluster.protectionClass) &&
             (m_Floor == cluster.floor) &&
             (m_ConfigurationLocked == cluster.configurationLocked) &&
-            (getConfiguration() == (int)cluster.configuration));
+            (getConfiguration() == (int)cluster.stateMachineConfig));
   } // equalConfig
 
   void Cluster::reset() {

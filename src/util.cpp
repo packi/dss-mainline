@@ -61,7 +61,7 @@ namespace dss {
 
         try {
           _interface->clusterSetName(pCluster->getID(), pCluster->getName());
-          _interface->clusterSetStandardID(pCluster->getID(), pCluster->getStandardGroupID());
+          _interface->clusterSetStateMachine(pCluster->getID(), pCluster->getStandardGroupID());
           _interface->clusterSetConfiguration(pCluster->getID(), pCluster->getStandardGroupID());
           _interface->clusterSetProperties(pCluster->getID(), pCluster->getLocation(),
                                            pCluster->getFloor(), pCluster->getProtectionClass());
@@ -84,7 +84,7 @@ namespace dss {
             try {
               _interface->createGroup(pZone->getID(), pGroup->getID(),
                   pGroup->getStandardGroupID(), pGroup->getName());
-              _interface->groupSetStandardID(pZone->getID(), pGroup->getID(),
+              _interface->groupSetStateMachine(pZone->getID(), pGroup->getID(),
                   pGroup->getStandardGroupID());
               _interface->groupSetConfiguration(pZone->getID(), pGroup->getID(),
                   pGroup->getConfiguration());
