@@ -211,11 +211,8 @@ namespace dss {
       return;
     }
     auto&& apartment = m_device.getApartment();
-    auto&& zoneId = m_device.getZoneID();
-    if (isGlobalAppGroup(targetGroupId)) {
-      zoneId = 0;
-    }
-    auto&& composedGroupName = ds::str("zone.", zoneId, ".group.", targetGroupId, ".inputType.",
+    auto&& targetGroupZoneId = m_device.getGroupZoneID(targetGroupId);
+    auto&& composedGroupName = ds::str("zone.", targetGroupZoneId, ".group.", targetGroupId, ".inputType.",
         static_cast<int>(m_inputType));
     boost::shared_ptr<ComposedGroupState> composedGroupState;
     {
@@ -312,7 +309,7 @@ namespace dss {
     removeFromPropertyTree();
   }
 
-  int Device::getGroupZoneID(int groupID) {
+  int Device::getGroupZoneID(int groupID) const {
     return (isAppUserGroup(groupID) || isGlobalAppGroup(groupID)) ? 0 : (m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID);
   }
 
@@ -1348,8 +1345,8 @@ namespace dss {
     m_LastKnownZoneID = _value;
   } // setLastKnownZoneID
 
-  int Device:: getGroupIdByIndex(const int _index) const {
-    return m_groupIds[_index];
+  int Device::getGroupIdByIndex(const int index) const {
+    return m_groupIds.at(index);
   } // getGroupIdByIndex
 
   boost::shared_ptr<Group> Device::getGroupByIndex(const int _index) {

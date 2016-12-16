@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2015 digitalSTROM.org, Zurich, Switzerland
+ *  Copyright (c) 2016 digitalSTROM.org, Zurich, Switzerland
  *
  *  This file is part of digitalSTROM Server.
  *
@@ -20,34 +20,18 @@
 #pragma once
 
 #include <boost/asio/steady_timer.hpp>
-#include <ds/asio/timer.h>
-#include "logger.h"
-#include "taskprocessor.h"
-#include "propertysystem.h"
-#include "sqlite3_wrapper.h"
-#include "vdc-db.h"
+#include <boost/chrono/chrono.hpp>
 
-namespace dss {
-  class DSS;
+namespace ds {
+namespace asio {
 
-  /// Initialize vdc-db in constructor and schedule vdc-db updates after start and periodically.
-  class VdcDbFetcher {
-  public:
-    static void recreateDb(DSS &dss);
+/// Asio (steady) timer class.
+///
+/// Nearly all code wants to use steady clock, so `steady` is skipped from the name.
+///
+/// Unit tests will need an option to control the time programatically.
+/// It will be much easier to deploy this change if all code uses this class.
+typedef boost::asio::basic_waitable_timer<boost::chrono::steady_clock> Timer;
 
-    VdcDbFetcher(DSS &dss);
-
-  private:
-    __DECL_LOG_CHANNEL__;
-    DSS& m_dss;
-    ds::asio::Timer m_timer;
-    TaskScope m_taskScope;
-    PropertyNodePtr m_configNode;
-    bool m_enabled;
-    boost::chrono::seconds m_period;
-    std::string m_url;
-
-    void asyncLoop();
-    void fetchTask();
-  };
-}
+} // namespace asio
+} // namespace ds
