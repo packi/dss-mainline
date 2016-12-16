@@ -171,12 +171,12 @@ namespace dss {
     return getVdcProperty(_meter, _meter, query);
   }
 
-  void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
+  void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _standardGroupID);
+    int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _stateMachineID);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
 
@@ -186,7 +186,7 @@ namespace dss {
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // createGroup
 
-  void DSStructureModifyingBusInterface::createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) {
+  void DSStructureModifyingBusInterface::createCluster(uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -196,7 +196,7 @@ namespace dss {
     //DSBusInterface::checkBroadcastResultCode(ret);
     //usleep(BROADCAST_SLEEP_MICROSECONDS);
 
-    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, _standardGroupID);
+    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, _stateMachineID);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
 
@@ -231,13 +231,13 @@ namespace dss {
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   } // removeCluster
 
-  void DSStructureModifyingBusInterface::groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) {
+  void DSStructureModifyingBusInterface::groupSetStateMachine(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     int ret;
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _standardGroupID);
+    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _stateMachineID);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetStandardID
@@ -253,10 +253,6 @@ namespace dss {
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetName
-
-  void DSStructureModifyingBusInterface::groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration) {
-    // TODO: implement after API changes
-  } // groupSetConfiguration
 
   void DSStructureModifyingBusInterface::removeGroup(uint16_t _zoneID, uint8_t _groupID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
@@ -447,19 +443,15 @@ namespace dss {
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }
 
-  void DSStructureModifyingBusInterface::clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) {
+  void DSStructureModifyingBusInterface::clusterSetStateMachine(uint8_t _clusterID, uint8_t _stateMachineID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     int ret;
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _standardGroupID);
+    ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _stateMachineID);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
-  }
-
-  void DSStructureModifyingBusInterface::clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration) {
-    // TODO: implement after API changes
   }
 
   void DSStructureModifyingBusInterface::clusterSetProperties(uint8_t _clusterID, uint16_t _location,

@@ -269,10 +269,10 @@ namespace dss {
 
       // in case this DSM does not provide group configuration ignore it.
       if (_dsMeter->getApiVersion() < 0x303) {
-        cluster.configuration = 0;
+        cluster.stateMachineConfig = 0;
       }
 
-      if (cluster.StandardGroupID > 0) {
+      if (cluster.stateMachineID > 0) {
         log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
             " and devices: " + intToString(cluster.NumberOfDevices));
       }
@@ -300,10 +300,10 @@ namespace dss {
        * the dSM is the master source for this data. The dSS will take the data
        * from the first dSM that has a non-zero configuration.
        */
-      if ((pCluster->getStandardGroupID() == 0) ||
-          ((pCluster->getStandardGroupID() > 0) && !pCluster->isReadFromDsm())) {
-        pCluster->setStandardGroupID(cluster.StandardGroupID);
-        pCluster->setConfiguration(cluster.configuration);
+      if ((pCluster->getApplicationType() == 0) ||
+          ((pCluster->getApplicationType() > 0) && !pCluster->isReadFromDsm())) {
+        pCluster->setApplicationType(cluster.stateMachineID);
+        pCluster->setApplicationConfiguration(cluster.stateMachineConfig);
         pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
         pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
         pCluster->setConfigurationLocked(cluster.configurationLocked);
@@ -737,7 +737,7 @@ namespace dss {
 
       // in case this DSM does not provide group configuration it is invalid and should be ignored
       if (_dsMeter->getApiVersion() < 0x303) {
-        group.configuration = 0;
+        group.stateMachineConfig = 0;
       }
 
       log("scanDSMeter:    Found group with id: " + intToString(group.GroupID) +
@@ -780,8 +780,8 @@ namespace dss {
           _zone->addGroup(groupOnZone);
         } else {
           if ( (groupOnZone->getName() != group.Name) ||
-               (groupOnZone->getStandardGroupID() != group.StandardGroupID) ||
-               (groupOnZone->getConfiguration() != (int)group.configuration)) {
+               (groupOnZone->getApplicationType() != group.stateMachineID) ||
+               (groupOnZone->getApplicationConfiguration() != (int)group.stateMachineConfig)) {
             groupOnZone->setIsSynchronized(false);
           }
         }

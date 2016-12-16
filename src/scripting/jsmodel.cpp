@@ -328,7 +328,7 @@ namespace dss {
 
       std::size_t i = 0;
       foreach (boost::shared_ptr<Cluster> cluster, ext->getApartment().getClusters()) {
-        if (cluster->getStandardGroupID() == 0) {
+        if (cluster->getApplicationType() == 0) {
           continue;
         }
         JSObject* clusterObj = ext->createJSCluster(*ctx, cluster);
@@ -3279,7 +3279,7 @@ namespace dss {
           JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, pCluster->getName().c_str())));
           return JS_TRUE;
         case 3:
-          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getStandardGroupID()));
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getApplicationType()));
           return JS_TRUE;
         case 4:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getLocation()));

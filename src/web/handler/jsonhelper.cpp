@@ -228,10 +228,10 @@ namespace dss {
     _json.startObject();
     _json.add("id", _group->getID());
     _json.add("name", _group->getName());
-    _json.add("color", _group->getStandardGroupID());
+    _json.add("color", _group->getApplicationType());
     _json.add("isPresent", _group->isPresent());
     _json.add("isValid", _group->isValid());
-    _json.add("configuration", _group->getConfiguration());
+    _json.add("configuration", _group->getApplicationConfiguration());
 
     _json.startArray("devices");
     Set devices = _group->getDevices();
@@ -254,7 +254,7 @@ namespace dss {
     _json.startObject();
     _json.add("id", _cluster->getID());
     _json.add("name", _cluster->getName());
-    _json.add("color", _cluster->getStandardGroupID());
+    _json.add("color", _cluster->getApplicationType());
     _json.add("isPresent", _cluster->isPresent());
     _json.add("isValid", _cluster->isValid());
     _json.add("CardinalDirection", toString(_cluster->getLocation()));
@@ -305,7 +305,7 @@ namespace dss {
     _json.startArray("clusters");
     std::vector<boost::shared_ptr<Cluster> > clusters = _apartment.getClusters();
     foreach (boost::shared_ptr<Cluster> pCluster, clusters) {
-      if (pCluster->getStandardGroupID() == 0) {
+      if (pCluster->getApplicationType() == 0) {
         continue;
       }
       toJSON(static_cast<boost::shared_ptr<const Cluster> >(pCluster), _json);

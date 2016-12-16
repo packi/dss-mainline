@@ -43,8 +43,8 @@ namespace dss {
   private:
     int m_ZoneID;
     int m_GroupID;
-    int m_StandardGroupID;
-    int m_Configuration;
+    int m_ApplicationType;
+    int m_ApplicationConfiguration;
     int m_LastCalledScene;
     int m_LastButOneCalledScene;
     bool m_IsValid;
@@ -64,13 +64,13 @@ namespace dss {
     int getID() const { return m_GroupID; }
     int getZoneID() const { return m_ZoneID; }
 
-    /** Returns the id of the default behavior and associated standard group number */
-    int getStandardGroupID() const { return m_StandardGroupID; }
-    void setStandardGroupID(const int _standardGroupNumber);
+    /** Returns the type of the application that this group is implementing */
+    int getApplicationType() const { return m_ApplicationType; }
+    void setApplicationType(const int applicationType);
 
     /** Returns the configuration of this group */
-    int getConfiguration() const { return m_Configuration; }
-    void setConfiguration(const int _configuration);
+    int getApplicationConfiguration() const { return m_ApplicationConfiguration; }
+    void setApplicationConfiguration(const int applicationConfiguration);
 
     /** returns true if the group is configured and usable */
     bool isValid() const;
