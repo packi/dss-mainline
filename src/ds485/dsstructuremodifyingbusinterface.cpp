@@ -254,10 +254,6 @@ namespace dss {
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetName
 
-  void DSStructureModifyingBusInterface::groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration) {
-    // TODO: implement after API changes
-  } // groupSetConfiguration
-
   void DSStructureModifyingBusInterface::removeGroup(uint16_t _zoneID, uint8_t _groupID) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
@@ -456,10 +452,6 @@ namespace dss {
     ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _stateMachineID);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
-  }
-
-  void DSStructureModifyingBusInterface::clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration) {
-    // TODO: implement after API changes
   }
 
   void DSStructureModifyingBusInterface::clusterSetProperties(uint8_t _clusterID, uint16_t _location,

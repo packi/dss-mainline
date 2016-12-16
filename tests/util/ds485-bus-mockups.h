@@ -61,14 +61,11 @@ public:
   }
   virtual void groupSetStateMachine(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID) {
   }
-  virtual void groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration) {
-  }
   virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) {}
   virtual void clusterSetStateMachine(uint8_t _clusterID, uint8_t _stateMachineID) {}
   virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) {}
   virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) {}
   virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) {}
-  virtual void clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration) {}
   virtual void sensorPush(uint16_t _zoneID, uint8_t groupID, dsuid_t _sourceID, uint8_t _sensorType, uint16_t _sensorValue) {
   }
   virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) {

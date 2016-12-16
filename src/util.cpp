@@ -62,7 +62,6 @@ namespace dss {
         try {
           _interface->clusterSetName(pCluster->getID(), pCluster->getName());
           _interface->clusterSetStateMachine(pCluster->getID(), pCluster->getStandardGroupID());
-          _interface->clusterSetConfiguration(pCluster->getID(), pCluster->getStandardGroupID());
           _interface->clusterSetProperties(pCluster->getID(), pCluster->getLocation(),
                                            pCluster->getFloor(), pCluster->getProtectionClass());
           _interface->clusterSetLockedScenes(pCluster->getID(), pCluster->getLockedScenes());
@@ -86,8 +85,6 @@ namespace dss {
                   pGroup->getStandardGroupID(), pGroup->getName());
               _interface->groupSetStateMachine(pZone->getID(), pGroup->getID(),
                   pGroup->getStandardGroupID());
-              _interface->groupSetConfiguration(pZone->getID(), pGroup->getID(),
-                  pGroup->getConfiguration());
               pGroup->setIsSynchronized(true);
             } catch (BusApiError& e) {
               Logger::getInstance()->log("Error updating user group configuration in zone " +

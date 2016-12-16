@@ -55,7 +55,6 @@ namespace dss {
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID);
     virtual void groupSetStateMachine(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID);
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name);
-    virtual void groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration);
 
     virtual void createCluster(uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name);
     virtual void removeCluster(uint8_t _clusterID);
@@ -64,7 +63,6 @@ namespace dss {
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass);
     virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes);
     virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock);
-    virtual void clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration);
 
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent);

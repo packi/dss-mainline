@@ -669,7 +669,7 @@ namespace dss {
     // we allow to set the configuration in all groups for now
     if (isValidGroup(_group->getID())) {
       _group->setConfiguration(_groupConfiguration);
-      m_Interface.groupSetConfiguration(_group->getZoneID(), _group->getID(), _groupConfiguration);
+      // TODO: add configuration after API change
       return;
     }
 
@@ -952,7 +952,7 @@ namespace dss {
         throw DSSException("The group is locked and cannot be modified");
       }
       _cluster->setConfiguration(_clusterConfiguration);
-      m_Interface.clusterSetConfiguration(_cluster->getID(), _clusterConfiguration);
+      // TODO: add configuration after API change
       return;
     }
 
