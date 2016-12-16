@@ -207,9 +207,7 @@ namespace dss {
 
       int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, _dsMeterID, _zoneID, iGroup,
           &result.GroupID, &result.stateMachineID, &result.NumberOfDevices, nameBuf
-#if DSM_API_VERSION >= 0x106
-          , NULL, NULL
-#endif
+          , NULL, NULL, &result.stateMachineConfig
           );
       DSBusInterface::checkResultCode(ret);
 
@@ -238,7 +236,7 @@ namespace dss {
 
       int ret = ClusterInfo_by_id(m_DSMApiHandle, _dsMeterID, iCluster,
           &result.stateMachineID, &canHaveStateMachine, &result.NumberOfDevices, nameBuf,
-          NULL, NULL, &configurationLock, sceneLock, &result.location, &result.floor, &result.protectionClass);
+          NULL, NULL, &configurationLock, sceneLock, &result.location, &result.floor, &result.protectionClass, &result.stateMachineConfig);
       DSBusInterface::checkResultCode(ret);
 
       result.GroupID = iCluster;
@@ -496,7 +494,7 @@ namespace dss {
       int ret = DeviceInfo_by_index(m_DSMApiHandle, _dsMeterID, _zoneID, iDevice,
           &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
           &spec.Version, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
-          &spec.LTMode, groups, name, &spec.DSID);
+          &spec.LTMode, groups, name, &spec.DSID, &spec.activeGroup, &spec.defaultGroup);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = makeDeviceGroups(groups, sizeof(groups) * 8, spec);
@@ -532,7 +530,7 @@ namespace dss {
       int ret = DeviceInfo_by_index_only_inactive(m_DSMApiHandle, _dsMeterID, _zoneID, iDevice,
           &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
           &spec.Version, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
-          &spec.LTMode, groups, name, &spec.DSID);
+          &spec.LTMode, groups, name, &spec.DSID, &spec.activeGroup, &spec.defaultGroup);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = makeDeviceGroups(groups, sizeof(groups) * 8, spec);
@@ -560,7 +558,7 @@ namespace dss {
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, _dsMeterID, _id,
         &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
         &result.Version, &result.ZoneID, &result.ActiveState, &locked, &result.OutputMode,
-        &result.LTMode, groups, name, &result.DSID);
+        &result.LTMode, groups, name, &result.DSID, &result.activeGroup, &result.defaultGroup);
     DSBusInterface::checkResultCode(ret);
     if (_id != result.ShortAddress) {
       throw BusApiError("DeviceInfo returned answer from a different device (" + intToString(_id) + " != " + intToString(result.ShortAddress) + ")");
