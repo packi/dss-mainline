@@ -69,8 +69,7 @@ namespace dss {
 
     if (m_GroupID == GroupIDYellow) {
       // zone.123.light
-      boost::shared_ptr<Group> me =
-          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<Group> me = sharedFromThis();
       boost::shared_ptr<State> state = boost::make_shared<State>(me, State::makeGroupName(*this));
 
       try {
@@ -78,8 +77,7 @@ namespace dss {
       } catch (ItemDuplicateException& ex) {} // we only care that it exists
     } else if (m_GroupID == GroupIDHeating) {
       // zone.123.heating
-      boost::shared_ptr<Group> me =
-          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<Group> me = sharedFromThis();
       boost::shared_ptr<State> state = boost::make_shared<State>(me, State::makeGroupName(*this));
 
       try {

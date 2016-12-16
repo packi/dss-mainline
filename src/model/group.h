@@ -60,6 +60,7 @@ namespace dss {
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, boost::shared_ptr<Zone> _pZone);
     virtual ~Group();
+    boost::shared_ptr<Group> sharedFromThis() { return boost::static_pointer_cast<Group>(shared_from_this()); }
     virtual Set getDevices() const;
 
     /** Returns the id of the group */
