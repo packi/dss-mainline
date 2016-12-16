@@ -313,6 +313,13 @@ namespace dss {
     return (isAppUserGroup(groupID) || isGlobalAppGroup(groupID)) ? 0 : (m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID);
   }
 
+  boost::weak_ptr<Group> Device::tryGetGroup(int groupId) const {
+    if (auto&& zone = m_pApartment->tryGetZone(getGroupZoneID(groupId)).lock()) {
+      return zone->tryGetGroup(groupId);
+    }
+    return boost::weak_ptr<Group>();
+  }
+
   void Device::removeFromPropertyTree() {
     if (m_pPropertyNode != NULL) {
       try {

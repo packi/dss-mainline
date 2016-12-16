@@ -204,8 +204,9 @@ namespace dss {
 
     /** Returns the group with the name \a _name */
     boost::shared_ptr<Group> getGroup(const std::string& _name) const;
-    /** Returns the group with the id \a _id */
-    boost::shared_ptr<Group> getGroup(const int _id) const;
+    boost::weak_ptr<Group> tryGetGroup(const int id) const;
+    /// WARNING: returns nullptr if group does not exist.
+    boost::shared_ptr<Group> getGroup(const int id) const;
 
     /** Adds a group to the zone */
     void addGroup(boost::shared_ptr<Group> _group);

@@ -532,6 +532,8 @@ namespace dss {
     int getJokerGroup() const;
     /** Returns the zoneID that this device group is in. */
     int getGroupZoneID(int groupID) const;
+    /// Returns zone local group or global group
+    boost::weak_ptr<Group> tryGetGroup(int groupId) const;
 
     /** Removes the device from all group.
      * The device will remain in the broadcastgroup though.

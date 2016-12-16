@@ -155,6 +155,7 @@ typedef struct {
 
     /** Returns the Zone by name */
     boost::shared_ptr<Zone> getZone(const std::string& _zoneName);
+    boost::weak_ptr<Zone> tryGetZone(const int id);
     /** Returns the Zone by its id */
     boost::shared_ptr<Zone> getZone(const int _id);
     /** Returns a vector of all zones */
