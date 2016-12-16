@@ -117,7 +117,7 @@ namespace dss {
     void setState(const callOrigin_t _origin, const int _state);
     void setState(const callOrigin_t _origin, const std::string& _state);
 
-    std::string getName() const { return m_name; }
+    const std::string& getName() const { return m_name; }
     void setName(const std::string& _name) { m_name = _name; }
 
     bool getPersistence() const;
