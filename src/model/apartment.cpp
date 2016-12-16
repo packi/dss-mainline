@@ -88,62 +88,62 @@ namespace dss {
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDYellow, _zone));
     grp->setName("yellow");
-    grp->setStandardGroupID(GroupIDYellow);
+    grp->setApplicationType(GroupIDYellow);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDGray, _zone));
     grp->setName("gray");
-    grp->setStandardGroupID(GroupIDGray);
+    grp->setApplicationType(GroupIDGray);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDHeating, _zone));
     grp->setName("heating");
-    grp->setStandardGroupID(GroupIDHeating);
+    grp->setApplicationType(GroupIDHeating);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDCyan, _zone));
     grp->setName("cyan");
-    grp->setStandardGroupID(GroupIDCyan);
+    grp->setApplicationType(GroupIDCyan);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDViolet, _zone));
     grp->setName("magenta");
-    grp->setStandardGroupID(GroupIDViolet);
+    grp->setApplicationType(GroupIDViolet);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDRed, _zone));
     grp->setName("reserved1");
-    grp->setStandardGroupID(0);
+    grp->setApplicationType(0);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDGreen, _zone));
     grp->setName("reserved2");
-    grp->setStandardGroupID(0);
+    grp->setApplicationType(0);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDBlack, _zone));
     grp->setName("black");
-    grp->setStandardGroupID(0);
+    grp->setApplicationType(0);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDCooling, _zone));
     grp->setName("cooling");
-    grp->setStandardGroupID(GroupIDCooling);
+    grp->setApplicationType(GroupIDCooling);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDVentilation, _zone));
     grp->setName("ventilation");
-    grp->setStandardGroupID(GroupIDVentilation);
+    grp->setApplicationType(GroupIDVentilation);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDWindow, _zone));
     grp->setName("window");
-    grp->setStandardGroupID(GroupIDWindow);
+    grp->setApplicationType(GroupIDWindow);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDControlTemperature, _zone));
     grp->setName("controltemperature");
-    grp->setStandardGroupID(GroupIDControlTemperature);
+    grp->setApplicationType(GroupIDControlTemperature);
     grp->setIsValid(true);
     _zone->addGroup(grp);
   } // addDefaultGroupsToZone
@@ -270,7 +270,7 @@ namespace dss {
   boost::shared_ptr<Cluster> Apartment::getEmptyCluster() {
     // find a group slot with unassigned state machine id
     foreach (boost::shared_ptr<Cluster> pCluster, getClusters()) {
-      if (pCluster->getStandardGroupID() == 0) {
+      if (pCluster->getApplicationType() == 0) {
         return pCluster;
       }
     }

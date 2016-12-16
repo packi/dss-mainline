@@ -476,7 +476,7 @@ namespace dss {
     }
   } // unpersistSet
 
-  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int _standardGroupNumber, const std::string& _name) {
+  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int applicationType, const std::string& _name) {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
@@ -491,11 +491,11 @@ namespace dss {
       }
       try {
         Logger::getInstance()->log("Configure user group " + intToString(_groupNumber) +
-            " with standard-id " + intToString(_standardGroupNumber), lsInfo);
+            " with standard-id " + intToString(applicationType), lsInfo);
         boost::shared_ptr<Cluster> pCluster = m_Apartment.getCluster(_groupNumber);
         pCluster->setName(_name);
-        pCluster->setStandardGroupID(_standardGroupNumber);
-        m_Interface.createCluster( _groupNumber, _standardGroupNumber, _name);
+        pCluster->setApplicationType(applicationType);
+        m_Interface.createCluster( _groupNumber, applicationType, _name);
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Datamodel-Error creating user group " + intToString(_groupNumber) +
             ": " + e.what(), lsWarning);
@@ -516,7 +516,7 @@ namespace dss {
             " in zone " + intToString(_zone->getID()), lsInfo);
         pGroup = boost::make_shared<Group>(_groupNumber, _zone);
         _zone->addGroup(pGroup);
-        m_Interface.createGroup(_zone->getID(), _groupNumber, _standardGroupNumber, _name);
+        m_Interface.createGroup(_zone->getID(), _groupNumber, applicationType, _name);
       }
       return;
     }
@@ -534,9 +534,9 @@ namespace dss {
         Logger::getInstance()->log("Creating user global application group " + intToString(_groupNumber), lsInfo);
         pGroup = boost::make_shared<Group>(_groupNumber, _zone);
         pGroup->setName(_name);
-        pGroup->setStandardGroupID(_standardGroupNumber);
+        pGroup->setApplicationType(applicationType);
         _zone->addGroup(pGroup);
-        m_Interface.createGroup(_zone->getID(), _groupNumber, _standardGroupNumber, _name);
+        m_Interface.createGroup(_zone->getID(), _groupNumber, applicationType, _name);
       }
       return;
     }
@@ -639,8 +639,8 @@ namespace dss {
     throw DSSException("Rename group: id " + intToString(_group->getID()) + " too large");
   } // groupSetName
 
-  void StructureManipulator::groupSetStandardID(boost::shared_ptr<Group> _group,
-                                                const int _standardGroupNumber) {
+  void StructureManipulator::groupSetApplicationType(boost::shared_ptr<Group> _group,
+                                                const int applicationType) {
     if (isDefaultGroup(_group->getID()) || isGlobalAppDsGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
@@ -650,25 +650,25 @@ namespace dss {
       if (pCluster->isConfigurationLocked()) {
         throw DSSException("The group is locked and cannot be modified");
       }
-      pCluster->setStandardGroupID(_standardGroupNumber);
-      m_Interface.groupSetStateMachine(pCluster->getZoneID(), pCluster->getID(), _standardGroupNumber);
+      pCluster->setApplicationType(applicationType);
+      m_Interface.groupSetStateMachine(pCluster->getZoneID(), pCluster->getID(), applicationType);
       return;
     }
 
     if (isZoneUserGroup(_group->getID()) || isGlobalAppUserGroup(_group->getID())) {
-      _group->setStandardGroupID(_standardGroupNumber);
-      m_Interface.groupSetStateMachine(_group->getZoneID(), _group->getID(), _standardGroupNumber);
+      _group->setApplicationType(applicationType);
+      m_Interface.groupSetStateMachine(_group->getZoneID(), _group->getID(), applicationType);
       return;
     }
 
     throw DSSException("SetStandardColor group: id " + intToString(_group->getID()) + " too large");
   } // groupSetStandardID
 
-  void StructureManipulator::groupSetConfiguration(boost::shared_ptr<Group> _group, const int _groupConfiguration) {
+  void StructureManipulator::groupSetApplicationConfiguration(boost::shared_ptr<Group> _group, const int applicationConfiguration) {
 
     // we allow to set the configuration in all groups for now
     if (isValidGroup(_group->getID())) {
-      _group->setConfiguration(_groupConfiguration);
+      _group->setApplicationConfiguration(applicationConfiguration);
       // TODO: add configuration after API change
       return;
     }
@@ -801,7 +801,7 @@ namespace dss {
         continue;
       }
       boost::shared_ptr<Group> itGroup = pZone->getGroup(g);
-      if (itGroup->getStandardGroupID() == newGroup->getID()) {
+      if (itGroup->getApplicationType() == newGroup->getID()) {
         continue;
       }
       deviceRemoveFromGroup(device, itGroup);
@@ -931,27 +931,27 @@ namespace dss {
     throw DSSException("Rename cluster: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetName
 
-  void StructureManipulator::clusterSetStandardID(boost::shared_ptr<Cluster> _cluster,
-                                                  const int _standardGroupNumber) {
+  void StructureManipulator::clusterSetApplicationType(boost::shared_ptr<Cluster> _cluster,
+                                                  const int applicationType) {
     if (isAppUserGroup(_cluster->getID())) {
       if (_cluster->isConfigurationLocked()) {
         throw DSSException("The group is locked and cannot be modified");
       }
-      _cluster->setStandardGroupID(_standardGroupNumber);
-      m_Interface.clusterSetStateMachine(_cluster->getID(), _standardGroupNumber);
+      _cluster->setApplicationType(applicationType);
+      m_Interface.clusterSetStateMachine(_cluster->getID(), applicationType);
       return;
     }
 
     throw DSSException("SetStandardColor cluster: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetStandardID
 
-  void StructureManipulator::clusterSetConfiguration(boost::shared_ptr<Cluster> _cluster,
-                                                  const int _clusterConfiguration) {
+  void StructureManipulator::clusterSetApplicationConfiguration(boost::shared_ptr<Cluster> _cluster,
+                                                  const int applicationConfiguration) {
     if (isAppUserGroup(_cluster->getID())) {
       if (_cluster->isConfigurationLocked()) {
         throw DSSException("The group is locked and cannot be modified");
       }
-      _cluster->setConfiguration(_clusterConfiguration);
+      _cluster->setApplicationConfiguration(applicationConfiguration);
       // TODO: add configuration after API change
       return;
     }

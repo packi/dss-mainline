@@ -42,8 +42,8 @@ namespace dss {
   : AddressableModelItem(&_pZone->getApartment()),
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
-    m_StandardGroupID(0),
-    m_Configuration(0),
+    m_ApplicationType(0),
+    m_ApplicationConfiguration(0),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
@@ -54,13 +54,13 @@ namespace dss {
 
   bool Group::isValid() const {
     if (isDefaultGroup(m_GroupID) || isAppUserGroup(m_GroupID)) {
-      return m_IsValid && (m_StandardGroupID > 0);
+      return m_IsValid && (m_ApplicationType > 0);
     }
     return m_IsValid;
   } // isValid
 
-  void Group::setStandardGroupID(const int _standardGroupNumber) {
-    m_StandardGroupID = _standardGroupNumber;
+  void Group::setApplicationType(const int applicationType) {
+    m_ApplicationType = applicationType;
     if (getZoneID() == 0) {
       return;
     }
@@ -86,8 +86,8 @@ namespace dss {
     }
   } // getID
 
-  void Group::setConfiguration(const int _configuration) {
-    m_Configuration = _configuration;
+  void Group::setApplicationConfiguration(const int applicationConfiguration) {
+    m_ApplicationConfiguration = applicationConfiguration;
   }
 
   Set Group::getDevices() const {
@@ -240,7 +240,7 @@ namespace dss {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(m_GroupID));
         m_pPropertyNode->createProperty("group")->setIntegerValue(m_GroupID);
         m_pPropertyNode->createProperty("color")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getStandardGroupID, &Group::setStandardGroupID));
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationType, &Group::setApplicationType));
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Group, std::string>(*this, &Group::getName, &Group::setName));
         m_pPropertyNode->createProperty("lastCalledScene")
@@ -248,7 +248,7 @@ namespace dss {
         m_pPropertyNode->createProperty("connectedDevices")
           ->linkToProxy(PropertyProxyReference<int>(m_connectedDevices, false));
         m_pPropertyNode->createProperty("configuration")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getConfiguration, &Group::setConfiguration));          
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationConfiguration, &Group::setApplicationConfiguration));          
       }
     }
   } // publishToPropertyTree
@@ -318,8 +318,8 @@ namespace dss {
     boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone));
 
     pGroup->setName(_groupSpec.Name);
-    pGroup->setStandardGroupID(_groupSpec.stateMachineID);
-    pGroup->setConfiguration(_groupSpec.stateMachineConfig);
+    pGroup->setApplicationType(_groupSpec.stateMachineID);
+    pGroup->setApplicationConfiguration(_groupSpec.stateMachineConfig);
 
     return pGroup;
   }

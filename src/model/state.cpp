@@ -120,8 +120,8 @@ namespace dss {
 
   std::string State::makeGroupName(const Group& group) {
     auto&& logicalName = [&]() -> std::string {
-      auto&& standardGroupId = group.getStandardGroupID();
-      switch (standardGroupId) {
+      auto&& stateMachineId = group.getApplicationType();
+      switch (stateMachineId) {
         case GroupIDYellow:
           return "light"; // ATTENTION: This is inconsistent with group.getName() == "yellow"
           break;

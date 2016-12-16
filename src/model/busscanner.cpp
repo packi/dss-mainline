@@ -300,10 +300,10 @@ namespace dss {
        * the dSM is the master source for this data. The dSS will take the data
        * from the first dSM that has a non-zero configuration.
        */
-      if ((pCluster->getStandardGroupID() == 0) ||
-          ((pCluster->getStandardGroupID() > 0) && !pCluster->isReadFromDsm())) {
-        pCluster->setStandardGroupID(cluster.stateMachineID);
-        pCluster->setConfiguration(cluster.stateMachineConfig);
+      if ((pCluster->getApplicationType() == 0) ||
+          ((pCluster->getApplicationType() > 0) && !pCluster->isReadFromDsm())) {
+        pCluster->setApplicationType(cluster.stateMachineID);
+        pCluster->setApplicationConfiguration(cluster.stateMachineConfig);
         pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
         pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
         pCluster->setConfigurationLocked(cluster.configurationLocked);
@@ -780,8 +780,8 @@ namespace dss {
           _zone->addGroup(groupOnZone);
         } else {
           if ( (groupOnZone->getName() != group.Name) ||
-               (groupOnZone->getStandardGroupID() != group.stateMachineID) ||
-               (groupOnZone->getConfiguration() != (int)group.stateMachineConfig)) {
+               (groupOnZone->getApplicationType() != group.stateMachineID) ||
+               (groupOnZone->getApplicationConfiguration() != (int)group.stateMachineConfig)) {
             groupOnZone->setIsSynchronized(false);
           }
         }

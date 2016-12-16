@@ -874,7 +874,7 @@ namespace dss {
               } else if (strcmp(_name, "associatedSet") == 0) {
                 m_tempCluster->setAssociatedSet(m_chardata);
               } else if (strcmp(_name, "color") == 0) {
-                m_tempCluster->setStandardGroupID(strToUIntDef(m_chardata, 0));
+                m_tempCluster->setApplicationType(strToUIntDef(m_chardata, 0));
               } else if (strcmp(_name, "location") == 0) {
                 CardinalDirection_t location = cd_none;
                 if (parseCardinalDirection(m_chardata, &location)) {
@@ -902,7 +902,7 @@ namespace dss {
                 } catch (std::invalid_argument&) {}
                 m_tempCluster->setAutomatic(isAutomatic);
               } else if (strcmp(_name, "configuration") == 0) {
-                m_tempCluster->setConfiguration(strToUIntDef(m_chardata, 0));
+                m_tempCluster->setApplicationConfiguration(strToUIntDef(m_chardata, 0));
               }
             }
           }
@@ -923,9 +923,9 @@ namespace dss {
           } else if (strcmp(_name, "associatedSet") == 0) {
             m_tempGroup->setAssociatedSet(m_chardata);
           } else if (strcmp(_name, "color") == 0) {
-            m_tempGroup->setStandardGroupID(strToUIntDef(m_chardata, 0));
+            m_tempGroup->setApplicationType(strToUIntDef(m_chardata, 0));
           } else if (strcmp(_name, "configuration") == 0) {
-            m_tempGroup->setConfiguration(strToUIntDef(m_chardata, 0));
+            m_tempGroup->setApplicationConfiguration(strToUIntDef(m_chardata, 0));
           }
         } else if ((m_state == ps_scene) && (strcmp(_name, "scenes") == 0)) {
           m_state = ps_group;
@@ -1100,8 +1100,8 @@ namespace dss {
       if (!_pGroup->getName().empty()) {
         addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
       }
-      addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getStandardGroupID()));
-      addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getConfiguration()));
+      addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getApplicationType()));
+      addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getApplicationConfiguration()));
       if (!_pGroup->getAssociatedSet().empty()) {
         addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
       }
@@ -1116,8 +1116,8 @@ namespace dss {
           if (!_pGroup->getName().empty()) {
             addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
           }
-          addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getStandardGroupID()));
-          addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getConfiguration()));
+          addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getApplicationType()));
+          addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getApplicationConfiguration()));
           if (!_pGroup->getAssociatedSet().empty()) {
             addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
           }
@@ -1149,13 +1149,13 @@ namespace dss {
     if (!_pCluster->getAssociatedSet().empty()) {
       addElementSimple(_ofs, _indent + 1, "associatedSet", _pCluster->getAssociatedSet());
     }
-    addElementSimple(_ofs, _indent + 1, "color", intToString(_pCluster->getStandardGroupID()));
+    addElementSimple(_ofs, _indent + 1, "color", intToString(_pCluster->getApplicationType()));
     addElementSimple(_ofs, _indent + 1, "location", toString(_pCluster->getLocation()));
     addElementSimple(_ofs, _indent + 1, "protectionClass", intToString(static_cast<int>(_pCluster->getProtectionClass())));
     addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));
     addElementSimple(_ofs, _indent + 1, "configurationLocked", (_pCluster->isConfigurationLocked() ? "1" : "0"));
     addElementSimple(_ofs, _indent + 1, "automatic", (_pCluster->isAutomatic() ? "1" : "0"));
-    addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pCluster->getConfiguration()));
+    addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pCluster->getApplicationConfiguration()));
     _ofs << doIndent(_indent + 1) << "<lockedScenes>" << std::endl;
     const std::vector<int> lockedScenes = _pCluster->getLockedScenes();
     for (unsigned int iScene = 0; iScene < lockedScenes.size(); iScene++) {

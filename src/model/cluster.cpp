@@ -96,13 +96,13 @@ namespace dss {
         return false;
       }
     }
-    return ((getStandardGroupID() == cluster.stateMachineID) &&
+    return ((getApplicationType() == cluster.stateMachineID) &&
             (getName() == cluster.Name) &&
             (m_Location == cluster.location) &&
             (m_ProtectionClass == cluster.protectionClass) &&
             (m_Floor == cluster.floor) &&
             (m_ConfigurationLocked == cluster.configurationLocked) &&
-            (getConfiguration() == (int)cluster.stateMachineConfig));
+            (getApplicationConfiguration() == (int)cluster.stateMachineConfig));
   } // equalConfig
 
   void Cluster::reset() {
@@ -112,9 +112,9 @@ namespace dss {
     m_LockedScenes.clear();
     setConfigurationLocked(false);
     setAutomatic(false);
-    setStandardGroupID(0);
+    setApplicationType(0);
     setName("");
-    setConfiguration(0);
+    setApplicationConfiguration(0);
   } // reset
 
   void Cluster::removeDevice(Device& _device)

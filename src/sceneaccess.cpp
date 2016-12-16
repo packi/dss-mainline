@@ -85,7 +85,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
     if (windActive || fireActive) {
       const Group* pGroup = dynamic_cast<const Group*>(_pTarget);
       if (pGroup != NULL) {
-        if (DEVICE_CLASS_GR == pGroup->getStandardGroupID()) {
+        if (DEVICE_CLASS_GR == pGroup->getApplicationType()) {
           throw SceneAccessException(protectionMessage);
         }
       }
@@ -109,7 +109,7 @@ bool SceneAccess::checkAccess(const AddressableModelItem *_pTarget, const SceneA
       } catch (ItemNotFoundException& e) {
         continue;
       }
-      if (gr && gr->isValid() && gr->getStandardGroupID() == DEVICE_CLASS_GR) {
+      if (gr && gr->isValid() && gr->getApplicationType() == DEVICE_CLASS_GR) {
         boost::shared_ptr<State> wind;
         try {
           wind = apartment.getNonScriptState("wind.group" + intToString(i));
