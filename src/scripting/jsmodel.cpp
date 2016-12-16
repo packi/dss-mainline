@@ -60,6 +60,8 @@
 #include "src/web/webrequests.h"
 #include "src/protobufjson.h"
 #include "src/stringconverter.h"
+#include "src/vdc-connection.h"
+
 
 namespace dss {
   struct meter_wrapper {
@@ -3160,7 +3162,64 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  } // global_getClusters
+  } // dsmeter_setPowerStateConfig
+
+  JSBool dsmeter_vdc_callMethod(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+        ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "ext of wrong type");
+      return JS_FALSE;
+    }
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      if(argc == 2) {
+        std::string method;
+        std::string params;
+        try {
+          method = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          params = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+        } catch (ScriptException& ex) {
+          JS_ReportError(cx, "Convert arguments: %s", ex.what());
+          return JS_FALSE;
+        }
+        jsrefcount ref = JS_SuspendRequest(cx);
+        try {
+          vdcapi::PropertyElement parsedParamsElement;
+          const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+          if (!params.empty()) {
+            parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+            paramsElement = &parsedParamsElement;
+          }
+
+          boost::shared_ptr<DSMeter> pMeter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pMeter;
+          vdcapi::Message res = VdcConnection::genericRequest(pMeter->getDSID(), pMeter->getDSID(), method, paramsElement->elements());
+          JSONWriter json(JSONWriter::jsonNoneResult);
+          ProtobufToJSon::protoPropertyToJson(res, json);
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, json.successJSON().c_str())));
+          return JS_TRUE;
+        } catch(const BusApiError& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
+        } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "General failure: %s", ex.what());
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dsmeter_vdc_callMethod
 
   JSFunctionSpec dsmeter_methods[] = {
     JS_FS("getPowerConsumption", dsmeter_getPowerConsumption, 0, 0),
@@ -3171,6 +3230,7 @@ namespace dss {
     JS_FS("setPowerStateConfig", dsmeter_setPowerStateConfig, 0, 0),
     JS_FS("setVdcProperty", dev_set_vdc_property, 2, 0),
     JS_FS("getVdcProperty", dev_get_vdc_property, 1, 0),
+    JS_FS("callVdcMethod", dsmeter_vdc_callMethod, 1, 0),
     JS_FS_END
   };
 

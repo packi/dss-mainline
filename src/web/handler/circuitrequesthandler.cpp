@@ -146,6 +146,12 @@ namespace dss {
         json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
+      } else if(_request.getMethod() == "invokeMethod") {
+        std::string method;
+        _request.getParameter("method", method);
+        vdcapi::Message res = VdcConnection::genericRequest(dsMeter->getDSID(), dsMeter->getDSID(), method, paramsElement->elements());
+        ProtobufToJSon::protoPropertyToJson(res, json);
+        return json.successJSON();
       } else {
         throw std::runtime_error("Unhandled function");
       }
