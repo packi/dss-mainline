@@ -39,6 +39,7 @@ namespace dss {
   class Group : public DeviceContainer,
                 public AddressableModelItem {
   private:
+    __DECL_LOG_CHANNEL__;
     int m_ZoneID;
     int m_GroupID;
     ApplicationType m_ApplicationType;

@@ -38,6 +38,8 @@ namespace dss {
 
     //============================================= Group
 
+__DEFINE_LOG_CHANNEL__(Group, lsNotice);
+
   Group::Group(const int _id, boost::shared_ptr<Zone> _pZone)
   : AddressableModelItem(&_pZone->getApartment()),
     m_ZoneID(_pZone->getID()),
