@@ -102,7 +102,7 @@ namespace dss {
   public:
     /** Constructs a state. */
     State(const std::string& _name);
-    State(eStateType _type, const std::string& _name, const std::string& _identifier);
+    State(eStateType _type, const std::string& _name, const std::string& _identifier = std::string());
     State(boost::shared_ptr<Device> _device, int _inputIndex);
     State(boost::shared_ptr<Device> _device, const std::string& stateName);
     static std::string makeGroupName(const Group& group);
