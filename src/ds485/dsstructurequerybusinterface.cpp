@@ -206,8 +206,8 @@ namespace dss {
       uint8_t nameBuf[NAME_LEN];
 
       int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, _dsMeterID, _zoneID, iGroup,
-          &result.GroupID, &result.stateMachineID, &result.NumberOfDevices, nameBuf
-          , NULL, NULL, &result.stateMachineConfig
+          &result.GroupID, &result.applicationType, &result.NumberOfDevices, nameBuf
+          , NULL, NULL, &result.applicationConfiguration
           );
       DSBusInterface::checkResultCode(ret);
 
@@ -235,8 +235,8 @@ namespace dss {
       uint8_t canHaveStateMachine = 0;
 
       int ret = ClusterInfo_by_id(m_DSMApiHandle, _dsMeterID, iCluster,
-          &result.stateMachineID, &canHaveStateMachine, &result.NumberOfDevices, nameBuf,
-          NULL, NULL, &configurationLock, sceneLock, &result.location, &result.floor, &result.protectionClass, &result.stateMachineConfig);
+          &result.applicationType, &canHaveStateMachine, &result.NumberOfDevices, nameBuf,
+          NULL, NULL, &configurationLock, sceneLock, &result.location, &result.floor, &result.protectionClass, &result.applicationConfiguration);
       DSBusInterface::checkResultCode(ret);
 
       result.GroupID = iCluster;

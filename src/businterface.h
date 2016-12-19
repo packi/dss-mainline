@@ -67,15 +67,15 @@ namespace dss {
 
   typedef struct {
     uint8_t GroupID;
-    uint8_t stateMachineID;
+    uint8_t applicationType;
     uint16_t NumberOfDevices;
     std::string Name;
-    uint32_t stateMachineConfig;
+    uint32_t applicationConfiguration;
   } GroupSpec_t;
 
   typedef struct {
     uint8_t GroupID;
-    uint8_t stateMachineID;
+    uint8_t applicationType;
     bool canHaveStateMachine;
     uint16_t NumberOfDevices;
     std::string Name;
@@ -84,7 +84,7 @@ namespace dss {
     uint16_t floor;
     bool configurationLocked;
     std::vector<int> lockedScenes;
-    uint32_t stateMachineConfig;
+    uint32_t applicationConfiguration;
   } ClusterSpec_t;
 
   typedef struct {
@@ -366,15 +366,15 @@ namespace dss {
     virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name) = 0;
 
     /** Create and manage user groups */
-    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID, uint32_t _stateMachineConfig, const std::string& _name) = 0;
+    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t applicationType, uint32_t applicationConfig, const std::string& _name) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
-    virtual void groupSetStateMachine(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID, uint32_t _stateMachineConfig) = 0;
+    virtual void groupSetApplication(uint16_t _zoneID, uint8_t _groupID, uint8_t applicationType, uint32_t applicationConfig) = 0;
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
 
-    virtual void createCluster(uint8_t _groupID, uint8_t _stateMachineID, uint32_t _stateMachineConfig, const std::string& _name) = 0;
+    virtual void createCluster(uint8_t _groupID, uint8_t applicationType, uint32_t applicationConfig, const std::string& _name) = 0;
     virtual void removeCluster(uint8_t _clusterID) = 0;
     virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) = 0;
-    virtual void clusterSetStateMachine(uint8_t _clusterID, uint8_t _stateMachineID, uint32_t _stateMachineConfig) = 0;
+    virtual void clusterSetApplication(uint8_t _clusterID, uint8_t applicationType, uint32_t applicationConfig) = 0;
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) = 0;
     virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) = 0;
     virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) = 0;

@@ -49,20 +49,20 @@ public:
   }
   virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name) {
   }
-  virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID, uint32_t _stateMachineConfig, const std::string& _name) {
+  virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t applicationType, uint32_t applicationConfig, const std::string& _name) {
   }
   virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) {
   }
   virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) {
   }
-  virtual void createCluster(uint8_t _groupID, uint8_t _stateMachineID, uint32_t _stateMachineConfig, const std::string& _name) {
+  virtual void createCluster(uint8_t _groupID, uint8_t applicationType, uint32_t applicationConfig, const std::string& _name) {
   }
   virtual void removeCluster(uint8_t _clusterID) {
   }
-  virtual void groupSetStateMachine(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID, uint32_t _stateMachineConfig) {
+  virtual void groupSetApplication(uint16_t _zoneID, uint8_t _groupID, uint8_t applicationType, uint32_t applicationConfig) {
   }
   virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) {}
-  virtual void clusterSetStateMachine(uint8_t _clusterID, uint8_t _stateMachineID, uint32_t _stateMachineConfig) {}
+  virtual void clusterSetApplication(uint8_t _clusterID, uint8_t applicationType, uint32_t applicationConfig) {}
   virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) {}
   virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) {}
   virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) {}

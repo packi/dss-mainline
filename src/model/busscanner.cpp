@@ -269,10 +269,10 @@ namespace dss {
 
       // in case this DSM does not provide group configuration ignore it.
       if (_dsMeter->getApiVersion() < 0x303) {
-        cluster.stateMachineConfig = 0;
+        cluster.applicationConfiguration = 0;
       }
 
-      if (cluster.stateMachineID > 0) {
+      if (cluster.applicationType > 0) {
         log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
             " and devices: " + intToString(cluster.NumberOfDevices));
       }
@@ -302,8 +302,8 @@ namespace dss {
        */
       if ((pCluster->getApplicationType() == 0) ||
           ((pCluster->getApplicationType() > 0) && !pCluster->isReadFromDsm())) {
-        pCluster->setApplicationType(cluster.stateMachineID);
-        pCluster->setApplicationConfiguration(cluster.stateMachineConfig);
+        pCluster->setApplicationType(cluster.applicationType);
+        pCluster->setApplicationConfiguration(cluster.applicationConfiguration);
         pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
         pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
         pCluster->setConfigurationLocked(cluster.configurationLocked);
@@ -737,7 +737,7 @@ namespace dss {
 
       // in case this DSM does not provide group configuration it is invalid and should be ignored
       if (_dsMeter->getApiVersion() < 0x303) {
-        group.stateMachineConfig = 0;
+        group.applicationConfiguration = 0;
       }
 
       log("scanDSMeter:    Found group with id: " + intToString(group.GroupID) +
@@ -780,8 +780,8 @@ namespace dss {
           _zone->addGroup(groupOnZone);
         } else {
           if ( (groupOnZone->getName() != group.Name) ||
-               (groupOnZone->getApplicationType() != group.stateMachineID) ||
-               (groupOnZone->getApplicationConfiguration() != (int)group.stateMachineConfig)) {
+               (groupOnZone->getApplicationType() != group.applicationType) ||
+               (groupOnZone->getApplicationConfiguration() != (int)group.applicationConfiguration)) {
             groupOnZone->setIsSynchronized(false);
           }
         }

@@ -656,7 +656,7 @@ namespace dss {
     if (isValidGroup(_group->getID())){
       _group->setApplicationType(applicationType);
       _group->setApplicationConfiguration(applicationConfiguration);
-      m_Interface.groupSetStateMachine(_group->getZoneID(), _group->getID(), applicationType, applicationConfiguration);
+      m_Interface.groupSetApplication(_group->getZoneID(), _group->getID(), applicationType, applicationConfiguration);
       return;
     }
 
@@ -920,7 +920,7 @@ namespace dss {
       }
       _cluster->setApplicationType(applicationType);
       _cluster->setApplicationConfiguration(applicationConfiguration);
-      m_Interface.clusterSetStateMachine(_cluster->getID(), applicationType, applicationConfiguration);
+      m_Interface.clusterSetApplication(_cluster->getID(), applicationType, applicationConfiguration);
       return;
     }
 
