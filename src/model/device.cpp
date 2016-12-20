@@ -1350,6 +1350,11 @@ namespace dss {
         base->addChild(m_pAliasNode);
       }
     }
+    // binary input status bits depend on zoneId.
+    // TODO(someday): refactor to some kind of observer pattern?
+    foreach (auto&& binaryInput, m_binaryInputs) {
+      binaryInput->updateStatusBitHandle();
+    }
   } // setZoneID
 
   int Device::getLastKnownZoneID() const {
