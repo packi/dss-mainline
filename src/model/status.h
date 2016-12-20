@@ -36,14 +36,14 @@ public:
   Group& getGroup() { return m_group; }
 
   StatusBit* tryGetBit(StatusBitType statusType);
-  void insertBit(StatusBitType statusType, boost::shared_ptr<StatusBit> state);
+  void insertBit(StatusBitType statusType, std::unique_ptr<StatusBit> state);
   unsigned int getValue() const { return m_valueBitset.to_ulong(); }
 
 private:
   __DECL_LOG_CHANNEL__;
   Group& m_group;
   std::bitset<STATUS_BIT_TYPE_MAX + 1> m_valueBitset;
-  std::map<StatusBitType, boost::shared_ptr<StatusBit>> m_bits;
+  std::map<StatusBitType, std::unique_ptr<StatusBit>> m_bits;
 
   friend class StatusBit;
   void setBitValue(StatusBitType type, bool value);

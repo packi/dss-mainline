@@ -43,8 +43,8 @@ StatusBit* Status::tryGetBit(StatusBitType statusType) {
   return DS_NULLPTR;
 }
 
-void Status::insertBit(StatusBitType statusType, boost::shared_ptr<StatusBit> state) {
-  m_bits[statusType] = state;
+void Status::insertBit(StatusBitType statusType, std::unique_ptr<StatusBit> state) {
+  m_bits[statusType] = std::move(state);
 }
 
 void Status::setBitValue(StatusBitType type, bool bitValue) {
