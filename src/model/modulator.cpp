@@ -213,7 +213,7 @@ namespace dss {
   } // addDevice
 
   void DSMeter::removeDevice(const DeviceReference& _device) {
-    DeviceIterator pos = std::find(m_ConnectedDevices.begin(), m_ConnectedDevices.end(), _device);
+    auto pos = std::find(m_ConnectedDevices.begin(), m_ConnectedDevices.end(), _device);
     if(pos != m_ConnectedDevices.end()) {
       m_ConnectedDevices.erase(pos);
     } else {

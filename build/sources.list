@@ -111,7 +111,6 @@ libdsscore_a_SOURCES =  \
 	../src/model/modelmaintenance.h \
 	../src/model/modelpersistence.cpp \
 	../src/model/modelpersistence.h \
-	../src/model/modeltypes.h \
 	../src/model/modulator.cpp \
 	../src/model/modulator.h \
 	../src/model/nonaddressablemodelitem.cpp \
