@@ -874,7 +874,7 @@ namespace dss {
               } else if (strcmp(_name, "associatedSet") == 0) {
                 m_tempCluster->setAssociatedSet(m_chardata);
               } else if (strcmp(_name, "color") == 0) {
-                m_tempCluster->setApplicationType(strToUIntDef(m_chardata, 0));
+                m_tempCluster->setApplicationType(static_cast<ApplicationType>(strToUIntDef(m_chardata, 0)));
               } else if (strcmp(_name, "location") == 0) {
                 CardinalDirection_t location = cd_none;
                 if (parseCardinalDirection(m_chardata, &location)) {
@@ -923,7 +923,7 @@ namespace dss {
           } else if (strcmp(_name, "associatedSet") == 0) {
             m_tempGroup->setAssociatedSet(m_chardata);
           } else if (strcmp(_name, "color") == 0) {
-            m_tempGroup->setApplicationType(strToUIntDef(m_chardata, 0));
+            m_tempGroup->setApplicationType(static_cast<ApplicationType>(strToUIntDef(m_chardata, 0)));
           } else if (strcmp(_name, "configuration") == 0) {
             m_tempGroup->setApplicationConfiguration(strToUIntDef(m_chardata, 0));
           }
@@ -1100,7 +1100,7 @@ namespace dss {
       if (!_pGroup->getName().empty()) {
         addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
       }
-      addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getApplicationType()));
+      addElementSimple(_ofs, _indent + 1, "color", intToString(static_cast<int>(_pGroup->getApplicationType())));
       addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getApplicationConfiguration()));
       if (!_pGroup->getAssociatedSet().empty()) {
         addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
@@ -1116,7 +1116,7 @@ namespace dss {
           if (!_pGroup->getName().empty()) {
             addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
           }
-          addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getApplicationType()));
+          addElementSimple(_ofs, _indent + 1, "color", intToString(static_cast<int>(_pGroup->getApplicationType())));
           addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getApplicationConfiguration()));
           if (!_pGroup->getAssociatedSet().empty()) {
             addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
@@ -1149,7 +1149,7 @@ namespace dss {
     if (!_pCluster->getAssociatedSet().empty()) {
       addElementSimple(_ofs, _indent + 1, "associatedSet", _pCluster->getAssociatedSet());
     }
-    addElementSimple(_ofs, _indent + 1, "color", intToString(_pCluster->getApplicationType()));
+    addElementSimple(_ofs, _indent + 1, "color", intToString(static_cast<int>(_pCluster->getApplicationType())));
     addElementSimple(_ofs, _indent + 1, "location", toString(_pCluster->getLocation()));
     addElementSimple(_ofs, _indent + 1, "protectionClass", intToString(static_cast<int>(_pCluster->getProtectionClass())));
     addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));

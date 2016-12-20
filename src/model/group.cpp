@@ -42,7 +42,7 @@ namespace dss {
   : AddressableModelItem(&_pZone->getApartment()),
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
-    m_ApplicationType(0),
+    m_ApplicationType(ApplicationType::None),
     m_ApplicationConfiguration(0),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
@@ -56,12 +56,12 @@ namespace dss {
 
   bool Group::isValid() const {
     if (isDefaultGroup(m_GroupID) || isAppUserGroup(m_GroupID)) {
-      return m_IsValid && (m_ApplicationType > 0);
+      return m_IsValid && (m_ApplicationType != ApplicationType::None);
     }
     return m_IsValid;
   } // isValid
 
-  void Group::setApplicationType(const int applicationType) {
+  void Group::setApplicationType(ApplicationType applicationType) {
     m_ApplicationType = applicationType;
     if (getZoneID() == 0) {
       return;
@@ -242,7 +242,7 @@ namespace dss {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(m_GroupID));
         m_pPropertyNode->createProperty("group")->setIntegerValue(m_GroupID);
         m_pPropertyNode->createProperty("color")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationType, &Group::setApplicationType));
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationTypeInt, &Group::setApplicationTypeInt));
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Group, std::string>(*this, &Group::getName, &Group::setName));
         m_pPropertyNode->createProperty("lastCalledScene")

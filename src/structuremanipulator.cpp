@@ -436,7 +436,7 @@ namespace dss {
       pGroup = boost::shared_ptr<Group>(
         new Group(_groupNumber, m_Apartment.getZone(0)));
       m_Apartment.getZone(0)->addGroup(pGroup);
-      m_Interface.createGroup(0, _groupNumber, 0, 0, "");
+      m_Interface.createGroup(0, _groupNumber, ApplicationType::None, 0, "");
       pGroup->setAssociatedSet(_originalSet);
     }
     Logger::getInstance()->log("creating new group " + intToString(_groupNumber));
@@ -474,7 +474,7 @@ namespace dss {
     }
   } // unpersistSet
 
-  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int applicationType,
+  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, ApplicationType applicationType,
       const int applicationConfiguration, const std::string& _name) {
     if (m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
@@ -490,7 +490,7 @@ namespace dss {
       }
       try {
         Logger::getInstance()->log("Configure user group " + intToString(_groupNumber) +
-            " with standard-id " + intToString(applicationType), lsInfo);
+            " with standard-id " + applicationTypeToString(applicationType), lsInfo);
         boost::shared_ptr<Cluster> pCluster = m_Apartment.getCluster(_groupNumber);
         pCluster->setName(_name);
         pCluster->setApplicationType(applicationType);
@@ -639,7 +639,7 @@ namespace dss {
   } // groupSetName
 
   void StructureManipulator::groupSetApplication(boost::shared_ptr<Group> _group,
-                                                const int applicationType, const int applicationConfiguration) {
+      ApplicationType applicationType, const int applicationConfiguration) {
     if (isDefaultGroup(_group->getID()) || isGlobalAppDsGroup(_group->getID())) {
       // for default groups we allow to change the configuration, but we do not allow changing of application type
       if (_group->getApplicationType() != applicationType) {
@@ -788,7 +788,7 @@ namespace dss {
         continue;
       }
       boost::shared_ptr<Group> itGroup = pZone->getGroup(g);
-      if (itGroup->getApplicationType() == newGroup->getID()) {
+      if (static_cast<int>(itGroup->getApplicationType()) == newGroup->getID()) {
         continue;
       }
       deviceRemoveFromGroup(device, itGroup);
@@ -913,7 +913,7 @@ namespace dss {
   } // clusterSetName
 
   void StructureManipulator::clusterSetApplication(boost::shared_ptr<Cluster> _cluster,
-                                                  const int applicationType, const int applicationConfiguration) {
+      ApplicationType applicationType, const int applicationConfiguration) {
     if (isAppUserGroup(_cluster->getID())) {
       if (_cluster->isConfigurationLocked()) {
         throw DSSException("The group is locked and cannot be modified");

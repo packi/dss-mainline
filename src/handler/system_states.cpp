@@ -294,7 +294,7 @@ void SystemState::startup() {
 
     foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
-        if (group->getApplicationType() == GroupIDGray) {
+        if (group->getApplicationType() == ApplicationType::Blinds) {
           registerState(formatAppartmentStateName(StateName::Wind, group->getID()), true);
         }
         continue;
@@ -353,7 +353,7 @@ void SystemState::startup() {
 
   // Restore states if they have been registered before, that reads: if a persistent data file exists
   foreach (boost::shared_ptr<Cluster> cluster, m_apartment.getClusters()) {
-    if (cluster->getApplicationType() == GroupIDGray) {
+    if (cluster->getApplicationType() == ApplicationType::Blinds) {
       loadPersistentState(StateType_Service, formatAppartmentStateName(StateName::Wind, cluster->getID()));
     }
     loadPersistentState(StateType_Group, formatAppartmentStateName(StateName::OperationLock, cluster->getID()));

@@ -120,12 +120,12 @@ namespace dss {
 
   std::string State::makeGroupName(const Group& group) {
     auto&& logicalName = [&]() -> std::string {
-      auto&& stateMachineId = group.getApplicationType();
-      switch (stateMachineId) {
-        case GroupIDYellow:
+      auto&& applicationType = group.getApplicationType();
+      switch (applicationType) {
+        case ApplicationType::Lights:
           return "light"; // ATTENTION: This is inconsistent with group.getName() == "yellow"
           break;
-        case GroupIDHeating:
+        case ApplicationType::Heating:
           return "heating";
           break;
         default:

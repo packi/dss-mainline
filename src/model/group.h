@@ -43,7 +43,7 @@ namespace dss {
   private:
     int m_ZoneID;
     int m_GroupID;
-    int m_ApplicationType;
+    ApplicationType m_ApplicationType;
     int m_ApplicationConfiguration;
     int m_LastCalledScene;
     int m_LastButOneCalledScene;
@@ -54,6 +54,10 @@ namespace dss {
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
     int m_connectedDevices;
+
+    // getter and setter for property proxy
+    int getApplicationTypeInt() const { return static_cast<int>(getApplicationType()); }
+    void setApplicationTypeInt(int applicationType) { setApplicationType(static_cast<ApplicationType>(applicationType)); }
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, boost::shared_ptr<Zone> _pZone);
@@ -65,8 +69,8 @@ namespace dss {
     int getZoneID() const { return m_ZoneID; }
 
     /** Returns the type of the application that this group is implementing */
-    int getApplicationType() const { return m_ApplicationType; }
-    void setApplicationType(const int applicationType);
+    ApplicationType getApplicationType() const { return m_ApplicationType; }
+    void setApplicationType(ApplicationType applicationType);
 
     /** Returns the configuration of this group */
     int getApplicationConfiguration() const { return m_ApplicationConfiguration; }

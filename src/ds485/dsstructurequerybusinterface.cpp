@@ -204,13 +204,15 @@ namespace dss {
     for (int iGroup = 0; iGroup < numGroups; iGroup++) {
       GroupSpec_t result;
       uint8_t nameBuf[NAME_LEN];
+      uint8_t applicationType = 0;
 
       int ret = ZoneGroupInfo_by_index(m_DSMApiHandle, _dsMeterID, _zoneID, iGroup,
-          &result.GroupID, &result.applicationType, &result.NumberOfDevices, nameBuf
+          &result.GroupID, &applicationType, &result.NumberOfDevices, nameBuf
           , NULL, NULL, &result.applicationConfiguration
           );
       DSBusInterface::checkResultCode(ret);
 
+      result.applicationType = static_cast<ApplicationType>(applicationType);
       char nameStr[NAME_LEN];
       memcpy(nameStr, nameBuf, NAME_LEN);
       result.Name = nameStr;
@@ -233,13 +235,15 @@ namespace dss {
       uint8_t sceneLock[16];
       uint8_t configurationLock = 0;
       uint8_t canHaveStateMachine = 0;
+      uint8_t applicationType = 0;
 
       int ret = ClusterInfo_by_id(m_DSMApiHandle, _dsMeterID, iCluster,
-          &result.applicationType, &canHaveStateMachine, &result.NumberOfDevices, nameBuf,
+          &applicationType, &canHaveStateMachine, &result.NumberOfDevices, nameBuf,
           NULL, NULL, &configurationLock, sceneLock, &result.location, &result.floor, &result.protectionClass, &result.applicationConfiguration);
       DSBusInterface::checkResultCode(ret);
 
       result.GroupID = iCluster;
+      result.applicationType = static_cast<ApplicationType>(applicationType);
       char nameStr[NAME_LEN];
       memcpy(nameStr, nameBuf, NAME_LEN);
       result.Name = nameStr;

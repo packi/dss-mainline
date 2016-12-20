@@ -228,6 +228,24 @@ namespace dss {
   };
   std::ostream& operator<<(std::ostream& stream, BinaryInputType type);
 
+  enum class ApplicationType {
+    None = 0,
+    Lights = 1,
+    Blinds = 2,
+    Heating = 3,
+    Audio = 4,
+    Video = 5,
+    Cooling = 9,
+    Ventilation = 10,
+    Window = 11,
+    Curtains = 12,
+    Temperature = 48,
+    ApartmentVentilation = 64,
+  };
+
+  std::string applicationTypeToString(ApplicationType type);
+  std::ostream& operator<<(std::ostream& stream, ApplicationType type);
+
   enum class BinaryInputState {
     Inactive = 0,
     Active = 1,

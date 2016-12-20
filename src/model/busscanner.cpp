@@ -272,7 +272,7 @@ namespace dss {
         cluster.applicationConfiguration = 0;
       }
 
-      if (cluster.applicationType > 0) {
+      if (cluster.applicationType != ApplicationType::None) {
         log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
             " and devices: " + intToString(cluster.NumberOfDevices));
       }
@@ -300,8 +300,8 @@ namespace dss {
        * the dSM is the master source for this data. The dSS will take the data
        * from the first dSM that has a non-zero configuration.
        */
-      if ((pCluster->getApplicationType() == 0) ||
-          ((pCluster->getApplicationType() > 0) && !pCluster->isReadFromDsm())) {
+      if ((pCluster->getApplicationType() == ApplicationType::None) ||
+          ((pCluster->getApplicationType() != ApplicationType::None) && !pCluster->isReadFromDsm())) {
         pCluster->setApplicationType(cluster.applicationType);
         pCluster->setApplicationConfiguration(cluster.applicationConfiguration);
         pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
