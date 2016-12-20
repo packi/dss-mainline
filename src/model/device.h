@@ -172,6 +172,8 @@ namespace dss {
     void setInputId(BinaryInputId inputId);
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
+
+    void updateStatusBitHandle();
   private:
     __DECL_LOG_CHANNEL__;
     Device& m_device;
@@ -179,8 +181,6 @@ namespace dss {
     boost::shared_ptr<State> m_state;
     class StatusBitHandle;
     std::unique_ptr<StatusBitHandle> m_statusBitHandle;
-
-    void updateStatusBit();
   };
 
   typedef struct {

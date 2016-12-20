@@ -131,7 +131,7 @@ namespace dss {
       m_state = device.getApartment().getNonScriptState(m_state->getName());
     }
 
-    updateStatusBit();
+    updateStatusBitHandle();
   }
 
   DeviceBinaryInput::~DeviceBinaryInput() {
@@ -152,7 +152,7 @@ namespace dss {
         + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
     m_targetGroupType = targetGroupType;
-    updateStatusBit();
+    updateStatusBitHandle();
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
@@ -208,7 +208,7 @@ namespace dss {
     }
   }
 
-  void DeviceBinaryInput::updateStatusBit() {
+  void DeviceBinaryInput::updateStatusBitHandle() {
     // find status object within target group
     boost::shared_ptr<Group> targetGroup;
     auto statusBit = [&]() -> StatusBit* {
@@ -228,10 +228,10 @@ namespace dss {
 
     m_statusBitHandle.reset();
     if (!statusBit) {
-      log(ds::str("updateStatusBit this:", m_name), lsInfo);
+      log(ds::str("updateStatusBitHandle this:", m_name), lsInfo);
       return;
     }
-    log(ds::str("updateStatusBit this:", m_name,
+    log(ds::str("updateStatusBitHandle this:", m_name,
         " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
         " type:",  statusBit->getType(), " name:", statusBit->getName()), lsInfo);
     m_statusBitHandle.reset(new StatusBitHandle(*this, boost::shared_ptr<StatusBit>(targetGroup, statusBit)));
