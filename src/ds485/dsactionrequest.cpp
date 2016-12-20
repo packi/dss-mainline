@@ -30,7 +30,6 @@
 #include "src/logger.h"
 #include "src/model/group.h"
 #include "src/model/device.h"
-#include "src/model/scenehelper.h"
 
 namespace dss {
 
@@ -288,8 +287,8 @@ namespace dss {
 
     Group *pGroup= dynamic_cast<Group*>(pTarget);
     if (pGroup) {
-      uint16_t convertedSensorValue = sensorToSystem(_sensorType, _sensorValueFloat);
-      uint8_t precisionvalue = sensorToPrecision(_sensorType);
+      uint16_t convertedSensorValue = doubleToSensorValue(_sensorType, _sensorValueFloat);
+      uint8_t precisionvalue = sensorTypeToPrecision(_sensorType);
 
       int ret = ZoneGroupSensorPush(m_DSMApiHandle, DSUID_BROADCAST, pGroup->getZoneID(), pGroup->getID(),
           _sourceID, static_cast<uint8_t>(_sensorType), convertedSensorValue, precisionvalue);

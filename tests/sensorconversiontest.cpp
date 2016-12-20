@@ -24,8 +24,9 @@
 #include <boost/test/unit_test.hpp>
 
 #include <digitalSTROM/dsuid.h>
-#include "src/ds485types.h"
-#include "src/model/scenehelper.h"
+
+#include "src/exception.h"
+#include "src/model/modelconst.h"
 
 using namespace dss;
 
@@ -35,11 +36,20 @@ BOOST_AUTO_TEST_CASE(test_sensor_conversion)
 {
 #define SENSOR_MIN 0
 #define SENSOR_MAX 0xfff
-  BOOST_CHECK_NO_THROW(sensorToSystem(SensorType::TemperatureIndoors, sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MIN)));
-  BOOST_CHECK_NO_THROW(sensorToSystem(SensorType::TemperatureIndoors, sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MAX)));
+  BOOST_CHECK_NO_THROW(doubleToSensorValue(SensorType::TemperatureIndoors, sensorValueToDouble(SensorType::TemperatureIndoors, SENSOR_MIN)));
+  BOOST_CHECK_NO_THROW(doubleToSensorValue(SensorType::TemperatureIndoors, sensorValueToDouble(SensorType::TemperatureIndoors, SENSOR_MAX)));
 
-  BOOST_CHECK_THROW(sensorToSystem(SensorType::TemperatureIndoors, (float)sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MIN)), SensorOutOfRangeException);
-  BOOST_CHECK_NO_THROW(sensorToSystem(SensorType::TemperatureIndoors, (float)sensorToFloat12(SensorType::TemperatureIndoors, SENSOR_MAX)));
+  BOOST_CHECK_THROW(doubleToSensorValue(SensorType::TemperatureIndoors, static_cast<float>(sensorValueToDouble(SensorType::TemperatureIndoors, SENSOR_MIN))), DSSException);
+  BOOST_CHECK_NO_THROW(doubleToSensorValue(SensorType::TemperatureIndoors, static_cast<float>(sensorValueToDouble(SensorType::TemperatureIndoors, SENSOR_MAX))));
+}
+
+BOOST_AUTO_TEST_CASE(testSensorTypeToString)
+{
+  BOOST_CHECK_EQUAL(sensorTypeName(SensorType::ActivePower), "Active Power");
+
+  std::stringstream s;
+  s << SensorType::ActivePower;
+  BOOST_CHECK_EQUAL(s.str(), "Active Power");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

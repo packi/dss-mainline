@@ -59,6 +59,7 @@ namespace dss {
     virtual void protobufMessageRequest(const dsuid_t _dSMdSUID, const uint16_t _request_size, const uint8_t *_request, uint16_t *_response_size, uint8_t *_response);
   private:
     int getGroupCount(const dsuid_t& _dsMeterID, const int _zoneID);
+    std::vector<int> makeDeviceGroups(const uint8_t *bitfield, int bits, const DeviceSpec_t& spec);
     void updateButtonGroupFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateSensorInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);

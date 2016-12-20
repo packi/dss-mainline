@@ -28,7 +28,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "base.h"
+#include "exception.h"
 #include "stringconverter.h"
 
 namespace dss {

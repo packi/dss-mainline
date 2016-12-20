@@ -20,7 +20,7 @@
 #pragma once
 
 #include <boost/asio/steady_timer.hpp>
-#include <atomic>
+#include <ds/asio/timer.h>
 #include "logger.h"
 #include "taskprocessor.h"
 #include "propertysystem.h"
@@ -40,7 +40,7 @@ namespace dss {
   private:
     __DECL_LOG_CHANNEL__;
     DSS& m_dss;
-    boost::asio::basic_waitable_timer<boost::chrono::steady_clock>  m_timer;
+    ds::asio::Timer m_timer;
     TaskScope m_taskScope;
     PropertyNodePtr m_configNode;
     bool m_enabled;

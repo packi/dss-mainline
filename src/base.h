@@ -26,19 +26,11 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include <type_traits>
+#include <unordered_map>
 
-#if !(definedWIN32 || defined(__APPLE__))
-  #include <tr1/unordered_map>
-#else
-  #include <unordered_map>
-#endif
-#include <stdexcept>
-
-#ifdef __APPLE__
-#define HASH_MAP std::unordered_map
-#else
-#define HASH_MAP std::tr1::unordered_map
-#endif
+// well known macro mapped to the state-of-the-art C++ construct
+#define ARRAY_SIZE(x) std::extent<decltype(x)>::value
 
 namespace dss {
 
@@ -46,10 +38,6 @@ namespace dss {
   bool contains(const std::vector<t>& _v, const t _item) {
     return find(_v.begin(), _v.end(), _item) != _v.end();
   }
-
-
-  //============================================= Common types
-  typedef HASH_MAP<std::string, std::string> HashMapStringString;
 
   //============================================= Conversion helpers
 
@@ -115,7 +103,7 @@ namespace dss {
 
   class Properties {
   private:
-    HashMapStringString m_Container;
+    std::unordered_map<std::string, std::string> m_Container;
   public:
     bool has(const std::string& _key) const;
     void set(const std::string& _key, const std::string& _value);
@@ -124,7 +112,7 @@ namespace dss {
 
     bool unset(const std::string& _key);
 
-    const HashMapStringString& getContainer() const { return m_Container; }
+    const std::unordered_map<std::string, std::string>& getContainer() const { return m_Container; }
     std::string toString() const;
   };
 
@@ -145,20 +133,6 @@ namespace dss {
   bool syncFile(const std::string& _path);
   std::string doIndent(const int _indent);
   std::string XMLStringEscape(const std::string& str);
-
-  //============================================= Exception
-
-  class DSSException : public std::runtime_error {
-  public:
-    DSSException(const std::string& _message)
-      : runtime_error( _message )
-    { }
-
-    virtual ~DSSException() throw() {}
-  }; // DSSException
-
-
-
 }
 
 #endif

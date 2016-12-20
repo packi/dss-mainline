@@ -26,7 +26,6 @@
 
 
 #include "cluster.h"
-#include "scenehelper.h"
 #include "apartment.h"
 #include "src/propertysystem.h"
 #include "src/foreach.h"
@@ -39,7 +38,7 @@ namespace dss {
     //============================================= Group
 
   Cluster::Cluster(const int _id, Apartment& _apartment)
-  : Group(_id, _apartment.getZone(0), _apartment),
+  : Group(_id, _apartment.getZone(0)),
     m_Location(cd_none),
     m_ProtectionClass(wpc_none),
     m_Floor(0),
@@ -97,13 +96,13 @@ namespace dss {
         return false;
       }
     }
-    return ((getStandardGroupID() == cluster.StandardGroupID) &&
+    return ((getApplicationType() == cluster.stateMachineID) &&
             (getName() == cluster.Name) &&
             (m_Location == cluster.location) &&
             (m_ProtectionClass == cluster.protectionClass) &&
             (m_Floor == cluster.floor) &&
             (m_ConfigurationLocked == cluster.configurationLocked) &&
-            (getConfiguration() == (int)cluster.configuration));
+            (getApplicationConfiguration() == (int)cluster.stateMachineConfig));
   } // equalConfig
 
   void Cluster::reset() {
@@ -113,9 +112,9 @@ namespace dss {
     m_LockedScenes.clear();
     setConfigurationLocked(false);
     setAutomatic(false);
-    setStandardGroupID(0);
+    setApplicationType(0);
     setName("");
-    setConfiguration(0);
+    setApplicationConfiguration(0);
   } // reset
 
   void Cluster::removeDevice(Device& _device)

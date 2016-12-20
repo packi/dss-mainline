@@ -65,8 +65,7 @@ namespace dss {
       json.startObject("options");
       boost::shared_ptr<const SubscriptionOptions> opts = pSubscription->getOptions();
       if(opts != NULL) {
-        HashMapStringString optsHash = opts->getParameters().getContainer();
-        foreach(HashMapStringString::reference option, optsHash) {
+        foreach (auto&& option, opts->getParameters().getContainer()) {
           json.add(option.first, option.second);
         }
       }

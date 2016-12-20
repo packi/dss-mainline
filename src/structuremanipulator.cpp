@@ -41,11 +41,11 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/model/modelconst.h"
-#include "src/model/scenehelper.h"
 #include "src/util.h"
 #include "src/event.h"
 #include "src/dss.h"
 #include "src/base.h"
+#include "src/messages/vdc-messages.pb.h"
 
 namespace dss {
 
@@ -73,9 +73,7 @@ namespace dss {
     // if the device that is being moved out of the zone was a zone sensor:
     // clear the previous sensor assignment and also check if we can reassign
     // another sensor to the zone
-    auto&& types_to_clear = _zone->getAssignedSensorTypes(_device);
-    for (size_t q = 0; q < types_to_clear->size(); ++q) {
-      auto&& sensorType = types_to_clear->at(q);
+    foreach (auto&& sensorType, _zone->getAssignedSensorTypes(*_device)) {
       resetZoneSensor(_zone, sensorType);
     }
     autoAssignZoneSensors(_zone);
@@ -436,7 +434,7 @@ namespace dss {
       pGroup = m_Apartment.getGroup(_groupNumber);
     } catch(ItemNotFoundException&) {
       pGroup = boost::shared_ptr<Group>(
-        new Group(_groupNumber, m_Apartment.getZone(0), m_Apartment));
+        new Group(_groupNumber, m_Apartment.getZone(0)));
       m_Apartment.getZone(0)->addGroup(pGroup);
       m_Interface.createGroup(0, _groupNumber, 0, "");
       pGroup->setAssociatedSet(_originalSet);
@@ -476,12 +474,12 @@ namespace dss {
     }
   } // unpersistSet
 
-  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int _standardGroupNumber, const std::string& _name) {
+  void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int applicationType, const std::string& _name) {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
 
-    if (isDefaultGroup(_groupNumber)) {
+    if (isDefaultGroup(_groupNumber) || isGlobalAppDsGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
@@ -491,11 +489,11 @@ namespace dss {
       }
       try {
         Logger::getInstance()->log("Configure user group " + intToString(_groupNumber) +
-            " with standard-id " + intToString(_standardGroupNumber), lsInfo);
+            " with standard-id " + intToString(applicationType), lsInfo);
         boost::shared_ptr<Cluster> pCluster = m_Apartment.getCluster(_groupNumber);
         pCluster->setName(_name);
-        pCluster->setStandardGroupID(_standardGroupNumber);
-        m_Interface.createCluster( _groupNumber, _standardGroupNumber, _name);
+        pCluster->setApplicationType(applicationType);
+        m_Interface.createCluster( _groupNumber, applicationType, _name);
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Datamodel-Error creating user group " + intToString(_groupNumber) +
             ": " + e.what(), lsWarning);
@@ -506,17 +504,37 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<Group> pGroup;
     if (isZoneUserGroup(_groupNumber)) {
+      boost::shared_ptr<Group> pGroup;
       try {
         pGroup = _zone->getGroup(_groupNumber);
         throw DSSException("Group id " + intToString(_groupNumber) + " already exists");
       } catch (ItemNotFoundException& e) {
         Logger::getInstance()->log("Creating user group " + intToString(_groupNumber) +
             " in zone " + intToString(_zone->getID()), lsInfo);
-        pGroup = boost::make_shared<Group>(_groupNumber, _zone, boost::ref<Apartment>(m_Apartment));
+        pGroup = boost::make_shared<Group>(_groupNumber, _zone);
         _zone->addGroup(pGroup);
-        m_Interface.createGroup(_zone->getID(), _groupNumber, _standardGroupNumber, _name);
+        m_Interface.createGroup(_zone->getID(), _groupNumber, applicationType, _name);
+      }
+      return;
+    }
+
+    // for groups in User Global Application range, we are locked to zone 0, but we create Groups not clusters
+    if (isGlobalAppUserGroup(_groupNumber)) {
+      boost::shared_ptr<Group> pGroup;
+      if (_zone->getID() != 0) {
+        throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
+      }
+      try {
+        pGroup = _zone->getGroup(_groupNumber);
+        throw DSSException("Group id " + intToString(_groupNumber) + " already exists");
+      } catch (ItemNotFoundException& e) {
+        Logger::getInstance()->log("Creating user global application group " + intToString(_groupNumber), lsInfo);
+        pGroup = boost::make_shared<Group>(_groupNumber, _zone);
+        pGroup->setName(_name);
+        pGroup->setApplicationType(applicationType);
+        _zone->addGroup(pGroup);
+        m_Interface.createGroup(_zone->getID(), _groupNumber, applicationType, _name);
       }
       return;
     }
@@ -529,7 +547,7 @@ namespace dss {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
 
-    if (isDefaultGroup(_groupNumber)) {
+    if (isDefaultGroup(_groupNumber) || isGlobalAppDsGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
 
@@ -579,16 +597,38 @@ namespace dss {
       return;
     }
 
-    throw DSSException("Remove group: id " + intToString(_groupNumber) + " too large");
+    // for groups in User Global Application range, we are locked to zone 0, but we remove Groups not clusters
+    if (isGlobalAppUserGroup(_groupNumber)) {
+      boost::shared_ptr<Group> pGroup;
+      if (_zone->getID() != 0) {
+        throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
+      }
+      try {
+        pGroup = _zone->getGroup(_groupNumber);
+      } catch (ItemNotFoundException& e) {
+        throw DSSException("Group id " + intToString(_groupNumber) + " does not exist");
+      }
+      try {
+        Logger::getInstance()->log("Removing user global application group " + intToString(_groupNumber), lsInfo);
+        _zone->removeGroup(pGroup);
+        m_Interface.removeGroup(_zone->getID(), _groupNumber);
+      } catch (BusApiError& e) {
+        Logger::getInstance()->log("Bus-Error removing user group " + intToString(_groupNumber) +
+            ": " + e.what(), lsWarning);
+      }
+      return;
+    }
+
+    throw DSSException("Remove group: id " + intToString(_groupNumber) + " not found");
   } // removeGroup
 
   void StructureManipulator::groupSetName(boost::shared_ptr<Group> _group,
                                           const std::string& _name) {
-    if (isDefaultGroup(_group->getID())) {
+    if (isDefaultGroup(_group->getID()) || isGlobalAppDsGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
-    if (isAppUserGroup(_group->getID()) || isZoneUserGroup(_group->getID())) {
+    if (isAppUserGroup(_group->getID()) || isZoneUserGroup(_group->getID()) || isGlobalAppUserGroup(_group->getID())) {
       _group->setName(_name);
       m_Interface.groupSetName(_group->getZoneID(), _group->getID(), _name);
       return;
@@ -597,9 +637,9 @@ namespace dss {
     throw DSSException("Rename group: id " + intToString(_group->getID()) + " too large");
   } // groupSetName
 
-  void StructureManipulator::groupSetStandardID(boost::shared_ptr<Group> _group,
-                                                const int _standardGroupNumber) {
-    if (isDefaultGroup(_group->getID())) {
+  void StructureManipulator::groupSetApplicationType(boost::shared_ptr<Group> _group,
+                                                const int applicationType) {
+    if (isDefaultGroup(_group->getID()) || isGlobalAppDsGroup(_group->getID())) {
       throw DSSException("Group with id " + intToString(_group->getID()) + " is reserved");
     }
 
@@ -608,26 +648,26 @@ namespace dss {
       if (pCluster->isConfigurationLocked()) {
         throw DSSException("The group is locked and cannot be modified");
       }
-      pCluster->setStandardGroupID(_standardGroupNumber);
-      m_Interface.groupSetStandardID(pCluster->getZoneID(), pCluster->getID(), _standardGroupNumber);
+      pCluster->setApplicationType(applicationType);
+      m_Interface.groupSetStateMachine(pCluster->getZoneID(), pCluster->getID(), applicationType);
       return;
     }
 
-    if (isZoneUserGroup(_group->getID())) {
-      _group->setStandardGroupID(_standardGroupNumber);
-      m_Interface.groupSetStandardID(_group->getZoneID(), _group->getID(), _standardGroupNumber);
+    if (isZoneUserGroup(_group->getID()) || isGlobalAppUserGroup(_group->getID())) {
+      _group->setApplicationType(applicationType);
+      m_Interface.groupSetStateMachine(_group->getZoneID(), _group->getID(), applicationType);
       return;
     }
 
     throw DSSException("SetStandardColor group: id " + intToString(_group->getID()) + " too large");
   } // groupSetStandardID
 
-  void StructureManipulator::groupSetConfiguration(boost::shared_ptr<Group> _group, const int _groupConfiguration) {
+  void StructureManipulator::groupSetApplicationConfiguration(boost::shared_ptr<Group> _group, const int applicationConfiguration) {
 
     // we allow to set the configuration in all groups for now
     if (isValidGroup(_group->getID())) {
-      _group->setConfiguration(_groupConfiguration);
-      m_Interface.groupSetConfiguration(_group->getZoneID(), _group->getID(), _groupConfiguration);
+      _group->setApplicationConfiguration(applicationConfiguration);
+      // TODO: add configuration after API change
       return;
     }
 
@@ -670,8 +710,8 @@ namespace dss {
     if (isAppUserGroup(_group->getID())) {
       if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) && (_device->getBinaryInputCount() == 1)) {
         /* AKM with single input, set active group to last group */
-        _device->setDeviceBinaryInputTarget(0, 0, _group->getID());
-        _device->setBinaryInputTarget(0, 0, _group->getID());
+        _device->setDeviceBinaryInputTarget(0, GroupType::Standard, _group->getID());
+        _device->setBinaryInputTarget(0, GroupType::Standard, _group->getID());
       } else if (_device->getOutputMode() == 0) {
         /* device has no output, button is active on group */
         _device->setDeviceButtonActiveGroup(_group->getID());
@@ -706,8 +746,8 @@ namespace dss {
         (_device->getBinaryInputCount() == 1) &&
         (_group->getID() == _device->getBinaryInputs()[0]->m_targetGroupId)) {
       /* AKM with single input, active on removed group */
-      _device->setDeviceBinaryInputTarget(0, 0, GroupIDBlack);
-      _device->setBinaryInputTarget(0, 0, GroupIDBlack);
+      _device->setDeviceBinaryInputTarget(0, GroupType::Standard, GroupIDBlack);
+      _device->setBinaryInputTarget(0, GroupType::Standard, GroupIDBlack);
     } else if (_group->getID() == _device->getButtonActiveGroup()) {
       /* device has no output, button is active on removed group */
       _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
@@ -759,7 +799,7 @@ namespace dss {
         continue;
       }
       boost::shared_ptr<Group> itGroup = pZone->getGroup(g);
-      if (itGroup->getStandardGroupID() == newGroup->getID()) {
+      if (itGroup->getApplicationType() == newGroup->getID()) {
         continue;
       }
       deviceRemoveFromGroup(device, itGroup);
@@ -785,17 +825,17 @@ namespace dss {
                                            SensorType _sensorType,
                                            boost::shared_ptr<Device> _dev) {
     Logger::getInstance()->log("SensorAssignment: assign zone: " + intToString(_zone->getID()) +
-        ", type: " + sensorName(_sensorType) +
+        ", type: " + sensorTypeName(_sensorType) +
         " => " + dsuid2str(_dev->getDSID()), lsInfo);
 
-    _zone->setSensor(_dev, _sensorType);
+    _zone->setSensor(*_dev, _sensorType);
     m_Interface.setZoneSensor(_zone->getID(), _sensorType, _dev->getDSID());
   }
 
   void StructureManipulator::resetZoneSensor(boost::shared_ptr<Zone> _zone,
                                              SensorType _sensorType) {
     Logger::getInstance()->log("SensorAssignment: reset zone: " + intToString(_zone->getID()) +
-        ", type: " + sensorName(_sensorType) +
+        ", type: " + sensorTypeName(_sensorType) +
         " => none", lsInfo);
 
     _zone->resetSensor(_sensorType);
@@ -815,19 +855,17 @@ namespace dss {
     auto&& unassigned_sensors = _zone->getUnassignedSensorTypes();
 
     Logger::getInstance()->log("SensorAssignment: run auto-assignment for " +
-        intToString(unassigned_sensors->size()) + " sensor types:", lsInfo);
+        intToString(unassigned_sensors.size()) + " sensor types:", lsInfo);
 
     // check if our set contains devices that with the matching sensor type
     // and assign the first device that we find automatically: UC 8.1
-    for (size_t q = 0; q < unassigned_sensors->size(); ++q) {
-      Set devicesBySensor =
-          devices.getBySensorType(unassigned_sensors->at(q));
+    foreach (auto&& sensorType, unassigned_sensors) {
+      Set devicesBySensor = devices.getBySensorType(sensorType);
       if (devicesBySensor.length() > 0) {
         // select an active sensor
         for (int i = 0; i < devicesBySensor.length(); ++i) {
           if (devicesBySensor.get(i).getDevice()->isPresent()) {
-            setZoneSensor(_zone, unassigned_sensors->at(q),
-                          devicesBySensor.get(i).getDevice());
+            setZoneSensor(_zone, sensorType, devicesBySensor.get(i).getDevice());
             break;
           }
         }
@@ -850,27 +888,23 @@ namespace dss {
       zone->removeInvalidZoneSensors();
 
       // erase all unassigned sensors in zone
-      auto&& sUnasList =  zone->getUnassignedSensorTypes();
       try {
-        for (size_t index = 0; index < sUnasList->size(); ++index) {
+        foreach (auto&& sensorType, zone->getUnassignedSensorTypes()) {
           Logger::getInstance()->log(std::string("SensorAssignment: sync reset ") +
                   "zone: " + intToString(zone->getID()) +
-                  ", type: " + sensorName(sUnasList->at(index)) +
+                  ", type: " + sensorTypeName(sensorType) +
                   " => none", lsInfo);
 
-          m_Interface.resetZoneSensor(zone->getID(), sUnasList->at(index));
+          m_Interface.resetZoneSensor(zone->getID(), sensorType);
         }
 
         // reassign all assigned sensors in zone
-        std::vector<boost::shared_ptr<MainZoneSensor_t> >sAsList = zone->getAssignedSensors();
-        for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = sAsList.begin();
-            it != sAsList.end();
-            ++it) {
+        foreach (auto&& s, zone->getAssignedSensors()) {
           Logger::getInstance()->log("SensorAssignment: sync assign zone: " + intToString(zone->getID()) +
-                  ", type: " + sensorName((*it)->m_sensorType) +
-                  " => " + dsuid2str((*it)->m_DSUID), lsInfo);
+                  ", type: " + sensorTypeName(s.m_sensorType) +
+                  " => " + dsuid2str(s.m_DSUID), lsInfo);
 
-          m_Interface.setZoneSensor(zone->getID(), (*it)->m_sensorType, (*it)->m_DSUID);
+          m_Interface.setZoneSensor(zone->getID(), s.m_sensorType, s.m_DSUID);
         }
       } catch (std::runtime_error &err) {
         Logger::getInstance()->log(std::string("StructureManipulator::synchronizeZoneSensorAssignment: can't synchronize zone sensors: ") + err.what(), lsWarning);
@@ -889,28 +923,28 @@ namespace dss {
     throw DSSException("Rename cluster: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetName
 
-  void StructureManipulator::clusterSetStandardID(boost::shared_ptr<Cluster> _cluster,
-                                                  const int _standardGroupNumber) {
+  void StructureManipulator::clusterSetApplicationType(boost::shared_ptr<Cluster> _cluster,
+                                                  const int applicationType) {
     if (isAppUserGroup(_cluster->getID())) {
       if (_cluster->isConfigurationLocked()) {
         throw DSSException("The group is locked and cannot be modified");
       }
-      _cluster->setStandardGroupID(_standardGroupNumber);
-      m_Interface.clusterSetStandardID(_cluster->getID(), _standardGroupNumber);
+      _cluster->setApplicationType(applicationType);
+      m_Interface.clusterSetStateMachine(_cluster->getID(), applicationType);
       return;
     }
 
     throw DSSException("SetStandardColor cluster: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetStandardID
 
-  void StructureManipulator::clusterSetConfiguration(boost::shared_ptr<Cluster> _cluster,
-                                                  const int _clusterConfiguration) {
+  void StructureManipulator::clusterSetApplicationConfiguration(boost::shared_ptr<Cluster> _cluster,
+                                                  const int applicationConfiguration) {
     if (isAppUserGroup(_cluster->getID())) {
       if (_cluster->isConfigurationLocked()) {
         throw DSSException("The group is locked and cannot be modified");
       }
-      _cluster->setConfiguration(_clusterConfiguration);
-      m_Interface.clusterSetConfiguration(_cluster->getID(), _clusterConfiguration);
+      _cluster->setApplicationConfiguration(applicationConfiguration);
+      // TODO: add configuration after API change
       return;
     }
 
@@ -927,5 +961,15 @@ namespace dss {
 
     throw DSSException("set cluster lock: id " + intToString(_cluster->getID()) + " not a cluster");
   } // clusterSetLockedState
+
+  void StructureManipulator::setProperty(boost::shared_ptr<DSMeter> _dsMeter,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) {
+    return m_Interface.setProperty(_dsMeter->getDSID(), properties);
+  }
+
+  vdcapi::Message StructureManipulator::getProperty(boost::shared_ptr<DSMeter> _dsMeter,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) {
+    return m_Interface.getProperty(_dsMeter->getDSID(), query);
+  }
 
 } // namespace dss

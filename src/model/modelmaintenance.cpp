@@ -1037,7 +1037,8 @@ namespace dss {
         log("Expected at least 4 parameter for ModelEvent::etDeviceBinaryStateEvent");
       } else {
         onBinaryInputEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1),
-            event->getParameter(2), static_cast<BinaryInputState>(event->getParameter(3)));
+            static_cast<BinaryInputType>(event->getParameter(2)),
+            static_cast<BinaryInputState>(event->getParameter(3)));
       }
       break;
     case ModelEvent::etDeviceSensorValue:
@@ -1972,12 +1973,18 @@ namespace dss {
       DeviceReference devRef = m_pApartment->getDevices().getByBusID(_deviceID, _dsMeterID);
       boost::shared_ptr<Device> device = devRef.getDevice();
       if(_configClass == CfgClassFunction) {
-        if(_configIndex == CfgFunction_Mode) {
+        if (_configIndex == CfgFunction_Mode) {
           device->setOutputMode(_value);
-        } else if(_configIndex == CfgFunction_ButtonMode) {
+        } else if (_configIndex == CfgFunction_ButtonMode) {
           device->setButtonID(_value & 0xf);
-          device->setButtonGroupMembership((_value >> 4) & 0xf);
-        } else if(_configIndex == CfgFunction_LTMode) {
+          // 4 most significant bits of value are only valid in case it is != 0, otherwise it is set with
+          // CfgFunction_PbGroup configuration change.
+          if (((_value >> 4) & 0xf) != 0) {
+            device->setButtonGroupMembership((_value >> 4) & 0xf);
+          }
+        } else if (_configIndex == CfgFunction_PbGroup) {
+          device->setButtonGroupMembership(_value);
+        } else if (_configIndex == CfgFunction_LTMode) {
           device->setButtonInputMode(_value);
         }
       } else if (_configClass == CfgClassDevice) {
@@ -1986,13 +1993,13 @@ namespace dss {
           uint8_t offset = (_configIndex - 0x40) % 3;
           switch (offset) {
           case 0:
-            device->setBinaryInputTarget(inputIndex, _value >> 6, _value & 0x3f);
+            device->setBinaryInputTarget(inputIndex, static_cast<GroupType>(_value >> 6), _value & 0x3f);
             break;
           case 1:
-            device->setBinaryInputType(inputIndex, _value & 0xff);
+            device->setBinaryInputType(inputIndex, static_cast<BinaryInputType>(_value & 0xff));
             break;
           case 2:
-            device->setBinaryInputId(inputIndex, _value >> 4);
+            device->setBinaryInputId(inputIndex, static_cast<BinaryInputId>(_value >> 4));
             break;
           }
         }
@@ -2037,7 +2044,7 @@ namespace dss {
   } // onSensorEvent
 
   void ModelMaintenance::onBinaryInputEvent(dsuid_t _meterID,
-      const devid_t _deviceID, const int& _eventIndex, const int& _eventType, BinaryInputState _state) {
+      const devid_t _deviceID, const int& _eventIndex, BinaryInputType _eventType, BinaryInputState _state) {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
@@ -2086,23 +2093,20 @@ namespace dss {
 
       // binary input state synchronization event
       if (_sensorIndex == 32) {
-        for (int index = 0; index < pDev->getBinaryInputCount(); index++) {
-          boost::shared_ptr<State> state;
-          try {
-            state = pDev->getBinaryInputState(index);
-          } catch (ItemNotFoundException& e) {
-            continue;
-          }
-          int oldState = state->getState();
+        int index = 0;
+        foreach (auto&& binaryInput, pDev->getBinaryInputs()) {
+          auto&& state = binaryInput->getState();
+          int oldState = state.getState();
           auto binaryInputState =
               (_sensorValue & (1 << index)) ? BinaryInputState::Active : BinaryInputState::Inactive;
-          int newState = binaryInputState == BinaryInputState::Active ? State_Active : State_Inactive;
+          pDev->handleBinaryInputEvent(index, binaryInputState);
+          int newState = state.getState();
           if (newState != oldState) {
-            state->setState(coSystem, newState);
-            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index, // HERE
-                                                    pDev->getDeviceBinaryInputType(index),
+            raiseEvent(createDeviceBinaryInputEvent(pDevRev, index,
+                                                    binaryInput->m_inputType,
                                                     binaryInputState));
           }
+          index++;
         }
 
       // device status and error event
@@ -2139,7 +2143,7 @@ namespace dss {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       boost::shared_ptr<Group> group = zone->getGroup(_groupID);
 
-      double fValue = sensorToFloat12(_sensorType, _sensorValue);
+      double fValue = sensorValueToDouble(_sensorType, _sensorValue);
       group->sensorPush(_sourceDevice, _sensorType, fValue);
 
       // check for a valid dsuid
@@ -2517,7 +2521,7 @@ namespace dss {
       boost::shared_ptr<Device> pDev = m_pApartment->getDeviceByDSID(event.m_deviceDSID);
       boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(pDev->getDSID(), &pDev->getApartment());
 
-      BOOST_FOREACH(HashMapStringString::value_type state, event.m_states.getContainer()) {
+      foreach (auto&& state, event.m_states.getContainer()) {
         const std::string& name = state.first;
         const std::string& value = state.second;
 
@@ -2937,10 +2941,9 @@ namespace dss {
     json.String("properties");
     json.StartObject();
 
-    const dss::HashMapStringString& props =  m_event->getProperties().getContainer();
-    for (dss::HashMapStringString::const_iterator iParam = props.begin(), e = props.end(); iParam != e; ++iParam) {
-      json.String((iParam->first).c_str());
-      json.String((iParam->second).c_str());
+    foreach (auto&& param, m_event->getProperties().getContainer()) {
+      json.String((param.first).c_str());
+      json.String((param.second).c_str());
     }
     json.EndObject();
 
@@ -3164,7 +3167,7 @@ namespace dss {
           continue;
         }
         try {
-          if (zone->isZoneSensor(device, sensor->m_sensorType)) {
+          if (zone->isZoneSensor(*device, sensor->m_sensorType)) {
             busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
           }
         } catch (std::runtime_error& e) {

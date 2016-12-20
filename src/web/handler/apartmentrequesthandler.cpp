@@ -45,7 +45,6 @@
 #include "src/model/cluster.h"
 #include "src/model/set.h"
 #include "src/model/modelmaintenance.h"
-#include "src/model/scenehelper.h"
 #include "src/stringconverter.h"
 #include "src/model-features.h"
 #include "src/vdc-db.h"
@@ -197,7 +196,7 @@ namespace dss {
           } else {
             json.add("dsid", "");
           }
-          json.add("dSUID", dsuid2str(dsMeter->getDSID()));
+          json.add("dSUID", dsMeter->getDSID());
           json.add("DisplayID", dsMeter->getDisplayID());
           json.add("hwVersion", 0);
           json.add("hwVersionString", dsMeter->getHardwareVersion());
@@ -277,7 +276,7 @@ namespace dss {
           json.add("name", pZone->getName());
           json.add("ControlMode", hProp.m_HeatingControlMode);
           json.add("ControlState", hProp.m_HeatingControlState);
-          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
           if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             json.add("IsConfigured", false);
           } else {
@@ -323,7 +322,7 @@ namespace dss {
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           json.add("id", pZone->getID());
           json.add("name", pZone->getName());
-          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
 
           if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
             json.add("IsConfigured", false);
@@ -374,7 +373,7 @@ namespace dss {
           ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           json.add("id", pZone->getID());
           json.add("name", pZone->getName());
-          json.add("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
+          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
 
           ZoneHeatingOperationModeSpec_t hOpValues;
           memset(&hOpValues, 0, sizeof(hOpValues));
@@ -402,26 +401,26 @@ namespace dss {
           case HeatingControlModeIDOff:
             break;
           case HeatingControlModeIDPID:
-            json.add("Off", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
-            json.add("Comfort", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
-            json.add("Economy", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
-            json.add("NotUsed", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
-            json.add("Night", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
-            json.add("Holiday", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
-            json.add("Cooling", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+            json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+            json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+            json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+            json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+            json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+            json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+            json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+            json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
             break;
           case HeatingControlModeIDZoneFollower:
             break;
           case HeatingControlModeIDFixed:
-            json.add("Off", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
-            json.add("Comfort", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
-            json.add("Economy", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
-            json.add("NotUsed", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
-            json.add("Night", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
-            json.add("Holiday", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
-            json.add("Cooling", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+            json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+            json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+            json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+            json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+            json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+            json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+            json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+            json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
             break;
           }
           json.endObject();
@@ -441,14 +440,10 @@ namespace dss {
 
           json.startArray("sensors");
 
-          std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = pZone->getAssignedSensors();
-          for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
-              it != slist.end();
-              it ++) {
+          foreach (auto&& devSensor, pZone->getAssignedSensors()) {
             json.startObject();
-            boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
-            json.add("sensorType", devSensor->m_sensorType);
-            json.add("dsuid", dsuid2str(devSensor->m_DSUID));
+            json.add("sensorType", devSensor.m_sensorType);
+            json.add("dsuid", devSensor.m_DSUID);
             json.endObject();
           }
           json.endArray();
@@ -614,7 +609,7 @@ namespace dss {
 
         for (size_t i = 0; i < lockedDevices.size(); i++) {
           json.startObject();
-          json.add("dsuid", dsuid2str(lockedDevices.at(i).dsuid));
+          json.add("dsuid", lockedDevices.at(i).dsuid);
 
           json.startArray("lockedScenes");
           for (size_t j = 0; j < lockedDevices.at(i).lockedScenes.size(); j++) {
@@ -712,23 +707,22 @@ namespace dss {
           boost::shared_ptr<Device> device = devices.get(d).getDevice();
           if ((device->getDeviceType() == DEVICE_TYPE_AKM) &&
               (device->isPresent() == true)) {
-            const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = device->getBinaryInputs();
+            auto&& binaryInputs = device->getBinaryInputs();
 
             if (!binaryInputs.empty()) {
               json.startObject();
-              json.add("dsuid", dsuid2str(device->getDSID()));
+              json.add("dsuid", device->getDSID());
 
               json.startArray("binaryInputs");
 
               for (size_t i = 0; i < binaryInputs.size(); i++) {
-                boost::shared_ptr<DeviceBinaryInput_t> input = binaryInputs.at(i);
+                auto&& input = binaryInputs.at(i);
                 json.startObject();
                 json.add("targetGroupType", input->m_targetGroupType);
                 json.add("targetGroup", input->m_targetGroupId);
                 json.add("inputType", input->m_inputType);
                 json.add("inputId", input->m_inputId);
-                json.add("state",
-                        device->getBinaryInputState(input->m_inputIndex)->getState());
+                json.add("state", input->getState().getState());
                 json.endObject();
               }
 
@@ -781,7 +775,7 @@ namespace dss {
           }
  
           json.startObject();
-          json.add("dSUID", dsuid2str(device->getDSID()));
+          json.add("dSUID", device->getDSID());
           // do not fail the whole set if one devices messes up
           try {
             vdcInfo::addByFilter(db, *device, filter, langCode, json);

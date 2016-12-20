@@ -95,6 +95,7 @@ namespace dss {
 
     static vdcapi::Message callLearningFunction(dsuid_t vdc, bool establish, int64_t timeout, const vdcapi::PropertyElement& params);
     static vdcapi::Message callFirmwareFunction(dsuid_t vdc, bool checkOnly, bool clearSettings, const vdcapi::PropertyElement& params);
+    static vdcapi::Message callAuthenticate(dsuid_t vdc, const std::string& authData, const std::string& authScope, const vdcapi::PropertyElement& params);
   };
 
   struct VdcConnection

@@ -75,19 +75,19 @@ namespace dss {
       (void) dsuid_to_dsid(dsMeter->getDSID(), &dsid);
 
       json.startObject();
-      json.add("dSUID", dsuid2str(dsMeter->getDSID()));
+      json.add("dSUID", dsMeter->getDSID());
       json.add("dsid", dsid2str(dsid));
       json.add("type", "energy");
       json.endObject();
 
       json.startObject();
-      json.add("dSUID", dsuid2str(dsMeter->getDSID()));
+      json.add("dSUID", dsMeter->getDSID());
       json.add("dsid", dsid2str(dsid));
       json.add("type", "energyDelta");
       json.endObject();
 
       json.startObject();
-      json.add("dSUID", dsuid2str(dsMeter->getDSID()));
+      json.add("dSUID", dsMeter->getDSID());
       json.add("dsid", dsid2str(dsid));
       json.add("type", "consumption");
       json.endObject();
@@ -201,8 +201,7 @@ namespace dss {
             iMeter != e;
             ++iMeter)
         {
-          std::string dsid = dsuid2str(iMeter->get()->getDSID());
-          json.add(dsid);
+          json.add(iMeter->get()->getDSID());
         }
         json.endArray();
       } else {
@@ -278,7 +277,6 @@ namespace dss {
       if (lastUpdateGlobal > lastUpdateAll) {
         lastUpdateAll = lastUpdateGlobal;
       }
-      std::string dsuid = dsuid2str(dsMeter->getDSID());
       dsid_t dsid;
       (void) dsuid_to_dsid(dsMeter->getDSID(), &dsid);
       if (aggregateMeterValues) {
@@ -288,7 +286,7 @@ namespace dss {
         try {
           json.startObject();
           json.add("dsid", dsid2str(dsid));
-          json.add("dSUID", dsuid);
+          json.add("dSUID", dsMeter->getDSID());
           json.add("value", value);
           json.add("date", lastUpdateAll.toString());
           json.endObject();
@@ -309,7 +307,7 @@ namespace dss {
         json.endArray();
         json.startArray("dSUID");
         foreach(dsuid_t dsuid, dsuids) {
-          json.add(dsuid2str(dsuid));
+          json.add(dsuid);
         }
         json.endArray();
         json.add("value", static_cast<unsigned long long>(aggregatedValue));

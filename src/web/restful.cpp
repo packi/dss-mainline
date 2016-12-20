@@ -29,6 +29,8 @@
 
 #include "restful.h"
 
+#include "base.h"
+
 namespace dss {
 
   RestfulRequest::RestfulRequest(const std::string& _request,

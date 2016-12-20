@@ -184,10 +184,8 @@ namespace dss {
     return false;
   }
 
-  bool Event::setProperty(const std::string& name, SensorType value) {
-    // TODO(someday) use proper structure to preserve type
-    m_Properties.set(name, intToString(static_cast<int>(value)));
-    return true;
+  void Event::setProperty(const std::string& name, int value) {
+    m_Properties.set(name, intToString(value));
   }
 
   boost::shared_ptr<const Group> Event::getRaisedAtGroup(Apartment& _apartment) const {
@@ -216,9 +214,7 @@ namespace dss {
   } // isReplacementFor
 
   void Event::applyProperties(const Properties& _others) {
-    const HashMapStringString sourceMap = _others.getContainer();
-    typedef const std::pair<const std::string, std::string> tItem;
-    foreach(tItem kv, sourceMap) {
+    foreach (auto&& kv, _others.getContainer()) {
       setProperty(kv.first, kv.second);
     }
   } // applyProperties
@@ -409,10 +405,8 @@ namespace dss {
            }
         }
 
-        for(HashMapStringString::const_iterator iParam = toProcess->getProperties().getContainer().begin(), e = toProcess->getProperties().getContainer().end();
-            iParam != e; ++iParam)
-        {
-          log("Interpreter: - parameter '" + iParam->first + "' = '" + iParam->second + "'");
+        foreach (auto&& param, toProcess->getProperties().getContainer()) {
+          log("Interpreter: - parameter '" + param.first + "' = '" + param.second + "'");
         }
 
         SubscriptionVector subscriptionsCopy;

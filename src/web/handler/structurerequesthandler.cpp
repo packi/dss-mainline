@@ -292,8 +292,8 @@ namespace dss {
       JSONWriter json;
       json.startArray("devices");
       json.startObject();
-      json.add("id", dsuid2str(dsuid));
-      json.add("dSUID", dsuid2str(dsuid));
+      json.add("id", dsuid);
+      json.add("dSUID", dsuid);
       json.add("DisplayID", dsuid2str(dsuid));
       json.endObject();
       json.endArray();
@@ -329,7 +329,7 @@ namespace dss {
       } else {
         json.add("id", "");
       }
-      json.add("dSUID", dsuid2str(pDev->getDSID()));
+      json.add("dSUID", pDev->getDSID());
       json.add("DisplayID", pDev->getDisplayID());
       json.endObject();
     }
@@ -442,7 +442,7 @@ namespace dss {
 
   std::string StructureRequestHandler::addCluster(const RestfulRequest& _request) {
     boost::shared_ptr<Cluster> pCluster;
-    int standardGroupID = 0;
+    int stateMachineID = 0;
     std::string clusterName;
 
     // find a group slot with unassigned state machine id
@@ -458,18 +458,18 @@ namespace dss {
       clusterName = escapeHTML(clusterName);
     }
     if (_request.hasParameter("color")) {
-      standardGroupID = strToIntDef(_request.getParameter("color"), 0);
+      stateMachineID = strToIntDef(_request.getParameter("color"), 0);
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), standardGroupID, clusterName);
+    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), stateMachineID, clusterName);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
     JSONWriter json;
     json.add("clusterID", pCluster->getID());
     json.add("name", clusterName);
-    json.add("color", standardGroupID);
+    json.add("color", stateMachineID);
     return json.successJSON();
   } // addCluster
 
@@ -478,7 +478,7 @@ namespace dss {
     boost::shared_ptr<Group> pGroup;
     int groupID = -1;
     int zoneID = -1;
-    int standardGroupID = 0;
+    int stateMachineID = 0;
     std::string groupName;
 
     if (_request.hasParameter("zoneID")) {
@@ -506,6 +506,8 @@ namespace dss {
         groupID = -1;
       } else if (grType == "global") {
         groupID = -2;
+      } else if (grType == "globalApp") {
+        groupID = -3;
       }
     } else {
       return JSONWriter::failure("Parameter groupID or groupAutoSelect missing");
@@ -523,12 +525,20 @@ namespace dss {
       // find a group slot with unassigned state machine id
       for (groupID = GroupIDAppUserMin; groupID <= GroupIDAppUserMax; groupID++) {
         pGroup = zone->getGroup(groupID);
-        if (pGroup->getStandardGroupID() == 0) {
+        if (pGroup->getApplicationType() == 0) {
           break;
         }
       }
-      if (pGroup->getStandardGroupID() > 0) {
+      if (pGroup->getApplicationType() > 0) {
         pGroup.reset();
+      }
+    } else if (groupID == -3) {
+      if (zoneID != 0) {
+        return JSONWriter::failure("Global application groups only allowed in Zone 0");
+      }
+      // find any free user global application slot
+      for (groupID = GroupIDGlobalAppUserMin; (pGroup == NULL) && (groupID < GroupIDGlobalAppUserMax); groupID ++) {
+        pGroup = zone->getGroup(groupID);
       }
     }
 
@@ -542,11 +552,11 @@ namespace dss {
       groupName = escapeHTML(groupName);
     }
     if (_request.hasParameter("groupColor")) {
-      standardGroupID = strToIntDef(_request.getParameter("groupColor"), 0);
+      stateMachineID = strToIntDef(_request.getParameter("groupColor"), 0);
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.createGroup(zone, groupID, standardGroupID, groupName);
+    manipulator.createGroup(zone, groupID, stateMachineID, groupName);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
@@ -554,7 +564,7 @@ namespace dss {
     json.add("groupID", groupID);
     json.add("zoneID", zoneID);
     json.add("groupName", groupName);
-    json.add("groupColor", standardGroupID);
+    json.add("groupColor", stateMachineID);
     return json.successJSON();
   } // addGroup
 
@@ -598,10 +608,10 @@ namespace dss {
       }
     }
 
-    if (!(dev->isInGroup(gr->getStandardGroupID()) ||
+    if (!(dev->isInGroup(gr->getApplicationType()) ||
           (dev->getDeviceType() == DEVICE_TYPE_AKM) ||
           (dev->getDeviceType() == DEVICE_TYPE_UMR))) {
-      return JSONWriter::failure("Devices does not match color of group (" + intToString(gr->getStandardGroupID()) + ")");
+      return JSONWriter::failure("Devices does not match color of group (" + intToString(gr->getApplicationType()) + ")");
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
@@ -856,7 +866,7 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.groupSetStandardID(group, newColor);
+    manipulator.groupSetApplicationType(group, newColor);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();
@@ -912,7 +922,7 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.clusterSetStandardID(pCluster, newColor);
+    manipulator.clusterSetApplicationType(pCluster, newColor);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();

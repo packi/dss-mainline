@@ -381,7 +381,7 @@ namespace dss {
     } else if (_request.getMethod() == "setJokerGroup") {
       boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
-      if (!isDefaultGroup(newGroupId)) {
+      if (!isDefaultGroup(newGroupId) && !isGlobalAppDsGroup(newGroupId)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
       if (m_pStructureBusInterface == NULL) {
@@ -615,7 +615,7 @@ namespace dss {
       } else {
         json.add("dsid", "");
       }
-      json.add("dSUID", dsuid2str(pDevice->getDSID()));
+      json.add("dSUID", pDevice->getDSID());
       json.add("buttonInputMode", pDevice->getButtonInputMode());
       json.endObject();
 
@@ -1084,8 +1084,8 @@ namespace dss {
     } else if (_request.getMethod() == "getBinaryInputs") {
       JSONWriter json;
       json.startArray("inputs");
-      std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binputs = pDevice->getBinaryInputs();
-      for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::iterator it = binputs.begin();
+      auto&& binputs = pDevice->getBinaryInputs();
+      for (auto&& it = binputs.begin();
           it != binputs.end();
           it ++) {
         json.startObject();
@@ -1107,7 +1107,7 @@ namespace dss {
       if (type < 0 || type > 254) {
         return JSONWriter::failure("Invalid or missing parameter 'type'");
       }
-      pDevice->setDeviceBinaryInputType(index, type);
+      pDevice->setDeviceBinaryInputType(index, static_cast<BinaryInputType>(type));
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputTarget") {
       int index = strToIntDef(_request.getParameter("index"), -1);
@@ -1115,14 +1115,14 @@ namespace dss {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
       int gtype = strToIntDef(_request.getParameter("groupType"), -1);
-      if (gtype < 0 || gtype > 4) {
+      if (gtype < 0 || gtype >= static_cast<int>(GroupType::End)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupType'");
       }
       int gid = strToIntDef(_request.getParameter("groupId"), -1);
       if (gid < 0 || gid > 63) {
         return JSONWriter::failure("Invalid or missing parameter 'groupId'");
       }
-      pDevice->setDeviceBinaryInputTarget(index, gtype, gid);
+      pDevice->setDeviceBinaryInputTarget(index, static_cast<GroupType>(gtype), gid);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputId") {
       int index = strToIntDef(_request.getParameter("index"), -1);
@@ -1133,7 +1133,7 @@ namespace dss {
       if (id < 0 || id > 15) {
         return JSONWriter::failure("Invalid or missing parameter 'inputId'");
       }
-      pDevice->setDeviceBinaryInputId(index, id);
+      pDevice->setDeviceBinaryInputId(index, static_cast<BinaryInputId>(id));
       return JSONWriter::success();
 
     } else if (_request.getMethod() == "getAKMInputTimeouts") {

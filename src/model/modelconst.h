@@ -24,6 +24,7 @@
 #define DS485GROUPSCENECONST_H_
 
 #include <stdint.h>
+#include <string>
 
 namespace dss {
 
@@ -157,6 +158,7 @@ namespace dss {
   const uint8_t SensorFunction_Generic11 = 11;
 
   enum class SensorType {
+    Status = 0, ///< Status sensor value. See also \ref StatusSensorBits.
     ActivePower = 4,
     OutputCurrent = 5,
     ElectricMeter = 6,
@@ -185,37 +187,46 @@ namespace dss {
     UnknownType = 255,
   };
 
+  // Interpretation of SensorType::Status bit values.
+  enum class StatusSensorBits {
+    MALFUNCTION = 0,
+    SERVICE = 1,
+  };
+
   const int SensorMaxLifeTime = 3600; /* 1h */
 
-  double sensorToFloat12(SensorType _sensorType, const int _sensorValue);
-  int sensorToSystem(SensorType _sensorType, const double _sensorValue);
-  uint8_t sensorToPrecision(SensorType _sensorType);
-  std::string sensorName(SensorType _sensorType);
+  double sensorValueToDouble(SensorType _sensorType, const int _sensorValue);
+  int doubleToSensorValue(SensorType _sensorType, const double _sensorValue);
+  uint8_t sensorTypeToPrecision(SensorType _sensorType);
+  std::string sensorTypeName(SensorType _sensorType);
+  std::ostream& operator<<(std::ostream& stream, SensorType type);
 
-  // BinaryInput Type IDs
-  const int BinaryInputIDPresence = 1;
-  const int BinaryInputIDRoomBrightness = 2;
-  const int BinaryInputIDPresenceInDarkness = 3;
-  const int BinaryInputIDTwilightExternal = 4;
-  const int BinaryInputIDMovement = 5;
-  const int BinaryInputIDMovementInDarkness = 6;
-  const int BinaryInputIDSmokeDetector = 7;
-  const int BinaryInputIDWindDetector = 8;
-  const int BinaryInputIDRainDetector = 9;
-  const int BinaryInputIDSunRadiation = 10;
-  const int BinaryInputIDRoomThermostat = 11;
-  const int BinaryInputIDBatteryLow = 12;
-  const int BinaryInputIDWindowContact = 13;
-  const int BinaryInputIDDoorContact = 14;
-  const int BinaryInputIDWindowTilt = 15;
-  const int BinaryInputIDGarageDoorContact = 16;
-  const int BinaryInputIDSunProtection = 17;
-  const int BinaryInputIDFrostDetector = 18;
-  const int BinaryInputIDHeatingSystem = 19;
-  const int BinaryInputIDHeatingSystemMode = 20;
-  const int BinaryInputIDPowerUp = 21;
-  const int BinaryInputIDMalfunction = 22;
-  const int BinaryInputIDService = 23;
+  enum class BinaryInputType {
+    Presence = 1,
+    RoomBrightness = 2,
+    PresenceInDarkness = 3,
+    TwilightExternal = 4,
+    Movement = 5,
+    MovementInDarkness = 6,
+    SmokeDetector = 7,
+    WindDetector = 8,
+    RainDetector = 9,
+    SunRadiation = 10,
+    RoomThermostat = 11,
+    BatteryLow = 12,
+    WindowContact = 13,
+    DoorContact = 14,
+    WindowTilt = 15,
+    GarageDoorContact = 16,
+    SunProtection = 17,
+    FrostDetector = 18,
+    HeatingSystem = 19,
+    HeatingSystemMode = 20,
+    PowerUp = 21,
+    Malfunction = 22,
+    Service = 23,
+  };
+  std::ostream& operator<<(std::ostream& stream, BinaryInputType type);
 
   enum class BinaryInputState {
     Inactive = 0,
@@ -228,6 +239,12 @@ namespace dss {
     Open = 1,
     Tilted = 2,
     Unknown = -1
+  };
+
+  enum class BinaryInputId {
+    // https://intranet.aizo.net/Wiki/Automatisierungsklemme.aspx
+    APP_MODE = 15, // dSS will interpret and react (not the dSM).
+    // other values are not interpreted by dss
   };
 
   // Click type constants for devices
@@ -284,6 +301,13 @@ namespace dss {
   const int ColorIDGreen = 7;
   const int ColorIDBlack = 8;
 
+  // TODO(someday): Remove this type and variables that use it altogether?
+  // https://git.digitalstrom.org/brano/dss-mainline/commit/d17f16eb550c0cb32c910372f8d137ba32338a68#note_35767
+  enum class GroupType {
+    Standard = 0, // (from dsm-api doc) 0 = Standard Groups
+    End = 5 // exclusive upper bound
+  };
+
   // Group ID"s
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
@@ -310,9 +334,14 @@ namespace dss {
   const int GroupIDControlTemperature = 48;
   const int GroupIDControlGroupMax = 55;
   const int GroupIDMax = 63;
+  // TODO: verify that this ranges are valid
   const int GroupIDGlobalAppMin = 64;
-  const int GroupIDGlobalAppVentilation = 64;
-  const int GroupIDGlobalAppMax = 128;
+  const int GroupIDGlobalAppDsMin = 64;
+  const int GroupIDGlobalAppDsVentilation = 64;
+  const int GroupIDGlobalAppDsMax = 187;
+  const int GroupIDGlobalAppUserMin = 188;
+  const int GroupIDGlobalAppUserMax = 249;
+  const int GroupIDGlobalAppMax = 249;
 
   inline bool isDefaultGroup(int groupId) {
     return ((groupId >= GroupIDYellow && groupId <= GroupIDStandardMax)) ||
@@ -331,8 +360,16 @@ namespace dss {
     return (groupId >= GroupIDControlGroupMin && groupId <= GroupIDControlGroupMax);
   }
 
+  inline bool isGlobalAppDsGroup(int groupId) {
+    return ( (groupId >= GroupIDGlobalAppDsMin) && (groupId <= GroupIDGlobalAppDsMax) );
+  }
+
+  inline bool isGlobalAppUserGroup(int groupId) {
+    return ( (groupId >= GroupIDGlobalAppUserMin) && (groupId <= GroupIDGlobalAppUserMax) );
+  }
+
   inline bool isGlobalAppGroup(int groupId) {
-    return (groupId >= GroupIDGlobalAppMin && groupId <= GroupIDGlobalAppMax);
+    return isGlobalAppDsGroup(groupId) || isGlobalAppUserGroup(groupId);
   }
 
   inline bool isValidGroup(int groupId) {
@@ -359,6 +396,8 @@ namespace dss {
   const uint8_t CfgFunction_FOnTime1 = 0x16;
   const uint8_t CfgFunction_FCount1 = 0x17;
   const uint8_t CfgFunction_LedConfig0 = 0x18;
+  const uint8_t CfgFunction_PbChannel = 0x1C;
+  const uint8_t CfgFunction_PbGroup = 0x1D;
   const uint8_t CfgFunction_LTMode = 0x1E;
   const uint8_t CfgFunction_DeviceActive = 0x1F;
   const uint8_t CfgFunction_LTTimeoutOff = 0x22;

@@ -239,11 +239,10 @@ void SystemState::startup() {
       continue;
     }
 
-    foreach (boost::shared_ptr<DeviceBinaryInput_t> input,
-             device->getBinaryInputs()) {
+    foreach (auto&& input, device->getBinaryInputs()) {
       // motion
-      if ((input->m_inputType == BinaryInputIDMovement) ||
-          (input->m_inputType == BinaryInputIDMovementInDarkness)) {
+      if ((input->m_inputType == BinaryInputType::Movement) ||
+          (input->m_inputType == BinaryInputType::MovementInDarkness)) {
         std::string stateName;
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
           stateName = formatGroupName(StateName::Motion, input->m_targetGroupId);
@@ -254,8 +253,8 @@ void SystemState::startup() {
       }
 
       // presence
-      if ((input->m_inputType == BinaryInputIDPresence) ||
-          (input->m_inputType == BinaryInputIDPresenceInDarkness)) {
+      if ((input->m_inputType == BinaryInputType::Presence) ||
+          (input->m_inputType == BinaryInputType::PresenceInDarkness)) {
         std::string stateName;
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
           stateName = formatGroupName(StateName::Presence, input->m_targetGroupId);
@@ -266,21 +265,21 @@ void SystemState::startup() {
       }
 
       // wind monitor
-      if (input->m_inputType == BinaryInputIDWindDetector) {
+      if (input->m_inputType == BinaryInputType::WindDetector) {
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
           getOrRegisterState(formatAppartmentStateName(StateName::Wind, input->m_targetGroupId));
         }
       }
 
       // rain monitor
-      if (input->m_inputType == BinaryInputIDRainDetector) {
+      if (input->m_inputType == BinaryInputType::RainDetector) {
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
           getOrRegisterState(formatAppartmentStateName(StateName::Rain, input->m_targetGroupId));
         }
       }
 
       // frost detector
-      if (input->m_inputType == BinaryInputIDFrostDetector) {
+      if (input->m_inputType == BinaryInputType::FrostDetector) {
         if (input->m_targetGroupId >= GroupIDAppUserMin) {
           getOrRegisterState(formatAppartmentStateName(StateName::Frost, input->m_targetGroupId));
         }
@@ -295,7 +294,7 @@ void SystemState::startup() {
 
     foreach (boost::shared_ptr<Group> group, zone->getGroups()) {
       if (isAppUserGroup(group->getID())) {
-        if (group->getStandardGroupID() == GroupIDGray) {
+        if (group->getApplicationType() == GroupIDGray) {
           registerState(formatAppartmentStateName(StateName::Wind, group->getID()), true);
         }
         continue;
@@ -354,7 +353,7 @@ void SystemState::startup() {
 
   // Restore states if they have been registered before, that reads: if a persistent data file exists
   foreach (boost::shared_ptr<Cluster> cluster, m_apartment.getClusters()) {
-    if (cluster->getStandardGroupID() == GroupIDGray) {
+    if (cluster->getApplicationType() == GroupIDGray) {
       loadPersistentState(StateType_Service, formatAppartmentStateName(StateName::Wind, cluster->getID()));
     }
     loadPersistentState(StateType_Group, formatAppartmentStateName(StateName::OperationLock, cluster->getID()));
@@ -628,20 +627,16 @@ void SystemState::undoscene() {
 }
 
 void SystemState::stateBinaryInputGeneric(State &_state,
-                                          int targetGroupType,
+                                          GroupType targetGroupType,
                                           int targetGroupId) {
   try {
     std::string stateName = _state.getName();
-    PropertyNodePtr pNode =
-        DSS::getInstance()->getPropertySystem().getProperty(
-            "/scripts/system_state/" + stateName + "." +
-            intToString(targetGroupType) + "." +
-            intToString(targetGroupId));
+    auto&& nodePath = "/scripts/system_state/" + stateName + "." +
+        intToString(static_cast<int>(targetGroupType)) + "." +
+        intToString(targetGroupId);
+    PropertyNodePtr pNode = DSS::getInstance()->getPropertySystem().getProperty(nodePath);
     if (pNode == NULL) {
-      pNode = DSS::getInstance()->getPropertySystem().createProperty(
-            "/scripts/system_state/" + stateName + "." +
-            intToString(targetGroupType) + "." +
-            intToString(targetGroupId));
+      pNode = DSS::getInstance()->getPropertySystem().createProperty(nodePath);
       pNode->setIntegerValue(0);
     }
 
@@ -694,15 +689,15 @@ void SystemState::stateBinaryinput() {
   }
 
   uint8_t inputIndex = (uint8_t)iiNode->getIntegerValue();
-  const boost::shared_ptr<DeviceBinaryInput_t> devInput = pDev->getBinaryInput(inputIndex);
+  auto&& devInput = pDev->getBinaryInput(inputIndex);
 
-  if (devInput->m_inputId != 15) {
+  if (devInput->m_inputId != BinaryInputId::APP_MODE) {
     return;
   }
 
   // motion
-  if ((devInput->m_inputType == BinaryInputIDMovement) ||
-      (devInput->m_inputType == BinaryInputIDMovementInDarkness)) {
+  if ((devInput->m_inputType == BinaryInputType::Movement) ||
+      (devInput->m_inputType == BinaryInputType::MovementInDarkness)) {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
       statename = formatGroupName(StateName::Motion, devInput->m_targetGroupId);
     } else {
@@ -714,8 +709,8 @@ void SystemState::stateBinaryinput() {
   }
 
   // presence
-  if ((devInput->m_inputType == BinaryInputIDPresence) ||
-      (devInput->m_inputType == BinaryInputIDPresenceInDarkness)) {
+  if ((devInput->m_inputType == BinaryInputType::Presence) ||
+      (devInput->m_inputType == BinaryInputType::PresenceInDarkness)) {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
       statename = formatGroupName(StateName::Presence, devInput->m_targetGroupId);
     } else {
@@ -727,7 +722,7 @@ void SystemState::stateBinaryinput() {
   }
 
   // smoke detector
-  if (devInput->m_inputType == BinaryInputIDSmokeDetector) {
+  if (devInput->m_inputType == BinaryInputType::SmokeDetector) {
     boost::shared_ptr<State> state;
     if (lookupState(state, StateName::Fire)) {
       if (m_properties.has("value")) {
@@ -741,7 +736,7 @@ void SystemState::stateBinaryinput() {
   }
 
   // wind monitor
-  if (devInput->m_inputType == BinaryInputIDWindDetector) {
+  if (devInput->m_inputType == BinaryInputType::WindDetector) {
     boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
@@ -756,7 +751,7 @@ void SystemState::stateBinaryinput() {
   }
 
   // rain monitor
-  if (devInput->m_inputType == BinaryInputIDRainDetector) {
+  if (devInput->m_inputType == BinaryInputType::RainDetector) {
     boost::shared_ptr<State> state;
     // create state for a user group if it does not exist (new group?)
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
@@ -771,7 +766,7 @@ void SystemState::stateBinaryinput() {
   }
 
   // zone thermostat
-  if (devInput->m_inputType == BinaryInputIDRoomThermostat) {
+  if (devInput->m_inputType == BinaryInputType::RoomThermostat) {
     if (m_properties.has("value")) {
       std::string val = m_properties.get("value");
       int iVal = strToIntDef(val, -1);
@@ -784,7 +779,7 @@ void SystemState::stateBinaryinput() {
   }
 
   // frost detector
-  if (devInput->m_inputType == BinaryInputIDFrostDetector) {
+  if (devInput->m_inputType == BinaryInputType::FrostDetector) {
     boost::shared_ptr<State> state;
     if (lookupState(state, StateName::Frost)) {
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
@@ -793,7 +788,7 @@ void SystemState::stateBinaryinput() {
   }
 
   // heating (on/off)
-  if (devInput->m_inputType == BinaryInputIDHeatingSystem) {
+  if (devInput->m_inputType == BinaryInputType::HeatingSystem) {
     boost::shared_ptr<State> state;
     if (lookupState(state, StateName::HeatingSystem)) {
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
@@ -802,7 +797,7 @@ void SystemState::stateBinaryinput() {
   }
 
   // heating mode: hot/cold
-  if (devInput->m_inputType == BinaryInputIDHeatingSystemMode) {
+  if (devInput->m_inputType == BinaryInputType::HeatingSystemMode) {
     boost::shared_ptr<State> state;
     if (lookupState(state, StateName::HeatingSystemMode)) {
       stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
@@ -811,8 +806,8 @@ void SystemState::stateBinaryinput() {
   }
 
   // evaluate heating mode
-  if ((devInput->m_inputType == BinaryInputIDHeatingSystem) ||
-      (devInput->m_inputType == BinaryInputIDHeatingSystemMode)) {
+  if ((devInput->m_inputType == BinaryInputType::HeatingSystem) ||
+      (devInput->m_inputType == BinaryInputType::HeatingSystemMode)) {
 
     boost::shared_ptr<State> heating;
     boost::shared_ptr<State> heating_mode;

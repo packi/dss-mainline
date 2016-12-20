@@ -24,6 +24,8 @@
 #define __DSS_WEBSERVICE_CONNECTION_H__
 
 #include <string>
+#include <unordered_map>
+
 #include <boost/shared_ptr.hpp>
 
 #include "dss.h"
@@ -53,14 +55,14 @@ public:
                bool authenticated = false);
   void request(const std::string& url,
                const std::string& parameters,
-               const HashMapStringString& headers,
+               const std::unordered_map<std::string, std::string> headers,
                const std::string& postdata,
                boost::shared_ptr<URLRequestCallback> cb,
                bool authenticated = false);
   void request(const std::string& url,
                const std::string &parameters,
                RequestType type,
-               const HashMapStringString& headers,
+               const std::unordered_map<std::string, std::string> headers,
                boost::shared_ptr<URLRequestCallback> cb,
                bool authenticated = false);
 

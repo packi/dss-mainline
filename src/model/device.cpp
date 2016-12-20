@@ -34,6 +34,7 @@
 
 #include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
+#include <ds/string.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -55,9 +56,178 @@
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
 #include "src/protobufjson.h"
+#include "composed-group-state.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
+
+  //================================================== DeviceBinaryInput
+
+  __DEFINE_LOG_CHANNEL__(DeviceBinaryInput, lsNotice);
+
+  // RAII class to handling stream to ComposedGroupState
+  class DeviceBinaryInput::GroupStateHandle: boost::noncopyable {
+  public:
+    GroupStateHandle(DeviceBinaryInput& parent, const boost::shared_ptr<ComposedGroupState>& ptr)
+        : m_parent(parent), m_ptr(ptr) {
+      assert(ptr);
+      m_ptr->addSubState(*m_parent.m_state);
+    }
+    ~GroupStateHandle() {
+      m_ptr->removeSubState(*m_parent.m_state);
+    }
+    void update() {
+      log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
+      m_ptr->updateSubState(*m_parent.m_state);
+    }
+  private:
+    DeviceBinaryInput& m_parent;
+    boost::shared_ptr<ComposedGroupState> m_ptr;
+  };
+
+  DeviceBinaryInput::DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index)
+      : m_inputIndex(index)
+      , m_inputType(spec.InputType)
+      , m_inputId(spec.InputID)
+      , m_targetGroupType(spec.TargetGroupType)
+      , m_targetGroupId(spec.TargetGroup)
+      , m_device(device)
+      , m_name(m_device.getName() + "/" + intToString(index)) {
+    log(std::string("DeviceBinaryInput this:") + m_name
+        + " inputType:" + intToString(static_cast<int>(m_inputType))
+        + " inputId:" + intToString(static_cast<int>(m_inputId))
+        + " targetGroupType:" + intToString(static_cast<int>(m_targetGroupType))
+        + " targetGroupId:" + intToString(m_targetGroupId), lsInfo);
+    m_state = boost::make_shared<State>(device.sharedFromThis(), index);
+
+    // assignCustomBinaryInputValues
+    if (m_inputType == BinaryInputType::WindowTilt) {
+      State::ValueRange_t windowTiltValues;
+      windowTiltValues.push_back("invalid");
+      windowTiltValues.push_back("closed");
+      windowTiltValues.push_back("open");
+      windowTiltValues.push_back("tilted");
+      windowTiltValues.push_back("unknown");
+      m_state->setValueRange(windowTiltValues);
+    }
+
+    try {
+      device.getApartment().allocateState(m_state);
+    } catch (ItemDuplicateException& ex) {
+      m_state = device.getApartment().getNonScriptState(m_state->getName());
+    }
+
+    updateGroupState();
+  }
+
+  DeviceBinaryInput::~DeviceBinaryInput() {
+    log(std::string("~DeviceBinaryInput this:") + m_name, lsInfo);
+    try {
+      m_device.getApartment().removeState(m_state);
+    } catch (const std::exception& e) {
+      Logger::getInstance()->log(std::string("~DeviceBinaryInput: remove state failed:") + e.what(), lsWarning);
+    }
+  }
+
+  void DeviceBinaryInput::setTarget(GroupType targetGroupType, uint8_t targetGroupId) {
+    if (m_targetGroupType == targetGroupType && m_targetGroupId == targetGroupId) {
+      return;
+    }
+    log(std::string("setTarget this:") + m_name
+        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType))
+        + " targetGroupId:" + intToString(targetGroupId), lsInfo);
+    m_targetGroupId = targetGroupId;
+    m_targetGroupType = targetGroupType;
+    updateGroupState();
+  }
+
+  void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
+    if (m_inputId == inputId) {
+      return;
+    }
+    log(std::string("setInputId this:") + m_name
+        + " inputId:" + intToString(static_cast<int>(inputId)), lsInfo);
+    m_inputId = inputId;
+  }
+
+  void DeviceBinaryInput::setInputType(BinaryInputType inputType) {
+    if (m_inputType == inputType) {
+      return;
+    }
+    log(std::string("setInputType this:") + m_name
+        + " inputType:" + intToString(static_cast<int>(inputType)), lsInfo);
+    m_inputType = inputType;
+  }
+
+  void DeviceBinaryInput::handleEvent(BinaryInputState inputState) {
+    log(std::string("handleEvent this:") + m_name
+        + " m_inputType:" + intToString(static_cast<int>(m_inputType))
+        + " inputState:" + intToString(static_cast<int>(inputState)), lsInfo);
+    try {
+      if (m_inputType == BinaryInputType::WindowTilt) {
+        m_state->setState(coSystem,
+            [&]() {
+              switch (static_cast<BinaryInputWindowHandleState>(inputState)) {
+                case BinaryInputWindowHandleState::Closed: return StateWH_Closed;
+                case BinaryInputWindowHandleState::Open: return StateWH_Open;
+                case BinaryInputWindowHandleState::Tilted: return StateWH_Tilted;
+                case BinaryInputWindowHandleState::Unknown: return StateWH_Unknown;
+              };
+              return StateWH_Unknown;
+            }());
+      } else {
+        m_state->setState(coSystem,
+            [&]() {
+              switch (inputState) {
+                case BinaryInputState::Inactive: return State_Inactive;
+                case BinaryInputState::Active: return State_Active;
+                case BinaryInputState::Unknown: return State_Unknown;
+              };
+              return State_Unknown;
+            }());
+      }
+    } catch (const std::exception& e) {
+      log(std::string("handleEvent: what:")+ e.what(), lsWarning);
+    }
+    if (m_groupState) {
+      m_groupState->update();
+    }
+  }
+
+  void DeviceBinaryInput::updateGroupState() {
+    // remove link to old group state
+    m_groupState.reset();
+
+    auto composedGroupStateType = composedGroupStateTypeForBinaryInputType(m_inputType);
+    log(std::string("updateGroupState ENTER this:") + m_name
+        + " m_inputType:" + intToString(static_cast<int>(m_inputType))
+        + " composedGroupStateType:" + intToString(static_cast<int>(composedGroupStateType))
+        + " m_targetGroupId:" + intToString(m_targetGroupId), lsInfo);
+    if (composedGroupStateType == ComposedGroupStateType::NONE) {
+      return;
+    }
+    auto&& targetGroupId = m_targetGroupId;
+    if (targetGroupId == 0) {
+      return;
+    }
+    auto&& apartment = m_device.getApartment();
+    auto&& targetGroupZoneId = m_device.getGroupZoneID(targetGroupId);
+    auto&& composedGroupName = ds::str("zone.", targetGroupZoneId, ".group.", targetGroupId, ".inputType.",
+        static_cast<int>(m_inputType));
+    boost::shared_ptr<ComposedGroupState> composedGroupState;
+    {
+      auto&& base = apartment.tryGetState(ComposedGroupState::STATE_TYPE, composedGroupName);
+      if (base) {
+        composedGroupState = boost::dynamic_pointer_cast<ComposedGroupState>(base);
+        assert(composedGroupState);
+      } else {
+        composedGroupState = boost::make_shared<ComposedGroupState>(composedGroupName, composedGroupStateType);
+        apartment.allocateState(composedGroupState); // no ItemNotFoundException, we know it does not exist
+      }
+    }
+    m_groupState.reset(new GroupStateHandle(*this, composedGroupState));
+    log(std::string("updateGroupState LEAVE this:") + m_name + " composedGroupName:" + composedGroupName, lsInfo);
+  }
 
   //================================================== Device
 
@@ -112,7 +282,6 @@ namespace dss {
     m_hasActions(false),
     m_ValveType(DEVICE_VALVE_UNKNOWN),
     m_IsConfigLocked(false),
-    m_binaryInputCount(0),
     m_sensorInputCount(0),
     m_outputChannelCount(0),
     m_AKMInputProperty(),
@@ -140,6 +309,10 @@ namespace dss {
     removeFromPropertyTree();
   }
 
+  int Device::getGroupZoneID(int groupID) const {
+    return (isAppUserGroup(groupID) || isGlobalAppGroup(groupID)) ? 0 : (m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID);
+  }
+
   void Device::removeFromPropertyTree() {
     if (m_pPropertyNode != NULL) {
       try {
@@ -154,9 +327,8 @@ namespace dss {
       }
 
       if (m_pApartment->getPropertyNode() != NULL) {
-        foreach(auto&& g, m_Groups) {
-          int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
-          std::string gPath = "zones/zone" + intToString(zid) +
+        foreach(auto&& g, m_groupIds) {
+          std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
               "/groups/group" + intToString(g) + "/devices/" +
               dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
@@ -384,8 +556,8 @@ namespace dss {
       }
     }
 
-    foreach (auto&& g, m_Groups) {
-      std::string gPath = "zones/zone" + intToString(m_ZoneID) +
+    foreach (auto&& g, m_groupIds) {
+      std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
                           "/groups/group" + intToString(g) + "/devices/" +
                           dsuid2str(m_DSID);
       PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
@@ -587,8 +759,7 @@ namespace dss {
 
   void Device::setDeviceButtonID(uint8_t _buttonId) {
     setButtonID(_buttonId);
-    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
-        ((m_ButtonGroupMembership & 0xf) << 4) | (_buttonId & 0xf));
+    setDeviceButtonConfig();
   } // setDeviceButtonId
 
   void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
@@ -614,8 +785,21 @@ namespace dss {
     }
   } // setDeviceActiveGroup
 
+  void Device::setDeviceButtonConfig() {
+    if (m_ButtonGroupMembership < 16) {
+      // In case the button group is in 0-15 range just set the LTNUMGROUP register (bank 3, offset 1)
+      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, ((m_ButtonGroupMembership & 0xf) << 4) | (m_ButtonID & 0xf));
+    } else {
+      // In case the button group is greater than 0-15 then the 4-bit field in LTNUMGROUP register (bank 3, offset 1) is
+      // replaced by the PBGROUP (bank 3, offset 0x1d) register.
+      // In case of a "0" value in LTNUMGRP group bits the value should be taken from PBGROUP instead
+      setDeviceConfig(CfgClassFunction, CfgFunction_PbGroup, m_ButtonGroupMembership);
+      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, m_ButtonID & 0xf);
+    }
+  }
+
   void Device::setDeviceJokerGroup(uint8_t _groupId) {
-    if ((_groupId < GroupIDYellow) || (_groupId > GroupIDStandardMax)) {
+    if (!isDefaultGroup(_groupId) && !isGlobalAppDsGroup(_groupId)) {
       throw std::runtime_error("Invalid joker group value");
     }
     // for standard groups force that only one group is active
@@ -624,11 +808,17 @@ namespace dss {
         removeFromGroup(g);
       }
     }
+    // remove also from GA groups
+    for (int g = GroupIDGlobalAppMin; g <= GroupIDGlobalAppMax; g++) {
+      if (isInGroup(g)) {
+        removeFromGroup(g);
+      }
+    }
+
     addToGroup(_groupId);
     // propagate target group value to device
     setButtonGroupMembership(_groupId);
-    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
-        ((_groupId & 0xf) << 4) | (m_ButtonID & 0xf));
+    setDeviceButtonConfig();
 
     updateIconPath();
   } // setDeviceJokerGroup
@@ -1155,27 +1345,22 @@ namespace dss {
     m_LastKnownZoneID = _value;
   } // setLastKnownZoneID
 
-  int Device:: getGroupIdByIndex(const int _index) const {
-    return m_Groups[_index];
+  int Device::getGroupIdByIndex(const int index) const {
+    return m_groupIds.at(index);
   } // getGroupIdByIndex
 
   boost::shared_ptr<Group> Device::getGroupByIndex(const int _index) {
     return m_pApartment->getGroup(getGroupIdByIndex(_index));
   } // getGroupByIndex
 
-  std::vector<int> Device::getGroups() const {
-    return m_Groups;
-  }
-
   void Device::addToGroup(const int _groupID) {
     if (isValidGroup(_groupID)) {
       updateIconPath();
-      if (find(m_Groups.begin(), m_Groups.end(), _groupID) == m_Groups.end()) {
-        m_Groups.push_back(_groupID);
+      if (find(m_groupIds.begin(), m_groupIds.end(), _groupID) == m_groupIds.end()) {
+        m_groupIds.push_back(_groupID);
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // create alias in group list
-          int zone = isAppUserGroup(_groupID) ? 0 : m_ZoneID;
-          std::string gPath = "zones/zone" + intToString(zone) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
+          std::string gPath = "zones/zone" + intToString(getGroupZoneID(_groupID)) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
           if (gnode) {
             gnode->alias(m_pPropertyNode);
@@ -1195,25 +1380,16 @@ namespace dss {
   void Device::removeFromGroup(const int _groupID) {
     if (isValidGroup(_groupID)) {
       updateIconPath();
-      std::vector<int>::iterator it = find(m_Groups.begin(), m_Groups.end(), _groupID);
-      if (it != m_Groups.end()) {
-        m_Groups.erase(it);
+      std::vector<int>::iterator it = find(m_groupIds.begin(), m_groupIds.end(), _groupID);
+      if (it != m_groupIds.end()) {
+        m_groupIds.erase(it);
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // remove alias in group list
-          int zid = m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID;
-          std::string gPath = "zones/zone" + intToString(zid) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
+          std::string gPath = "zones/zone" + intToString(getGroupZoneID(_groupID)) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
           PropertyNodePtr gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
           if (gnode) {
             gnode->getParentNode()->removeChild(gnode);
           }
-
-          // remove from zone 0
-          gPath = "zones/zone0/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
-          gnode = m_pApartment->getPropertyNode()->getProperty(gPath);
-          if (gnode) {
-            gnode->getParentNode()->removeChild(gnode);
-          }
-
           // remove property in device group list
           PropertyNodePtr gsubnode = m_pPropertyNode->getProperty("groups/group" + intToString(_groupID));
           if (gsubnode) {
@@ -1228,14 +1404,14 @@ namespace dss {
 
   void Device::resetGroups() {
     std::vector<int>::iterator it;
-    while (m_Groups.size() > 0) {
-      int g = m_Groups.front();
+    while (m_groupIds.size() > 0) {
+      int g = m_groupIds.front();
       removeFromGroup(g);
     }
   } // resetGroups
 
   int Device::getGroupsCount() const {
-    return m_Groups.size();
+    return m_groupIds.size();
   } // getGroupsCount
 
   bool Device::isInGroup(const int _groupID) const {
@@ -1245,15 +1421,11 @@ namespace dss {
     } else if (!isValidGroup(_groupID)) {
       result = false;
     } else {
-      auto it = find(m_Groups.begin(), m_Groups.end(), _groupID);
-      result = (it != m_Groups.end());
+      auto it = find(m_groupIds.begin(), m_groupIds.end(), _groupID);
+      result = (it != m_groupIds.end());
     }
     return result;
   } // isInGroup
-
-  Apartment& Device::getApartment() const {
-    return *m_pApartment;
-  } // getApartment
 
   void Device::setIsLockedInDSM(const bool _value) {
     m_IsLockedInDSM = _value;
@@ -2041,27 +2213,27 @@ namespace dss {
     dirty();
   }
 
-  void Device::setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType) {
+  void Device::setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType inputType) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     lock.unlock();
-    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, _inputType);
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, static_cast<int>(inputType));
   }
 
-  void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup)
+  void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, GroupType targetType, uint8_t _targetGroup)
   {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
-    uint8_t val = (_targetType & 0x3) << 6;
+    uint8_t val = (static_cast<int>(targetType) & 0x3) << 6;
     val |= (_targetGroup & 0x3f);
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, val);
   }
 
-  uint8_t Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
+  BinaryInputType Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
@@ -2069,22 +2241,12 @@ namespace dss {
     return m_binaryInputs[_inputIndex]->m_inputType;
   }
 
-  bool Device::hasBinaryInputType(int inputType) const {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    foreach(boost::shared_ptr<DeviceBinaryInput_t> binInput, m_binaryInputs) {
-      if (binInput->m_inputType == inputType) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  void Device::setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId) {
+  void Device::setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId id) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
-    uint8_t val = (_targetId & 0xf) << 4;
+    uint8_t val = (static_cast<int>(id) & 0xf) << 4;
     if (_inputIndex == m_binaryInputs.size()) {
       val |= 0x80;
     }
@@ -2134,48 +2296,30 @@ namespace dss {
   }
 
   const uint8_t Device::getBinaryInputCount() const {
-    return (uint8_t) m_binaryInputCount;
+    return (uint8_t) m_binaryInputs.size();
   }
 
-  void Device::setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup) {
+  void Device::setBinaryInputTarget(uint8_t index, GroupType targetGroupType, uint8_t targetGroup) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_index >= m_binaryInputs.size()) {
-      throw ItemNotFoundException("Invalid binary input index");
-    }
-    m_binaryInputs[_index]->m_targetGroupId = targetGroup;
-    m_binaryInputs[_index]->m_targetGroupType = targetGroupType;
+    getBinaryInput(index)->setTarget(targetGroupType, targetGroup);
   }
 
-  void Device::setBinaryInputId(uint8_t _index, uint8_t _inputId) {
+  void Device::setBinaryInputId(uint8_t index, BinaryInputId inputId) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_index >= m_binaryInputs.size()) {
-      throw ItemNotFoundException("Invalid binary input index");
-    }
-    m_binaryInputs[_index]->m_inputId = _inputId;
+    getBinaryInput(index)->setInputId(inputId);
   }
 
-  void Device::setBinaryInputType(uint8_t _index, uint8_t _inputType) {
+  void Device::setBinaryInputType(uint8_t index, BinaryInputType inputType) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_index >= m_binaryInputs.size()) {
-      throw ItemNotFoundException("Invalid binary input index");
-    }
-    m_binaryInputs[_index]->m_inputType = _inputType;
+    getBinaryInput(index)->setInputType(inputType);
   }
 
-  void Device::clearBinaryInputStates() {
+  void Device::clearBinaryInputs() {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    foreach(auto&& state, m_binaryInputStates) {
-      try {
-        m_pApartment->removeState(state);
-      } catch (const std::exception& e) {
-        Logger::getInstance()->log(std::string("Device::clearBinaryInputStates: remove state failed:")
-            + e.what(), lsWarning);
-      }
-    }
-    m_binaryInputStates.clear();
+    m_binaryInputs.clear();
   }
 
-  void Device::initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& stateSpecs) {
+  void Device::initStates(const std::vector<DeviceStateSpec_t>& stateSpecs) {
     if (stateSpecs.empty()) {
       return;
     }
@@ -2193,7 +2337,7 @@ namespace dss {
     BOOST_FOREACH(const DeviceStateSpec_t& stateSpec, stateSpecs) {
       const std::string& stateName = stateSpec.Name;
       try {
-        boost::shared_ptr<State> state = boost::make_shared<State>(me, stateName);
+        boost::shared_ptr<State> state = boost::make_shared<State>(sharedFromThis(), stateName);
         std::vector<std::string> values;
         values.push_back(State::INVALID);
         values.insert(values.end(), stateSpec.Values.begin(), stateSpec.Values.end());
@@ -2268,54 +2412,11 @@ namespace dss {
     }
   }
 
-
-  void Device::assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state) {
-    // Window Tilt Binary Input
-    if (inputType == BinaryInputIDWindowTilt) {
-      State::ValueRange_t windowTiltValues;
-      windowTiltValues.push_back("invalid");
-      windowTiltValues.push_back("closed");
-      windowTiltValues.push_back("open");
-      windowTiltValues.push_back("tilted");
-      windowTiltValues.push_back("unknown");
-      state->setValueRange(windowTiltValues);
-    }
-    // other custom devices...
-  }
-
   void Device::handleBinaryInputEvent(const int index, BinaryInputState inputState) {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    try {
-      auto&& state = m_binaryInputStates.at(index);
-      auto&& inputType = getDeviceBinaryInputType(index);
-      if (inputType == BinaryInputIDWindowTilt) {
-        state->setState(coSystem,
-            [&]() {
-              switch (static_cast<BinaryInputWindowHandleState>(inputState)) {
-                case BinaryInputWindowHandleState::Closed: return StateWH_Closed;
-                case BinaryInputWindowHandleState::Open: return StateWH_Open;
-                case BinaryInputWindowHandleState::Tilted: return StateWH_Tilted;
-                case BinaryInputWindowHandleState::Unknown: return StateWH_Unknown;
-              };
-              return StateWH_Unknown;
-            }());
-      } else {
-        state->setState(coSystem,
-            [&]() {
-              switch (inputState) {
-                case BinaryInputState::Inactive: return State_Inactive;
-                case BinaryInputState::Active: return State_Active;
-                case BinaryInputState::Unknown: return State_Unknown;
-              };
-              return State_Unknown;
-            }());
-      }
-    } catch (const std::exception& e) {
-      Logger::getInstance()->log(std::string("Device::handleBinaryInputEvent: what:")+ e.what(), lsWarning);
-    }
+    getBinaryInput(index)->handleEvent(inputState);
   }
 
-  void Device::setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
+  void Device::setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInputs) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr binaryInputNode;
     if (m_pPropertyNode != NULL) {
@@ -2325,62 +2426,43 @@ namespace dss {
       }
       binaryInputNode = m_pPropertyNode->createProperty("binaryInputs");
     }
-    m_binaryInputCount = 0;
     m_binaryInputs.clear();
-    m_binaryInputStates.clear();
 
     for (std::vector<DeviceBinaryInputSpec_t>::const_iterator it = _binaryInputs.begin();
         it != _binaryInputs.end();
         ++it) {
-      boost::shared_ptr<DeviceBinaryInput_t> binput = boost::make_shared<DeviceBinaryInput_t>();
-      binput->m_inputIndex = m_binaryInputCount;
-      binput->m_inputId = it->InputID;
-      binput->m_inputType = it->InputType;
-      binput->m_targetGroupType = it->TargetGroupType;
-      binput->m_targetGroupId = it->TargetGroup;
-      m_binaryInputs.push_back(binput);
-
-      boost::shared_ptr<State> state = boost::make_shared<State>(me, m_binaryInputCount);
-      assignCustomBinaryInputValues(binput->m_inputType, state);
-
-      try {
-        getApartment().allocateState(state);
-      } catch (ItemDuplicateException& ex) {
-        state = getApartment().getNonScriptState(state->getName());
-      }
-      m_binaryInputStates.push_back(state);
+      auto binaryInputIndex = m_binaryInputs.size();
+      m_binaryInputs.push_back(boost::make_shared<DeviceBinaryInput>(*this, *it, binaryInputIndex));
+      auto& binaryInput = m_binaryInputs.back();
 
       if (m_pPropertyNode != NULL) {
-        std::string bpath = std::string("binaryInput") + intToString(m_binaryInputCount);
+        std::string bpath = std::string("binaryInput") + intToString(binaryInputIndex);
         PropertyNodePtr entry = binaryInputNode->createProperty(bpath);
         entry->createProperty("targetGroupType")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_targetGroupType));
+                ->linkToProxy(PropertyProxyReference<int, GroupType>(binaryInput->m_targetGroupType));
         entry->createProperty("targetGroupId")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_targetGroupId));
+                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_targetGroupId));
         entry->createProperty("inputType")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputType));
+                ->linkToProxy(PropertyProxyReference<int, BinaryInputType>(binaryInput->m_inputType));
         entry->createProperty("inputId")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputId));
+                ->linkToProxy(PropertyProxyReference<int, BinaryInputId>(binaryInput->m_inputId));
         entry->createProperty("inputIndex")
-                ->linkToProxy(PropertyProxyReference<int>(m_binaryInputs[m_binaryInputCount]->m_inputIndex));
-        PropertyNodePtr stateNode = m_binaryInputStates[m_binaryInputCount]
-                ->getPropertyNode();
+                ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_inputIndex));
+        PropertyNodePtr stateNode = binaryInput->getState().getPropertyNode();
         PropertyNodePtr stateValueNode = stateNode->getProperty("value");
         if (stateValueNode != NULL) {
           PropertyNodePtr stateValueAlias = entry->createProperty("stateValue");
           stateValueAlias->alias(stateValueNode);
         }
       }
-
-      m_binaryInputCount ++;
     }
   }
 
-  const std::vector<boost::shared_ptr<DeviceBinaryInput_t> >& Device::getBinaryInputs() const {
+  const std::vector<boost::shared_ptr<DeviceBinaryInput> >& Device::getBinaryInputs() const {
     return m_binaryInputs;
   }
 
-  const boost::shared_ptr<DeviceBinaryInput_t> Device::getBinaryInput(uint8_t _inputIndex) const {
+  const boost::shared_ptr<DeviceBinaryInput> Device::getBinaryInput(uint8_t _inputIndex) const {
     if (_inputIndex >= getBinaryInputCount()) {
       throw ItemNotFoundException(std::string("Device::getBinaryInput: index out of bounds"));
     }
@@ -2391,7 +2473,7 @@ namespace dss {
     return (uint8_t) m_sensorInputCount;
   }
 
-  void Device::setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _sensorInputs) {
+  void Device::setSensors(const std::vector<DeviceSensorSpec_t>& _sensorInputs) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr sensorInputNode;
     if (m_pPropertyNode != NULL) {
@@ -2447,7 +2529,7 @@ namespace dss {
     }
   }
 
-  void Device::setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels) {
+  void Device::setOutputChannels(const std::vector<int>& _outputChannels) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr outputChannelNode;
     if (m_pPropertyNode != NULL) {
@@ -2541,7 +2623,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValue = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat =
-        sensorToFloat12(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+        sensorValueToDouble(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
@@ -2553,7 +2635,7 @@ namespace dss {
     DateTime now;
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValue =
-            sensorToSystem(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+            doubleToSensorValue(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
@@ -2594,14 +2676,6 @@ namespace dss {
             (_otherDev->getDSMeterDSID() != m_DSMeterDSID) &&
             (_otherDev->getOemEan() == m_OemEanNumber) &&
             (_otherDev->getOemSerialNumber() == m_OemSerialNumber));
-  }
-
-  boost::shared_ptr<State> Device::getBinaryInputState(uint8_t _inputIndex) const {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex >= m_binaryInputStates.size()) {
-      throw ItemNotFoundException(std::string("Device::getBinaryInputState: index out of bounds"));
-    }
-    return m_binaryInputStates[_inputIndex];
   }
 
   void Device::setConfigLock(bool _lockConfig) {
@@ -2715,9 +2789,7 @@ namespace dss {
   std::vector<int> Device::getLockedScenes() {
     std::vector<int> ls;
 
-    for (int g = 0; g < getGroupsCount(); g++) {
-      boost::shared_ptr<Group> group = getGroupByIndex(g);
-      int gid = group->getID();
+    foreach (auto&& gid, m_groupIds) {
       if (isAppUserGroup(gid)) {
         boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
         if (cluster->isConfigurationLocked()) {
@@ -2731,9 +2803,7 @@ namespace dss {
   }
 
   bool Device::isInLockedCluster() {
-    for (int g = 0; g < getGroupsCount(); g++) {
-      boost::shared_ptr<Group> group = getGroupByIndex(g);
-      int gid = group->getID();
+    foreach (auto&& gid, m_groupIds) {
       if (isAppUserGroup(gid)) {
         boost::shared_ptr<Cluster> cluster = m_pApartment->getCluster(gid);
         if (cluster->isConfigurationLocked()) {

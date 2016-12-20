@@ -55,7 +55,7 @@ namespace dss {
       _json.add("id", "");
     }
     _json.add("DisplayID", _device.getDevice()->getDisplayID());
-    _json.add("dSUID", dsuid2str(_device.getDSID()));
+    _json.add("dSUID", _device.getDSID());
     _json.add("GTIN", _device.getDevice()->getGTIN());
     _json.add("name", _device.getName());
     _json.add("dSUIDIndex", _device.getDevice()->multiDeviceIndex());
@@ -95,7 +95,7 @@ namespace dss {
       } else {
         _json.add("meterDSID", "");
       }
-      _json.add("meterDSUID", dsuid2str(_device.getDevice()->getDSMeterDSID()));
+      _json.add("meterDSUID", _device.getDevice()->getDSMeterDSID());
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
@@ -110,7 +110,7 @@ namespace dss {
       } else {
         _json.add("meterDSID", "");
       }
-      _json.add("meterDSUID", dsuid2str(_device.getDevice()->getLastKnownDSMeterDSID()));
+      _json.add("meterDSUID", _device.getDevice()->getLastKnownDSMeterDSID());
       std::string dSMName;
       try {
         dSMName = DSS::getInstance()->getApartment().getDSMeterByDSID(_device.getDevice()->getDSMeterDSID())->getName();
@@ -153,16 +153,16 @@ namespace dss {
     }
     _json.endArray();
 
-    const std::vector<boost::shared_ptr<DeviceBinaryInput_t> > binaryInputs = _device.getDevice()->getBinaryInputs();
+    auto&& binaryInputs = _device.getDevice()->getBinaryInputs();
     _json.add("binaryInputCount", (int)binaryInputs.size());
     _json.startArray("binaryInputs");
-    for (std::vector<boost::shared_ptr<DeviceBinaryInput_t> >::const_iterator it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
+    for (auto&& it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
       _json.startObject();
       _json.add("targetGroupType", (*it)->m_targetGroupType);
       _json.add("targetGroup", (*it)->m_targetGroupId);
       _json.add("inputType", (*it)->m_inputType);
       _json.add("inputId", (*it)->m_inputId);
-      _json.add("state", _device.getDevice()->getBinaryInputState((*it)->m_inputIndex)->getState());
+      _json.add("state", (*it)->getState().getState());
       _json.endObject();
     }
     _json.endArray();
@@ -200,7 +200,7 @@ namespace dss {
       for (int pd = 0; pd < (_device.getDevice()->getPairedDevices() - 1); pd++) {
           dsuid_t next;
           dsuid_get_next_dsuid(dsuid, &next);
-          _json.add(dsuid2str(next));
+          _json.add(next);
           dsuid = next;
       }
     }
@@ -228,10 +228,10 @@ namespace dss {
     _json.startObject();
     _json.add("id", _group->getID());
     _json.add("name", _group->getName());
-    _json.add("color", _group->getStandardGroupID());
+    _json.add("color", _group->getApplicationType());
     _json.add("isPresent", _group->isPresent());
     _json.add("isValid", _group->isValid());
-    _json.add("configuration", _group->getConfiguration());
+    _json.add("configuration", _group->getApplicationConfiguration());
 
     _json.startArray("devices");
     Set devices = _group->getDevices();
@@ -244,7 +244,7 @@ namespace dss {
         // do not render hidden TNY devices
         continue;
       }
-      _json.add(dsuid2str(devices[iDevice].getDSID()));
+      _json.add(devices[iDevice].getDSID());
     }
     _json.endArray();
     _json.endObject();
@@ -254,7 +254,7 @@ namespace dss {
     _json.startObject();
     _json.add("id", _cluster->getID());
     _json.add("name", _cluster->getName());
-    _json.add("color", _cluster->getStandardGroupID());
+    _json.add("color", _cluster->getApplicationType());
     _json.add("isPresent", _cluster->isPresent());
     _json.add("isValid", _cluster->isValid());
     _json.add("CardinalDirection", toString(_cluster->getLocation()));
@@ -273,7 +273,7 @@ namespace dss {
         // do not render hidden TNY devices
         continue;
       }
-      _json.add(dsuid2str(devices[iDevice].getDSID()));
+      _json.add(devices[iDevice].getDSID());
     }
     _json.endArray();
     _json.endObject();
@@ -305,7 +305,7 @@ namespace dss {
     _json.startArray("clusters");
     std::vector<boost::shared_ptr<Cluster> > clusters = _apartment.getClusters();
     foreach (boost::shared_ptr<Cluster> pCluster, clusters) {
-      if (pCluster->getStandardGroupID() == 0) {
+      if (pCluster->getApplicationType() == 0) {
         continue;
       }
       toJSON(static_cast<boost::shared_ptr<const Cluster> >(pCluster), _json);

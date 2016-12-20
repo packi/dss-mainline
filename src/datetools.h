@@ -28,7 +28,6 @@
 #include "config.h"
 #endif
 
-#include "base.h"
 #include "logger.h"
 
 #ifdef HAVE_LIBICAL_ICAL_H

@@ -45,7 +45,6 @@
 #include "src/propertysystem.h"
 #include "src/structuremanipulator.h"
 #include "src/businterface.h"
-#include "src/model/scenehelper.h"
 
 using namespace dss;
 
@@ -162,15 +161,15 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
   boost::shared_ptr<Cluster> pClust;
   BOOST_CHECK_NO_THROW(pClust = apt.getCluster(16));
   BOOST_CHECK_EQUAL(pClust->getName(), "Jalousien");
-  BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
+  BOOST_CHECK_EQUAL(pClust->getApplicationType(), 2);
 
   BOOST_CHECK_NO_THROW(pClust = apt.getCluster(17));
   BOOST_CHECK_EQUAL(pClust->getName(), "Jalousien2");
-  BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
+  BOOST_CHECK_EQUAL(pClust->getApplicationType(), 2);
   BOOST_CHECK_EQUAL(pClust->getLocation(), cd_south_east);
   BOOST_CHECK_EQUAL(pClust->getProtectionClass(), wpc_awning_class_2);
   BOOST_CHECK_EQUAL(pClust->getFloor(), 1);
-  BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 2);
+  BOOST_CHECK_EQUAL(pClust->getApplicationType(), 2);
   BOOST_CHECK_EQUAL(pClust->isConfigurationLocked(), false);
   BOOST_CHECK_EQUAL(pClust->isAutomatic(), true);
   BOOST_CHECK_EQUAL(pClust->getLockedScenes().size(), 4);
@@ -295,7 +294,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
     zoneBroadcast->addGroup(pCluster);
 
     pCluster->setName("Testing");
-    pCluster->setStandardGroupID(4);
+    pCluster->setApplicationType(4);
     pCluster->setLocation(cd_east);
     pCluster->setProtectionClass(wpc_blind_class_3);
     pCluster->setFloor(13);
@@ -319,7 +318,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
   boost::shared_ptr<Cluster> pClust;
   BOOST_CHECK_NO_THROW(pClust = apt2.getCluster(39));
   BOOST_CHECK_EQUAL(pClust->getName(), "Testing");
-  BOOST_CHECK_EQUAL(pClust->getStandardGroupID(), 4);
+  BOOST_CHECK_EQUAL(pClust->getApplicationType(), 4);
   BOOST_CHECK_EQUAL(pClust->getLocation(), cd_east);
   BOOST_CHECK_EQUAL(pClust->getProtectionClass(), wpc_blind_class_3);
   BOOST_CHECK_EQUAL(pClust->getFloor(), 13);

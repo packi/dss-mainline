@@ -22,7 +22,6 @@
 #include "src/logger.h"
 #include "src/sqlite3_wrapper.h"
 
-#include <boost/asio/steady_timer.hpp>
 #include <atomic>
 #include "dss.h"
 #include "vdc-db.h"

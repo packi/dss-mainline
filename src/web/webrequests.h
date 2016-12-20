@@ -34,6 +34,7 @@
 #include <rapidjson/encodings.h>
 
 #include "src/logger.h"
+#include "src/ds485types.h"
 #include "src/dss.h"
 #include "src/model/modelconst.h"
 
@@ -94,7 +95,11 @@ namespace dss {
     void add(std::string _name, unsigned long long int _value);
     void add(std::string _name, bool _value);
     void add(std::string _name, double _value);
-    void add(std::string _name, SensorType sensorType);
+    void add(const std::string& name, SensorType x) { add(name, static_cast<int>(x)); }
+    void add(const std::string& name, BinaryInputType x) { add(name, static_cast<int>(x)); }
+    void add(const std::string& name, BinaryInputId x) { add(name, static_cast<int>(x)); }
+    void add(const std::string& name, GroupType x) { add(name, static_cast<int>(x)); }
+    void add(std::string name, const dsuid_t &dsuid) { add(name, dsuid2str(dsuid)); }
     void add(std::string _value);
     void add(const char* _value);
     void add(int _value);
@@ -103,6 +108,7 @@ namespace dss {
     void add(unsigned long long int _value);
     void add(bool _value);
     void add(double _value);
+    void add(const dsuid_t &dsuid) { add(dsuid2str(dsuid)); }
     void addNull();
     void startArray(std::string _name);
     void startArray();

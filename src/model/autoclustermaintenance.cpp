@@ -150,8 +150,8 @@ void AutoClusterMaintenance::joinIdenticalClusters ()
       }
       if (cluster->getLocation() == clusters[index]->getLocation() &&
           cluster->getProtectionClass() == clusters[index]->getProtectionClass()) {
-        log("The clusters with ids " + intToString(cluster->getStandardGroupID()) + " and id " +
-            intToString(cluster->getStandardGroupID()) + " are identical", lsWarning);
+        log("The clusters with ids " + intToString(cluster->getApplicationType()) + " and id " +
+            intToString(cluster->getApplicationType()) + " are identical", lsWarning);
         moveClusterDevices(clusters[index], cluster);
       }
     }
@@ -236,7 +236,7 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
 
   std::vector<boost::shared_ptr<Cluster> > clusters = m_pApartment->getClusters();
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
-    if ((cluster->getStandardGroupID() != 0) &&
+    if ((cluster->getApplicationType() != 0) &&
         (cluster->getProtectionClass() == _protection) &&
         (cluster->getLocation() == _cardinalDirection) &&
         (cluster->isAutomatic())) {
@@ -252,7 +252,7 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
 
   cluster->setLocation(_cardinalDirection);
   cluster->setProtectionClass(_protection);
-  cluster->setStandardGroupID(DEVICE_CLASS_GR);
+  cluster->setApplicationType(DEVICE_CLASS_GR);
 
   // Naming scheme: "<orientation> - Class <class> - <speed>m/s" (e.g. "South-West – Class 1 -9.8 m/s")
   // if no orientation is defined: only "Class z - x.y m/s" (no "none"-Orientation)
@@ -329,7 +329,7 @@ void AutoClusterMaintenance::busUpdateCluster(boost::shared_ptr<Cluster> _cluste
     // operation can be overridden for testing.
     StructureModifyingBusInterface* itf = m_pApartment->getBusInterface()->getStructureModifyingBusInterface();
     itf->clusterSetName(_cluster->getID(), _cluster->getName());
-    itf->clusterSetStandardID(_cluster->getID(), _cluster->getStandardGroupID());
+    itf->clusterSetStateMachine(_cluster->getID(), _cluster->getApplicationType());
     itf->clusterSetProperties(_cluster->getID(), _cluster->getLocation(),
                               _cluster->getFloor(), _cluster->getProtectionClass());
     itf->clusterSetLockedScenes(_cluster->getID(), _cluster->getLockedScenes());

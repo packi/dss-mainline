@@ -136,12 +136,11 @@ size_t HttpClient::writeCallbackMute(void* contents, size_t size, size_t nmemb, 
 
 long HttpClient::get(const std::string& url, std::string *result, bool insecure)
 {
-  return internalRequest(url, GET, HashMapStringString(), std::string(),
-                         result, insecure);
+  return internalRequest(url, GET, std::unordered_map<std::string, std::string>(), std::string(), result, insecure);
 }
 
 long HttpClient::get(const std::string& url,
-                     const HashMapStringString& headers,
+                     const std::unordered_map<std::string, std::string>& headers,
                      std::string *result, bool insecure)
 {
   return internalRequest(url, GET, headers, std::string(), result, insecure);
@@ -150,12 +149,11 @@ long HttpClient::get(const std::string& url,
 long HttpClient::post(const std::string& _url, const std::string &_postdata,
                       std::string *_result)
 {
-  return internalRequest(_url, POST, HashMapStringString(), _postdata, _result,
-                         false);
+  return internalRequest(_url, POST, std::unordered_map<std::string, std::string>(), _postdata, _result, false);
 }
 
 long HttpClient::post(const std::string& _url,
-                      const HashMapStringString& _headers,
+                      const std::unordered_map<std::string, std::string>& _headers,
                       const std::string &_postdata, std::string *_result)
 {
   return internalRequest(_url, POST, _headers, _postdata, _result, false);
@@ -264,7 +262,7 @@ struct data config;
 #endif
 
 long HttpClient::internalRequest(const std::string& _url, RequestType _type,
-                                 const HashMapStringString& _headers,
+                                 const std::unordered_map<std::string, std::string>& _headers,
                                  const std::string &_postdata,
                                  std::string *_result, bool _insecure)
 {
@@ -298,10 +296,9 @@ long HttpClient::internalRequest(const std::string& _url, RequestType _type,
     curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(m_curl_handle, CURLOPT_SSL_VERIFYHOST, 1L);
   }
-  HashMapStringString::const_iterator it;
   if (!_headers.empty()) {
-    for (it = _headers.begin(); it != _headers.end(); it++) {
-      cheaders = curl_slist_append(cheaders, (it->first + ": " + it->second).c_str());
+    foreach (auto&& header, _headers) {
+      cheaders = curl_slist_append(cheaders, (header.first + ": " + header.second).c_str());
     }
     curl_easy_setopt(m_curl_handle, CURLOPT_HTTPHEADER, cheaders);
   }

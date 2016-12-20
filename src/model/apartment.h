@@ -35,7 +35,6 @@
 #include "devicecontainer.h"
 #include "modeltypes.h"
 #include "src/subsystem.h"
-#include "src/base.h"
 #include "src/model/state.h"
 #include "src/datetools.h"
 #include "src/model/device.h"
@@ -180,6 +179,9 @@ typedef struct {
     std::vector<boost::shared_ptr<Cluster> > getClusters();
     /** Return an Empty Cluster, if available. */
     boost::shared_ptr<Cluster> getEmptyCluster();
+
+    /** Returns a vector of Global Application Groups */
+    std::vector<boost::shared_ptr<Group> > getGlobalApps();
 
     /// @return nullptr on failure
     boost::shared_ptr<State> tryGetState(const eStateType _type, const std::string& _stateName) const;

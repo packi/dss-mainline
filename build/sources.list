@@ -12,6 +12,14 @@ libdsscore_a_SOURCES =  \
 	../src/datetools.h \
 	../src/defaultbuseventsink.cpp \
 	../src/defaultbuseventsink.h \
+	../src/ds/asio/timer.cpp \
+	../src/ds/asio/timer.h \
+	../src/ds/common.cpp \
+	../src/ds/common.h \
+	../src/ds/log.h \
+	../src/ds/log.cpp \
+	../src/ds/string.cpp \
+	../src/ds/string.h \
 	../src/ds485/dsactionrequest.cpp \
 	../src/ds485/dsactionrequest.h \
 	../src/ds485/dsbusinterface.cpp \
@@ -45,6 +53,8 @@ libdsscore_a_SOURCES =  \
 	../src/eventinterpretersystemplugins.h \
 	../src/eventsubscriptionsession.cpp \
 	../src/eventsubscriptionsession.h \
+	../src/exception.cpp \
+	../src/exception.h \
 	../src/expatparser.cpp \
 	../src/expatparser.h \
 	../src/foreach.h \
@@ -77,6 +87,8 @@ libdsscore_a_SOURCES =  \
 	../src/model/busscanner.h \
 	../src/model/cluster.cpp \
 	../src/model/cluster.h \
+	../src/model/composed-group-state.h \
+	../src/model/composed-group-state.cpp \
 	../src/model/data_types.cpp \
 	../src/model/data_types.cpp \
 	../src/model/data_types.h \
@@ -91,6 +103,7 @@ libdsscore_a_SOURCES =  \
 	../src/model/devicereference.h \
 	../src/model/group.cpp \
 	../src/model/group.h \
+	../src/model/modelconst.cpp \
 	../src/model/modelconst.h \
 	../src/model/modelevent.cpp \
 	../src/model/modelevent.h \
@@ -109,6 +122,8 @@ libdsscore_a_SOURCES =  \
 	../src/model/scenehelper.h \
 	../src/model/set.cpp \
 	../src/model/set.h \
+	../src/model/setsplitter.cpp \
+	../src/model/setsplitter.h \
 	../src/model/state.cpp \
 	../src/model/state.h \
 	../src/model/zone.cpp \
@@ -298,5 +313,6 @@ dsstests_SOURCES = \
 	../tests/vdc-db.cpp \
 	../tests/webfixture.h \
 	../tests/webserver.cpp \
-	../tests/webservice_api_tests.cpp
+	../tests/webservice_api_tests.cpp \
+	../tests/zone_tests.cpp
 

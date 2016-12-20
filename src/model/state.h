@@ -105,7 +105,7 @@ namespace dss {
     State(boost::shared_ptr<Device> _device, int _inputIndex);
     State(boost::shared_ptr<Device> _device, const std::string& stateName);
     static std::string makeGroupName(const Group& group);
-    State(boost::shared_ptr<Group> _group);
+    State(boost::shared_ptr<Group> _group, const std::string& name);
     State(boost::shared_ptr<DSMeter> _meter, int _inputIndex);
 
     virtual ~State();

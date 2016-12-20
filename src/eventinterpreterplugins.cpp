@@ -111,9 +111,7 @@ namespace dss {
 
   void EventInterpreterPluginRaiseEvent::applyOptionsWithSuffix(boost::shared_ptr<const SubscriptionOptions> _options, const std::string& _suffix, boost::shared_ptr<Event> _event, bool _onlyOverride) {
     if(_options != NULL) {
-      const HashMapStringString sourceMap = _options->getParameters().getContainer();
-      typedef const std::pair<const std::string, std::string> tItem;
-      foreach(tItem kv, sourceMap) {
+      foreach (auto&& kv, _options->getParameters().getContainer()) {
         if(endsWith(kv.first, _suffix)) {
           std::string propName = kv.first.substr(0, kv.first.length() - _suffix.length());
           if(_event->hasPropertySet(propName) || !_onlyOverride) {
@@ -435,13 +433,10 @@ namespace dss {
 
         // add raisedEvent.parameter
         ScriptObject param(*ctx, NULL);
-        const HashMapStringString& props =  _event.getProperties().getContainer();
-        for(HashMapStringString::const_iterator iParam = props.begin(), e = props.end();
-            iParam != e; ++iParam)
-        {
-          Logger::getInstance()->log("JavaScript Event Handler: setting parameter " + iParam->first +
-                                      " to " + iParam->second);
-          param.setProperty<const std::string&>(iParam->first, iParam->second);
+        foreach (auto&& elt, _event.getProperties().getContainer()) {
+          Logger::getInstance()->log("JavaScript Event Handler: setting parameter " + elt.first +
+                                      " to " + elt.second);
+          param.setProperty<const std::string&>(elt.first, elt.second);
         }
         raisedEvent.setProperty("parameter", &param);
 
@@ -1011,9 +1006,8 @@ namespace dss {
       return;
     }
 
-    HashMapStringString ps = _event.getProperties().getContainer();
-    for (HashMapStringString::iterator it = ps.begin(); it != ps.end(); it++) {
-      Logger::getInstance()->log(" name " + it->first + " : " + it->second);
+    foreach (auto&& elt, _event.getProperties().getContainer()) {
+      Logger::getInstance()->log(" name " + elt.first + " : " + elt.second);
     }
 
     WebserviceMsHub::ChangeType type;

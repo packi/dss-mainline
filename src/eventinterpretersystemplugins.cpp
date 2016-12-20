@@ -45,7 +45,6 @@
 #include "model/apartment.h"
 #include "model/state.h"
 #include "model/modelconst.h"
-#include "model/scenehelper.h"
 #include "model/modulator.h"
 #include "model/data_types.h"
 #include "propertysystem.h"
@@ -2750,7 +2749,7 @@ namespace dss {
     }
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');
-    _logger->logln(";SensorValue;" + sensorName(sensorType) +
+    _logger->logln(";SensorValue;" + sensorTypeName(sensorType) +
         " [" + intToString(static_cast<int>(sensorType)) + '/' + sensorIndex + "];" +
         sensorValueFloat + " [" + sensorValue + "];" +
         zoneName + ";;;" + devName + ";");
@@ -2766,7 +2765,7 @@ namespace dss {
     std::string sensorValue = m_properties.get("sensorValue");
     std::string sensorValueFloat = m_properties.get("sensorValueFloat");
 
-    std::string typeName = sensorName(static_cast<SensorType>(sensorType));
+    std::string typeName = sensorTypeName(static_cast<SensorType>(sensorType));
     std::string origName = getDeviceName(m_properties.get("originDSID"));
 
     //l.logln('Time;Event;Action;Action-ID/Button Index;Zone;Zone-ID;Group;Group-ID;Origin;Origin-ID;originToken');

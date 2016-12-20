@@ -134,6 +134,24 @@ namespace dss {
         json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
+      } else if(_request.getMethod() == "storeAccessToken") {
+        std::string authData;
+        if (_request.hasParameter("authData")) {
+          authData = _request.getParameter("authData");
+        } else {
+          return json.failure("missing parameter authData");
+        }
+        std::string authScope = _request.getParameter("authScope");
+        vdcapi::Message res = VdcHelper::callAuthenticate(dsMeter->getDSID(), authData, authScope, *paramsElement);
+        json.add("response");
+        ProtobufToJSon::protoPropertyToJson(res, json);
+        return json.successJSON();
+      } else if(_request.getMethod() == "invokeMethod") {
+        std::string method;
+        _request.getParameter("method", method);
+        vdcapi::Message res = VdcConnection::genericRequest(dsMeter->getDSID(), dsMeter->getDSID(), method, paramsElement->elements());
+        ProtobufToJSon::protoPropertyToJson(res, json);
+        return json.successJSON();
       } else {
         throw std::runtime_error("Unhandled function");
       }

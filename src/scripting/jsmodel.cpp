@@ -48,7 +48,6 @@
 #include "src/model/cluster.h"
 #include "src/model/zone.h"
 #include "src/model/state.h"
-#include "src/model/scenehelper.h"
 #include "src/metering/metering.h"
 #include "src/scripting/scriptobject.h"
 #include "src/scripting/jsproperty.h"
@@ -61,8 +60,14 @@
 #include "src/web/webrequests.h"
 #include "src/protobufjson.h"
 #include "src/stringconverter.h"
+#include "src/vdc-connection.h"
+
 
 namespace dss {
+  struct meter_wrapper {
+    boost::shared_ptr<DSMeter> pMeter;
+  };
+
   const std::string ModelScriptcontextExtensionName = "modelextension";
 
   Set filterOutInvisibleDevices(Set set) {
@@ -323,7 +328,7 @@ namespace dss {
 
       std::size_t i = 0;
       foreach (boost::shared_ptr<Cluster> cluster, ext->getApartment().getClusters()) {
-        if (cluster->getStandardGroupID() == 0) {
+        if (cluster->getApplicationType() == 0) {
           continue;
         }
         JSObject* clusterObj = ext->createJSCluster(*ctx, cluster);
@@ -2208,59 +2213,74 @@ namespace dss {
   JSBool dev_get_vdc_property(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+        ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "ext of wrong type");
+      return JS_FALSE;
+    }
+
     try {
       JS_SET_RVAL(cx, vp, JSVAL_NULL);
-      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
-      if(self.is("Device")) {
-        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-        boost::shared_ptr<Device> pDev(intf->getDevice());
-
-        if (!pDev->isVdcDevice()) {
-          JS_ReportError(cx, "Device is not a vdc device");
+      if(argc == 1) {
+        std::string path;
+        try {
+          path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+        } catch (ScriptException& ex) {
+          JS_ReportError(cx, "Convert arguments: %s", ex.what());
           return JS_FALSE;
         }
-        if(argc == 1) {
-          std::string path;
-          try {
-            path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-          } catch (ScriptException& ex) {
-            JS_ReportError(cx, "Convert arguments: %s", ex.what());
-            return JS_FALSE;
-          }
-          jsrefcount ref = JS_SuspendRequest(cx);
-          try {
-            std::vector<std::string> parts = splitString(path, '/');
-            google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
-            vdcapi::PropertyElement* currentElement;
-            bool firstElement = true;
-            foreach(std::string part, parts) {
-              if (firstElement) {
-                currentElement = query.Add();
-                firstElement = false;
-              } else {
-                currentElement = currentElement->add_elements();
-              }
-              currentElement->set_name(part);
+        jsrefcount ref = JS_SuspendRequest(cx);
+        try {
+          std::vector<std::string> parts = splitString(path, '/');
+          google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+          vdcapi::PropertyElement* currentElement;
+          bool firstElement = true;
+          foreach(std::string part, parts) {
+            if (firstElement) {
+              currentElement = query.Add();
+              firstElement = false;
+            } else {
+              currentElement = currentElement->add_elements();
             }
-            vdcapi::Message message = pDev->getVdcProperty(query);
-            VdcElementReader reader(message.vdc_response_get_property().properties());
-            JSONWriter json(JSONWriter::jsonNoneResult);
-            json.add("result");
-            ProtobufToJSon::processElementsPretty(reader.childElements(), json);
-
-            JS_ResumeRequest(cx, ref);
-            JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, json.successJSON().c_str())));
-            return JS_TRUE;
-          } catch(const BusApiError& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, "Bus failure: %s", ex.what());
-          } catch (DSSException& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, "Failure: %s", ex.what());
-          } catch (std::exception& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, "General failure: %s", ex.what());
+            currentElement->set_name(part);
           }
+          ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+          vdcapi::Message message;
+          if(self.is("Device")) {
+            DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+            boost::shared_ptr<Device> pDev(intf->getDevice());
+
+            if (!pDev->isVdcDevice()) {
+              JS_ReportError(cx, "Device is not a vdc device");
+              return JS_FALSE;
+            }
+            message = pDev->getVdcProperty(query);
+          } else if (self.is("DSMeter")) {
+            boost::shared_ptr<DSMeter> pMeter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pMeter;
+            StructureManipulator manipulator(
+                *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
+                *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
+                ext->getApartment());
+            message = manipulator.getProperty(pMeter, query);
+          }
+          VdcElementReader reader(message.vdc_response_get_property().properties());
+          JSONWriter json(JSONWriter::jsonNoneResult);
+          json.add("result");
+          ProtobufToJSon::processElementsPretty(reader.childElements(), json);
+
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, json.successJSON().c_str())));
+          return JS_TRUE;
+        } catch(const BusApiError& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
+        } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "General failure: %s", ex.what());
         }
       }
     } catch(ItemNotFoundException& ex) {
@@ -2274,74 +2294,94 @@ namespace dss {
   JSBool dev_set_vdc_property(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+        ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "ext of wrong type");
+      return JS_FALSE;
+    }
+
     try {
       JS_SET_RVAL(cx, vp, JSVAL_NULL);
-      ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
-      if(self.is("Device")) {
-        DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
-        boost::shared_ptr<Device> pDev(intf->getDevice());
-        if (!pDev->isVdcDevice()) {
-          JS_ReportError(cx, "Device is not a vdc device");
+      if (argc == 2) {
+        std::string path;
+        std::string value;
+        try {
+          path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+        } catch (ScriptException& ex) {
+          JS_ReportError(cx, ex.what());
           return JS_FALSE;
         }
+        jsrefcount ref = JS_SuspendRequest(cx);
+        try {
+          std::vector<std::string> parts = splitString(path, '/');
+          google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+          vdcapi::PropertyElement* currentElement = 0;
+          bool firstElement = true;
+          foreach(std::string part, parts) {
+            if (firstElement) {
+              currentElement = query.Add();
+              firstElement = false;
+            } else {
+              currentElement = currentElement->add_elements();
+            }
+            currentElement->set_name(part);
+          }
 
-        if (argc == 2) {
-          std::string path;
-          std::string value;
-          try {
-            path = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-          } catch (ScriptException& ex) {
-            JS_ReportError(cx, ex.what());
+          if (currentElement == 0) {
+            JS_ResumeRequest(cx, ref);
+            JS_ReportError(cx, "path failed to parse");
             return JS_FALSE;
           }
-          jsrefcount ref = JS_SuspendRequest(cx);
-          try {
-            std::vector<std::string> parts = splitString(path, '/');
-            google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
-            vdcapi::PropertyElement* currentElement;
-            bool firstElement = true;
-            foreach(std::string part, parts) {
-              if (firstElement) {
-                currentElement = query.Add();
-                firstElement = false;
-              } else {
-                currentElement = currentElement->add_elements();
-              }
-              currentElement->set_name(part);
-            }
 
-            if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[1])) {
-              StringConverter st("UTF-8", "UTF-8");
-              std::string propValue = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]));
-              currentElement->mutable_value()->set_v_string(propValue);
-            } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[1])) {
-              currentElement->mutable_value()->set_v_bool(ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]));
-            } else if (JSVAL_IS_INT(JS_ARGV(cx, vp)[1])) {
-              currentElement->mutable_value()->set_v_int64(ctx->convertTo<int>(JS_ARGV(cx, vp)[1]));
-            } else if(JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[1])) {
-              currentElement->mutable_value()->set_v_double(ctx->convertTo<double>(JS_ARGV(cx, vp)[1]));
-            } else {
-              JS_ReportWarning(cx, "Property.setVdcProperty: unknown type of argument 2");
-              JS_ResumeRequest(cx, ref);
+          if(JSVAL_IS_STRING(JS_ARGV(cx, vp)[1])) {
+            StringConverter st("UTF-8", "UTF-8");
+            std::string propValue = st.convert(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]));
+            currentElement->mutable_value()->set_v_string(propValue);
+          } else if(JSVAL_IS_BOOLEAN(JS_ARGV(cx, vp)[1])) {
+            currentElement->mutable_value()->set_v_bool(ctx->convertTo<bool>(JS_ARGV(cx, vp)[1]));
+          } else if (JSVAL_IS_INT(JS_ARGV(cx, vp)[1])) {
+            currentElement->mutable_value()->set_v_int64(ctx->convertTo<int>(JS_ARGV(cx, vp)[1]));
+          } else if(JSVAL_IS_DOUBLE(JS_ARGV(cx, vp)[1])) {
+            currentElement->mutable_value()->set_v_double(ctx->convertTo<double>(JS_ARGV(cx, vp)[1]));
+          } else {
+            JS_ReportWarning(cx, "Property.setVdcProperty: unknown type of argument 2");
+            JS_ResumeRequest(cx, ref);
+            return JS_FALSE;
+          }
+          ScriptObject self(JS_THIS_OBJECT(cx, vp), *ctx);
+          if(self.is("Device")) {
+            DeviceReference* intf = static_cast<DeviceReference*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)));
+            boost::shared_ptr<Device> pDev(intf->getDevice());
+            if (!pDev->isVdcDevice()) {
+              JS_ReportError(cx, "Device is not a vdc device");
               return JS_FALSE;
             }
             pDev->setVdcProperty(query);
-
-            JS_ResumeRequest(cx, ref);
-            JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
-            return JS_TRUE;
-          } catch(const BusApiError& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, "Bus failure: %s", ex.what());
-          } catch (DSSException& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, "Failure: %s", ex.what());
-          } catch (std::exception& ex) {
-            JS_ResumeRequest(cx, ref);
-            JS_ReportError(cx, "General failure: %s", ex.what());
+          } else if (self.is("DSMeter")) {
+            boost::shared_ptr<DSMeter> pMeter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pMeter;
+            StructureManipulator manipulator(
+                *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
+                *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
+                ext->getApartment());
+            manipulator.setProperty(pMeter, query);
           }
+
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+          return JS_TRUE;
+        } catch(const BusApiError& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
+        } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "General failure: %s", ex.what());
         }
       }
+
     } catch(ItemNotFoundException& ex) {
       JS_ReportWarning(cx, "Item not found: %s", ex.what());
     } catch (SecurityException& ex) {
@@ -2881,10 +2921,6 @@ namespace dss {
 
   //=== DSMeter ===
 
-  struct meter_wrapper {
-    boost::shared_ptr<DSMeter> pMeter;
-  };
-
   void finalize_meter(JSContext *cx, JSObject *obj) {
     struct meter_wrapper* pDevice = static_cast<meter_wrapper*>(JS_GetPrivate(cx, obj));
     JS_SetPrivate(cx, obj, NULL);
@@ -3126,7 +3162,64 @@ namespace dss {
       JS_ReportError(cx, "Access denied: %s", ex.what());
     }
     return JS_FALSE;
-  } // global_getClusters
+  } // dsmeter_setPowerStateConfig
+
+  JSBool dsmeter_vdc_callMethod(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+        ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+    if (ext == NULL) {
+      JS_ReportError(cx, "ext of wrong type");
+      return JS_FALSE;
+    }
+
+    try {
+      JS_SET_RVAL(cx, vp, JSVAL_NULL);
+      if(argc == 2) {
+        std::string method;
+        std::string params;
+        try {
+          method = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
+          params = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+        } catch (ScriptException& ex) {
+          JS_ReportError(cx, "Convert arguments: %s", ex.what());
+          return JS_FALSE;
+        }
+        jsrefcount ref = JS_SuspendRequest(cx);
+        try {
+          vdcapi::PropertyElement parsedParamsElement;
+          const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+          if (!params.empty()) {
+            parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+            paramsElement = &parsedParamsElement;
+          }
+
+          boost::shared_ptr<DSMeter> pMeter = static_cast<meter_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pMeter;
+          vdcapi::Message res = VdcConnection::genericRequest(pMeter->getDSID(), pMeter->getDSID(), method, paramsElement->elements());
+          JSONWriter json(JSONWriter::jsonNoneResult);
+          ProtobufToJSon::protoPropertyToJson(res, json);
+          JS_ResumeRequest(cx, ref);
+          JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, json.successJSON().c_str())));
+          return JS_TRUE;
+        } catch(const BusApiError& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Bus failure: %s", ex.what());
+        } catch (DSSException& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "Failure: %s", ex.what());
+        } catch (std::exception& ex) {
+          JS_ResumeRequest(cx, ref);
+          JS_ReportError(cx, "General failure: %s", ex.what());
+        }
+      }
+    } catch(ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // dsmeter_vdc_callMethod
 
   JSFunctionSpec dsmeter_methods[] = {
     JS_FS("getPowerConsumption", dsmeter_getPowerConsumption, 0, 0),
@@ -3135,6 +3228,9 @@ namespace dss {
     JS_FS("getCachedEnergyMeterValue", dsmeter_getCachedEnergyMeterValue, 0, 0),
     JS_FS("getPropertyNode", dsmeter_get_property_node, 0, 0),
     JS_FS("setPowerStateConfig", dsmeter_setPowerStateConfig, 0, 0),
+    JS_FS("setVdcProperty", dev_set_vdc_property, 2, 0),
+    JS_FS("getVdcProperty", dev_get_vdc_property, 1, 0),
+    JS_FS("callVdcMethod", dsmeter_vdc_callMethod, 1, 0),
     JS_FS_END
   };
 
@@ -3183,7 +3279,7 @@ namespace dss {
           JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(JS_NewStringCopyZ(cx, pCluster->getName().c_str())));
           return JS_TRUE;
         case 3:
-          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getStandardGroupID()));
+          JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getApplicationType()));
           return JS_TRUE;
         case 4:
           JS_SET_RVAL(cx, vp, INT_TO_JSVAL(pCluster->getLocation()));
@@ -3634,7 +3730,7 @@ namespace dss {
         }
 
         boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
-        double sensorValueFloat = sensorToFloat12(sensorType, sensorValue);
+        double sensorValueFloat = sensorValueToDouble(sensorType, sensorValue);
         pGroup->pushSensor(coJSScripting, category, sourceDSID, sensorType, sensorValueFloat, "");
 
         JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
@@ -3994,41 +4090,41 @@ namespace dss {
         break;
       case HeatingControlModeIDPID:
         obj.setProperty<double>("Off",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
         obj.setProperty<double>("Cooling",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
         obj.setProperty<double>("CoolingOff",
-            sensorToFloat12(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
         break;
       case HeatingControlModeIDZoneFollower:
         break;
       case HeatingControlModeIDFixed:
         obj.setProperty<double>("Off",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
         obj.setProperty<double>("Comfort",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
         obj.setProperty<double>("Economy",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
         obj.setProperty<double>("NotUsed",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
         obj.setProperty<double>("Night",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
         obj.setProperty<double>("Holiday",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
         obj.setProperty<double>("Cooling",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
         obj.setProperty<double>("CoolingOff",
-            sensorToFloat12(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
         break;
       }
       return JS_TRUE;
@@ -4219,21 +4315,21 @@ namespace dss {
 
         double fValue = strToDouble(propValue);
         if (propKey == "Off") {
-          hOpValues.OpMode0 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode0 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Comfort") {
-          hOpValues.OpMode1 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode1 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Economy") {
-          hOpValues.OpMode2 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode2 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "NotUsed") {
-          hOpValues.OpMode3 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode3 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Night") {
-          hOpValues.OpMode4 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode4 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Holiday") {
-          hOpValues.OpMode5 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode5 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Cooling") {
-          hOpValues.OpMode6 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode6 = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "CoolingOff") {
-          hOpValues.OpMode7 = sensorToSystem(SensorConversion, fValue);
+          hOpValues.OpMode7 = doubleToSensorValue(SensorConversion, fValue);
         } else {
           JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: unknown opmode \"%s\"", propKey.c_str());
         }

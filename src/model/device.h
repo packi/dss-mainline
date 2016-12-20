@@ -157,13 +157,33 @@ namespace dss {
     bool posTimeMax; // device supports maximum positioning time
   } DeviceFeatures_t;
 
-  typedef struct {
+  class Device;
+  struct DeviceBinaryInput : boost::noncopyable {
     int m_inputIndex;        // input line index
-    int m_inputType;         // type of input signal
-    int m_inputId;           // target Id, like ButtonId
-    int m_targetGroupType;   // type of target group: standard, user, apartment
+    BinaryInputType m_inputType; // type of input signal
+    BinaryInputId m_inputId;           // target Id, like ButtonId
+    GroupType m_targetGroupType;   // type of target group: standard, user, apartment
     int m_targetGroupId;     // index of target group, 0..63
-  } DeviceBinaryInput_t;
+
+    DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index);
+    ~DeviceBinaryInput();
+
+    const State& getState() const { return *m_state; }
+    void setTarget(GroupType type, uint8_t group);
+    void setInputId(BinaryInputId inputId);
+    void setInputType(BinaryInputType inputType);
+    void handleEvent(BinaryInputState inputState);
+  private:
+    __DECL_LOG_CHANNEL__;
+    Device& m_device;
+    std::string m_name;
+    boost::shared_ptr<State> m_state;
+    class GroupStateHandle;
+    friend class GroupStateHandle;
+    std::unique_ptr<GroupStateHandle> m_groupState;
+
+    void updateGroupState();
+  };
 
   typedef struct {
     int m_sensorIndex;       // sensor index
@@ -243,7 +263,7 @@ namespace dss {
     std::string m_DSMeterDSUIDstr; // for proptree publishing
     std::string m_LastKnownMeterDSIDstr; // for proptree publishing
     std::string m_LastKnownMeterDSUIDstr; // for proptree publishing
-    std::vector<int> m_Groups;
+    std::vector<int> m_groupIds;
     int m_ActiveGroup;
     int m_DefaultGroup;
     int m_FunctionID;
@@ -307,9 +327,7 @@ namespace dss {
 
     bool m_IsConfigLocked;
 
-    uint8_t m_binaryInputCount;
-    std::vector<boost::shared_ptr<DeviceBinaryInput_t> > m_binaryInputs;
-    std::vector<boost::shared_ptr<State> > m_binaryInputStates;
+    std::vector<boost::shared_ptr<DeviceBinaryInput> > m_binaryInputs;
 
     typedef std::map<std::string, boost::shared_ptr<State> > States;
     States m_states;
@@ -343,7 +361,6 @@ namespace dss {
     void calculateHWInfo();
     void updateIconPath();
     std::string getAKMButtonInputString(const int _mode);
-    void assignCustomBinaryInputValues(int inputType, boost::shared_ptr<State> state);
     bool hasBlinkSettings();
 
   public:
@@ -351,6 +368,7 @@ namespace dss {
     Device(const dsuid_t _dsid, Apartment* _pApartment);
     virtual ~Device();
 
+    boost::shared_ptr<Device> sharedFromThis() { return boost::static_pointer_cast<Device>(shared_from_this()); }
     /** @copydoc DeviceReference::isOn() */
     virtual bool isOn() const;
 
@@ -359,6 +377,7 @@ namespace dss {
     void setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex, uint16_t _value);
     void setDeviceButtonID(uint8_t _buttonId);
     void setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup);
+    void setDeviceButtonConfig();
     void setDeviceJokerGroup(uint8_t _groupId);
     void setDeviceOutputMode(uint8_t _modeId);
     void setDeviceButtonInputMode(uint8_t _modeId);
@@ -418,11 +437,10 @@ namespace dss {
     void getDeviceValveControl(DeviceValveControlSpec_t& _config);
 
     /** Binary input devices */
-    void setDeviceBinaryInputId(uint8_t _inputIndex, uint8_t _targetId);
-    void setDeviceBinaryInputTarget(uint8_t _inputIndex, uint8_t _targetType, uint8_t _targetGroup);
-    void setDeviceBinaryInputType(uint8_t _inputIndex, uint8_t _inputType);
-    uint8_t getDeviceBinaryInputType(uint8_t _inputIndex);
-    bool hasBinaryInputType(int inputType) const;
+    void setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId _targetId);
+    void setDeviceBinaryInputTarget(uint8_t _inputIndex, GroupType targetType, uint8_t _targetGroup);
+    void setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType _inputType);
+    BinaryInputType getDeviceBinaryInputType(uint8_t _inputIndex);
     /** AKM2xx timeout settings */
     void setDeviceAKMInputTimeouts(int _onDelay, int _offDelay);
     void getDeviceAKMInputTimeouts(int& _onDelay, int& _offDelay);
@@ -508,11 +526,13 @@ namespace dss {
     boost::shared_ptr<Group> getGroupByIndex(const int _index);
     /** Returns the number of groups the device is a member of */
     int getGroupsCount() const;
-    /** Returns the numbers of groups this device is in */
-    std::vector<int> getGroups() const;
+    /** Returns the vector of groups the device is in */
+    const std::vector<int>& getGroupIds() const { return m_groupIds; }
     /** Retuturns group to which the joker is configured or -1 if device is not
         a joker */
     int getJokerGroup() const;
+    /** Returns the zoneID that this device group is in. */
+    int getGroupZoneID(int groupID) const;
 
     /** Removes the device from all group.
      * The device will remain in the broadcastgroup though.
@@ -565,7 +585,7 @@ namespace dss {
     int getLastKnownZoneID() const;
     void setLastKnownZoneID(const int _value);
     /** Returns the apartment the device resides in. */
-    Apartment& getApartment() const;
+    Apartment& getApartment() const { return *m_pApartment; }
 
     const DateTime& getLastDiscovered() const { return m_LastDiscovered; }
     const DateTime& getFirstSeen() const { return m_FirstSeen; }
@@ -718,23 +738,22 @@ namespace dss {
     void setHasActions(bool x) { m_hasActions = x; }
     bool getHasActions() const { return m_hasActions; }
 
-    void setBinaryInputs(boost::shared_ptr<Device> me, const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
+    void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;
-    const std::vector<boost::shared_ptr<DeviceBinaryInput_t> >& getBinaryInputs() const;
-    const boost::shared_ptr<DeviceBinaryInput_t> getBinaryInput(uint8_t _inputIndex) const;
-    void setBinaryInputTarget(uint8_t _index, uint8_t targetGroupType, uint8_t targetGroup);
-    void setBinaryInputId(uint8_t _index, uint8_t _inputId);
-    void setBinaryInputType(uint8_t _index, uint8_t _inputType);
-    boost::shared_ptr<State> getBinaryInputState(uint8_t _inputIndex) const;
-    void clearBinaryInputStates();
+    const std::vector<boost::shared_ptr<DeviceBinaryInput> >& getBinaryInputs() const;
+    const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
+    void setBinaryInputTarget(uint8_t _index, GroupType targetGroupType, uint8_t targetGroup);
+    void setBinaryInputId(uint8_t _index, BinaryInputId _inputId);
+    void setBinaryInputType(uint8_t _index, BinaryInputType _inputType);
+    void clearBinaryInputs();
 
-    void initStates(boost::shared_ptr<Device> me, const std::vector<DeviceStateSpec_t>& specs);
+    void initStates(const std::vector<DeviceStateSpec_t>& specs);
     const std::map<std::string, boost::shared_ptr<State> >& getStates() const { return m_states; }
     void clearStates();
     void setStateValue(const std::string& name, const std::string& value);
     void setStateValues(const std::vector<std::pair<std::string, std::string> >& values);
 
-    void setSensors(boost::shared_ptr<Device> me, const std::vector<DeviceSensorSpec_t>& _binaryInput);
+    void setSensors(const std::vector<DeviceSensorSpec_t>& _binaryInput);
     const uint8_t getSensorCount() const;
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
@@ -744,7 +763,7 @@ namespace dss {
     const void setSensorDataValidity(int _sensorIndex, bool _valid) const;
     bool isSensorDataValid(int _sensorIndex) const;
 
-    void setOutputChannels(boost::shared_ptr<Device> me, const std::vector<int>& _outputChannels);
+    void setOutputChannels(const std::vector<int>& _outputChannels);
     const int getOutputChannelCount() const;
     const int getOutputChannelIndex(int _channelId) const;
     const int getOutputChannel(int _index) const;

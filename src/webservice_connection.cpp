@@ -251,7 +251,7 @@ void WebserviceConnection::request(const std::string& url,
 
 void WebserviceConnection::request(const std::string& url,
                                  const std::string &parameters,
-                                 const HashMapStringString& headers,
+                                 const std::unordered_map<std::string, std::string> headers,
                                  const std::string& postdata,
                                  boost::shared_ptr<URLRequestCallback> cb,
                                  bool authenticated)
@@ -269,7 +269,7 @@ void WebserviceConnection::request(const std::string& url,
 void WebserviceConnection::request(const std::string& url,
                                 const std::string& parameters,
                                 RequestType type,
-                                const HashMapStringString& headers,
+                                const std::unordered_map<std::string, std::string> headers,
                                 boost::shared_ptr<URLRequestCallback> cb,
                                 bool authenticated)
 {

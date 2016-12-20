@@ -40,6 +40,7 @@
 #include "src/logger.h"
 #include "src/scripting/scriptobject.h"
 
+#include "src/base.h"
 #include "src/dss.h"
 #include "src/propertysystem.h"
 #include "src/security/user.h"

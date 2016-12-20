@@ -484,4 +484,9 @@ BOOST_AUTO_TEST_CASE(testReadFile) {
     BOOST_CHECK_THROW(readFile(name), std::exception);
 }
 
+BOOST_AUTO_TEST_CASE(testArraySize) {
+    int x[] = { 1, 2, 3, 4, 5 };
+    BOOST_CHECK_EQUAL(ARRAY_SIZE(x), 5);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

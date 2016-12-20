@@ -26,6 +26,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 
+#include "src/base.h"
 #include "src/scripting/jshandler.h"
 #include "src/scripting/scriptobject.h"
 

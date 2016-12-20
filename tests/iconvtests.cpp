@@ -24,8 +24,9 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#include "../src/base.h"
-#include "../src/stringconverter.h"
+#include "src/base.h"
+#include "src/exception.h"
+#include "src/stringconverter.h"
 
 using namespace dss;
 

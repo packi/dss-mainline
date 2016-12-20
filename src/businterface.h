@@ -31,7 +31,6 @@
 #include <boost/shared_ptr.hpp>
 #include <limits.h>
 
-#include "base.h"
 #include "ds485types.h"
 #include "sceneaccess.h"
 #include "model/deviceinterface.h"
@@ -68,15 +67,15 @@ namespace dss {
 
   typedef struct {
     uint8_t GroupID;
-    uint8_t StandardGroupID;
+    uint8_t stateMachineID;
     uint16_t NumberOfDevices;
     std::string Name;
-    uint32_t configuration;
+    uint32_t stateMachineConfig;
   } GroupSpec_t;
 
   typedef struct {
     uint8_t GroupID;
-    uint8_t StandardGroupID;
+    uint8_t stateMachineID;
     bool canHaveStateMachine;
     uint16_t NumberOfDevices;
     std::string Name;
@@ -85,14 +84,14 @@ namespace dss {
     uint16_t floor;
     bool configurationLocked;
     std::vector<int> lockedScenes;
-    uint32_t configuration;
+    uint32_t stateMachineConfig;
   } ClusterSpec_t;
 
   typedef struct {
-    uint8_t TargetGroupType;
+    GroupType TargetGroupType;
     uint8_t TargetGroup;
-    uint8_t InputType;
-    uint8_t InputID;
+    BinaryInputType InputType;
+    BinaryInputId InputID;
   } DeviceBinaryInputSpec_t;
 
   typedef struct {
@@ -126,11 +125,11 @@ namespace dss {
     uint8_t LTMode;
     std::vector<int> Groups;
     dsuid_t DSID;
-    uint8_t ButtonID;
-    uint8_t GroupMembership;
-    uint8_t ActiveGroup;
-    bool SetsLocalPriority;
-    bool CallsPresent;
+    uint8_t buttonID;
+    uint8_t buttonGroupMembership;
+    uint8_t buttonActiveGroup;
+    bool buttonSetsLocalPriority;
+    bool buttonCallsPresent;
     std::string Name;
     uint16_t ZoneID;
     std::vector<DeviceBinaryInputSpec_t> binaryInputs;
@@ -139,8 +138,8 @@ namespace dss {
     bool sensorInputsValid;
     std::vector<int> outputChannels;
     bool outputChannelsValid;
-    uint8_t deviceActiveGroup;
-    uint8_t deviceDefaultGroup;
+    uint8_t activeGroup;
+    uint8_t defaultGroup;
   } DeviceSpec_t;
 
   typedef struct {
@@ -367,20 +366,18 @@ namespace dss {
     virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name) = 0;
 
     /** Create and manage user groups */
-    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) = 0;
+    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
-    virtual void groupSetStandardID(uint16_t _zoneID, uint8_t _groupID, uint8_t _standardGroupID) = 0;
+    virtual void groupSetStateMachine(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID) = 0;
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
-    virtual void groupSetConfiguration(uint16_t _zoneID, uint8_t _groupID, uint8_t _groupConfiguration) = 0;
 
-    virtual void createCluster(uint8_t _groupID, uint8_t _standardGroupID, const std::string& _name) = 0;
+    virtual void createCluster(uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name) = 0;
     virtual void removeCluster(uint8_t _clusterID) = 0;
     virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) = 0;
-    virtual void clusterSetStandardID(uint8_t _clusterID, uint8_t _standardGroupID) = 0;
+    virtual void clusterSetStateMachine(uint8_t _clusterID, uint8_t _stateMachineID) = 0;
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) = 0;
     virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) = 0;
     virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) = 0;
-    virtual void clusterSetConfiguration(uint8_t _clusterID, uint8_t _clusterConfiguration) = 0;
     
     virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) = 0;
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
@@ -395,11 +392,15 @@ namespace dss {
 
     virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) = 0;
 
+    virtual void setProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) = 0;
+    virtual vdcapi::Message getProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) = 0;
+
     virtual ~StructureModifyingBusInterface() {}; // please the compiler (virtual dtor)
   }; // StructureModifyingBusInterface
 
   class ActionRequestInterface {
   public:
+    virtual ~ActionRequestInterface() {}; // please the compiler (virtual dtor)
     virtual void callScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t scene, const std::string _token, const bool _force) = 0;
     virtual void callSceneMin(AddressableModelItem *pTarget, const callOrigin_t _origin, const SceneAccessCategory _category, const uint16_t _scene, const std::string _token) = 0;
     virtual void saveScene(AddressableModelItem *pTarget, const callOrigin_t _origin, const uint16_t scene, const std::string _token) = 0;

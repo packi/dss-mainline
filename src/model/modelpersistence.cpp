@@ -484,7 +484,7 @@ namespace dss {
       if (m_tempZone->getID() == 0 && isAppUserGroup(groupID)) {
         m_tempGroup.reset(new Cluster(groupID, m_Apartment));
       } else {
-        m_tempGroup.reset(new Group(groupID, m_tempZone, m_Apartment));
+        m_tempGroup.reset(new Group(groupID, m_tempZone));
       }
       m_tempZone->addGroup(m_tempGroup);
     }
@@ -611,10 +611,10 @@ namespace dss {
       return;
     }
 
-    boost::shared_ptr<MainZoneSensor_t> ms = boost::make_shared<MainZoneSensor_t>();
-    ms->m_DSUID = _dsuid;
-    ms->m_sensorType = _sensorType;
-    ms->m_sensorIndex = _sensorIndex;
+    MainZoneSensor_t ms;
+    ms.m_DSUID = _dsuid;
+    ms.m_sensorType = _sensorType;
+    ms.m_sensorIndex = _sensorIndex;
 
     try {
       m_tempZone->setSensor(ms);
@@ -874,7 +874,7 @@ namespace dss {
               } else if (strcmp(_name, "associatedSet") == 0) {
                 m_tempCluster->setAssociatedSet(m_chardata);
               } else if (strcmp(_name, "color") == 0) {
-                m_tempCluster->setStandardGroupID(strToUIntDef(m_chardata, 0));
+                m_tempCluster->setApplicationType(strToUIntDef(m_chardata, 0));
               } else if (strcmp(_name, "location") == 0) {
                 CardinalDirection_t location = cd_none;
                 if (parseCardinalDirection(m_chardata, &location)) {
@@ -902,7 +902,7 @@ namespace dss {
                 } catch (std::invalid_argument&) {}
                 m_tempCluster->setAutomatic(isAutomatic);
               } else if (strcmp(_name, "configuration") == 0) {
-                m_tempCluster->setConfiguration(strToUIntDef(m_chardata, 0));
+                m_tempCluster->setApplicationConfiguration(strToUIntDef(m_chardata, 0));
               }
             }
           }
@@ -923,9 +923,9 @@ namespace dss {
           } else if (strcmp(_name, "associatedSet") == 0) {
             m_tempGroup->setAssociatedSet(m_chardata);
           } else if (strcmp(_name, "color") == 0) {
-            m_tempGroup->setStandardGroupID(strToUIntDef(m_chardata, 0));
+            m_tempGroup->setApplicationType(strToUIntDef(m_chardata, 0));
           } else if (strcmp(_name, "configuration") == 0) {
-            m_tempGroup->setConfiguration(strToUIntDef(m_chardata, 0));
+            m_tempGroup->setApplicationConfiguration(strToUIntDef(m_chardata, 0));
           }
         } else if ((m_state == ps_scene) && (strcmp(_name, "scenes") == 0)) {
           m_state = ps_group;
@@ -1091,12 +1091,38 @@ namespace dss {
 
   void groupToXML(boost::shared_ptr<Group> _pGroup, std::ofstream& _ofs, const int _indent) {
     bool headerWritten = false;
+    bool sceneTagWritten = false;
+
+    // in case of GA we always need to serialize the group even if it do not have custom scenes
+    if (isGlobalAppGroup(_pGroup->getID())) {
+      headerWritten = true;
+      _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
+      if (!_pGroup->getName().empty()) {
+        addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
+      }
+      addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getApplicationType()));
+      addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getApplicationConfiguration()));
+      if (!_pGroup->getAssociatedSet().empty()) {
+        addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
+      }
+    }
+
     for (int iScene = 0; iScene < MaxSceneNumber; iScene++) {
       std::string name = _pGroup->getSceneName(iScene);
       if (!name.empty()) {
         if (!headerWritten) {
           headerWritten = true;
           _ofs << doIndent(_indent) << "<group id=\"" << intToString(_pGroup->getID()) << "\">" << std::endl;
+          if (!_pGroup->getName().empty()) {
+            addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
+          }
+          addElementSimple(_ofs, _indent + 1, "color", intToString(_pGroup->getApplicationType()));
+          addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getApplicationConfiguration()));
+          if (!_pGroup->getAssociatedSet().empty()) {
+            addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
+          }
+
+          sceneTagWritten = true;
           _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
         }
         _ofs << doIndent(_indent + 2) << "<scene id=\"" << intToString(iScene) << "\">" << std::endl;
@@ -1105,8 +1131,11 @@ namespace dss {
       }
     }
 
-    if (headerWritten) {
+    if (sceneTagWritten) {
       _ofs << doIndent(_indent + 1) << "</scenes>" << std::endl;
+    }
+
+    if (headerWritten) {
       _ofs << doIndent(_indent) << "</group>" << std::endl;
     }
   } // groupToXML
@@ -1120,13 +1149,13 @@ namespace dss {
     if (!_pCluster->getAssociatedSet().empty()) {
       addElementSimple(_ofs, _indent + 1, "associatedSet", _pCluster->getAssociatedSet());
     }
-    addElementSimple(_ofs, _indent + 1, "color", intToString(_pCluster->getStandardGroupID()));
+    addElementSimple(_ofs, _indent + 1, "color", intToString(_pCluster->getApplicationType()));
     addElementSimple(_ofs, _indent + 1, "location", toString(_pCluster->getLocation()));
     addElementSimple(_ofs, _indent + 1, "protectionClass", intToString(static_cast<int>(_pCluster->getProtectionClass())));
     addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));
     addElementSimple(_ofs, _indent + 1, "configurationLocked", (_pCluster->isConfigurationLocked() ? "1" : "0"));
     addElementSimple(_ofs, _indent + 1, "automatic", (_pCluster->isAutomatic() ? "1" : "0"));
-    addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pCluster->getConfiguration()));
+    addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pCluster->getApplicationConfiguration()));
     _ofs << doIndent(_indent + 1) << "<lockedScenes>" << std::endl;
     const std::vector<int> lockedScenes = _pCluster->getLockedScenes();
     for (unsigned int iScene = 0; iScene < lockedScenes.size(); iScene++) {
@@ -1137,12 +1166,12 @@ namespace dss {
     _ofs << doIndent(_indent) << "</cluster>" << std::endl;
   } // clusterToXML
 
-  void zoneSensorToXML(boost::shared_ptr<MainZoneSensor_t> _zoneSensor, std::ofstream& _ofs, const int _indent)
+  void zoneSensorToXML(const MainZoneSensor_t &_zoneSensor, std::ofstream& _ofs, const int _indent)
   {
     _ofs << doIndent(_indent) << "<sensor dsuid=\""
-         << dsuid2str(_zoneSensor->m_DSUID) << "\""
-         << " sensorType=\"" << intToString(static_cast<int>(_zoneSensor->m_sensorType)) << "\""
-         << " sensorIndex=\"" << intToString(_zoneSensor->m_sensorIndex)  << "\"/>"
+         << dsuid2str(_zoneSensor.m_DSUID) << "\""
+         << " sensorType=\"" << intToString(static_cast<int>(_zoneSensor.m_sensorType)) << "\""
+         << " sensorIndex=\"" << intToString(_zoneSensor.m_sensorIndex)  << "\"/>"
          << std::endl;
   } // zoneSensorToXML
 
@@ -1186,13 +1215,10 @@ namespace dss {
     _ofs << doIndent(_indent + 1) << "</groups>" << std::endl;
 
     // Zone sensors
-    std::vector<boost::shared_ptr<MainZoneSensor_t> > slist = _pZone->getAssignedSensors();
+    auto&& slist = _pZone->getAssignedSensors();
     if ( !slist.empty() ) {
       _ofs << doIndent(_indent + 1) << "<sensors>" << std::endl;
-      for (std::vector<boost::shared_ptr<MainZoneSensor_t> >::iterator it = slist.begin();
-          it != slist.end();
-          it ++) {
-        boost::shared_ptr<MainZoneSensor_t> devSensor = *it;
+      foreach (auto&& devSensor,  slist) {
         zoneSensorToXML(devSensor, _ofs, _indent+2);
       }
       _ofs << doIndent(_indent + 1) << "</sensors>" << std::endl;

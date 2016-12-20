@@ -25,12 +25,14 @@
 #define EVENTINTERPRETERPLUGINS_H_
 
 #include "event.h"
-#include "webservice_api.h"
+
+#include <unordered_map>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
 #include "src/scripting/jshandler.h"
+#include "webservice_api.h"
 
 namespace dss {
 
@@ -110,7 +112,7 @@ namespace dss {
     void registerSubscription(EventRelayTarget* _pTarget, const std::string& _subscriptionID);
     void removeSubscription(const std::string& _subscriptionID);
   private:
-    HASH_MAP<std::string, EventRelayTarget*> m_IDTargetMap;
+    std::unordered_map<std::string, EventRelayTarget*> m_IDTargetMap;
   }; // EventInterpreterInternalRelay
 
   class EventInterpreterPluginSendmail : public EventInterpreterPlugin {
