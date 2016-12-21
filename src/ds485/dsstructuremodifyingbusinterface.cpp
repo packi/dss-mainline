@@ -176,7 +176,11 @@ namespace dss {
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, applicationType, applicationConfig);
+    int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, applicationType);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    ret = ZoneGroupProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, applicationType, applicationConfig);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
 
@@ -196,7 +200,12 @@ namespace dss {
     //DSBusInterface::checkBroadcastResultCode(ret);
     //usleep(BROADCAST_SLEEP_MICROSECONDS);
 
-    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, applicationType, applicationConfig);
+    // TODO(soon): We will be able to remove this call when new DSM is available
+    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, applicationType);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
+
+    ret = ClusterProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _groupID, applicationType, applicationConfig);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
 
@@ -217,7 +226,12 @@ namespace dss {
     //DSBusInterface::checkBroadcastResultCode(ret);
     //usleep(BROADCAST_SLEEP_MICROSECONDS);
 
-    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0, 0);
+    // TODO(soon): We will be able to remove this call when new DSM is available
+    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
+
+    ret = ClusterProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0, 0);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
 
@@ -237,7 +251,13 @@ namespace dss {
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, applicationType, applicationConfig);
+
+    // TODO(soon): We will be able to remove this call when new DSM is available
+    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, applicationType);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    ret = ZoneGroupProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, applicationType, applicationConfig);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetStandardID
@@ -449,7 +469,13 @@ namespace dss {
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, applicationType, applicationConfig);
+
+    // TODO(soon): We will be able to remove this call when new DSM is available
+    ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, applicationType);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
+
+    ret = ClusterProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, applicationType, applicationConfig);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }
