@@ -56,7 +56,7 @@
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
 #include "src/protobufjson.h"
-#include "composed-group-state.h"
+#include "status-bit.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -65,24 +65,42 @@ namespace dss {
 
   __DEFINE_LOG_CHANNEL__(DeviceBinaryInput, lsNotice);
 
-  // RAII class to handling stream to ComposedGroupState
-  class DeviceBinaryInput::GroupStateHandle: boost::noncopyable {
+  // RAII class to handling stream to StatusBit
+  // We capture only weak reference to StatusBit to avaid crashes
+  // if this object is not notified soon enough that StatusBit was deleted.
+  class DeviceBinaryInput::StatusBitHandle: boost::noncopyable {
   public:
-    GroupStateHandle(DeviceBinaryInput& parent, const boost::shared_ptr<ComposedGroupState>& ptr)
-        : m_parent(parent), m_ptr(ptr) {
-      assert(ptr);
-      m_ptr->addSubState(*m_parent.m_state);
+    StatusBitHandle(DeviceBinaryInput& parent, StatusBit& statusBit)
+        : m_parent(parent),
+        m_weakPtr(boost::shared_ptr<StatusBit>(statusBit.getStatus().getGroup().sharedFromThis(), &statusBit)) {
+      statusBit.addSubState(*m_parent.m_state);
     }
-    ~GroupStateHandle() {
-      m_ptr->removeSubState(*m_parent.m_state);
+
+    ~StatusBitHandle() {
+      if (auto&& ptr = m_weakPtr.lock()) {
+        ptr->removeSubState(*m_parent.m_state);
+      }
     }
+
+    StatusBit* getPtr() {
+      if (auto&& ptr = m_weakPtr.lock()) {
+        return ptr.get();
+      }
+      return DS_NULLPTR;
+    }
+
     void update() {
-      log(std::string("GroupStateHandle::update this:") + m_parent.m_name, lsDebug);
-      m_ptr->updateSubState(*m_parent.m_state);
+      log(std::string("StatusBitHandle::update this:") + m_parent.m_name, lsDebug);
+      if (auto&& ptr = m_weakPtr.lock()) {
+        ptr->updateSubState(*m_parent.m_state);
+      } else {
+        // We should have been deleted at this point
+        log(ds::str("Referenced StatusBit instance was deleted"), lsError);
+      }
     }
   private:
     DeviceBinaryInput& m_parent;
-    boost::shared_ptr<ComposedGroupState> m_ptr;
+    boost::weak_ptr<StatusBit> m_weakPtr;
   };
 
   DeviceBinaryInput::DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index)
@@ -117,7 +135,7 @@ namespace dss {
       m_state = device.getApartment().getNonScriptState(m_state->getName());
     }
 
-    updateGroupState();
+    updateStatusBitHandle();
   }
 
   DeviceBinaryInput::~DeviceBinaryInput() {
@@ -138,7 +156,7 @@ namespace dss {
         + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
     m_targetGroupType = targetGroupType;
-    updateGroupState();
+    updateStatusBitHandle();
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
@@ -189,44 +207,38 @@ namespace dss {
     } catch (const std::exception& e) {
       log(std::string("handleEvent: what:")+ e.what(), lsWarning);
     }
-    if (m_groupState) {
-      m_groupState->update();
+    if (m_statusBitHandle) {
+      m_statusBitHandle->update();
     }
   }
 
-  void DeviceBinaryInput::updateGroupState() {
-    // remove link to old group state
-    m_groupState.reset();
-
-    auto composedGroupStateType = composedGroupStateTypeForBinaryInputType(m_inputType);
-    log(std::string("updateGroupState ENTER this:") + m_name
-        + " m_inputType:" + intToString(static_cast<int>(m_inputType))
-        + " composedGroupStateType:" + intToString(static_cast<int>(composedGroupStateType))
-        + " m_targetGroupId:" + intToString(m_targetGroupId), lsInfo);
-    if (composedGroupStateType == ComposedGroupStateType::NONE) {
-      return;
-    }
-    auto&& targetGroupId = m_targetGroupId;
-    if (targetGroupId == 0) {
-      return;
-    }
-    auto&& apartment = m_device.getApartment();
-    auto&& targetGroupZoneId = m_device.getGroupZoneID(targetGroupId);
-    auto&& composedGroupName = ds::str("zone.", targetGroupZoneId, ".group.", targetGroupId, ".inputType.",
-        static_cast<int>(m_inputType));
-    boost::shared_ptr<ComposedGroupState> composedGroupState;
-    {
-      auto&& base = apartment.tryGetState(ComposedGroupState::STATE_TYPE, composedGroupName);
-      if (base) {
-        composedGroupState = boost::dynamic_pointer_cast<ComposedGroupState>(base);
-        assert(composedGroupState);
-      } else {
-        composedGroupState = boost::make_shared<ComposedGroupState>(composedGroupName, composedGroupStateType);
-        apartment.allocateState(composedGroupState); // no ItemNotFoundException, we know it does not exist
+  void DeviceBinaryInput::updateStatusBitHandle() {
+    // find status object within target group
+    boost::shared_ptr<Group> targetGroup;
+    StatusBit* statusBit = DS_NULLPTR;
+    if (m_targetGroupId != 0) {
+      if (auto type = statusBitTypeForBinaryInputType(m_inputType)) {
+        if (targetGroup = m_device.tryGetGroup(m_targetGroupId).lock()) {
+          statusBit = &targetGroup->getStatusBit(*type);
+        }
       }
     }
-    m_groupState.reset(new GroupStateHandle(*this, composedGroupState));
-    log(std::string("updateGroupState LEAVE this:") + m_name + " composedGroupName:" + composedGroupName, lsInfo);
+    auto oldStatusBit = m_statusBitHandle ? m_statusBitHandle->getPtr() : (StatusBit*) DS_NULLPTR;
+    if (oldStatusBit == statusBit) {
+      return;
+    }
+
+    m_statusBitHandle.reset();
+    if (!statusBit) {
+      log(ds::str("updateStatusBitHandle this:", m_name,
+          " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
+          " statusBit:nullptr"), lsInfo);
+      return;
+    }
+    log(ds::str("updateStatusBitHandle this:", m_name,
+        " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
+        " type:",  statusBit->getType(), " name:", statusBit->getName()), lsInfo);
+    m_statusBitHandle.reset(new StatusBitHandle(*this, *statusBit));
   }
 
   //================================================== Device
@@ -311,6 +323,13 @@ namespace dss {
 
   int Device::getGroupZoneID(int groupID) const {
     return (isAppUserGroup(groupID) || isGlobalAppGroup(groupID)) ? 0 : (m_ZoneID > 0 ? m_ZoneID : m_LastKnownZoneID);
+  }
+
+  boost::weak_ptr<Group> Device::tryGetGroup(int groupId) const {
+    if (auto&& zone = m_pApartment->tryGetZone(getGroupZoneID(groupId)).lock()) {
+      return zone->tryGetGroup(groupId);
+    }
+    return boost::weak_ptr<Group>();
   }
 
   void Device::removeFromPropertyTree() {
@@ -1334,6 +1353,11 @@ namespace dss {
         }
         base->addChild(m_pAliasNode);
       }
+    }
+    // Binary input status bit handles depend on zoneId by call to `tryGetGroup`.
+    // TODO(someday): refactor to some kind of observer pattern?
+    foreach (auto&& binaryInput, m_binaryInputs) {
+      binaryInput->updateStatusBitHandle();
     }
   } // setZoneID
 

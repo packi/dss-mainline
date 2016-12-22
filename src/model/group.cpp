@@ -23,9 +23,10 @@
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 #endif
-
-
 #include "group.h"
+
+#include <ds/string.h>
+
 #include "zone.h"
 #include "scenehelper.h"
 #include "set.h"
@@ -34,9 +35,13 @@
 #include "src/propertysystem.h"
 
 #include "src/model/modelconst.h"
+#include "status-bit.h"
+
 namespace dss {
 
     //============================================= Group
+
+__DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
   Group::Group(const int _id, boost::shared_ptr<Zone> _pZone)
   : AddressableModelItem(&_pZone->getApartment()),
@@ -48,7 +53,8 @@ namespace dss {
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
     m_SyncPending(false),
-    m_connectedDevices(0)
+    m_connectedDevices(0),
+    m_status(*this)
   {
   } // ctor
 
@@ -69,8 +75,7 @@ namespace dss {
 
     if (m_GroupID == GroupIDYellow) {
       // zone.123.light
-      boost::shared_ptr<Group> me =
-          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<Group> me = sharedFromThis();
       boost::shared_ptr<State> state = boost::make_shared<State>(me, State::makeGroupName(*this));
 
       try {
@@ -78,8 +83,7 @@ namespace dss {
       } catch (ItemDuplicateException& ex) {} // we only care that it exists
     } else if (m_GroupID == GroupIDHeating) {
       // zone.123.heating
-      boost::shared_ptr<Group> me =
-          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<Group> me = sharedFromThis();
       boost::shared_ptr<State> state = boost::make_shared<State>(me, State::makeGroupName(*this));
 
       try {
@@ -301,6 +305,18 @@ namespace dss {
         node->getParentNode()->removeChild(node);
       }
     }
+  }
+
+  StatusBit& Group::getStatusBit(StatusBitType type) {
+    if (auto&& bit = m_status.tryGetBit(type)) {
+      return *bit;
+    }
+    auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
+    log(ds::str("New status bit name:", name), lsNotice);
+    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(m_status, type, std::move(name)));
+    auto&& bitRef = *bit;
+    m_status.insertBit(type, std::move(bit));
+    return bitRef;
   }
 
   boost::mutex Group::m_SceneNameMutex;

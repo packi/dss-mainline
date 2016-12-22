@@ -18,40 +18,35 @@
 */
 #pragma once
 
+#include <boost/optional.hpp>
 #include <logger.h>
 #include "state.h"
 
 namespace dss {
+class Status;
 
-/// Group states calculated for binary inputs within given group
-enum class ComposedGroupStateType {
-  NONE, // No group state associated with binary input
-  OR,   // Group state oring all binary inputs of given binary input type in the group
-};
-
-ComposedGroupStateType composedGroupStateTypeForBinaryInputType(BinaryInputType type);
-
-/// Group state that combines all substates by `or` function.
-///
-/// We inherit State class publicly to make this class registrable into Apartment class.
-/// But the non-const State api is not intented for public use and should stay private.
+/// Composed status bit that is active when any substate is active (`or` function).
 ///
 /// Methods `add`, `update` and `remove` take `const State& state`,
 /// but the coupling is very weak. State object is accessed only inside the called method.
-class ComposedGroupState : public State {
+class StatusBit : private boost::noncopyable {
 public:
-  ComposedGroupState(const std::string& name, ComposedGroupStateType type);
-  ~ComposedGroupState();
+  StatusBit(Status& status, StatusBitType type, const std::string& name);
+  ~StatusBit();
 
-  static constexpr eStateType STATE_TYPE = StateType_Service;
+  Status& getStatus() { return m_status; }
+  const std::string getName() const { return m_state->getName(); }
+  StatusBitType getType() const { return m_type; }
+
   void addSubState(const State& subState);
   void updateSubState(const State& subState);
   void removeSubState(const State& subState);
 
 private:
   __DECL_LOG_CHANNEL__;
-  boost::recursive_mutex m_mutex;
-  ComposedGroupStateType m_type;
+  Status& m_status;
+  StatusBitType m_type;
+  boost::shared_ptr<State> m_state; // State uses shared_from_this
   struct SubStateItem;
   std::vector<SubStateItem> m_subStateItems;
 

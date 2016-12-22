@@ -259,6 +259,16 @@ namespace dss {
     return stream;
   }
 
+  std::ostream& operator<<(std::ostream& stream, StatusBitType x) {
+    return [&]()-> std::ostream& {
+      switch (x) {
+        case StatusBitType::MALFUNCTION: return stream << "malfunction";
+        case StatusBitType::SERVICE: return stream << "service";
+      }
+      return stream << "unknown";
+    }() << '(' << static_cast<int>(x) << ')';
+  }
+
   std::ostream& operator<<(std::ostream& stream, BinaryInputType x) {
     switch (x) {
       case BinaryInputType::Presence: return stream << "presence";
@@ -286,6 +296,38 @@ namespace dss {
       case BinaryInputType::Service: return stream << "service";
     }
     return stream << "unknown" << static_cast<int>(x);
+  }
+
+  boost::optional<StatusBitType> statusBitTypeForBinaryInputType(BinaryInputType x) {
+    switch (x) {
+      case BinaryInputType::Presence:
+      case BinaryInputType::RoomBrightness:
+      case BinaryInputType::PresenceInDarkness:
+      case BinaryInputType::TwilightExternal:
+      case BinaryInputType::Movement:
+      case BinaryInputType::MovementInDarkness:
+      case BinaryInputType::SmokeDetector:
+      case BinaryInputType::WindDetector:
+      case BinaryInputType::RainDetector:
+      case BinaryInputType::SunRadiation:
+      case BinaryInputType::RoomThermostat:
+      case BinaryInputType::BatteryLow:
+      case BinaryInputType::WindowContact:
+      case BinaryInputType::DoorContact:
+      case BinaryInputType::WindowTilt:
+      case BinaryInputType::GarageDoorContact:
+      case BinaryInputType::SunProtection:
+      case BinaryInputType::FrostDetector:
+      case BinaryInputType::HeatingSystem:
+      case BinaryInputType::HeatingSystemMode:
+      case BinaryInputType::PowerUp:
+        return boost::none;
+      case BinaryInputType::Malfunction:
+        return StatusBitType::MALFUNCTION;
+      case BinaryInputType::Service:
+        return StatusBitType::SERVICE;
+    }
+    return boost::none;
   }
 
   std::string applicationTypeToString(ApplicationType type) {
@@ -320,4 +362,5 @@ namespace dss {
   }
 
   std::ostream& operator<<(std::ostream& stream, ApplicationType x) { return stream << applicationTypeToString(x); }
-}
+
+} // namespace dss

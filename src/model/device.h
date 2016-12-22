@@ -172,16 +172,15 @@ namespace dss {
     void setInputId(BinaryInputId inputId);
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
+
+    void updateStatusBitHandle();
   private:
     __DECL_LOG_CHANNEL__;
     Device& m_device;
     std::string m_name;
     boost::shared_ptr<State> m_state;
-    class GroupStateHandle;
-    friend class GroupStateHandle;
-    std::unique_ptr<GroupStateHandle> m_groupState;
-
-    void updateGroupState();
+    class StatusBitHandle;
+    std::unique_ptr<StatusBitHandle> m_statusBitHandle;
   };
 
   typedef struct {
@@ -532,6 +531,8 @@ namespace dss {
     int getJokerGroup() const;
     /** Returns the zoneID that this device group is in. */
     int getGroupZoneID(int groupID) const;
+    /// Returns zone local group or global group
+    boost::weak_ptr<Group> tryGetGroup(int groupId) const;
 
     /** Removes the device from all group.
      * The device will remain in the broadcastgroup though.

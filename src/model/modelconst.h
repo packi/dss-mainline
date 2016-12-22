@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <boost/optional.hpp>
 
 namespace dss {
 
@@ -158,7 +159,7 @@ namespace dss {
   const uint8_t SensorFunction_Generic11 = 11;
 
   enum class SensorType {
-    Status = 0, ///< Status sensor value. See also \ref StatusSensorBits.
+    Status = 0, ///< Status sensor value. Value bits are defined by \re StatusBitType
     ActivePower = 4,
     OutputCurrent = 5,
     ElectricMeter = 6,
@@ -187,12 +188,6 @@ namespace dss {
     UnknownType = 255,
   };
 
-  // Interpretation of SensorType::Status bit values.
-  enum class StatusSensorBits {
-    MALFUNCTION = 0,
-    SERVICE = 1,
-  };
-
   const int SensorMaxLifeTime = 3600; /* 1h */
 
   double sensorValueToDouble(SensorType _sensorType, const int _sensorValue);
@@ -200,6 +195,15 @@ namespace dss {
   uint8_t sensorTypeToPrecision(SensorType _sensorType);
   std::string sensorTypeName(SensorType _sensorType);
   std::ostream& operator<<(std::ostream& stream, SensorType type);
+
+  /// Status types. Constant value represent bit number of SensorType::Status value.
+  enum class StatusBitType : std::size_t {
+    MALFUNCTION = 0,
+    SERVICE = 1,
+  };
+  /// Maximal StatusBitType value. Restriction imposed by SensorValue range.
+  static constexpr std::size_t STATUS_BIT_TYPE_MAX = 11;
+  std::ostream& operator<<(std::ostream& stream, StatusBitType type);
 
   enum class BinaryInputType {
     Presence = 1,
@@ -227,6 +231,7 @@ namespace dss {
     Service = 23,
   };
   std::ostream& operator<<(std::ostream& stream, BinaryInputType type);
+  boost::optional<StatusBitType> statusBitTypeForBinaryInputType(BinaryInputType type);
 
   enum class ApplicationType {
     None = 0,

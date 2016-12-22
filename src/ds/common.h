@@ -3,10 +3,12 @@
 #if defined __GNUC__
   #if __GNUC__ <5
     #define DS_OVERRIDE
+    #define DS_NULLPTR 0
   #endif
 #endif
 #ifndef DS_OVERRIDE
     #define DS_OVERRIDE override
+    #define DS_NULLPTR nullptr
 #endif
 
 // define to `[[fallthrough]]` on c++17 complaint compilers

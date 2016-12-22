@@ -188,15 +188,22 @@ namespace dss {
     throw ItemNotFoundException(_zoneName);
   } // getZone(name)
 
-  boost::shared_ptr<Zone> Apartment::getZone(const int _id) {
+  boost::weak_ptr<Zone> Apartment::tryGetZone(const int id) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    foreach(boost::shared_ptr<Zone> zone, m_Zones) {
-      if(zone->getID() == _id) {
+    foreach (auto&& zone, m_Zones) {
+      if(zone->getID() == id) {
         return zone;
       }
     }
-    throw ItemNotFoundException(intToString(_id));
-  } // getZone(id)
+    return boost::weak_ptr<Zone>();
+  }
+
+  boost::shared_ptr<Zone> Apartment::getZone(const int id) {
+    if (auto&& zone = tryGetZone(id).lock()) {
+      return zone;
+    }
+    throw ItemNotFoundException(intToString(id));
+  }
 
   std::vector<boost::shared_ptr<Zone> > Apartment::getZones() {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
