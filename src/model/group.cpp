@@ -23,9 +23,10 @@
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 #endif
-
-
 #include "group.h"
+
+#include <ds/string.h>
+
 #include "zone.h"
 #include "scenehelper.h"
 #include "set.h"
@@ -34,6 +35,8 @@
 #include "src/propertysystem.h"
 
 #include "src/model/modelconst.h"
+#include "status-bit.h"
+
 namespace dss {
 
     //============================================= Group
@@ -50,7 +53,8 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
     m_SyncPending(false),
-    m_connectedDevices(0)
+    m_connectedDevices(0),
+    m_status(*this)
   {
   } // ctor
 
@@ -301,6 +305,18 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
         node->getParentNode()->removeChild(node);
       }
     }
+  }
+
+  StatusBit& Group::getStatusBit(StatusBitType type) {
+    if (auto&& bit = m_status.tryGetBit(type)) {
+      return *bit;
+    }
+    auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
+    log(ds::str("New status bit name:", name), lsNotice);
+    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(m_status, type, std::move(name)));
+    auto&& bitRef = *bit;
+    m_status.insertBit(type, std::move(bit));
+    return bitRef;
   }
 
   boost::mutex Group::m_SceneNameMutex;

@@ -29,6 +29,7 @@
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
 #include "state.h"
+#include "status.h"
 #include "src/businterface.h"
 
 namespace dss {
@@ -53,6 +54,7 @@ namespace dss {
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
     int m_connectedDevices;
+    Status m_status;
 
     // getter and setter for property proxy
     int getApplicationTypeInt() const { return static_cast<int>(getApplicationType()); }
@@ -62,6 +64,7 @@ namespace dss {
     Group(const int _id, boost::shared_ptr<Zone> _pZone);
     virtual ~Group();
     boost::shared_ptr<Group> sharedFromThis() { return boost::static_pointer_cast<Group>(shared_from_this()); }
+
     virtual Set getDevices() const;
 
     /** Returns the id of the group */
@@ -129,6 +132,9 @@ namespace dss {
     /** Published a sensor value to all devices of this zone */
     void sensorPush(const dsuid_t& _sourceID, SensorType _type, double _value);
     void sensorInvalid(SensorType _type);
+
+    /// Get group StatusBit instance for given status type
+    StatusBit& getStatusBit(StatusBitType statusBitType);
 
     void addConnectedDevice();
     void removeConnectedDevice();
