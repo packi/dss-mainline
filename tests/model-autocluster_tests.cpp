@@ -97,7 +97,7 @@ void filterClusters(std::vector<boost::shared_ptr<Cluster> > _clusters,
                     std::vector<boost::shared_ptr<Cluster> > *_automaticClusters)
 {
   foreach (boost::shared_ptr<Cluster> cluster, _clusters) {
-    if (cluster->getApplicationType() != 0) {
+    if (cluster->getApplicationType() != ApplicationType::None) {
       _usedClusters->push_back(cluster);
     }
     if (cluster->isAutomatic()) {
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_SUITE(clustertest)
 
   // check no cluster is assigned
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
-    BOOST_CHECK_EQUAL(cluster->getApplicationType(), 0);
+    BOOST_CHECK_EQUAL(cluster->getApplicationType(), ApplicationType::None);
   }
 
   //----------------------------------------------------------------------------
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(assignDoubeDeviceDirection) {
 
   // check no cluster is assigned
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
-    BOOST_CHECK_EQUAL(cluster->getApplicationType(), 0);
+    BOOST_CHECK_EQUAL(cluster->getApplicationType(), ApplicationType::None);
   }
 
   //----------------------------------------------------------------------------
@@ -304,7 +304,7 @@ void makeClustersInconsistent(Apartment &_apartment, boost::shared_ptr<Device> &
   if (cluster != NULL) {
     cluster->setLocation(_device->getCardinalDirection());
     cluster->setProtectionClass(_protection);
-    cluster->setApplicationType(DEVICE_CLASS_GR);
+    cluster->setApplicationType(ApplicationType::Blinds);
     cluster->setName(toString(_device->getCardinalDirection()) + "-" +
                      intToString(_device->getWindProtectionClass()));
     cluster->setAutomatic(true);
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE(joinCheckLocked) {
     int clusterAutomatic = 0;
     std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
     foreach (boost::shared_ptr<Cluster> cluster, clusters) {
-      if (cluster->getApplicationType() != 0) {
+      if (cluster->getApplicationType() != ApplicationType::None) {
         ++clusterUsed;
       }
       if (cluster->isAutomatic()) {
@@ -575,7 +575,7 @@ BOOST_AUTO_TEST_CASE(getClusterUnassigned) {
   BOOST_CHECK_EQUAL(cluster->getLocation(), cd_none);
   BOOST_CHECK_EQUAL(cluster->getProtectionClass(), wpc_none);
   BOOST_CHECK_EQUAL(cluster->isAutomatic(), true);
-  BOOST_CHECK_EQUAL(cluster->getApplicationType(), DEVICE_CLASS_GR);
+  BOOST_CHECK_EQUAL(cluster->getApplicationType(), ApplicationType::Blinds);
 }
 
 BOOST_AUTO_TEST_CASE(unassignmentCheck) {
@@ -627,7 +627,7 @@ BOOST_AUTO_TEST_CASE(checkCleanupEmptyCluster) {
   foreach (boost::shared_ptr<Cluster> cluster, apt1.getClusters()) {
     cluster->setLocation(cd_east);
     cluster->setProtectionClass(wpc_blind_class_3);
-    cluster->setApplicationType(DEVICE_CLASS_GR);
+    cluster->setApplicationType(ApplicationType::Blinds);
     cluster->setName("test");
     cluster->setAutomatic(true);
   }

@@ -684,7 +684,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
   // create 2 clusters
   boost::shared_ptr<Cluster> cluster1 = apt.getCluster(16);
   cluster1->setLocation(cd_north);
-  cluster1->setApplicationType(3);
+  cluster1->setApplicationType(ApplicationType::Heating);
   cluster1->setProtectionClass(wpc_awning_class_2);
   cluster1->setFloor(2);
   cluster1->setConfigurationLocked(true);
@@ -694,7 +694,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
 
   boost::shared_ptr<Cluster> cluster2 = apt.getCluster(38);
   cluster2->setLocation(cd_south);
-  cluster2->setApplicationType(4);
+  cluster2->setApplicationType(ApplicationType::Audio);
   cluster2->setProtectionClass(wpc_awning_class_1);
   cluster2->setFloor(1);
   cluster2->setConfigurationLocked(false);
@@ -743,7 +743,8 @@ BOOST_AUTO_TEST_CASE(testCluster) {
     BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("id"), cluster->getID());
     std::string name(ctx->getRootObject().getProperty<std::string>("name"));
     BOOST_CHECK_EQUAL(name.compare(cluster->getName()), 0);
-    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("standardGroup"),      cluster->getApplicationType());
+    BOOST_CHECK_EQUAL(static_cast<ApplicationType>(ctx->getRootObject().getProperty<int>("standardGroup")),
+        cluster->getApplicationType());
     BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("location"),           cluster->getLocation());
     BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("protectionClass"),    cluster->getProtectionClass());
     BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("floor"),              cluster->getFloor());

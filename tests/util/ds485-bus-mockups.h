@@ -22,7 +22,7 @@
 
 #include "dss.h"
 #include "src/messages/vdc-messages.pb.h"
-#include "src/model/application.h"
+#include "src/model/modelconst.h"
 
 namespace dss {
 
