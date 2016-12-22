@@ -462,7 +462,7 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), color, 0, clusterName);
+    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), static_cast<ApplicationType>(color), 0, clusterName);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
@@ -525,11 +525,11 @@ namespace dss {
       // find a group slot with unassigned state machine id
       for (groupID = GroupIDAppUserMin; groupID <= GroupIDAppUserMax; groupID++) {
         pGroup = zone->getGroup(groupID);
-        if (pGroup->getApplicationType() == 0) {
+        if (pGroup->getApplicationType() == ApplicationType::None) {
           break;
         }
       }
-      if (pGroup->getApplicationType() > 0) {
+      if (pGroup->getApplicationType() != ApplicationType::None) {
         pGroup.reset();
       }
     } else if (groupID == -3) {
@@ -556,7 +556,7 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.createGroup(zone, groupID, groupColor, 0, groupName);
+    manipulator.createGroup(zone, groupID, static_cast<ApplicationType>(groupColor), 0, groupName);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
@@ -608,10 +608,10 @@ namespace dss {
       }
     }
 
-    if (!(dev->isInGroup(gr->getApplicationType()) ||
+    if (!(dev->isInGroup(static_cast<int>(gr->getApplicationType())) ||
           (dev->getDeviceType() == DEVICE_TYPE_AKM) ||
           (dev->getDeviceType() == DEVICE_TYPE_UMR))) {
-      return JSONWriter::failure("Devices does not match color of group (" + intToString(gr->getApplicationType()) + ")");
+      return JSONWriter::failure("Devices does not match color of group (" + applicationTypeToString(gr->getApplicationType()) + ")");
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
@@ -866,7 +866,7 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.groupSetApplication(group, newColor, 0);
+    manipulator.groupSetApplication(group, static_cast<ApplicationType>(newColor), 0);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();
@@ -922,7 +922,7 @@ namespace dss {
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.clusterSetApplication(pCluster, newColor, 0);
+    manipulator.clusterSetApplication(pCluster, static_cast<ApplicationType>(newColor), 0);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();

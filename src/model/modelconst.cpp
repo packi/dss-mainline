@@ -287,4 +287,37 @@ namespace dss {
     }
     return stream << "unknown" << static_cast<int>(x);
   }
+
+  std::string applicationTypeToString(ApplicationType type) {
+    switch (type) {
+      case ApplicationType::None:
+        return "None";
+      case ApplicationType::Lights:
+        return "Lights";
+      case ApplicationType::Blinds:
+        return "Blinds";
+      case ApplicationType::Heating:
+        return "Heating";
+      case ApplicationType::Audio:
+        return "Audio";
+      case ApplicationType::Video:
+        return "Video";
+      case ApplicationType::Cooling:
+        return "Cooling";
+      case ApplicationType::Ventilation:
+        return "Ventilation";
+      case ApplicationType::Window:
+        return "Window";
+      case ApplicationType::Curtains:
+        return "Curtains";
+      case ApplicationType::Temperature:
+        return "Temperature";
+      case ApplicationType::ApartmentVentilation:
+        return "ApartmentVentilation";
+      default:
+        return "Not valid ApplicationType (" + intToString(static_cast<int>(type)) + ")";
+    }
+  }
+
+  std::ostream& operator<<(std::ostream& stream, ApplicationType x) { return stream << applicationTypeToString(x); }
 }

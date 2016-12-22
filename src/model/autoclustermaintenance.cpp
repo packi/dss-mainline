@@ -150,8 +150,8 @@ void AutoClusterMaintenance::joinIdenticalClusters ()
       }
       if (cluster->getLocation() == clusters[index]->getLocation() &&
           cluster->getProtectionClass() == clusters[index]->getProtectionClass()) {
-        log("The clusters with ids " + intToString(cluster->getApplicationType()) + " and id " +
-            intToString(cluster->getApplicationType()) + " are identical", lsWarning);
+        log("The clusters with ids " + applicationTypeToString(cluster->getApplicationType()) + " and id " +
+            applicationTypeToString(clusters[index]->getApplicationType()) + " are identical", lsWarning);
         moveClusterDevices(clusters[index], cluster);
       }
     }
@@ -236,7 +236,7 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
 
   std::vector<boost::shared_ptr<Cluster> > clusters = m_pApartment->getClusters();
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
-    if ((cluster->getApplicationType() != 0) &&
+    if ((cluster->getApplicationType() != ApplicationType::None) &&
         (cluster->getProtectionClass() == _protection) &&
         (cluster->getLocation() == _cardinalDirection) &&
         (cluster->isAutomatic())) {
@@ -252,7 +252,8 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
 
   cluster->setLocation(_cardinalDirection);
   cluster->setProtectionClass(_protection);
-  cluster->setApplicationType(DEVICE_CLASS_GR);
+  // TODO: why do we create gray cluster?
+  cluster->setApplicationType(ApplicationType::Blinds);
 
   // Naming scheme: "<orientation> - Class <class> - <speed>m/s" (e.g. "South-West – Class 1 -9.8 m/s")
   // if no orientation is defined: only "Class z - x.y m/s" (no "none"-Orientation)

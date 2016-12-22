@@ -112,7 +112,7 @@ namespace dss {
     m_LockedScenes.clear();
     setConfigurationLocked(false);
     setAutomatic(false);
-    setApplicationType(0);
+    setApplicationType(ApplicationType::None);
     setName("");
     setApplicationConfiguration(0);
   } // reset
