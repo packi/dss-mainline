@@ -196,12 +196,13 @@ namespace dss {
   std::string sensorTypeName(SensorType _sensorType);
   std::ostream& operator<<(std::ostream& stream, SensorType type);
 
- // Status types. Constant value represent bit number of SensorType::Status value.
-  enum class StatusBitType {
+  /// Status types. Constant value represent bit number of SensorType::Status value.
+  enum class StatusBitType : std::size_t {
     MALFUNCTION = 0,
     SERVICE = 1,
   };
-  static constexpr std::size_t STATUS_BIT_TYPE_MAX = 11; // Maximal StatusBitType value
+  /// Maximal StatusBitType value. Restriction imposed by SensorValue range.
+  static constexpr std::size_t STATUS_BIT_TYPE_MAX = 11;
   std::ostream& operator<<(std::ostream& stream, StatusBitType type);
 
   enum class BinaryInputType {

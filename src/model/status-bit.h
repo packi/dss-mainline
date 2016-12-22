@@ -34,6 +34,7 @@ public:
   StatusBit(Status& status, StatusBitType type, const std::string& name);
   ~StatusBit();
 
+  Status& getStatus() { return m_status; }
   const std::string getName() const { return m_state->getName(); }
   StatusBitType getType() const { return m_type; }
 

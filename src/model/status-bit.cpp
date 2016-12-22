@@ -44,6 +44,7 @@ StatusBit::StatusBit(Status& status, StatusBitType type, const std::string& name
     : m_status(status), m_type(type),
     m_state(boost::make_shared<State>(StateType_Service, name)) {
   log(std::string("StatusBit this:") + getName(), lsInfo);
+  DS_ASSUME(static_cast<std::size_t>(type) <= STATUS_BIT_TYPE_MAX);
 }
 
 StatusBit::~StatusBit() = default;

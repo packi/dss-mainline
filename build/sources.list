@@ -87,13 +87,11 @@ libdsscore_a_SOURCES =  \
 	../src/model/busscanner.h \
 	../src/model/cluster.cpp \
 	../src/model/cluster.h \
-	../src/model/status-bit.h \
 	../src/model/status-bit.cpp \
+	../src/model/status-bit.h \
 	../src/model/status.h \
 	../src/model/status.cpp \
 	../src/model/data_types.cpp \
-	../src/model/data_types.cpp \
-	../src/model/data_types.h \
 	../src/model/data_types.h \
 	../src/model/device.cpp \
 	../src/model/device.h \

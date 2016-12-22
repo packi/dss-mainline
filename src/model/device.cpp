@@ -66,13 +66,14 @@ namespace dss {
   __DEFINE_LOG_CHANNEL__(DeviceBinaryInput, lsNotice);
 
   // RAII class to handling stream to StatusBit
+  // We capture only weak reference to StatusBit to avaid crashes
+  // if this object is not notified soon enough that StatusBit was deleted.
   class DeviceBinaryInput::StatusBitHandle: boost::noncopyable {
   public:
-    StatusBitHandle(DeviceBinaryInput& parent, boost::weak_ptr<StatusBit> weakPtr)
-        : m_parent(parent), m_weakPtr(std::move(weakPtr)) {
-      if (auto&& ptr = m_weakPtr.lock()) {
-        ptr->addSubState(*m_parent.m_state);
-      }
+    StatusBitHandle(DeviceBinaryInput& parent, StatusBit& statusBit)
+        : m_parent(parent),
+        m_weakPtr(boost::shared_ptr<StatusBit>(statusBit.getStatus().getGroup().sharedFromThis(), &statusBit)) {
+      statusBit.addSubState(*m_parent.m_state);
     }
 
     ~StatusBitHandle() {
@@ -92,6 +93,9 @@ namespace dss {
       log(std::string("StatusBitHandle::update this:") + m_parent.m_name, lsDebug);
       if (auto&& ptr = m_weakPtr.lock()) {
         ptr->updateSubState(*m_parent.m_state);
+      } else {
+        // We should have been deleted at this point
+        log(ds::str("Referenced StatusBit instance was deleted"), lsError);
       }
     }
   private:
@@ -211,16 +215,14 @@ namespace dss {
   void DeviceBinaryInput::updateStatusBitHandle() {
     // find status object within target group
     boost::shared_ptr<Group> targetGroup;
-    auto statusBit = [&]() -> StatusBit* {
-      if (m_targetGroupId != 0) {
-        if (auto type = statusBitTypeForBinaryInputType(m_inputType)) {
-          if (targetGroup = m_device.tryGetGroup(m_targetGroupId).lock()) {
-            return &targetGroup->getStatusBit(*type);
-          }
+    StatusBit* statusBit = DS_NULLPTR;
+    if (m_targetGroupId != 0) {
+      if (auto type = statusBitTypeForBinaryInputType(m_inputType)) {
+        if (targetGroup = m_device.tryGetGroup(m_targetGroupId).lock()) {
+          statusBit = &targetGroup->getStatusBit(*type);
         }
       }
-      return DS_NULLPTR;
-    }();
+    }
     auto oldStatusBit = m_statusBitHandle ? m_statusBitHandle->getPtr() : (StatusBit*) DS_NULLPTR;
     if (oldStatusBit == statusBit) {
       return;
@@ -234,7 +236,7 @@ namespace dss {
     log(ds::str("updateStatusBitHandle this:", m_name,
         " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
         " type:",  statusBit->getType(), " name:", statusBit->getName()), lsInfo);
-    m_statusBitHandle.reset(new StatusBitHandle(*this, boost::shared_ptr<StatusBit>(targetGroup, statusBit)));
+    m_statusBitHandle.reset(new StatusBitHandle(*this, *statusBit));
   }
 
   //================================================== Device
@@ -1350,7 +1352,7 @@ namespace dss {
         base->addChild(m_pAliasNode);
       }
     }
-    // binary input status bits depend on zoneId.
+    // Binary input status bit handles depend on zoneId by call to `tryGetGroup`.
     // TODO(someday): refactor to some kind of observer pattern?
     foreach (auto&& binaryInput, m_binaryInputs) {
       binaryInput->updateStatusBitHandle();

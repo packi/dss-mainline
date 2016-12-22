@@ -49,7 +49,7 @@ void Status::insertBit(StatusBitType statusType, std::unique_ptr<StatusBit> stat
 
 void Status::setBitValue(StatusBitType type, bool bitValue) {
   auto&& bit = static_cast<int>(type);
-  if (m_valueBitset.test(bit) == !!bitValue) {
+  if (m_valueBitset.test(bit) == bitValue) {
     return;
   }
   log(ds::str("setBitValue type:", type, " bitValue:", bitValue), lsInfo);

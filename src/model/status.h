@@ -33,6 +33,8 @@ public:
   Status(Group& group);
   ~Status();
 
+  Group& getGroup() { return m_group; }
+
   StatusBit* tryGetBit(StatusBitType statusType);
   void insertBit(StatusBitType statusType, std::unique_ptr<StatusBit> state);
   unsigned int getValue() const { return m_valueBitset.to_ulong(); }
