@@ -230,7 +230,9 @@ namespace dss {
 
     m_statusBitHandle.reset();
     if (!statusBit) {
-      log(ds::str("updateStatusBitHandle this:", m_name), lsInfo);
+      log(ds::str("updateStatusBitHandle this:", m_name,
+          " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
+          " statusBit:nullptr"), lsInfo);
       return;
     }
     log(ds::str("updateStatusBitHandle this:", m_name,
