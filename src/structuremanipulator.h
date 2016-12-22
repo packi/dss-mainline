@@ -67,17 +67,15 @@ namespace dss {
     int persistSet(Set& _set, const std::string& _originalSet, int _groupNumber);
     void unpersistSet(std::string _setDescription);
 
-    void createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int applicationType, const std::string& _name);
+    void createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, const int applicationType, const int applicationConfiguration, const std::string& _name);
     void removeGroup(boost::shared_ptr<Zone> _zone, int _groupNumber);
     void groupSetName(boost::shared_ptr<Group> _group, const std::string& _name);
-    void groupSetApplicationType(boost::shared_ptr<Group> _group, const int applicationType);
-    void groupSetApplicationConfiguration(boost::shared_ptr<Group> _group, const int applicationConfiguration);
+    void groupSetApplication(boost::shared_ptr<Group> _group, const int applicationType, const int applicationConfiguration);
 
     void sceneSetName(boost::shared_ptr<Group> _group, int _sceneNumber, const std::string& _name);
 
     void clusterSetName(boost::shared_ptr<Cluster> _cluster, const std::string& _name);
-    void clusterSetApplicationType(boost::shared_ptr<Cluster> _cluster, const int applicationType);
-    void clusterSetApplicationConfiguration(boost::shared_ptr<Cluster> _cluster, const int applicationConfiguration);
+    void clusterSetApplication(boost::shared_ptr<Cluster> _cluster, const int applicationType, const int applicationConfiguration);
     void clusterSetConfigurationLock(boost::shared_ptr<Cluster> _cluster, bool _locked);
 
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);

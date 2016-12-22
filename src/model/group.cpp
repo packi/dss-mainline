@@ -320,8 +320,8 @@ namespace dss {
     boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone));
 
     pGroup->setName(_groupSpec.Name);
-    pGroup->setApplicationType(_groupSpec.stateMachineID);
-    pGroup->setApplicationConfiguration(_groupSpec.stateMachineConfig);
+    pGroup->setApplicationType(_groupSpec.applicationType);
+    pGroup->setApplicationConfiguration(_groupSpec.applicationConfiguration);
 
     return pGroup;
   }

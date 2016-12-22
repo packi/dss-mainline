@@ -329,7 +329,7 @@ void AutoClusterMaintenance::busUpdateCluster(boost::shared_ptr<Cluster> _cluste
     // operation can be overridden for testing.
     StructureModifyingBusInterface* itf = m_pApartment->getBusInterface()->getStructureModifyingBusInterface();
     itf->clusterSetName(_cluster->getID(), _cluster->getName());
-    itf->clusterSetStateMachine(_cluster->getID(), _cluster->getApplicationType());
+    itf->clusterSetApplication(_cluster->getID(), _cluster->getApplicationType(), _cluster->getApplicationConfiguration());
     itf->clusterSetProperties(_cluster->getID(), _cluster->getLocation(),
                               _cluster->getFloor(), _cluster->getProtectionClass());
     itf->clusterSetLockedScenes(_cluster->getID(), _cluster->getLockedScenes());
