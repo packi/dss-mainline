@@ -169,7 +169,7 @@ namespace dss {
   } // getDeviceByName
 
   Set Apartment::getDevices() const {
-    DeviceVector devs;
+    std::vector<DeviceReference> devs;
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
       devs.push_back(DeviceReference(dev, this));

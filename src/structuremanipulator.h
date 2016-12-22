@@ -44,8 +44,7 @@ namespace dss {
     Apartment& m_Apartment;
     StructureModifyingBusInterface& m_Interface;
     class StructureQueryBusInterface& m_QueryInterface;
-    void checkSensorsOnDeviceRemoval(
-          boost::shared_ptr<Zone> _zone, boost::shared_ptr<Device> _device);
+    void checkSensorsOnDeviceRemoval(Zone &_zone, Device &_device);
     void wipeZoneOnMeter(dsuid_t _meterDSUID, int _zoneID);
   public:
     StructureManipulator(StructureModifyingBusInterface& _interface,
@@ -87,10 +86,11 @@ namespace dss {
 
     void setZoneHeatingConfig(boost::shared_ptr<Zone> _zone, const dsuid_t& _ctrlDSUID, const ZoneHeatingConfigSpec_t _spec);
     void clearZoneHeatingConfig(boost::shared_ptr<Zone> _zone);
-    void setZoneSensor(boost::shared_ptr<Zone> _zone, SensorType _sensorType, boost::shared_ptr<Device> _dev);
-    void resetZoneSensor(boost::shared_ptr<Zone> _zone, SensorType _sensorType);
-    void autoAssignZoneSensors(boost::shared_ptr<Zone> _zone);
-    void synchronizeZoneSensorAssignment(std::vector<boost::shared_ptr<Zone> > _zones);
+
+    void setZoneSensor(Zone &_zone, SensorType _sensorType, boost::shared_ptr<Device> _dev);
+    void resetZoneSensor(Zone &_zone, SensorType _sensorType);
+    void autoAssignZoneSensors(Zone &_zone);
+    void synchronizeZoneSensorAssignment(Zone &zone);
     /**
      * @ret device moved
      */

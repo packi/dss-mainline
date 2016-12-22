@@ -35,14 +35,13 @@ using namespace google::protobuf;
 namespace dss {
 
   void ProtobufToJSon::processGenericResponse(const ::vdcapi::GenericResponse& response, JSONWriter& writer) {
-    writer.startArray();
+    writer.startArray("response");
     writer.startObject();
-    writer.add("response",response.code());
+    writer.add("code",response.code());
     writer.endObject();
-
     if (response.has_description()) {
       writer.startObject();
-      writer.add("result",response.description());
+      writer.add("message",response.description());
       writer.endObject();
     }
     writer.endArray();
@@ -50,7 +49,7 @@ namespace dss {
 
   void ProtobufToJSon::processElements(const RepeatedPtrField< ::vdcapi::PropertyElement >& _elements,
                                        JSONWriter& _writer) {
-    _writer.startArray();
+    _writer.startArray("elements");
     for (int i = 0; i < _elements.size(); ++i) {
       const ::vdcapi::PropertyElement& tempElement = _elements.Get(i);
 
@@ -99,19 +98,19 @@ namespace dss {
   void ProtobufToJSon::protoPropertyToJson(const vdcapi::Message& _message, JSONWriter& _writer) {
     switch (_message.type()) {
     case vdcapi::VDSM_REQUEST_GET_PROPERTY:
-      _writer.add("RequestGetProperty");
+      _writer.add("type", "RequestGetProperty");
       processElements(_message.vdsm_request_get_property().query(), _writer);
       break;
     case vdcapi::VDC_RESPONSE_GET_PROPERTY:
-      _writer.add("ResponseGetProperty");
+      _writer.add("type", "ResponseGetProperty");
       processElements(_message.vdc_response_get_property().properties(), _writer);
       break;
     case vdcapi::VDSM_REQUEST_SET_PROPERTY:
-      _writer.add("RequestSetProperty");
+      _writer.add("type", "RequestSetProperty");
       processElements(_message.vdsm_request_set_property().properties(), _writer);
       break;
     case vdcapi::GENERIC_RESPONSE:
-      _writer.add("GenericResponse");
+      _writer.add("type", "GenericResponse");
       processGenericResponse(_message.generic_response(), _writer);
       break;
     default:

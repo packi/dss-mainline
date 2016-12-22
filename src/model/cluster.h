@@ -26,7 +26,6 @@
 #include <map>
 #include <boost/thread/mutex.hpp>
 
-#include "modeltypes.h"
 #include "device.h"
 #include "group.h"
 #include "businterface.h"

@@ -641,7 +641,7 @@ std::string ZoneRequestHandler::setSensorSource(
   }
 
   StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-  manipulator.setZoneSensor(pZone, type, dev);
+  manipulator.setZoneSensor(*pZone, type, dev);
   return JSONWriter::success();
 }
 
@@ -656,7 +656,7 @@ std::string ZoneRequestHandler::clearSensorSource(
   }
   SensorType sensorType = static_cast<SensorType>(intType);
   StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-  manipulator.resetZoneSensor(pZone, sensorType);
+  manipulator.resetZoneSensor(*pZone, sensorType);
   return JSONWriter::success();
 }
 

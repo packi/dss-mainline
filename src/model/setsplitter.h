@@ -35,7 +35,6 @@
 #include "src/util.h"
 #include "src/logger.h"
 #include "src/foreach.h"
-#include "src/model/modelconst.h"
 
 #include "device.h"
 #include "group.h"

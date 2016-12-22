@@ -114,7 +114,7 @@ namespace dss {
   } // removeGroup
 
   void Zone::removeDevice(const DeviceReference& _device) {
-    DeviceIterator pos = find(m_Devices.begin(), m_Devices.end(), _device);
+    auto pos = find(m_Devices.begin(), m_Devices.end(), _device);
     if(pos != m_Devices.end()) {
       if(m_pPropertyNode != NULL) {
         for(std::vector<boost::shared_ptr<Group> >::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();

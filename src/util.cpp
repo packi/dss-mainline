@@ -38,7 +38,6 @@
 #include "model/modulator.h"
 #include "model/modelconst.h"
 #include "ds485/dsdevicebusinterface.h"
-#include "structuremanipulator.h"
 #include "foreach.h"
 #include "expatparser.h"
 

@@ -112,26 +112,22 @@ namespace dss {
         int timeout = -1;
         _request.getParameter("timeout", timeout);
         vdcapi::Message res = VdcHelper::callLearningFunction(dsMeter->getDSID(), true, timeout, *paramsElement);
-        json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
       } else if(_request.getMethod() == "learnOut") {
         int timeout = -1;
         _request.getParameter("timeout", timeout);
         vdcapi::Message res = VdcHelper::callLearningFunction(dsMeter->getDSID(), false, timeout, *paramsElement);
-        json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
       } else if(_request.getMethod() == "firmwareCheck") {
         vdcapi::Message res = VdcHelper::callFirmwareFunction(dsMeter->getDSID(), true, false, *paramsElement);
-        json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
       } else if(_request.getMethod() == "firmwareUpdate") {
         bool clearSettings = false;
         _request.getParameter("clearsettings", clearSettings);
         vdcapi::Message res = VdcHelper::callFirmwareFunction(dsMeter->getDSID(), false, clearSettings, *paramsElement);
-        json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
       } else if(_request.getMethod() == "storeAccessToken") {
@@ -143,7 +139,6 @@ namespace dss {
         }
         std::string authScope = _request.getParameter("authScope");
         vdcapi::Message res = VdcHelper::callAuthenticate(dsMeter->getDSID(), authData, authScope, *paramsElement);
-        json.add("response");
         ProtobufToJSon::protoPropertyToJson(res, json);
         return json.successJSON();
       } else if(_request.getMethod() == "invokeMethod") {

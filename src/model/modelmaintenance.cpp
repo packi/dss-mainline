@@ -203,8 +203,14 @@ namespace dss {
         boost::mutex::scoped_lock lock(m_syncMutex);
         m_triggerSynchronize = false;
       }
-      synchronizeZoneSensorAssignment();
-      autoAssignSensors();
+      StructureManipulator manipulator(*m_pModifyingBusInterface,
+                                       *m_pQueryBusInterface,
+                                       *m_pApartment);
+
+      foreach (auto&& zone, DSS::getInstance()->getApartment().getZones()) {
+        manipulator.autoAssignZoneSensors(*zone);
+        manipulator.synchronizeZoneSensorAssignment(*zone);
+      }
     }
   }
 
@@ -454,25 +460,6 @@ namespace dss {
 
     log("setApartmentState: apartment state set to " + strstate, lsDebug);
     state->setState(coSystem, strstate);
-  }
-
-  void MeterMaintenance::autoAssignSensors() {
-    StructureManipulator manipulator(*m_pModifyingBusInterface,
-                                     *m_pQueryBusInterface,
-                                     *m_pApartment);
-
-    foreach (boost::shared_ptr<Zone> zone, m_pDSS->getApartment().getZones()) {
-      manipulator.autoAssignZoneSensors(zone);
-    }
-  }
-
-  void MeterMaintenance::synchronizeZoneSensorAssignment() {
-
-    StructureManipulator manipulator(*m_pModifyingBusInterface,
-                                     *m_pQueryBusInterface,
-                                     *m_pApartment);
-
-    manipulator.synchronizeZoneSensorAssignment(DSS::getInstance()->getApartment().getZones());
   }
 
   void MeterMaintenance::raiseEvent(const boost::shared_ptr<Event> &event) {
@@ -1879,7 +1866,7 @@ namespace dss {
       StructureManipulator manipulator(*m_pStructureModifyingBusInterface,
                                        *m_pStructureQueryBusInterface,
                                        *m_pApartment);
-      manipulator.autoAssignZoneSensors(zone);
+      manipulator.autoAssignZoneSensors(*zone);
 
       pollSensors(pDevRef);
     }

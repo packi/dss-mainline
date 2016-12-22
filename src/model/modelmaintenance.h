@@ -135,8 +135,6 @@ namespace dss {
     void readOutPendingMeter();
     void dsMeterReady(const dsuid_t& _dsMeterBusID);
     void setApartmentState();
-    void autoAssignSensors();
-    void synchronizeZoneSensorAssignment();
     void raiseEvent(const boost::shared_ptr<Event> &event);
     void setupInitializedState();
     void monitorInitialization();

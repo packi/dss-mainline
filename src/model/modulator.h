@@ -34,7 +34,7 @@
 #include "devicecontainer.h"
 #include "physicalmodelitem.h"
 #include "src/ds485types.h"
-#include "src/model/modeltypes.h"
+#include "src/model/devicereference.h"
 #include "src/datetools.h"
 #include "src/storagetools.h"
 #include "businterface.h"
@@ -83,7 +83,7 @@ namespace dss {
     bool m_capHasMetering;
     bool m_capHasTemperatureControl;
 
-    DeviceVector m_ConnectedDevices;
+    std::vector<DeviceReference> m_ConnectedDevices;
     int m_PowerConsumption;
     DateTime m_PowerConsumptionTimeStamp;
     double m_EnergyMeterValue;
