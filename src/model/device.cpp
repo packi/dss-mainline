@@ -1355,9 +1355,9 @@ namespace dss {
 
   void Device::addToGroup(const int _groupID) {
     if (isValidGroup(_groupID)) {
-      updateIconPath();
       if (find(m_groupIds.begin(), m_groupIds.end(), _groupID) == m_groupIds.end()) {
         m_groupIds.push_back(_groupID);
+        updateIconPath();
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // create alias in group list
           std::string gPath = "zones/zone" + intToString(getGroupZoneID(_groupID)) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
@@ -1379,10 +1379,10 @@ namespace dss {
 
   void Device::removeFromGroup(const int _groupID) {
     if (isValidGroup(_groupID)) {
-      updateIconPath();
       std::vector<int>::iterator it = find(m_groupIds.begin(), m_groupIds.end(), _groupID);
       if (it != m_groupIds.end()) {
         m_groupIds.erase(it);
+        updateIconPath();
         if ((m_pPropertyNode != NULL) && (m_pApartment->getPropertyNode() != NULL)) {
           // remove alias in group list
           std::string gPath = "zones/zone" + intToString(getGroupZoneID(_groupID)) + "/groups/group" + intToString(_groupID) + "/devices/"  +  dsuid2str(m_DSID);
