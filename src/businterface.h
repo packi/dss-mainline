@@ -32,6 +32,7 @@
 #include <limits.h>
 
 #include "ds485types.h"
+#include "model/behavior.h"
 #include "sceneaccess.h"
 #include "model/deviceinterface.h"
 

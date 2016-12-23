@@ -122,6 +122,13 @@ namespace dss {
   void JSONWriter::addNull() {
     m_writer.Null();
   }
+  void JSONWriter::addRaw(std::string _name, std::string json) {
+    m_writer.String(_name);
+    m_writer.RawValue(json.data(), json.size(), rapidjson::kObjectType);
+  }
+  void JSONWriter::addRaw(std::string json) {
+    m_writer.RawValue(json.data(), json.size(), rapidjson::kObjectType);
+  }
   void JSONWriter::startArray(std::string _name) {
     m_writer.String(_name);
     m_writer.StartArray();

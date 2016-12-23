@@ -200,7 +200,7 @@ namespace dss {
     //DSBusInterface::checkBroadcastResultCode(ret);
     //usleep(BROADCAST_SLEEP_MICROSECONDS);
 
-    // TODO(soon): We will be able to remove this call when new DSM is available
+    // TODO(someday): We will be able to remove this call when new DSM is available
     int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, static_cast<int>(applicationType));
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
@@ -226,7 +226,7 @@ namespace dss {
     //DSBusInterface::checkBroadcastResultCode(ret);
     //usleep(BROADCAST_SLEEP_MICROSECONDS);
 
-    // TODO(soon): We will be able to remove this call when new DSM is available
+    // TODO(someday): We will be able to remove this call when new DSM is available
     int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
@@ -252,7 +252,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
 
-    // TODO(soon): We will be able to remove this call when new DSM is available
+    // TODO(someday): We will be able to remove this call when new DSM is available
     ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, static_cast<int>(applicationType));
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
@@ -469,8 +469,7 @@ namespace dss {
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-
-    // TODO(soon): We will be able to remove this call when new DSM is available
+    // TODO(someday): We will be able to remove this call when new DSM is available
     ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, static_cast<int>(applicationType));
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
