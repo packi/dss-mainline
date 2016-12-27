@@ -313,9 +313,9 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     }
     auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
     log(ds::str("New status bit name:", name), lsNotice);
-    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(m_status, type, std::move(name)));
+    auto&& bit = boost::shared_ptr<StatusBit>(new StatusBit(m_status, type, std::move(name)));
     auto&& bitRef = *bit;
-    m_status.insertBit(type, std::move(bit));
+    m_status.insertBit(type, bit);
     return bitRef;
   }
 
