@@ -18,7 +18,7 @@
 */
 #pragma once
 
-#include <boost/optional.hpp>
+#include <boost/container/map.hpp>
 #include <logger.h>
 #include "state.h"
 
@@ -43,7 +43,7 @@ private:
   __DECL_LOG_CHANNEL__;
   Group& m_group;
   std::bitset<STATUS_BIT_TYPE_MAX + 1> m_valueBitset;
-  std::map<StatusBitType, std::unique_ptr<StatusBit>> m_bits;
+  boost::container::map<StatusBitType, std::unique_ptr<StatusBit>> m_bits;
 
   friend class StatusBit;
   void setBitValue(StatusBitType type, bool value);
