@@ -626,7 +626,7 @@ namespace dss {
     /// or create the child property with default value and return its value.
     template <typename T>
     T getOrCreateChildValue(const std::string& childPath, const T& defaultValue) {
-      return getOrCreateChild<T>(childPath, defaultValue)->getValue<T>();
+      return getOrCreateChild<T>(childPath, defaultValue)->template getValue<T>();
     }
 
   public:

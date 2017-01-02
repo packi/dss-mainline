@@ -218,7 +218,7 @@ namespace dss {
     StatusBit* statusBit = DS_NULLPTR;
     if (m_targetGroupId != 0) {
       if (auto type = statusBitTypeForBinaryInputType(m_inputType)) {
-        if (targetGroup = m_device.tryGetGroup(m_targetGroupId).lock()) {
+        if ((targetGroup = m_device.tryGetGroup(m_targetGroupId).lock())) {
           statusBit = &targetGroup->getStatusBit(*type);
         }
       }

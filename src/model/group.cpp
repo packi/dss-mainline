@@ -308,7 +308,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   }
 
   StatusBit& Group::getStatusBit(StatusBitType type) {
-    if (auto&& bit = m_status.tryGetBit(type)) {
+    if (StatusBit* bit = m_status.tryGetBit(type)) {
       return *bit;
     }
     auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
