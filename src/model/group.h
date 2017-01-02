@@ -29,12 +29,13 @@
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
 #include "state.h"
-#include "status.h"
 #include "src/businterface.h"
 
 namespace dss {
 
   class Zone;
+  class Status;
+  class StatusBit;
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
@@ -54,7 +55,9 @@ namespace dss {
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
     int m_connectedDevices;
-    Status m_status;
+    /// lazy created because it has causes side effects that should
+    /// exist only when some status bits exist in the group
+    std::unique_ptr<Status> m_status;
 
     // getter and setter for property proxy
     int getApplicationTypeInt() const { return static_cast<int>(getApplicationType()); }

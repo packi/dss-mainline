@@ -36,6 +36,7 @@
 
 #include "src/model/modelconst.h"
 #include "status-bit.h"
+#include "status.h"
 
 namespace dss {
 
@@ -53,8 +54,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
     m_SyncPending(false),
-    m_connectedDevices(0),
-    m_status(*this)
+    m_connectedDevices(0)
   {
   } // ctor
 
@@ -308,14 +308,17 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   }
 
   StatusBit& Group::getStatusBit(StatusBitType type) {
-    if (StatusBit* bit = m_status.tryGetBit(type)) {
+    if (!m_status) {
+      m_status.reset(new Status(*this));
+    }
+    if (StatusBit* bit = m_status->tryGetBit(type)) {
       return *bit;
     }
     auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
     log(ds::str("New status bit name:", name), lsNotice);
-    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(m_status, type, std::move(name)));
+    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(*m_status, type, std::move(name)));
     auto&& bitRef = *bit;
-    m_status.insertBit(type, std::move(bit));
+    m_status->insertBit(type, std::move(bit));
     return bitRef;
   }
 
