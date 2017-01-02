@@ -1,7 +1,7 @@
 begin transaction;
 drop table if exists "device";
 create table "device"(id primary key,gtin,name,version);
-insert into device values(11 , "1234567890123" , "DevelopmentDevice" , "1");
+insert into device values(11 , "1234567890123" , "RegressionTestDevice (Do not change)" , "1");
 insert into device values(12 , "7640156791914" , "V-Zug MSLQ - aktiv" , "1");
 insert into device values(18 , "7640156791945" , "vDC smarter iKettle 2.0" , "1");
 insert into device values(24 , "7640156792072" , "Logitech Harmony" , "");
@@ -827,7 +827,7 @@ insert into device_status_enum values(30 , 11 , "Aborting");
 drop table if exists "device_labels";
 create table "device_labels" (id primary key,device_id,name,tags);
 insert into device_labels values(1 , 18 , "notes" , "overview:4");
-insert into device_labels values(3 , 11 , "dummyNode3" , "overview");
+insert into device_labels values(3 , 11 , "dummyNode" , "overview");
 drop table if exists "common_labels";
 create table "common_labels" (id primary key,name,tags);
 insert into common_labels values(1 , "name" , "overview:1;settings:1");
@@ -850,7 +850,7 @@ insert into device_properties values(5 , 18 , "waterLevel" , 3 , "0" , "2.0" , "
 insert into device_properties values(6 , 18 , "defaulttemperature" , 1 , "0" , "100" , "100" , "1" , "celsius" , "settings" );
 insert into device_properties values(7 , 18 , "defaultcooldowntemperature" , 1 , "0" , "100" , "80" , "1" , "celsius" , "invisible" );
 insert into device_properties values(8 , 18 , "defaultkeepwarmtime" , 2 , "0" , "30" , "15" , "1" , "min" , "settings" );
-insert into device_properties values(9 , 11 , "dummyProperty" , 4 , "" , "" , "" , "" , "" , "settings" );
+insert into device_properties values(9 , 11 , "dummyProperty" , 4 , "" , "" , "" , "" , "" , "" );
 insert into device_properties values(10 , 25 , "outerRingWaterSession" , 4 , "" , "" , "0" , "1" , "liter" , "" );
 insert into device_properties values(11 , 25 , "innerRingWaterSession" , 4 , "" , "" , "0" , "1" , "liter" , "" );
 insert into device_properties values(12 , 25 , "outerRingWaterCounter" , 4 , "" , "" , "0" , "1" , "liter" , "" );
