@@ -19,7 +19,7 @@
 #pragma once
 
 #include <stdexcept>
-#include "string.h"
+#include "str.h"
 
 namespace ds {
 

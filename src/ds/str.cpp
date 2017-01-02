@@ -16,4 +16,4 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
-#include "string.h"
+#include "str.h"

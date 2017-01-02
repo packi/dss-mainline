@@ -25,7 +25,7 @@
 #endif
 #include "group.h"
 
-#include <ds/string.h>
+#include <ds/str.h>
 
 #include "zone.h"
 #include "scenehelper.h"

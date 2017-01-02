@@ -34,7 +34,7 @@
 
 #include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
-#include <ds/string.h>
+#include <ds/str.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"

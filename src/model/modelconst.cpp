@@ -25,7 +25,7 @@
 #include "modelconst.h"
 
 #include <math.h>
-#include <ds/string.h>
+#include <ds/str.h>
 
 #include "base.h"
 #include "exception.h"
