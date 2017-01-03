@@ -700,7 +700,6 @@ namespace dss {
 
   EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin(EventName::SendMail, _pInterpreter)
-  , m_thread(0)
   {
     if (DSS::hasInstance()) {
       m_mailq_dir = DSS::getInstance()->getDataDirectory() + "/mail/";
