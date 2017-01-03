@@ -146,6 +146,8 @@ namespace dss {
     static boost::shared_ptr<Group> make(const GroupSpec_t& _spec, boost::shared_ptr<Zone> _pZone);
   }; // Group
 
+  std::ostream& operator<<(std::ostream &, const Group &);
+
 } // namespace dss
 
 #endif // GROUP_H

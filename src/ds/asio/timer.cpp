@@ -18,3 +18,18 @@
  */
 
 #include "timer.h"
+#include <ds/random.h>
+
+namespace ds {
+namespace asio {
+
+void Timer::randomlyExpiresFromNow(Duration a, Duration b) {
+    expires_from_now(Duration(ds::randint(a.count(), b.count())));
+}
+
+void Timer::randomlyExpiresFromNowPercent(Duration d, int p) {
+    randomlyExpiresFromNow(d * (100 - p) / 100, d * 100 / (100 -p));
+}
+
+} // namespace asio
+} // namespace ds

@@ -31,7 +31,18 @@ namespace asio {
 ///
 /// Unit tests will need an option to control the time programatically.
 /// It will be much easier to deploy this change if all code uses this class.
-typedef boost::asio::basic_waitable_timer<boost::chrono::steady_clock> Timer;
+class Timer : public ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock> {
+public:
+    typedef duration Duration;
+    Timer(boost::asio::io_service& ioService)
+        : ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock>(ioService) {
+    }
+    /// Expires randomly in closed interval [a, b] relatively to now.
+    void randomlyExpiresFromNow(Duration a, Duration b);
+
+    /// Expires randomly `p` percent around `d` relatively to now.
+    void randomlyExpiresFromNowPercent(Duration d, int p);
+};
 
 } // namespace asio
 } // namespace ds

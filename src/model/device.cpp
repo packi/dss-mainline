@@ -57,6 +57,7 @@
 #include "src/vdc-connection.h"
 #include "src/protobufjson.h"
 #include "status-bit.h"
+#include "status.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {

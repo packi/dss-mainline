@@ -21,18 +21,28 @@
 */
 #include "status.h"
 
+#include "ds/random.h"
 #include "ds/log.h"
 
 #include "base.h"
 #include "foreach.h"
 #include "status-bit.h"
 #include "group.h"
+#include "apartment.h"
+#include "dss.h"
+
+typedef boost::system::error_code error_code;
 
 namespace dss {
 
 __DEFINE_LOG_CHANNEL__(Status, lsNotice);
 
-Status::Status(Group& group) : m_group(group) {}
+boost::chrono::seconds Status::PUSH_SENSOR_PERIOD = boost::chrono::minutes(90);
+
+Status::Status(Group& group) : m_group(group), m_timer(group.getApartment().getDss().getIoService()) {
+  asynPeriodicPushSensor();
+}
+
 Status::~Status() = default;
 
 StatusBit* Status::tryGetBit(StatusBitType statusType) {
@@ -56,13 +66,34 @@ void Status::setBitValue(StatusBitType type, bool bitValue) {
   m_valueBitset.set(bit, bitValue);
   auto&& value = getValue();
   log(ds::str("this:", m_group.getName(), " changed value:", value), lsNotice);
+  pushSensor();
+}
 
-  // TODO(soon): moderate pushSensor calls - requirements?
+void Status::pushSensor() {
   try {
+    auto&& value = getValue();
+    log(ds::str("pushSensor ", *this, " value:", value), lsNotice);
     m_group.pushSensor(coSystem, SAC_UNKNOWN, DSUID_NULL, SensorType::Status, value, "");
   } catch (std::exception &e) {
     log(ds::str("setBitValue pushSensor failed what:", e.what()), lsError);
   }
+}
+
+void Status::asynPeriodicPushSensor() {
+  log(ds::str("asynPeriodicPushSensor ", *this), lsDebug);
+
+  m_timer.randomlyExpiresFromNowPercent(PUSH_SENSOR_PERIOD, 20);
+  m_timer.async_wait([this](const error_code& e) {
+      if (e) {
+          return; //timer was aborted
+      }
+      pushSensor();
+      asynPeriodicPushSensor(); // async loop
+  });
+}
+
+std::ostream& operator<<(std::ostream& stream, const Status &x) {
+    return stream << x.getGroup();
 }
 
 } // namespace dss

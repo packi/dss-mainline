@@ -18,6 +18,8 @@ libdsscore_a_SOURCES =  \
 	../src/ds/common.h \
 	../src/ds/log.h \
 	../src/ds/log.cpp \
+	../src/ds/random.h \
+	../src/ds/random.cpp \
 	../src/ds/str.cpp \
 	../src/ds/str.h \
 	../src/ds485/dsactionrequest.cpp \

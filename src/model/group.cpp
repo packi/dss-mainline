@@ -345,4 +345,8 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     return pGroup;
   }
 
+  std::ostream& operator<<(std::ostream& stream, const Group &x) {
+    return stream << "zone." << x.getZoneID() << ".group." << x.getID();
+  }
+
 } // namespace dss
