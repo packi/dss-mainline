@@ -68,7 +68,8 @@ namespace dss {
     void setAutomatic(const bool _automatic) { m_automatic = _automatic; }
     bool isAutomatic() const { return m_automatic; }
 
-    bool equalConfig(const ClusterSpec_t &cluster);
+    void setFromSpec(const ClusterSpec_t& spec);
+    bool isConfigEqual(const ClusterSpec_t& spec);
 
     bool isOperationLock();
     void setOperationLock(bool _locked, callOrigin_t _callOrigin);

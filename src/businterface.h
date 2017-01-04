@@ -65,7 +65,7 @@ namespace dss {
     uint8_t ApartmentState;
   } DSMeterSpec_t;
 
-  typedef struct {
+  typedef struct GroupSpec {
     uint8_t GroupID;
     ApplicationType applicationType;
     uint16_t NumberOfDevices;
@@ -73,18 +73,13 @@ namespace dss {
     uint32_t applicationConfiguration;
   } GroupSpec_t;
 
-  typedef struct {
-    uint8_t GroupID;
-    ApplicationType applicationType;
+  typedef struct ClusterSpec : public GroupSpec {
     bool canHaveStateMachine;
-    uint16_t NumberOfDevices;
-    std::string Name;
     uint16_t protectionClass;
     uint16_t location;
     uint16_t floor;
     bool configurationLocked;
     std::vector<int> lockedScenes;
-    uint32_t applicationConfiguration;
   } ClusterSpec_t;
 
   typedef struct {

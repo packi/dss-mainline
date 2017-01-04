@@ -93,7 +93,8 @@ namespace dss {
     void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
     bool isReadFromDsm() const { return m_readFromDsm; }
 
-    bool equalConfig(const GroupSpec_t &group);
+    void setFromSpec(const GroupSpec_t& spec);
+    bool isConfigEqual(const GroupSpec_t& spec);
 
     std::string getAssociatedSet() const { return m_AssociatedSet; }
     void setAssociatedSet(const std::string& _value) { m_AssociatedSet = _value; }

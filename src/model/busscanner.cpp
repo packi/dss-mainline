@@ -292,7 +292,7 @@ namespace dss {
        * if the configuration on the dSS and the dSM is different,
        * synchronize the settings back to the dSMs
        */
-      if (!pCluster->equalConfig(cluster)) {
+      if (!pCluster->isConfigEqual(cluster)) {
         pCluster->setIsSynchronized(false);
       }
 
@@ -302,12 +302,7 @@ namespace dss {
        */
       if ((pCluster->getApplicationType() == ApplicationType::None) ||
           ((pCluster->getApplicationType() != ApplicationType::None) && !pCluster->isReadFromDsm())) {
-        pCluster->setApplicationType(cluster.applicationType);
-        pCluster->setApplicationConfiguration(cluster.applicationConfiguration);
-        pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
-        pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
-        pCluster->setConfigurationLocked(cluster.configurationLocked);
-        pCluster->setLockedScenes(cluster.lockedScenes);
+        pCluster->setFromSpec(cluster);
         pCluster->setReadFromDsm(true);
       }
 
@@ -744,76 +739,74 @@ namespace dss {
           " and devices: " + intToString(group.NumberOfDevices));
 
       // apartment-wide unique standard- and user-groups published in zone<0>
-      boost::shared_ptr<Group> pGroup;
-      boost::shared_ptr<Group> groupOnZone;
+      boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
 
       if (isDefaultGroup(group.GroupID)) {
-        groupOnZone = _zone->getGroup(group.GroupID);
-        if (groupOnZone == NULL) {
-          log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone = Group::make(group, _zone);
-          _zone->addGroup(groupOnZone);
-        }
-        groupOnZone->setIsPresent(true);
-        groupOnZone->setIsConnected(true);
-        groupOnZone->setLastCalledScene(SceneOff);
-        groupOnZone->setIsValid(true);
+        boost::shared_ptr<Group> pGroupZone = _zone->tryGetGroup(group.GroupID).lock();
 
-        try {
-          pGroup = m_Apartment.getGroup(group.GroupID);
-        } catch (ItemNotFoundException&) {
-          boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
-          pGroup = Group::make(group, zoneBroadcast);
-          zoneBroadcast->addGroup(pGroup);
+        if (pGroupZone == NULL) {
+          log(" scanDSMeter:    Adding new group to zone");
+          pGroupZone = Group::make(group, _zone);
+          _zone->addGroup(pGroupZone);
         }
-        pGroup->setIsPresent(true);
-        pGroup->setIsConnected(true);
-        pGroup->setLastCalledScene(SceneOff);
-        pGroup->setIsValid(true);
+        pGroupZone->setIsPresent(true);
+        pGroupZone->setIsConnected(true);
+        pGroupZone->setLastCalledScene(SceneOff);
+        pGroupZone->setIsValid(true);
+
+        boost::shared_ptr<Group> pGroupBroadcast = zoneBroadcast->tryGetGroup(group.GroupID).lock();
+
+        if (pGroupBroadcast == NULL) {
+          log(" scanDSMeter:    Adding new group to broadcast zone");
+          pGroupBroadcast = Group::make(group, zoneBroadcast);
+          zoneBroadcast->addGroup(pGroupBroadcast);
+        }
+        pGroupBroadcast->setIsPresent(true);
+        pGroupBroadcast->setIsConnected(true);
+        pGroupBroadcast->setLastCalledScene(SceneOff);
+        pGroupBroadcast->setIsValid(true);
       } else if (isGlobalAppGroup(group.GroupID)) {
-        try {
-          pGroup = m_Apartment.getGroup(group.GroupID);
+        boost::shared_ptr<Group> pGroupApartmentApp = zoneBroadcast->tryGetGroup(group.GroupID).lock();
 
-          if (!pGroup->equalConfig(group)) {
-            if (!pGroup->isReadFromDsm()) {
-              // First DSM is owner of Apartment Application group
-              pGroup->setName(group.Name);
-              pGroup->setApplicationType(group.applicationType);
-              pGroup->setApplicationConfiguration(group.applicationConfiguration);
-              pGroup->setReadFromDsm(true);
-            } else {
-              // All other DSMs need to be overwritten in synchronizeGroups() function
-              pGroup->setIsSynchronized(false);
-            }
+        if (pGroupApartmentApp == NULL) {
+          log(" scanDSMeter:    Adding new apartment application group");
+          pGroupApartmentApp = Group::make(group, zoneBroadcast);
+          pGroupApartmentApp->setReadFromDsm(true);
+          zoneBroadcast->addGroup(pGroupApartmentApp);
+        } else if (!pGroupApartmentApp->isConfigEqual(group)) {
+          if (!pGroupApartmentApp->isReadFromDsm()) {
+            // First DSM is owner of Apartment Application group
+            pGroupApartmentApp->setName(group.Name);
+            pGroupApartmentApp->setApplicationType(group.applicationType);
+            pGroupApartmentApp->setApplicationConfiguration(group.applicationConfiguration);
+            pGroupApartmentApp->setReadFromDsm(true);
+          } else {
+            // All other DSMs need to be overwritten in synchronizeGroups() function
+            pGroupApartmentApp->setIsSynchronized(false);
           }
-        } catch (ItemNotFoundException&) {
-          boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
-          pGroup = Group::make(group, zoneBroadcast);
-          pGroup->setReadFromDsm(true);
-          zoneBroadcast->addGroup(pGroup);
         }
 
-        pGroup->setIsPresent(true);
-        pGroup->setIsConnected(true);
-        pGroup->setLastCalledScene(SceneOff);
-        pGroup->setIsValid(true);
+        pGroupApartmentApp->setIsPresent(true);
+        pGroupApartmentApp->setIsConnected(true);
+        pGroupApartmentApp->setLastCalledScene(SceneOff);
+        pGroupApartmentApp->setIsValid(true);
       } else {
-        // user groups
-        groupOnZone = _zone->getGroup(group.GroupID);
-        if (groupOnZone == NULL) {
+        boost::shared_ptr<Group> pGroupUser = _zone->tryGetGroup(group.GroupID).lock();
+
+        if (pGroupUser == NULL) {
           log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone = Group::make(group, _zone);
-          _zone->addGroup(groupOnZone);
+          pGroupUser = Group::make(group, _zone);
+          _zone->addGroup(pGroupUser);
         } else {
           // DSS is the owner of user groups configuration we will overwrite in DSM
-          if (!groupOnZone->equalConfig(group)) {
-            groupOnZone->setIsSynchronized(false);
+          if (!pGroupUser->isConfigEqual(group)) {
+            pGroupUser->setIsSynchronized(false);
           }
         }
-        groupOnZone->setIsPresent(true);
-        groupOnZone->setIsConnected(true);
-        groupOnZone->setLastCalledScene(SceneOff);
-        groupOnZone->setIsValid(true);
+        pGroupUser->setIsPresent(true);
+        pGroupUser->setIsConnected(true);
+        pGroupUser->setLastCalledScene(SceneOff);
+        pGroupUser->setIsValid(true);
       }
     }
     return true;

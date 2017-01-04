@@ -101,9 +101,15 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_ApplicationConfiguration = applicationConfiguration;
   }
 
-  bool Group::equalConfig(const GroupSpec_t& group) {
-    return ((getName() == group.Name) && (getApplicationType() == group.applicationType) &&
-            (getApplicationConfiguration() && (int)group.applicationConfiguration));
+  void Group::setFromSpec(const GroupSpec_t& spec) {
+    setName(spec.Name);
+    setApplicationType(spec.applicationType);
+    setApplicationConfiguration(spec.applicationConfiguration);
+  }
+
+  bool Group::isConfigEqual(const GroupSpec_t& spec) {
+    return ((getName() == spec.Name) && (getApplicationType() == spec.applicationType) &&
+            (getApplicationConfiguration() && (int)spec.applicationConfiguration));
   }
 
   Set Group::getDevices() const {
@@ -354,10 +360,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   boost::shared_ptr<Group> Group::make(const GroupSpec_t& _groupSpec, boost::shared_ptr<Zone> _pZone)
   {
     boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone));
-
-    pGroup->setName(_groupSpec.Name);
-    pGroup->setApplicationType(_groupSpec.applicationType);
-    pGroup->setApplicationConfiguration(_groupSpec.applicationConfiguration);
+    pGroup->setFromSpec(_groupSpec);
 
     return pGroup;
   }
