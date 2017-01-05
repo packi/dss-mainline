@@ -109,7 +109,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
   bool Group::isConfigEqual(const GroupSpec_t& spec) {
     return ((getName() == spec.Name) && (getApplicationType() == spec.applicationType) &&
-            (getApplicationConfiguration() && (int)spec.applicationConfiguration));
+            (getApplicationConfiguration() == (int)spec.applicationConfiguration));
   }
 
   Set Group::getDevices() const {
