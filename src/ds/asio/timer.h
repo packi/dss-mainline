@@ -21,6 +21,7 @@
 
 #include <boost/asio/steady_timer.hpp>
 #include <boost/chrono/chrono.hpp>
+#include <ds/common.h>
 
 namespace ds {
 namespace asio {
@@ -40,8 +41,22 @@ public:
     /// Expires randomly in closed interval [a, b] relatively to now.
     void randomlyExpiresFromNow(Duration a, Duration b);
 
-    /// Expires randomly `p` percent around `d` relatively to now.
-    void randomlyExpiresFromNowPercent(Duration d, int p);
+    /// Expires randomly in closed interval [d - d * p / 100, d] relatively to now.
+    void randomlyExpiresFromNowPercentDown(Duration d, int p);
+
+    /// Calls async_wait, but calls callback only on NO error.
+    ///
+    /// Callback can be sure that it is not called when timer is destroyed / cancelled.
+    template <typename F>
+    void asyncWait(F &&f) {
+        static_assert(std::is_void<decltype(f())>::value, "required F type: void ()");
+        async_wait([f](boost::system::error_code e) {
+            if (e) {
+                return; //timer was aborted
+            }
+            f();
+        });
+    }
 };
 
 } // namespace asio

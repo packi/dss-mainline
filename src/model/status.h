@@ -29,8 +29,9 @@ namespace dss {
 class Group;
 class StatusBit;
 
-/// Status with each bit managed by StatusBit.
-/// Status value changes are propagated as sensor value to parent group.
+/// Status with each value bit managed by StatusBit.
+/// Status value is propagated as sensor value to parent group
+/// periodically and on value change.
 class Status : boost::noncopyable {
 public:
   Status(Group& group);
@@ -48,14 +49,14 @@ public:
 private:
   __DECL_LOG_CHANNEL__;
   Group& m_group;
-  ds::asio::Timer m_timer;
+  ds::asio::Timer m_periodicPushTimer;
   std::bitset<STATUS_BIT_TYPE_MAX + 1> m_valueBitset;
   boost::container::map<StatusBitType, std::unique_ptr<StatusBit>> m_bits;
 
   friend class StatusBit;
   void setBitValue(StatusBitType type, bool value);
-  void pushSensor();
-  void asynPeriodicPushSensor();
+  void push();
+  void asyncPeriodicPush();
 };
 
 std::ostream& operator<<(std::ostream &, const Status &);

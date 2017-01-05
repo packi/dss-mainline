@@ -309,6 +309,11 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
   StatusBit& Group::getStatusBit(StatusBitType type) {
     if (!m_status) {
+      // Lazy created to avoid periodic broadcast of status current values
+      // for empty Statuses over dsm-api.
+      //
+      // It is possible to move this functionality to Status class.
+      // But we also save some memory this way as most groups don't have Status.
       m_status.reset(new Status(*this));
     }
     if (StatusBit* bit = m_status->tryGetBit(type)) {

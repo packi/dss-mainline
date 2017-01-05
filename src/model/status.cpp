@@ -31,16 +31,16 @@
 #include "apartment.h"
 #include "dss.h"
 
-typedef boost::system::error_code error_code;
-
 namespace dss {
 
 __DEFINE_LOG_CHANNEL__(Status, lsNotice);
 
 boost::chrono::seconds Status::PUSH_SENSOR_PERIOD = boost::chrono::minutes(90);
 
-Status::Status(Group& group) : m_group(group), m_timer(group.getApartment().getDss().getIoService()) {
-  asynPeriodicPushSensor();
+Status::Status(Group& group)
+    : m_group(group)
+    , m_periodicPushTimer(group.getApartment().getDss().getIoService()) {
+  asyncPeriodicPush();
 }
 
 Status::~Status() = default;
@@ -66,10 +66,10 @@ void Status::setBitValue(StatusBitType type, bool bitValue) {
   m_valueBitset.set(bit, bitValue);
   auto&& value = getValue();
   log(ds::str("this:", m_group.getName(), " changed value:", value), lsNotice);
-  pushSensor();
+  push();
 }
 
-void Status::pushSensor() {
+void Status::push() {
   try {
     auto&& value = getValue();
     log(ds::str("pushSensor ", *this, " value:", value), lsNotice);
@@ -79,16 +79,13 @@ void Status::pushSensor() {
   }
 }
 
-void Status::asynPeriodicPushSensor() {
-  log(ds::str("asynPeriodicPushSensor ", *this), lsDebug);
+void Status::asyncPeriodicPush() {
+  log(ds::str("asyncPeriodicPush ", *this), lsDebug);
 
-  m_timer.randomlyExpiresFromNowPercent(PUSH_SENSOR_PERIOD, 20);
-  m_timer.async_wait([this](const error_code& e) {
-      if (e) {
-          return; //timer was aborted
-      }
-      pushSensor();
-      asynPeriodicPushSensor(); // async loop
+  m_periodicPushTimer.randomlyExpiresFromNowPercentDown(PUSH_SENSOR_PERIOD, 25);
+  m_periodicPushTimer.asyncWait([this]() {
+      push();
+      asyncPeriodicPush(); // async loop
   });
 }
 

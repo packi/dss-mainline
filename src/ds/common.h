@@ -1,14 +1,18 @@
 #pragma once
 
 #if defined __GNUC__
-  #if __GNUC__ <5
+  #if __GNUC__ <5 && ! __clang__
+    // OE_CORE version
     #define DS_OVERRIDE
     #define DS_NULLPTR 0
+    #define DS_STATIC_ASSERT(...)
   #endif
 #endif
 #ifndef DS_OVERRIDE
+    // C++11 capable version
     #define DS_OVERRIDE override
     #define DS_NULLPTR nullptr
+    #define DS_STATIC_ASSERT(...) static_assert(##__VA_ARGS__)
 #endif
 
 // define to `[[fallthrough]]` on c++17 complaint compilers
