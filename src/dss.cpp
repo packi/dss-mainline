@@ -48,6 +48,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/finder.hpp>
 
+#include <ds/log.h>
 #include "logger.h"
 #include "propertysystem.h"
 #include "eventinterpreterplugins.h"
@@ -168,6 +169,10 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
         }
         m_ioServiceObjects.reset();
       }
+    }
+
+    bool isIoServiceThread() {
+      return m_ioServiceThread.get_id() == std::this_thread::get_id();
     }
   };
 
@@ -952,7 +957,19 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
   }
 
   void DSS::assertIoServiceThread() {
-    assert(m_impl->m_ioServiceThread.get_id() == std::this_thread::get_id());
+    assert(m_impl->isIoServiceThread());
+  }
+
+  void DSS::requireBlockingAllowed() {
+    DS_ASSUME(!m_impl->isIoServiceThread());
+  }
+
+  void DSS::setDsmApiBlockingCallback(void *dsmApiHandle) {
+    DsmApiCallback_t callback;
+    callback.function = (void*)(static_cast<DsmApiBlocking_callback_t>(
+      [](void* data){ static_cast<decltype(this)>(data)->requireBlockingAllowed(); }));
+    callback.arg = this;
+    DsmApiSetBlockingCallback(dsmApiHandle, &callback, NULL);
   }
 
   void DSS::raiseEvent(const boost::shared_ptr<Event> &event) {
