@@ -92,6 +92,32 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     }
   } // getID
 
+  int Group::getColor() const {
+    switch (m_ApplicationType) {
+      case ApplicationType::Lights:
+        return ColorIDYellow;
+      case ApplicationType::Blinds:
+        return ColorIDGray;
+      case ApplicationType::Heating:
+      case ApplicationType::Cooling:
+      case ApplicationType::Ventilation:
+      case ApplicationType::Window:
+      case ApplicationType::Temperature:
+      case ApplicationType::ApartmentVentilation:
+        return ColorIDBlue;
+      case ApplicationType::Audio:
+        return ColorIDCyan;
+      case ApplicationType::Video:
+        return ColorIDViolet;
+      default:
+        if (m_GroupID <= ColorIDBlack) {
+          return m_GroupID;
+        } else {
+          return 0;
+        }
+    }
+  }
+
   void Group::setApplicationConfiguration(const int applicationConfiguration) {
     m_ApplicationConfiguration = applicationConfiguration;
   }
@@ -246,6 +272,8 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(m_GroupID));
         m_pPropertyNode->createProperty("group")->setIntegerValue(m_GroupID);
         m_pPropertyNode->createProperty("color")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getColor));
+        m_pPropertyNode->createProperty("applicationType")
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationTypeInt, &Group::setApplicationTypeInt));
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Group, std::string>(*this, &Group::getName, &Group::setName));

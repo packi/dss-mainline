@@ -75,6 +75,8 @@ namespace dss {
     ApplicationType getApplicationType() const { return m_ApplicationType; }
     void setApplicationType(ApplicationType applicationType);
 
+    int getColor() const;
+
     /** Returns the configuration of this group */
     int getApplicationConfiguration() const { return m_ApplicationConfiguration; }
     void setApplicationConfiguration(const int applicationConfiguration);
