@@ -228,7 +228,8 @@ namespace dss {
     _json.startObject();
     _json.add("id", _group->getID());
     _json.add("name", _group->getName());
-    _json.add("color", static_cast<int>(_group->getApplicationType()));
+    _json.add("color", _group->getColor());
+    _json.add("applicationType", static_cast<int>(_group->getApplicationType()));
     _json.add("isPresent", _group->isPresent());
     _json.add("isValid", _group->isValid());
     _json.add("configuration", _group->getApplicationConfiguration());
@@ -254,7 +255,8 @@ namespace dss {
     _json.startObject();
     _json.add("id", _cluster->getID());
     _json.add("name", _cluster->getName());
-    _json.add("color", static_cast<int>(_cluster->getApplicationType()));
+    _json.add("color", _cluster->getColor());
+    _json.add("applicationType", static_cast<int>(_cluster->getApplicationType()));
     _json.add("isPresent", _cluster->isPresent());
     _json.add("isValid", _cluster->isValid());
     _json.add("CardinalDirection", toString(_cluster->getLocation()));
