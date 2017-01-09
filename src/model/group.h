@@ -29,12 +29,13 @@
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
 #include "state.h"
-#include "status.h"
 #include "src/businterface.h"
 
 namespace dss {
 
   class Zone;
+  class Status;
+  class StatusBit;
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
@@ -54,7 +55,7 @@ namespace dss {
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
     int m_connectedDevices;
-    Status m_status;
+    std::unique_ptr<Status> m_status; // lazy created in getStatusBit
 
     // getter and setter for property proxy
     int getApplicationTypeInt() const { return static_cast<int>(getApplicationType()); }
@@ -144,6 +145,8 @@ namespace dss {
 
     static boost::shared_ptr<Group> make(const GroupSpec_t& _spec, boost::shared_ptr<Zone> _pZone);
   }; // Group
+
+  std::ostream& operator<<(std::ostream &, const Group &);
 
 } // namespace dss
 

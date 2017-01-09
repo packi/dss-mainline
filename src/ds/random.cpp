@@ -16,4 +16,24 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
-#include "string.h"
+#include "random.h"
+#include <random>
+#include <boost/optional.hpp>
+#include <boost/thread/tss.hpp>
+#include "common.h"
+
+namespace ds {
+namespace _private {
+
+std::default_random_engine& getRandomEngine() {
+    // TODO(c++11): use thread_local std::unique_ptr
+    static boost::thread_specific_ptr<std::default_random_engine> engine;
+    if (!engine.get()) {
+        std::random_device device;
+        engine.reset(new std::default_random_engine(device()));
+    }
+    return *engine;
+}
+
+} // _private
+} // namespace ds

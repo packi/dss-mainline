@@ -21,18 +21,28 @@
 */
 #include "status.h"
 
+#include "ds/random.h"
 #include "ds/log.h"
 
 #include "base.h"
 #include "foreach.h"
 #include "status-bit.h"
 #include "group.h"
+#include "apartment.h"
+#include "dss.h"
 
 namespace dss {
 
 __DEFINE_LOG_CHANNEL__(Status, lsNotice);
 
-Status::Status(Group& group) : m_group(group) {}
+boost::chrono::seconds Status::PUSH_SENSOR_PERIOD = boost::chrono::minutes(90);
+
+Status::Status(Group& group)
+    : m_group(group)
+    , m_periodicPushTimer(group.getApartment().getDss().getIoService()) {
+  asyncPeriodicPush();
+}
+
 Status::~Status() = default;
 
 StatusBit* Status::tryGetBit(StatusBitType statusType) {
@@ -43,8 +53,8 @@ StatusBit* Status::tryGetBit(StatusBitType statusType) {
   return DS_NULLPTR;
 }
 
-void Status::insertBit(StatusBitType statusType, boost::shared_ptr<StatusBit> state) {
-  m_bits[statusType] = state;
+void Status::insertBit(StatusBitType statusType, std::unique_ptr<StatusBit> state) {
+  m_bits[statusType] = std::move(state);
 }
 
 void Status::setBitValue(StatusBitType type, bool bitValue) {
@@ -56,13 +66,31 @@ void Status::setBitValue(StatusBitType type, bool bitValue) {
   m_valueBitset.set(bit, bitValue);
   auto&& value = getValue();
   log(ds::str("this:", m_group.getName(), " changed value:", value), lsNotice);
+  push();
+}
 
-  // TODO(soon): moderate pushSensor calls - requirements?
+void Status::push() {
   try {
+    auto&& value = getValue();
+    log(ds::str("pushSensor ", *this, " value:", value), lsNotice);
     m_group.pushSensor(coSystem, SAC_UNKNOWN, DSUID_NULL, SensorType::Status, value, "");
   } catch (std::exception &e) {
     log(ds::str("setBitValue pushSensor failed what:", e.what()), lsError);
   }
+}
+
+void Status::asyncPeriodicPush() {
+  log(ds::str("asyncPeriodicPush ", *this), lsDebug);
+
+  m_periodicPushTimer.randomlyExpiresFromNowPercentDown(PUSH_SENSOR_PERIOD, 25);
+  m_periodicPushTimer.asyncWait([this]() {
+      push();
+      asyncPeriodicPush(); // async loop
+  });
+}
+
+std::ostream& operator<<(std::ostream& stream, const Status &x) {
+    return stream << x.getGroup();
 }
 
 } // namespace dss

@@ -58,8 +58,9 @@ namespace dss {
 
   //================================================== Apartment
 
-  Apartment::Apartment(DSS* _pDSS)
-  : m_pBusInterface(NULL),
+  Apartment::Apartment(DSS* dss)
+  : m_dss(dss),
+    m_pBusInterface(NULL),
     m_pModelMaintenance(NULL),
     m_pPropertySystem(NULL),
     m_pMetering(NULL)

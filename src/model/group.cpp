@@ -25,7 +25,7 @@
 #endif
 #include "group.h"
 
-#include <ds/string.h>
+#include <ds/str.h>
 
 #include "zone.h"
 #include "scenehelper.h"
@@ -36,6 +36,7 @@
 
 #include "src/model/modelconst.h"
 #include "status-bit.h"
+#include "status.h"
 
 namespace dss {
 
@@ -53,8 +54,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
     m_SyncPending(false),
-    m_connectedDevices(0),
-    m_status(*this)
+    m_connectedDevices(0)
   {
   } // ctor
 
@@ -336,14 +336,22 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   }
 
   StatusBit& Group::getStatusBit(StatusBitType type) {
-    if (StatusBit* bit = m_status.tryGetBit(type)) {
+    if (!m_status) {
+      // Lazy created to avoid periodic broadcast of status current values
+      // for empty Statuses over dsm-api.
+      //
+      // It is possible to move this functionality to Status class.
+      // But we also save some memory this way as most groups don't have Status.
+      m_status.reset(new Status(*this));
+    }
+    if (StatusBit* bit = m_status->tryGetBit(type)) {
       return *bit;
     }
     auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
     log(ds::str("New status bit name:", name), lsNotice);
-    auto&& bit = boost::shared_ptr<StatusBit>(new StatusBit(m_status, type, std::move(name)));
+    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(*m_status, type, std::move(name)));
     auto&& bitRef = *bit;
-    m_status.insertBit(type, bit);
+    m_status->insertBit(type, std::move(bit));
     return bitRef;
   }
 
@@ -368,6 +376,10 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     pGroup->setApplicationConfiguration(_groupSpec.applicationConfiguration);
 
     return pGroup;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, const Group &x) {
+    return stream << "zone." << x.getZoneID() << ".group." << x.getID();
   }
 
 } // namespace dss

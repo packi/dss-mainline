@@ -34,7 +34,7 @@
 
 #include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
-#include <ds/string.h>
+#include <ds/str.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -57,6 +57,7 @@
 #include "src/vdc-connection.h"
 #include "src/protobufjson.h"
 #include "status-bit.h"
+#include "status.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
