@@ -911,6 +911,12 @@ namespace dss {
       return JSONWriter::failure("Could not find group with id : '" + _request.getParameter("groupID") + "'");
     }
 
+    // Currently configuration for zone related groups in zone 0 are undefined
+    if ((zone->getID() == 0) && (isDefaultGroup(group->getID()))) {
+      return JSONWriter::failure(
+          "Configuration for group : '" + _request.getParameter("groupID") + "' in zone 0 is not defined");
+    }
+
     JSONWriter json(JSONWriter::jsonNoneResult);
     json.addRaw("result", group->serializeApplicationConfiguration(group->getApplicationConfiguration()));
     json.add("ok", true);
@@ -922,6 +928,7 @@ namespace dss {
     boost::shared_ptr<Group> group;
     int groupID = -1;
     int zoneID = 0;
+    int applicationType = -1;
 
     if (_request.hasParameter("zoneID")) {
       std::string zoneIDStr = _request.getParameter("zoneID");
@@ -944,18 +951,24 @@ namespace dss {
       return JSONWriter::failure("Could not find group with id : '" + _request.getParameter("groupID") + "'");
     }
 
-    // by default we use current group application type, but can be overwritten by optional parameter
-    ApplicationType applicationType = group->getApplicationType();
+    // Currently configuration for zone related groups in zone 0 are undefined
+    if ((zone->getID() == 0) && (isDefaultGroup(group->getID()))) {
+      return JSONWriter::failure(
+          "Configuration for group : '" + _request.getParameter("groupID") + "' in zone 0 is not defined");
+    }
 
     if (_request.hasParameter("applicationType")) {
       std::string applicationTypeStr = _request.getParameter("applicationType");
-      int applicationTypeInt = strToIntDef(applicationTypeStr, -1);
+      applicationType = strToIntDef(applicationTypeStr, -1);
+    }
 
-      if (applicationTypeInt < 0) {
+    // if the applicationType was not provided we assume current group application type, but only for dS defined groups
+    if (applicationType < 0) {
+      if (isDefaultGroup(group->getID()) || isGlobalAppDsGroup(group->getID())) {
+        applicationType = static_cast<int>(group->getApplicationType());
+      } else {
         return JSONWriter::failure("Invalid application Type: '" + _request.getParameter("applicationType") + "'");
       }
-
-      applicationType = static_cast<ApplicationType>(applicationTypeInt);
     }
 
     // if not present the configuration is empty - default
@@ -967,8 +980,8 @@ namespace dss {
 
     // set the configuration in the DSM
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.groupSetApplication(
-        group, applicationType, group->deserializeApplicationConfiguration(configuration));
+    manipulator.groupSetApplication(group, static_cast<ApplicationType>(applicationType),
+        group->deserializeApplicationConfiguration(configuration));
 
     // raise ModelDirty to force rewrite of model data to apartment.xml
     DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
