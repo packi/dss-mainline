@@ -33,6 +33,7 @@ webservices/soapH.h
 webservices/soapC.cpp
 internal/
 data/metering
+data/config.xml
 doc/webservices/html
 INSTALL
 *.o
