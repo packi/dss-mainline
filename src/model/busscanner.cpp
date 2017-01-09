@@ -135,6 +135,7 @@ namespace dss {
       if (_dsMeter->getCapability_HasDevices()) {
         std::vector<int> zoneIDs;
         try {
+          // TODO(soon): make sure that the DSM return zone 0 in this list if it contain apartment application group.
           zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
         } catch(BusApiError& e) {
           log("scanDSMeter: Error getting ZoneIDs", lsWarning);
@@ -745,6 +746,7 @@ namespace dss {
       if (isDefaultGroup(group.GroupID)) {
         boost::shared_ptr<Group> zoneGroup = _zone->tryGetGroup(group.GroupID).lock();
 
+        // TODO(soon): re-implement the configuration synchronization logic for default groups
         if (zoneGroup == NULL) {
           // note: This should never happen as default groups are created during zone allocation
           log(" scanDSMeter:    Adding new group to zone");
