@@ -442,7 +442,7 @@ namespace dss {
 
   std::string StructureRequestHandler::addCluster(const RestfulRequest& _request) {
     boost::shared_ptr<Cluster> pCluster;
-    int appType = 0;
+    int applicationType = 0;
     std::string clusterName;
 
     // find a group slot with unassigned state machine id
@@ -459,14 +459,15 @@ namespace dss {
     }
 
     if (_request.hasParameter("applicationType")) {
-      appType  = strToIntDef(_request.getParameter("applicationType"), 0);
+      applicationType  = strToIntDef(_request.getParameter("applicationType"), 0);
     } else if (_request.hasParameter("color")) {
       Logger::getInstance()->log("addCluster parameter \"color\" is deprecated, use \"applicationType\"", lsWarning);
-      appType = strToIntDef(_request.getParameter("color"), 0);
+      applicationType = strToIntDef(_request.getParameter("color"), 0);
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), static_cast<ApplicationType>(appType), 0, clusterName);
+    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), static_cast<ApplicationType>(applicationType),
+        0, clusterName);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
@@ -474,7 +475,7 @@ namespace dss {
     json.add("clusterID", pCluster->getID());
     json.add("name", clusterName);
     json.add("color", pCluster->getColor());
-    json.add("applicationType", appType);
+    json.add("applicationType", applicationType);
     return json.successJSON();
   } // addCluster
 
