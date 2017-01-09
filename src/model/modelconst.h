@@ -250,6 +250,7 @@ namespace dss {
 
   std::string applicationTypeToString(ApplicationType type);
   std::ostream& operator<<(std::ostream& stream, ApplicationType type);
+  int getApplicationTypeColor(ApplicationType type);
 
   enum class BinaryInputState {
     Inactive = 0,
