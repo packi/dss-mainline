@@ -110,8 +110,6 @@ namespace dss {
     void add(double _value);
     void add(const dsuid_t &dsuid) { add(dsuid2str(dsuid)); }
     void addNull();
-    void addRaw(std::string _name, std::string json);
-    void addRaw(std::string json);
     void startArray(std::string _name);
     void startArray();
     void endArray();

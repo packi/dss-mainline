@@ -917,9 +917,8 @@ namespace dss {
           "Configuration for group : '" + _request.getParameter("groupID") + "' in zone 0 is not defined");
     }
 
-    JSONWriter json(JSONWriter::jsonNoneResult);
-    json.addRaw("result", group->serializeApplicationConfiguration(group->getApplicationConfiguration()));
-    json.add("ok", true);
+    JSONWriter json;
+    group->serializeApplicationConfiguration(group->getApplicationConfiguration(), json);
     return json.successJSON();
   }
 

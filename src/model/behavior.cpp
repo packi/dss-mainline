@@ -46,11 +46,13 @@ DefaultBehavior::DefaultBehavior(int configuration) : Behavior(configuration) {}
 
 DefaultBehavior::~DefaultBehavior() {}
 
-std::string DefaultBehavior::serializeConfiguration(int configuration) const { return "{}"; }
+void DefaultBehavior::serializeConfiguration(int configuration, JSONWriter& writer) const {
+  // do nothing - leave empty JSON
+}
 
 int DefaultBehavior::deserializeConfiguration(const std::string& jsonConfiguration) const {
   Document d;
-  d.Parse(jsonConfiguration);
+  d.Parse(jsonConfiguration.c_str());
 
   // for DefaultBehavior we do not use any configuration but we check that the call itself was valid
   if (!d.IsObject()) {
@@ -71,28 +73,19 @@ VentilationBehavior::VentilationBehavior(int configuration) : Behavior(configura
 
 VentilationBehavior::~VentilationBehavior() {}
 
-std::string VentilationBehavior::serializeConfiguration(int configuration) const {
+void VentilationBehavior::serializeConfiguration(int configuration, JSONWriter& writer) const {
   // mapping bit offsets to sceneId
   const std::vector<int> sceneIds = {SceneOff, Scene1, Scene2, Scene3, Scene4};
 
-  Document d;
-  d.SetObject();
-
-  Value activeBasicScenes;
-  activeBasicScenes.SetArray();
+  writer.startArray("activeBasicScenes");
 
   for (unsigned int i = 0; i < sceneIds.size(); ++i) {
     if ((configuration & (1 << i)) == 0) {
-      activeBasicScenes.PushBack(Value().SetInt(sceneIds.at(i)), d.GetAllocator());
+      writer.add(sceneIds.at(i));
     }
   }
-  d.AddMember("activeBasicScenes", activeBasicScenes, d.GetAllocator());
 
-  StringBuffer sb;
-  Writer<StringBuffer> writer(sb);
-  d.Accept(writer);
-
-  return sb.GetString();
+  writer.endArray();
 }
 
 int VentilationBehavior::deserializeConfiguration(const std::string& jsonConfiguration) const {
@@ -101,7 +94,7 @@ int VentilationBehavior::deserializeConfiguration(const std::string& jsonConfigu
   int configuration = 0;
 
   Document d;
-  d.Parse(jsonConfiguration);
+  d.Parse(jsonConfiguration.c_str());
 
   if (!d.IsObject()) {
     throw std::runtime_error("Error during Json parsing");

@@ -71,7 +71,8 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   void Group::setApplicationType(ApplicationType applicationType) {
     m_ApplicationType = applicationType;
 
-    if (applicationType == ApplicationType::ApartmentVentilation) {
+    if ((applicationType == ApplicationType::Ventilation) ||
+        (applicationType == ApplicationType::ApartmentVentilation)) {
       m_pApplicationBehavior.reset(new VentilationBehavior());
     } else {
       m_pApplicationBehavior.reset(new DefaultBehavior());

@@ -22,7 +22,8 @@
 
 #include <string>
 #include "scenehelper.h"
-#include "src/ds/string.h"
+#include <ds/str.h>
+#include <web/webrequests.h>
 
 namespace dss {
 
@@ -37,7 +38,7 @@ public:
   int getConfiguration() { return m_configuration; }
   void setConfiguration(int configuration) { m_configuration = configuration; }
 
-  virtual std::string serializeConfiguration(int configuration) const = 0;
+  virtual void serializeConfiguration(int configuration, JSONWriter& writer) const = 0;
   virtual int deserializeConfiguration(const std::string& jsonConfiguration) const = 0;
 
   virtual int getNextScene(int currentScene) = 0;
@@ -50,7 +51,7 @@ public:
   DefaultBehavior(int configuration);
   ~DefaultBehavior();
 
-  std::string serializeConfiguration(int configuration) const DS_OVERRIDE;
+  void serializeConfiguration(int configuration, JSONWriter& writer) const DS_OVERRIDE;
   int deserializeConfiguration(const std::string& jsonConfiguration) const DS_OVERRIDE;
 
   int getNextScene(int currentScene) DS_OVERRIDE;
@@ -63,7 +64,7 @@ public:
   VentilationBehavior(int configuration);
   ~VentilationBehavior();
 
-  std::string serializeConfiguration(int configuration) const DS_OVERRIDE;
+  void serializeConfiguration(int configuration, JSONWriter& writer) const DS_OVERRIDE;
   int deserializeConfiguration(const std::string& jsonConfiguration) const DS_OVERRIDE;
 
   int getNextScene(int currentScene) DS_OVERRIDE;
