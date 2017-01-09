@@ -960,14 +960,16 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     assert(m_impl->isIoServiceThread());
   }
 
-  void DSS::requireBlockingAllowed() {
-    DS_ASSUME(!m_impl->isIoServiceThread());
+  void DSS::assertBlockingAllowed() {
+    assert(!m_impl->isIoServiceThread());
   }
 
   void DSS::setDsmApiBlockingCallback(void *dsmApiHandle) {
     DsmApiCallback_t callback;
-    callback.function = (void*)(static_cast<DsmApiBlocking_callback_t>(
-      [](void* data){ static_cast<decltype(this)>(data)->requireBlockingAllowed(); }));
+    auto onBlocking = [](void* data) {
+      static_cast<DSS*>(data)->assertBlockingAllowed();
+    };
+    callback.function = (void*)(static_cast<DsmApiBlocking_callback_t>(onBlocking));
     callback.arg = this;
     DsmApiSetBlockingCallback(dsmApiHandle, &callback, NULL);
   }

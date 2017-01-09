@@ -177,8 +177,8 @@ namespace dss {
     boost::asio::io_service& getIoService() { return m_ioService; }
     // Assert that current thread is ioService thread
     void assertIoServiceThread();
-    // throws if blocking is currently not allowed (e.g. eventLoop tread must not be blocked)
-    void requireBlockingAllowed();
+    // Assert that blocking is allowed in current context. E.g. eventLoop tread must not be blocked
+    void assertBlockingAllowed();
     void setDsmApiBlockingCallback(void *dsmApiHandle);
 
     const std::string& getDataDirectory() const { return m_dataDirectory; }
