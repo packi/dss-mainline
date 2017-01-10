@@ -248,7 +248,6 @@ namespace dss {
     ApartmentVentilation = 64,
   };
 
-  std::string applicationTypeToString(ApplicationType type);
   std::ostream& operator<<(std::ostream& stream, ApplicationType type);
   int getApplicationTypeColor(ApplicationType type);
 

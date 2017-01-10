@@ -26,6 +26,7 @@
 
 #include "autoclustermaintenance.h"
 
+#include <ds/str.h>
 #include "src/dss.h"
 #include "src/model/apartment.h"
 #include "src/model/cluster.h"
@@ -150,8 +151,8 @@ void AutoClusterMaintenance::joinIdenticalClusters ()
       }
       if (cluster->getLocation() == clusters[index]->getLocation() &&
           cluster->getProtectionClass() == clusters[index]->getProtectionClass()) {
-        log("The clusters with ids " + applicationTypeToString(cluster->getApplicationType()) + " and id " +
-            applicationTypeToString(clusters[index]->getApplicationType()) + " are identical", lsWarning);
+        log(ds::str("The clusters with ids ", cluster->getApplicationType(), " and id ",
+            clusters[index]->getApplicationType(), " are identical"), lsWarning);
         moveClusterDevices(clusters[index], cluster);
       }
     }
