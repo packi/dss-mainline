@@ -29,7 +29,7 @@ void Timer::randomlyExpiresFromNow(Duration a, Duration b) {
 }
 
 void Timer::randomlyExpiresFromNowPercentDown(Duration d, int p) {
-    DS_ASSUME(p > 0 && p < 100, p);
+    DS_REQUIRE(p > 0 && p < 100, p);
     randomlyExpiresFromNow(d - d / 100 * p, d);
 }
 

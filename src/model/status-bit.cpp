@@ -44,7 +44,7 @@ StatusBit::StatusBit(Status& status, StatusBitType type, const std::string& name
     : m_status(status), m_type(type),
     m_state(boost::make_shared<State>(StateType_Service, name)) {
   log(std::string("StatusBit this:") + getName(), lsInfo);
-  DS_ASSUME(static_cast<std::size_t>(type) <= STATUS_BIT_TYPE_MAX);
+  DS_REQUIRE(static_cast<std::size_t>(type) <= STATUS_BIT_TYPE_MAX);
 }
 
 StatusBit::~StatusBit() = default;
@@ -54,7 +54,7 @@ void StatusBit::addSubState(const State& subState) {
   log(std::string("addSubState this:") + getName() + " state:" + subState.getName() + " value:" + intToString(value),
       lsNotice);
   auto&& it = std::find(m_subStateItems.begin(), m_subStateItems.end(), subState);
-  DS_ASSUME(it == m_subStateItems.end());
+  DS_REQUIRE(it == m_subStateItems.end());
   m_subStateItems.push_back(SubStateItem(subState));
   update();
 }
@@ -62,7 +62,7 @@ void StatusBit::addSubState(const State& subState) {
 void StatusBit::updateSubState(const State& subState) {
   auto&& value = static_cast<eState>(subState.getState());
   auto&& it = std::find(m_subStateItems.begin(), m_subStateItems.end(), subState);
-  DS_ASSUME(it != m_subStateItems.end());
+  DS_REQUIRE(it != m_subStateItems.end());
   if (it->m_value == value) {
     return;
   }
@@ -75,7 +75,7 @@ void StatusBit::updateSubState(const State& subState) {
 void StatusBit::removeSubState(const State& subState) {
   log(std::string("removeSubState this:") + getName() + " state:" + subState.getName(), lsNotice);
   auto&& it = std::find(m_subStateItems.begin(), m_subStateItems.end(), subState);
-  DS_ASSUME(it != m_subStateItems.end());
+  DS_REQUIRE(it != m_subStateItems.end());
   m_subStateItems.erase(it);
   update();
 }

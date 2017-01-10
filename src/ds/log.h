@@ -73,20 +73,32 @@ constexpr const char *trimArg(const char *x) {
 
 #define DS_LOG_ARG(x) , " ", ::ds::log::trimArg(#x ":"), x
 
-// * `DS_ASSUME(condition)`:  Check preconditions -- e.g. to validate parameters passed from a caller.
+// * `DS_REQUIRE(condition)`:  Check external input and preconditions
+// e.g. to validate parameters passed from a caller.
 // A failure indicates that the caller is buggy.
-// Variadic arguments are attached to the message like in debug macros
-#define DS_ASSUME(condition, ...) \
+// Variadic arguments are attached to the message like in debug macros.
+// Example:
+//
+// DS_REQUIRE(value >= 0, "Value cannot be negative.", value);
+//
+#define DS_REQUIRE(condition, ...) \
     if (DS_LIKELY(condition)) {} else \
         throw std::runtime_error(ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ', #condition \
             DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__)))
 
-// Throws an exception if `condition` is false.
+// Assert the `condition` is true.
 // This macro should be used to check for bugs in the surrounding code (broken invariant, ...)
 // and its dependencies, but NOT to check for invalid input.
-// Like assert, but throws an exception instead of terminate. But we may want to change this behaviour.
-#define DS_CHECK(condition, ...) \
-    DS_ASSUME(condition, ...)
+// Example:
+//
+// DS_ASSERT(m_state == State::CONNECTED, m_state);
+//
+#define DS_ASSERT(condition, ...) \
+    if (DS_LIKELY(condition)) {} else { \
+        std::cerr << ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ', #condition \
+            DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
+        abort(); \
+    }
 
 } // namespace log
 } // namespace ds
