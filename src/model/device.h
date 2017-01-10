@@ -94,6 +94,7 @@ namespace dss {
   class DSMeter;
   class VdcElementReader;
   struct VdsdSpec_t;
+  enum class ModelFeatureId;
 
   typedef struct {
     bool dontcare;
@@ -318,7 +319,7 @@ namespace dss {
     std::string m_VdcHardwareInfo;
     std::string m_VdcHardwareVersion;
     std::string m_VdcIconPath;
-    boost::shared_ptr<std::vector<int> > m_VdcModelFeatures;
+    boost::shared_ptr<std::vector<ModelFeatureId> > m_VdcModelFeatures;
     bool m_hasActions;
 
     DeviceValveType_t m_ValveType;
@@ -732,8 +733,8 @@ namespace dss {
       m_VdcIconPath = _value; updateIconPath();
     }
     const std::string& getVdcIconPath() const { return m_VdcIconPath; }
-    void setVdcModelFeatures(const boost::shared_ptr<std::vector<int> >& _value) { m_VdcModelFeatures = _value; }
-    const boost::shared_ptr<std::vector<int> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }
+    void setVdcModelFeatures(const boost::shared_ptr<std::vector<ModelFeatureId> >& _value) { m_VdcModelFeatures = _value; }
+    const boost::shared_ptr<std::vector<ModelFeatureId> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }
 
     void setHasActions(bool x) { m_hasActions = x; }
     bool getHasActions() const { return m_hasActions; }

@@ -38,6 +38,7 @@ namespace dss {
 
   class JSONElement;
   class JSONObject;
+  enum class ModelFeatureId;
 
   struct VdsdSpec_t {
     // dS-Article Data
@@ -61,7 +62,7 @@ namespace dss {
 
     // Configurator integration
     std::string configURL;
-    boost::shared_ptr<std::vector<int> > modelFeatures;
+    boost::shared_ptr<std::vector<ModelFeatureId> > modelFeatures;
   };
 
   typedef struct {

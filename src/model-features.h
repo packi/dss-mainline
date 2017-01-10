@@ -37,50 +37,50 @@ namespace dss {
    http://redmine.digitalstrom.org/projects/dss/wiki/Model_Features
  */
 
-enum {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_leddark,
-  mf_transt,
-  mf_outmode,
-  mf_outmodeswitch,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbsensor,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_pushbcombined,
-  mf_shadeprops,
-  mf_shadeposition,
-  mf_motiontimefins,
-  mf_optypeconfig,
-  mf_shadebladeang,
-  mf_highlevel,
-  mf_consumption,
-  mf_jokerconfig,
-  mf_akmsensor,
-  mf_akminput,
-  mf_akmdelay,
-  mf_twowayconfig,
-  mf_outputchannels,
-  mf_heatinggroup,
-  mf_heatingoutmode,
-  mf_heatingprops,
-  mf_pwmvalue,
-  mf_valvetype,
-  mf_extradimmer,
-  mf_umvrelay,
-  mf_blinkconfig,
-  mf_umroutmode,
-  mf_locationconfig,
-  mf_windprotectionconfigawning,
-  mf_windprotectionconfigblind,
-  mf_impulseconfig,
-  mf_outmodegeneric,
-  mf_outconfigswitch,
-  mf_temperatureoffset
+enum class ModelFeatureId {
+  dontcare,
+  blink,
+  ledauto,
+  leddark,
+  transt,
+  outmode,
+  outmodeswitch,
+  outvalue8,
+  pushbutton,
+  pushbdevice,
+  pushbsensor,
+  pushbarea,
+  pushbadvanced,
+  pushbcombined,
+  shadeprops,
+  shadeposition,
+  motiontimefins,
+  optypeconfig,
+  shadebladeang,
+  highlevel,
+  consumption,
+  jokerconfig,
+  akmsensor,
+  akminput,
+  akmdelay,
+  twowayconfig,
+  outputchannels,
+  heatinggroup,
+  heatingoutmode,
+  heatingprops,
+  pwmvalue,
+  valvetype,
+  extradimmer,
+  umvrelay,
+  blinkconfig,
+  umroutmode,
+  locationconfig,
+  windprotectionconfigawning,
+  windprotectionconfigblind,
+  impulseconfig,
+  outmodegeneric,
+  outconfigswitch,
+  temperatureoffset
 };
 
 class ModelFeatures
@@ -88,18 +88,18 @@ class ModelFeatures
 public:
   static ModelFeatures* createInstance();
   static ModelFeatures* getInstance();
-  void setFeatures(int _color, std::string model, boost::shared_ptr<std::vector<int> > _features);
-  std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > > getFeatures(int _color);
-  std::string getFeatureName(int _feature);
-  int nameToFeature(std::string _name);
+  void setFeatures(int _color, std::string model, boost::shared_ptr<std::vector<ModelFeatureId> > _features);
+  std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<ModelFeatureId> > > > > getFeatures(int _color);
+  std::string getFeatureName(ModelFeatureId feature);
+  ModelFeatureId nameToFeature(std::string _name);
   std::string colorToString(int _color);
-  boost::shared_ptr<std::vector<int> > getAvailableFeatures();
+  boost::shared_ptr<std::vector<ModelFeatureId> > getAvailableFeatures();
 private:
   ModelFeatures();
   static ModelFeatures *m_instance;
   // color vector, each index represents one color according to definitions of
   // modelconst.h
-  std::vector<std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > > > m_features;
+  std::vector<std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<ModelFeatureId> > > > > > m_features;
   boost::mutex m_lock;
 };
 

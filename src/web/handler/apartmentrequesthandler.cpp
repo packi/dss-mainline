@@ -569,15 +569,15 @@ namespace dss {
 
         json.startObject("modelFeatures");
         for (int colorID = ColorIDYellow; colorID <= ColorIDBlack; colorID++) {
-          std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > > f = ModelFeatures::getInstance()->getFeatures(colorID);
+          auto&& f = ModelFeatures::getInstance()->getFeatures(colorID);
           json.startObject(ModelFeatures::getInstance()->colorToString(colorID));
 
           for (size_t i = 0; i < f.size(); i++) {
-            boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > model = f.at(i);
+            auto&& model = f.at(i);
             json.startObject(model->first);
 
             for (size_t devf = 0; devf < model->second->size(); devf++) {
-              int feature = model->second->at(devf);
+              ModelFeatureId feature = model->second->at(devf);
               json.add(ModelFeatures::getInstance()->getFeatureName(feature), true);
             }
             json.endObject();
@@ -587,7 +587,7 @@ namespace dss {
         json.endObject();
         
         json.startObject("reference");
-        boost::shared_ptr<std::vector<int> > all = ModelFeatures::getInstance()->getAvailableFeatures();
+        auto&& all = ModelFeatures::getInstance()->getAvailableFeatures();
         for (size_t a = 0; a < all->size(); a++) {
           json.add(ModelFeatures::getInstance()->getFeatureName(all->at(a)), false);
         }

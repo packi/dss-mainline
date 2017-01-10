@@ -69,609 +69,609 @@ const char *SK20 =     "SK:20";
 const char *AKM2 =      "AKM:2"; // wildcard for all AKM-2*
 
 // all available features
-const int MF_AVAILABLE[] =
+const ModelFeatureId MF_AVAILABLE[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_leddark,
-  mf_transt,
-  mf_outmode,
-  mf_outmodeswitch,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_pushbcombined,
-  mf_shadeprops,
-  mf_shadeposition,
-  mf_motiontimefins,
-  mf_optypeconfig,
-  mf_shadebladeang,
-  mf_highlevel,
-  mf_consumption,
-  mf_jokerconfig,
-  mf_akmsensor,
-  mf_akminput,
-  mf_akmdelay,
-  mf_twowayconfig,
-  mf_outputchannels,
-  mf_heatinggroup,
-  mf_heatingoutmode,
-  mf_heatingprops,
-  mf_pwmvalue,
-  mf_valvetype,
-  mf_extradimmer,
-  mf_umvrelay,
-  mf_blinkconfig,
-  mf_umroutmode,
-  mf_pushbsensor,
-  mf_locationconfig,
-  mf_windprotectionconfigawning,
-  mf_windprotectionconfigblind,
-  mf_impulseconfig,
-  mf_outmodegeneric,
-  mf_outconfigswitch,
-  mf_temperatureoffset
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::leddark,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outmodeswitch,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::pushbcombined,
+  ModelFeatureId::shadeprops,
+  ModelFeatureId::shadeposition,
+  ModelFeatureId::motiontimefins,
+  ModelFeatureId::optypeconfig,
+  ModelFeatureId::shadebladeang,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::consumption,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::akmsensor,
+  ModelFeatureId::akminput,
+  ModelFeatureId::akmdelay,
+  ModelFeatureId::twowayconfig,
+  ModelFeatureId::outputchannels,
+  ModelFeatureId::heatinggroup,
+  ModelFeatureId::heatingoutmode,
+  ModelFeatureId::heatingprops,
+  ModelFeatureId::pwmvalue,
+  ModelFeatureId::valvetype,
+  ModelFeatureId::extradimmer,
+  ModelFeatureId::umvrelay,
+  ModelFeatureId::blinkconfig,
+  ModelFeatureId::umroutmode,
+  ModelFeatureId::pushbsensor,
+  ModelFeatureId::locationconfig,
+  ModelFeatureId::windprotectionconfigawning,
+  ModelFeatureId::windprotectionconfigblind,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::outmodegeneric,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::temperatureoffset
 };
 
 // model features
-const int MF_GE_KM220[] =
+const ModelFeatureId MF_GE_KM220[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_KM2[] =
+const ModelFeatureId MF_GE_KM2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_KL200[] =
+const ModelFeatureId MF_GE_KL200[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmodeswitch,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmodeswitch,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_TKM210[] =
+const ModelFeatureId MF_GE_TKM210[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_TKM220[] =
+const ModelFeatureId MF_GE_TKM220[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_pushbutton,
-  mf_pushbarea,
-  mf_pushbadvanced
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced
 };
 
-const int MF_GE_TKM230[] =
+const ModelFeatureId MF_GE_TKM230[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_pushbutton,
-  mf_pushbarea,
-  mf_pushbadvanced
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced
 };
 
-const int MF_GE_SDM20[] =
+const ModelFeatureId MF_GE_SDM20[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_SDS210[] =
+const ModelFeatureId MF_GE_SDS210[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_twowayconfig,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::twowayconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_SDS20[] =
+const ModelFeatureId MF_GE_SDS20[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_pushbcombined,
-  mf_twowayconfig,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::pushbcombined,
+  ModelFeatureId::twowayconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_SDS22[] =
+const ModelFeatureId MF_GE_SDS22[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_pushbcombined,
-  mf_twowayconfig,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::pushbcombined,
+  ModelFeatureId::twowayconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_SDS2[] =
+const ModelFeatureId MF_GE_SDS2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_twowayconfig,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::twowayconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
 
-const int MF_GE_ZWS2[] =
+const ModelFeatureId MF_GE_ZWS2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_UMV204[] =
+const ModelFeatureId MF_GE_UMV204[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_UMV200[] =
+const ModelFeatureId MF_GE_UMV200[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_extradimmer,
-  mf_umvrelay,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::extradimmer,
+  ModelFeatureId::umvrelay,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GE_UMV210[] =
+const ModelFeatureId MF_GE_UMV210[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_extradimmer,
-  mf_umvrelay,
-  mf_outputchannels,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::extradimmer,
+  ModelFeatureId::umvrelay,
+  ModelFeatureId::outputchannels,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_GN_KM2[] =
+const ModelFeatureId MF_GN_KM2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8
 };
 
-const int MF_GN_TKM2[] =
+const ModelFeatureId MF_GN_TKM2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8
 };
 
-const int MF_RT_KM2[] =
+const ModelFeatureId MF_RT_KM2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8
 };
 
-const int MF_RT_TKM2[] =
+const ModelFeatureId MF_RT_TKM2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_transt,
-  mf_outmode,
-  mf_outvalue8
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::transt,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8
 };
 
-const int MF_RT_SDM2[] =
+const ModelFeatureId MF_RT_SDM2[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_outmode,
-  mf_outvalue8
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::outmode,
+  ModelFeatureId::outvalue8
 };
 
-const int MF_GR_KL210[] =
+const ModelFeatureId MF_GR_KL210[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_shadeprops,
-  mf_shadeposition,
-  mf_locationconfig,
-  mf_windprotectionconfigawning
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::shadeprops,
+  ModelFeatureId::shadeposition,
+  ModelFeatureId::locationconfig,
+  ModelFeatureId::windprotectionconfigawning
 };
 
-const int MF_GR_KL220[] =
+const ModelFeatureId MF_GR_KL220[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_shadeprops,
-  mf_shadeposition,
-  mf_motiontimefins,
-  mf_shadebladeang,
-  mf_locationconfig,
-  mf_windprotectionconfigblind
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::shadeprops,
+  ModelFeatureId::shadeposition,
+  ModelFeatureId::motiontimefins,
+  ModelFeatureId::shadebladeang,
+  ModelFeatureId::locationconfig,
+  ModelFeatureId::windprotectionconfigblind
 };
 
-const int MF_GR_KL230[] =
+const ModelFeatureId MF_GR_KL230[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_shadeprops,
-  mf_shadeposition,
-  mf_motiontimefins,
-  mf_shadebladeang,
-  mf_locationconfig,
-  mf_windprotectionconfigblind
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::shadeprops,
+  ModelFeatureId::shadeposition,
+  ModelFeatureId::motiontimefins,
+  ModelFeatureId::shadebladeang,
+  ModelFeatureId::locationconfig,
+  ModelFeatureId::windprotectionconfigblind
 };
 
-const int MF_GR_KL2[] =
+const ModelFeatureId MF_GR_KL2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_shadeprops,
-  mf_shadeposition,
-  mf_locationconfig,
-  mf_windprotectionconfigblind
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::shadeprops,
+  ModelFeatureId::shadeposition,
+  ModelFeatureId::locationconfig,
+  ModelFeatureId::windprotectionconfigblind
 };
 
-const int MF_GR_TKM2[] =
+const ModelFeatureId MF_GR_TKM2[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_pushbutton,
-  mf_pushbarea,
-  mf_pushbadvanced
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced
 };
 
-const int MF_BL_KM200[] =
+const ModelFeatureId MF_BL_KM200[] =
 {
-  mf_dontcare,
-  mf_ledauto,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbadvanced,
-  mf_heatinggroup,
-  mf_heatingoutmode,
-  mf_heatingprops,
-  mf_pwmvalue,
-  mf_valvetype
+  ModelFeatureId::dontcare,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::heatinggroup,
+  ModelFeatureId::heatingoutmode,
+  ModelFeatureId::heatingprops,
+  ModelFeatureId::pwmvalue,
+  ModelFeatureId::valvetype
 };
 
-const int MF_BL_SDS200[] =
+const ModelFeatureId MF_BL_SDS200[] =
 {
-  mf_dontcare,
-  mf_ledauto,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbadvanced,
-  mf_heatinggroup,
-  mf_heatingoutmode,
-  mf_heatingprops,
-  mf_pwmvalue,
-  mf_valvetype
+  ModelFeatureId::dontcare,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::heatinggroup,
+  ModelFeatureId::heatingoutmode,
+  ModelFeatureId::heatingprops,
+  ModelFeatureId::pwmvalue,
+  ModelFeatureId::valvetype
 };
 
-const int MF_BL_KL2[] =
+const ModelFeatureId MF_BL_KL2[] =
 {
-  mf_dontcare,
-  mf_ledauto
+  ModelFeatureId::dontcare,
+  ModelFeatureId::ledauto
 };
 
-const int MF_TK_TKM2[] =
+const ModelFeatureId MF_TK_TKM2[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_pushbutton,
-  mf_pushbarea
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbarea
 };
 
-const int MF_GE_TKM2[] =
+const ModelFeatureId MF_GE_TKM2[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_pushbutton,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_SW_TKM2[] =
+const ModelFeatureId MF_SW_TKM2[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_pushbutton,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_highlevel,
-  mf_jokerconfig,
-  mf_twowayconfig
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::twowayconfig
 };
 
-const int MF_SW_KL2[] =
+const ModelFeatureId MF_SW_KL2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_optypeconfig,
-  mf_highlevel,
-  mf_consumption,
-  mf_jokerconfig,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::optypeconfig,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::consumption,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_SW_ZWS2[] =
+const ModelFeatureId MF_SW_ZWS2[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbdevice,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_optypeconfig,
-  mf_highlevel,
-  mf_consumption,
-  mf_jokerconfig,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::optypeconfig,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::consumption,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_SW_KL213[] =
+const ModelFeatureId MF_SW_KL213[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outvalue8,
-  mf_optypeconfig,
-  mf_highlevel,
-  mf_consumption,
-  mf_jokerconfig,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::optypeconfig,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::consumption,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_SW_KL214[] =
+const ModelFeatureId MF_SW_KL214[] =
 {
-  mf_dontcare,
-  mf_blink,
-  mf_ledauto,
-  mf_transt,
-  mf_outvalue8,
-  mf_optypeconfig,
-  mf_highlevel,
-  mf_consumption,
-  mf_jokerconfig,
-  mf_outconfigswitch,
-  mf_impulseconfig,
-  mf_blinkconfig
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::optypeconfig,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::consumption,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
 };
 
-const int MF_SW_SDS20[] =
+const ModelFeatureId MF_SW_SDS20[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_pushbutton,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_highlevel,
-  mf_jokerconfig,
-  mf_twowayconfig
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::twowayconfig
 };
 
-const int MF_SW_SDS22[] =
+const ModelFeatureId MF_SW_SDS22[] =
 {
-  mf_blink,
-  mf_leddark,
-  mf_pushbutton,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_highlevel,
-  mf_jokerconfig,
-  mf_twowayconfig
+  ModelFeatureId::blink,
+  ModelFeatureId::leddark,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::twowayconfig
 };
 
-const int MF_SW_AKM2[] =
+const ModelFeatureId MF_SW_AKM2[] =
 {
-  mf_akmsensor,
-  mf_akminput,
-  mf_akmdelay
+  ModelFeatureId::akmsensor,
+  ModelFeatureId::akminput,
+  ModelFeatureId::akmdelay
 };
 
-const int MF_SW_UMR200[] =
+const ModelFeatureId MF_SW_UMR200[] =
 {
-  mf_blink,
-  mf_dontcare,
-  mf_outvalue8,
-  mf_pushbutton,
-  mf_pushbsensor,
-  mf_pushbarea,
-  mf_pushbadvanced,
-  mf_highlevel,
-  mf_jokerconfig,
-  mf_twowayconfig,
-  mf_akminput,
-  mf_akmsensor,
-  mf_akmdelay,
-  mf_blinkconfig,
-  mf_impulseconfig,
-  mf_umroutmode,
-  mf_outconfigswitch,
+  ModelFeatureId::blink,
+  ModelFeatureId::dontcare,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbsensor,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::twowayconfig,
+  ModelFeatureId::akminput,
+  ModelFeatureId::akmsensor,
+  ModelFeatureId::akmdelay,
+  ModelFeatureId::blinkconfig,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::umroutmode,
+  ModelFeatureId::outconfigswitch,
 };
 
-const int MF_SW_SK20[] =
+const ModelFeatureId MF_SW_SK20[] =
 {
-    mf_temperatureoffset
+    ModelFeatureId::temperatureoffset
 };
 
 ModelFeatures* ModelFeatures::createInstance()
@@ -700,210 +700,210 @@ ModelFeatures* ModelFeatures::getInstance()
 
 ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   // initialize "our" devices
-  boost::shared_ptr<std::vector<int> > fv;
-  fv = boost::make_shared<std::vector<int> >();
+  boost::shared_ptr<std::vector<ModelFeatureId> > fv;
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
 
   fv->assign(MF_GE_KM220, ARRAY_END(MF_GE_KM220));
   setFeatures(ColorIDYellow, KM220, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_KM2, ARRAY_END(MF_GE_KM2));
   setFeatures(ColorIDYellow, KM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_KL200, ARRAY_END(MF_GE_KL200));
   setFeatures(ColorIDYellow, KL200, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_TKM210, ARRAY_END(MF_GE_TKM210));
   setFeatures(ColorIDYellow, TKM210, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_TKM220, ARRAY_END(MF_GE_TKM220));
   setFeatures(ColorIDYellow, TKM220, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_TKM230, ARRAY_END(MF_GE_TKM230));
   setFeatures(ColorIDYellow, TKM230, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_SDM20, ARRAY_END(MF_GE_SDM20));
   setFeatures(ColorIDYellow, SDM20, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_SDS210, ARRAY_END(MF_GE_SDS210));
   setFeatures(ColorIDYellow, SDS210, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_SDS20, ARRAY_END(MF_GE_SDS20));
   setFeatures(ColorIDYellow, SDS20, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_SDS22, ARRAY_END(MF_GE_SDS22));
   setFeatures(ColorIDYellow, SDS22, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_SDS2, ARRAY_END(MF_GE_SDS2));
   setFeatures(ColorIDYellow, SDS2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_ZWS2, ARRAY_END(MF_GE_ZWS2));
   setFeatures(ColorIDYellow, ZWS2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_UMV204, ARRAY_END(MF_GE_UMV204));
   setFeatures(ColorIDYellow, UMV204, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_UMV200, ARRAY_END(MF_GE_UMV200));
   setFeatures(ColorIDYellow, UMV200, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_UMV210, ARRAY_END(MF_GE_UMV210));
   setFeatures(ColorIDYellow, UMV210, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GN_KM2, ARRAY_END(MF_GN_KM2));
   setFeatures(ColorIDGreen, KM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GN_TKM2, ARRAY_END(MF_GN_TKM2));
   setFeatures(ColorIDGreen, TKM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_RT_KM2, ARRAY_END(MF_RT_KM2));
   setFeatures(ColorIDRed, KM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_RT_TKM2, ARRAY_END(MF_RT_TKM2));
   setFeatures(ColorIDRed, TKM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_RT_SDM2, ARRAY_END(MF_RT_SDM2));
   setFeatures(ColorIDRed, SDM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GR_KL210, ARRAY_END(MF_GR_KL210));
   setFeatures(ColorIDGray, KL210, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GR_KL220, ARRAY_END(MF_GR_KL220));
   setFeatures(ColorIDGray, KL220, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GR_KL230, ARRAY_END(MF_GR_KL230));
   setFeatures(ColorIDGray, KL230, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GR_KL2, ARRAY_END(MF_GR_KL2));
   setFeatures(ColorIDGray, KL2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GR_TKM2, ARRAY_END(MF_GR_TKM2));
   setFeatures(ColorIDGray, TKM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_BL_KM200, ARRAY_END(MF_BL_KM200));
   setFeatures(ColorIDBlue, KM200, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_BL_SDS200, ARRAY_END(MF_BL_SDS200));
   setFeatures(ColorIDBlue, SDS2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_BL_KL2, ARRAY_END(MF_BL_KL2));
   setFeatures(ColorIDBlue, KL2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_TKM2, ARRAY_END(MF_GE_TKM2));
   setFeatures(ColorIDYellow, TKM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_TK_TKM2, ARRAY_END(MF_TK_TKM2));
   setFeatures(ColorIDCyan, TKM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_TKM2, ARRAY_END(MF_SW_TKM2));
   setFeatures(ColorIDBlack, TKM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_KL2, ARRAY_END(MF_SW_KL2));
   setFeatures(ColorIDBlack, KL2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_ZWS2, ARRAY_END(MF_SW_ZWS2));
   setFeatures(ColorIDBlack, ZWS2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_KL213, ARRAY_END(MF_SW_KL213));
   setFeatures(ColorIDBlack, KL213, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_KL214, ARRAY_END(MF_SW_KL214));
   setFeatures(ColorIDBlack, KL214, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_SDS20, ARRAY_END(MF_SW_SDS20));
   setFeatures(ColorIDBlack, SDS20, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_SDS22, ARRAY_END(MF_SW_SDS22));
   setFeatures(ColorIDBlack, SDS22, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_AKM2, ARRAY_END(MF_SW_AKM2));
   setFeatures(ColorIDBlack, AKM2, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_UMR200, ARRAY_END(MF_SW_UMR200));
   setFeatures(ColorIDBlack, UMR200, fv);
   fv.reset();
 
-  fv = boost::make_shared<std::vector<int> >();
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_SK20, ARRAY_END(MF_SW_SK20));
   setFeatures(ColorIDBlack, SK20, fv);
   fv.reset();
 }
 
-void ModelFeatures::setFeatures(int _color, std::string _model, boost::shared_ptr<std::vector<int> > _features) {
+void ModelFeatures::setFeatures(int _color, std::string _model, boost::shared_ptr<std::vector<ModelFeatureId> > _features) {
   if (_model.empty()) {
     throw std::runtime_error("can't add model features: missing model key");
   }
@@ -919,15 +919,15 @@ void ModelFeatures::setFeatures(int _color, std::string _model, boost::shared_pt
 
   for (size_t i = 0; i < m_features.at(_color).size(); i++) {
     if (m_features.at(_color).at(i)->first == _model) {
-      boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > content = m_features.at(_color).at(i);
+      boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<ModelFeatureId> > > > content = m_features.at(_color).at(i);
       return;
     }
   }
 
-  m_features.at(_color).push_back(boost::make_shared<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > >(_model, _features));
+  m_features.at(_color).push_back(boost::make_shared<std::pair<std::string, boost::shared_ptr<const std::vector<ModelFeatureId> > > >(_model, _features));
 }
 
-std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<int> > > > > ModelFeatures::getFeatures(int _color) {
+std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<ModelFeatureId> > > > > ModelFeatures::getFeatures(int _color) {
   if ((_color < ColorIDYellow) || (_color > ColorIDBlack)) {
     throw std::runtime_error("can not retrieve features: unsupported device color");
   }
@@ -941,187 +941,187 @@ std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std
   return m_features.at(_color);
 }
 
-int ModelFeatures::nameToFeature(std::string _name) {
+ModelFeatureId ModelFeatures::nameToFeature(std::string _name) {
   if (_name == "dontcare") {
-    return mf_dontcare;
+    return ModelFeatureId::dontcare;
   } else if (_name == "blink") {
-    return mf_blink;
+    return ModelFeatureId::blink;
   } else if (_name == "ledauto") {
-    return mf_ledauto;
+    return ModelFeatureId::ledauto;
   } else if (_name == "leddark") {
-    return mf_leddark;
+    return ModelFeatureId::leddark;
   } else if (_name == "transt") {
-    return mf_transt;
+    return ModelFeatureId::transt;
   } else if (_name == "outmode") {
-    return mf_outmode;
+    return ModelFeatureId::outmode;
   } else if (_name == "outmodeswitch") {
-    return mf_outmodeswitch;
+    return ModelFeatureId::outmodeswitch;
   } else if (_name == "outvalue8") {
-    return mf_outvalue8;
+    return ModelFeatureId::outvalue8;
   } else if (_name == "pushbutton") {
-    return mf_pushbutton;
+    return ModelFeatureId::pushbutton;
   } else if (_name == "pushbdevice") {
-    return mf_pushbdevice;
+    return ModelFeatureId::pushbdevice;
   } else if (_name == "pushbarea") {
-    return mf_pushbarea;
+    return ModelFeatureId::pushbarea;
   } else if (_name == "pushbadvanced") {
-    return mf_pushbadvanced;
+    return ModelFeatureId::pushbadvanced;
   } else if (_name == "pushbcombined") {
-    return mf_pushbcombined;
+    return ModelFeatureId::pushbcombined;
   } else if (_name == "shadeprops") {
-    return mf_shadeprops;
+    return ModelFeatureId::shadeprops;
   } else if (_name == "shadeposition") {
-    return mf_shadeposition;
+    return ModelFeatureId::shadeposition;
   } else if (_name == "motiontimefins") {
-    return mf_motiontimefins;
+    return ModelFeatureId::motiontimefins;
   } else if (_name == "optypeconfig") {
-    return mf_optypeconfig;
+    return ModelFeatureId::optypeconfig;
   } else if (_name == "shadebladeang") {
-    return mf_shadebladeang;
+    return ModelFeatureId::shadebladeang;
   } else if (_name == "highlevel") {
-    return mf_highlevel;
+    return ModelFeatureId::highlevel;
   } else if (_name == "consumption") {
-    return mf_consumption;
+    return ModelFeatureId::consumption;
   } else if (_name == "jokerconfig") {
-    return mf_jokerconfig;
+    return ModelFeatureId::jokerconfig;
   } else if (_name == "akmsensor") {
-    return mf_akmsensor;
+    return ModelFeatureId::akmsensor;
   } else if (_name == "akminput") {
-    return mf_akminput;
+    return ModelFeatureId::akminput;
   } else if (_name == "akmdelay") {
-    return mf_akmdelay;
+    return ModelFeatureId::akmdelay;
   } else if (_name == "twowayconfig") {
-    return mf_twowayconfig;
+    return ModelFeatureId::twowayconfig;
   } else if (_name == "outputchannels") {
-    return mf_outputchannels;
+    return ModelFeatureId::outputchannels;
   } else if (_name == "heatinggroup") {
-    return mf_heatinggroup;
+    return ModelFeatureId::heatinggroup;
   } else if (_name == "heatingoutmode") {
-    return mf_heatingoutmode;
+    return ModelFeatureId::heatingoutmode;
   } else if (_name == "heatingprops") {
-    return mf_heatingprops;
+    return ModelFeatureId::heatingprops;
   } else if (_name == "pwmvalue") {
-    return mf_pwmvalue;
+    return ModelFeatureId::pwmvalue;
   } else if (_name == "valvetype") {
-    return mf_valvetype;
+    return ModelFeatureId::valvetype;
   } else if (_name == "extradimmer") {
-    return mf_extradimmer;
+    return ModelFeatureId::extradimmer;
   } else if (_name == "umvrelay") {
-    return mf_umvrelay;
+    return ModelFeatureId::umvrelay;
   } else if (_name == "blinkconfig") {
-    return mf_blinkconfig;
+    return ModelFeatureId::blinkconfig;
   } else if (_name == "impulseconfig") {
-    return mf_impulseconfig;
+    return ModelFeatureId::impulseconfig;
   } else if (_name == "umroutmode") {
-    return mf_umroutmode;
+    return ModelFeatureId::umroutmode;
   } else if (_name == "pushbsensor") {
-    return mf_pushbsensor;
+    return ModelFeatureId::pushbsensor;
   } else if (_name == "locationconfig") {
-    return mf_locationconfig;
+    return ModelFeatureId::locationconfig;
   } else if (_name == "windprotectionconfigblind") {
-    return mf_windprotectionconfigblind;
+    return ModelFeatureId::windprotectionconfigblind;
   } else if (_name == "windprotectionconfigawning") {
-    return mf_windprotectionconfigawning;
+    return ModelFeatureId::windprotectionconfigawning;
   } else if (_name == "outmodegeneric") {
-    return mf_outmodegeneric;
+    return ModelFeatureId::outmodegeneric;
   } else if (_name == "outconfigswitch") {
-    return mf_outconfigswitch;
+    return ModelFeatureId::outconfigswitch;
   } else if (_name == "temperatureoffset") {
-    return mf_temperatureoffset;
+    return ModelFeatureId::temperatureoffset;
   }
 
   throw std::runtime_error("unknown feature encountered");
 }
 
-std::string ModelFeatures::getFeatureName(int _feature)
+std::string ModelFeatures::getFeatureName(ModelFeatureId _feature)
 {
   switch (_feature)
   {
-    case mf_dontcare:
+    case ModelFeatureId::dontcare:
       return "dontcare";
-    case mf_blink:
+    case ModelFeatureId::blink:
       return "blink";
-    case mf_ledauto:
+    case ModelFeatureId::ledauto:
       return "ledauto";
-    case mf_leddark:
+    case ModelFeatureId::leddark:
       return "leddark";
-    case mf_transt:
+    case ModelFeatureId::transt:
       return "transt";
-    case mf_outmode:
+    case ModelFeatureId::outmode:
       return "outmode";
-    case mf_outmodeswitch:
+    case ModelFeatureId::outmodeswitch:
       return "outmodeswitch";
-    case mf_outvalue8:
+    case ModelFeatureId::outvalue8:
       return "outvalue8";
-    case mf_pushbutton:
+    case ModelFeatureId::pushbutton:
       return "pushbutton";
-    case mf_pushbdevice:
+    case ModelFeatureId::pushbdevice:
       return "pushbdevice";
-    case mf_pushbarea:
+    case ModelFeatureId::pushbarea:
       return "pushbarea";
-    case mf_pushbadvanced:
+    case ModelFeatureId::pushbadvanced:
       return "pushbadvanced";
-    case mf_pushbcombined:
+    case ModelFeatureId::pushbcombined:
       return "pushbcombined";
-    case mf_shadeprops:
+    case ModelFeatureId::shadeprops:
       return "shadeprops";
-    case mf_shadeposition:
+    case ModelFeatureId::shadeposition:
       return "shadeposition";
-    case mf_motiontimefins:
+    case ModelFeatureId::motiontimefins:
       return "motiontimefins";
-    case mf_optypeconfig:
+    case ModelFeatureId::optypeconfig:
       return "optypeconfig";
-    case mf_shadebladeang:
+    case ModelFeatureId::shadebladeang:
       return "shadebladeang";
-    case mf_highlevel:
+    case ModelFeatureId::highlevel:
       return "highlevel";
-    case mf_consumption:
+    case ModelFeatureId::consumption:
       return "consumption";
-    case mf_jokerconfig:
+    case ModelFeatureId::jokerconfig:
       return "jokerconfig";
-    case mf_akmsensor:
+    case ModelFeatureId::akmsensor:
       return "akmsensor";
-    case mf_akminput:
+    case ModelFeatureId::akminput:
       return "akminput";
-    case mf_akmdelay:
+    case ModelFeatureId::akmdelay:
       return "akmdelay";
-    case mf_twowayconfig:
+    case ModelFeatureId::twowayconfig:
       return "twowayconfig";
-    case mf_outputchannels:
+    case ModelFeatureId::outputchannels:
       return "outputchannels";
-    case mf_heatinggroup:
+    case ModelFeatureId::heatinggroup:
       return "heatinggroup";
-    case mf_heatingoutmode:
+    case ModelFeatureId::heatingoutmode:
       return "heatingoutmode";
-    case mf_heatingprops:
+    case ModelFeatureId::heatingprops:
       return "heatingprops";
-    case mf_pwmvalue:
+    case ModelFeatureId::pwmvalue:
       return "pwmvalue";
-    case mf_valvetype:
+    case ModelFeatureId::valvetype:
       return "valvetype";
-    case mf_extradimmer:
+    case ModelFeatureId::extradimmer:
       return "extradimmer";
-    case mf_umvrelay:
+    case ModelFeatureId::umvrelay:
       return "umvrelay";
-    case mf_blinkconfig:
+    case ModelFeatureId::blinkconfig:
       return "blinkconfig";
-    case mf_impulseconfig:
+    case ModelFeatureId::impulseconfig:
       return "impulseconfig";
-    case mf_umroutmode:
+    case ModelFeatureId::umroutmode:
       return "umroutmode";
-    case mf_pushbsensor:
+    case ModelFeatureId::pushbsensor:
       return "pushbsensor";
-    case mf_locationconfig:
+    case ModelFeatureId::locationconfig:
       return "locationconfig";
-    case mf_windprotectionconfigawning:
+    case ModelFeatureId::windprotectionconfigawning:
       return "windprotectionconfigawning";
-    case mf_windprotectionconfigblind:
+    case ModelFeatureId::windprotectionconfigblind:
       return "windprotectionconfigblind";
-    case mf_outmodegeneric:
+    case ModelFeatureId::outmodegeneric:
       return "outmodegeneric";
-    case mf_outconfigswitch:
+    case ModelFeatureId::outconfigswitch:
       return "outconfigswitch";
-    case mf_temperatureoffset:
+    case ModelFeatureId::temperatureoffset:
       return "temperatureoffset";
     default:
       break;
@@ -1157,10 +1157,10 @@ std::string ModelFeatures::colorToString(int _color)
   throw std::runtime_error("unknown color");
 }
 
-boost::shared_ptr<std::vector<int> > ModelFeatures::getAvailableFeatures()
+boost::shared_ptr<std::vector<ModelFeatureId> > ModelFeatures::getAvailableFeatures()
 {
-  boost::shared_ptr<std::vector<int> > ret;
-  ret = boost::make_shared<std::vector<int> >();
+  boost::shared_ptr<std::vector<ModelFeatureId> > ret;
+  ret = boost::make_shared<std::vector<ModelFeatureId> >();
   ret->assign(MF_AVAILABLE, ARRAY_END(MF_AVAILABLE));
   return ret;
 }
