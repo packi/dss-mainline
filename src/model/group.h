@@ -45,7 +45,7 @@ namespace dss {
     int m_ZoneID;
     int m_GroupID;
     ApplicationType m_ApplicationType;
-    int m_ApplicationConfiguration;
+    std::unique_ptr<Behavior> m_pApplicationBehavior;
     int m_LastCalledScene;
     int m_LastButOneCalledScene;
     bool m_IsValid;
@@ -79,9 +79,19 @@ namespace dss {
 
     int getColor() const;
 
-    /** Returns the configuration of this group */
-    int getApplicationConfiguration() const { return m_ApplicationConfiguration; }
-    void setApplicationConfiguration(const int applicationConfiguration);
+    /** Returns and sets the configuration of this group */
+    int getApplicationConfiguration() const { return m_pApplicationBehavior->getConfiguration(); }
+    void setApplicationConfiguration(const int applicationConfiguration) {
+      return m_pApplicationBehavior->setConfiguration(applicationConfiguration);
+    }
+
+    /** Translates the configuration back and forth between binary and JSON format */
+    void serializeApplicationConfiguration(int configuration, JSONWriter& writer) const {
+      return m_pApplicationBehavior->serializeConfiguration(configuration, writer);
+    }
+    int deserializeApplicationConfiguration(const std::string& jsonConfiguration) const {
+      return m_pApplicationBehavior->deserializeConfiguration(jsonConfiguration);
+    }
 
     /** returns true if the group is configured and usable */
     bool isValid() const;

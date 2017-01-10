@@ -49,7 +49,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
     m_ApplicationType(ApplicationType::None),
-    m_ApplicationConfiguration(0),
+    m_pApplicationBehavior(new DefaultBehavior()),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
@@ -70,6 +70,14 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
   void Group::setApplicationType(ApplicationType applicationType) {
     m_ApplicationType = applicationType;
+
+    if ((applicationType == ApplicationType::Ventilation) ||
+        (applicationType == ApplicationType::ApartmentVentilation)) {
+      m_pApplicationBehavior.reset(new VentilationBehavior());
+    } else {
+      m_pApplicationBehavior.reset(new DefaultBehavior());
+    }
+
     if (getZoneID() == 0) {
       return;
     }
@@ -95,10 +103,6 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
   int Group::getColor() const {
     return getApplicationTypeColor(m_ApplicationType);
-  }
-
-  void Group::setApplicationConfiguration(const int applicationConfiguration) {
-    m_ApplicationConfiguration = applicationConfiguration;
   }
 
   void Group::setFromSpec(const GroupSpec_t& spec) {
@@ -153,11 +157,11 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   } // getPowerConsumption
 
   void Group::nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    callScene(_origin, _category, SceneHelper::getNextScene(m_LastCalledScene),  "", false);
+    callScene(_origin, _category, m_pApplicationBehavior->getNextScene(m_LastCalledScene),  "", false);
   } // nextScene
 
   void Group::previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    callScene(_origin, _category, SceneHelper::getPreviousScene(m_LastCalledScene), "", false);
+    callScene(_origin, _category, m_pApplicationBehavior->getPreviousScene(m_LastCalledScene), "", false);
   } // previousScene
 
   void Group::setSceneName(int _sceneNumber, const std::string& _name) {

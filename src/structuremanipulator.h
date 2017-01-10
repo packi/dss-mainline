@@ -24,6 +24,8 @@
 #define STRUCTUREMANIPULATOR_H_
 
 #include <boost/shared_ptr.hpp>
+
+#include "model/behavior.h"
 #include "src/businterface.h"
 #include "src/model/devicereference.h"
 

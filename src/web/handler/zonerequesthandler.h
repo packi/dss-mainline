@@ -59,7 +59,6 @@ namespace dss {
     std::string clearSensorSource(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getAssignedSensors(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getSensorValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
-
   }; // ZoneRequestHandler
 
 }
