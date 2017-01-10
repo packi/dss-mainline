@@ -90,7 +90,9 @@ BOOST_FIXTURE_TEST_CASE(testBindArgs, DSSInstanceFixture) {
 
   {
     // if bindScope isn't held, behavior is same as without binding
-    /* auto bindScope = */ find_by_key.bind(11);
+    {
+      auto bindScope = find_by_key.bind(11);
+    }
     BOOST_CHECK(find_by_key.step() == SqlStatement::StepResult::DONE);
     find_by_key.reset();
   }
