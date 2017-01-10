@@ -700,7 +700,9 @@ namespace dss {
 
   EventInterpreterPluginSendmail::EventInterpreterPluginSendmail(EventInterpreter* _pInterpreter)
   : EventInterpreterPlugin(EventName::SendMail, _pInterpreter)
+#ifdef HAVE_SENDMAIL
   , m_thread(0)
+#endif
   {
     if (DSS::hasInstance()) {
       m_mailq_dir = DSS::getInstance()->getDataDirectory() + "/mail/";
@@ -869,6 +871,7 @@ namespace dss {
 #endif
   } // handleEvent
 
+#ifdef HAVE_SENDMAIL
   void* EventInterpreterPluginSendmail::run(void* arg) {
     EventInterpreterPluginSendmail* me = static_cast<EventInterpreterPluginSendmail *> (arg);
 
@@ -925,6 +928,7 @@ namespace dss {
     }
     return NULL;
   } // run
+#endif
 
   EventInterpreterPluginExecutionDeniedDigest::EventInterpreterPluginExecutionDeniedDigest(EventInterpreter* _pInterpreter)
         : EventInterpreterPlugin("execution_denied_digest", _pInterpreter) {

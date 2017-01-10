@@ -117,10 +117,12 @@ namespace dss {
 
   class EventInterpreterPluginSendmail : public EventInterpreterPlugin {
    private:
+#ifdef HAVE_SENDMAIL
      static void* run(void* arg);
      pthread_t m_thread;
      pthread_mutex_t m_Mutex;
      pthread_cond_t m_Condition;
+#endif
      std::deque<std::string> m_MailFiles;
      std::string m_mailq_dir;
      static bool m_active;
