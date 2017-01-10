@@ -93,29 +93,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   } // getID
 
   int Group::getColor() const {
-    switch (m_ApplicationType) {
-      case ApplicationType::Lights:
-        return ColorIDYellow;
-      case ApplicationType::Blinds:
-        return ColorIDGray;
-      case ApplicationType::Heating:
-      case ApplicationType::Cooling:
-      case ApplicationType::Ventilation:
-      case ApplicationType::Window:
-      case ApplicationType::Temperature:
-      case ApplicationType::ApartmentVentilation:
-        return ColorIDBlue;
-      case ApplicationType::Audio:
-        return ColorIDCyan;
-      case ApplicationType::Video:
-        return ColorIDViolet;
-      default:
-        if (m_GroupID <= ColorIDBlack) {
-          return m_GroupID;
-        } else {
-          return 0;
-        }
-    }
+    return getApplicationTypeColor(m_ApplicationType);
   }
 
   void Group::setApplicationConfiguration(const int applicationConfiguration) {

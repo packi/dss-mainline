@@ -363,4 +363,28 @@ namespace dss {
 
   std::ostream& operator<<(std::ostream& stream, ApplicationType x) { return stream << applicationTypeToString(x); }
 
+  int getApplicationTypeColor(ApplicationType x) {
+    switch (x) {
+      case ApplicationType::Lights:
+        return ColorIDYellow;
+      case ApplicationType::Blinds:
+        return ColorIDGray;
+      case ApplicationType::Heating:
+      case ApplicationType::Cooling:
+      case ApplicationType::Ventilation:
+      case ApplicationType::Window:
+      case ApplicationType::Temperature:
+      case ApplicationType::ApartmentVentilation:
+        return ColorIDBlue;
+      case ApplicationType::Audio:
+        return ColorIDCyan;
+      case ApplicationType::Video:
+        return ColorIDViolet;
+      case ApplicationType::None:
+      case ApplicationType::Curtains:
+        return 0;
+    }
+    return 0;
+  }
+
 } // namespace dss
