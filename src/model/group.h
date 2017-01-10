@@ -80,16 +80,16 @@ namespace dss {
     int getColor() const;
 
     /** Returns and sets the configuration of this group */
-    int getApplicationConfiguration() const { return m_pApplicationBehavior->getConfiguration(); }
-    void setApplicationConfiguration(const int applicationConfiguration) {
+    uint32_t getApplicationConfiguration() const { return m_pApplicationBehavior->getConfiguration(); }
+    void setApplicationConfiguration(const uint32_t applicationConfiguration) {
       return m_pApplicationBehavior->setConfiguration(applicationConfiguration);
     }
 
     /** Translates the configuration back and forth between binary and JSON format */
-    void serializeApplicationConfiguration(int configuration, JSONWriter& writer) const {
+    void serializeApplicationConfiguration(uint32_t configuration, JSONWriter& writer) const {
       return m_pApplicationBehavior->serializeConfiguration(configuration, writer);
     }
-    int deserializeApplicationConfiguration(const std::string& jsonConfiguration) const {
+    uint32_t deserializeApplicationConfiguration(const std::string& jsonConfiguration) const {
       return m_pApplicationBehavior->deserializeConfiguration(jsonConfiguration);
     }
 

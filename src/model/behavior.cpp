@@ -46,11 +46,11 @@ DefaultBehavior::DefaultBehavior(int configuration) : Behavior(configuration) {}
 
 DefaultBehavior::~DefaultBehavior() {}
 
-void DefaultBehavior::serializeConfiguration(int configuration, JSONWriter& writer) const {
+void DefaultBehavior::serializeConfiguration(uint32_t configuration, JSONWriter& writer) const {
   // do nothing - leave empty JSON
 }
 
-int DefaultBehavior::deserializeConfiguration(const std::string& jsonConfiguration) const {
+uint32_t DefaultBehavior::deserializeConfiguration(const std::string& jsonConfiguration) const {
   Document d;
   d.Parse(jsonConfiguration.c_str());
 
@@ -59,7 +59,7 @@ int DefaultBehavior::deserializeConfiguration(const std::string& jsonConfigurati
     throw std::runtime_error("Error during Json parsing");
   }
 
-  return 0;
+  return 0u;
 }
 
 int DefaultBehavior::getNextScene(int currentScene) { return SceneHelper::getNextScene(currentScene); }
@@ -73,7 +73,7 @@ VentilationBehavior::VentilationBehavior(int configuration) : Behavior(configura
 
 VentilationBehavior::~VentilationBehavior() {}
 
-void VentilationBehavior::serializeConfiguration(int configuration, JSONWriter& writer) const {
+void VentilationBehavior::serializeConfiguration(uint32_t configuration, JSONWriter& writer) const {
   // mapping bit offsets to sceneId
   const std::vector<int> sceneIds = {SceneOff, Scene1, Scene2, Scene3, Scene4};
 
@@ -88,10 +88,10 @@ void VentilationBehavior::serializeConfiguration(int configuration, JSONWriter& 
   writer.endArray();
 }
 
-int VentilationBehavior::deserializeConfiguration(const std::string& jsonConfiguration) const {
+uint32_t VentilationBehavior::deserializeConfiguration(const std::string& jsonConfiguration) const {
   // mapping sceneId to bit offset
   const std::map<int, int> sceneIds = {{SceneOff, 0}, {Scene1, 1}, {Scene2, 2}, {Scene3, 3}, {Scene4, 4}};
-  int configuration = 0;
+  uint32_t configuration = 0u;
 
   Document d;
   d.Parse(jsonConfiguration.c_str());

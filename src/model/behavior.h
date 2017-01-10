@@ -29,17 +29,17 @@ namespace dss {
 
 class Behavior {
 private:
-  int m_configuration;
+  uint32_t m_configuration;
 
 public:
   Behavior(int configuration);
   virtual ~Behavior();
 
-  int getConfiguration() { return m_configuration; }
-  void setConfiguration(int configuration) { m_configuration = configuration; }
+  uint32_t getConfiguration() { return m_configuration; }
+  void setConfiguration(uint32_t configuration) { m_configuration = configuration; }
 
-  virtual void serializeConfiguration(int configuration, JSONWriter& writer) const = 0;
-  virtual int deserializeConfiguration(const std::string& jsonConfiguration) const = 0;
+  virtual void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const = 0;
+  virtual uint32_t deserializeConfiguration(const std::string& jsonConfiguration) const = 0;
 
   virtual int getNextScene(int currentScene) = 0;
   virtual int getPreviousScene(int currentScene) = 0;
@@ -51,8 +51,8 @@ public:
   DefaultBehavior(int configuration);
   ~DefaultBehavior();
 
-  void serializeConfiguration(int configuration, JSONWriter& writer) const DS_OVERRIDE;
-  int deserializeConfiguration(const std::string& jsonConfiguration) const DS_OVERRIDE;
+  void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const DS_OVERRIDE;
+  uint32_t deserializeConfiguration(const std::string& jsonConfiguration) const DS_OVERRIDE;
 
   int getNextScene(int currentScene) DS_OVERRIDE;
   int getPreviousScene(int currentScene) DS_OVERRIDE;
@@ -64,8 +64,8 @@ public:
   VentilationBehavior(int configuration);
   ~VentilationBehavior();
 
-  void serializeConfiguration(int configuration, JSONWriter& writer) const DS_OVERRIDE;
-  int deserializeConfiguration(const std::string& jsonConfiguration) const DS_OVERRIDE;
+  void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const DS_OVERRIDE;
+  uint32_t deserializeConfiguration(const std::string& jsonConfiguration) const DS_OVERRIDE;
 
   int getNextScene(int currentScene) DS_OVERRIDE;
   int getPreviousScene(int currentScene) DS_OVERRIDE;
