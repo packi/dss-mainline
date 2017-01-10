@@ -1101,7 +1101,7 @@ namespace dss {
         addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
       }
       addElementSimple(_ofs, _indent + 1, "color", intToString(static_cast<int>(_pGroup->getApplicationType())));
-      addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getApplicationConfiguration()));
+      addElementSimple(_ofs, _indent + 1, "configuration", uintToString(_pGroup->getApplicationConfiguration()));
       if (!_pGroup->getAssociatedSet().empty()) {
         addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
       }
@@ -1117,7 +1117,7 @@ namespace dss {
             addElementSimple(_ofs, _indent + 1, "name", _pGroup->getName());
           }
           addElementSimple(_ofs, _indent + 1, "color", intToString(static_cast<int>(_pGroup->getApplicationType())));
-          addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pGroup->getApplicationConfiguration()));
+          addElementSimple(_ofs, _indent + 1, "configuration", uintToString(_pGroup->getApplicationConfiguration()));
           if (!_pGroup->getAssociatedSet().empty()) {
             addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
           }
@@ -1155,7 +1155,7 @@ namespace dss {
     addElementSimple(_ofs, _indent + 1, "floor", intToString(_pCluster->getFloor()));
     addElementSimple(_ofs, _indent + 1, "configurationLocked", (_pCluster->isConfigurationLocked() ? "1" : "0"));
     addElementSimple(_ofs, _indent + 1, "automatic", (_pCluster->isAutomatic() ? "1" : "0"));
-    addElementSimple(_ofs, _indent + 1, "configuration", intToString(_pCluster->getApplicationConfiguration()));
+    addElementSimple(_ofs, _indent + 1, "configuration", uintToString(_pCluster->getApplicationConfiguration()));
     _ofs << doIndent(_indent + 1) << "<lockedScenes>" << std::endl;
     const std::vector<int> lockedScenes = _pCluster->getLockedScenes();
     for (unsigned int iScene = 0; iScene < lockedScenes.size(); iScene++) {

@@ -113,7 +113,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
   bool Group::isConfigEqual(const GroupSpec_t& spec) {
     return ((getName() == spec.Name) && (getApplicationType() == spec.applicationType) &&
-            (getApplicationConfiguration() == (int)spec.applicationConfiguration));
+            (getApplicationConfiguration() == spec.applicationConfiguration));
   }
 
   Set Group::getDevices() const {
@@ -276,7 +276,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
         m_pPropertyNode->createProperty("connectedDevices")
           ->linkToProxy(PropertyProxyReference<int>(m_connectedDevices, false));
         m_pPropertyNode->createProperty("configuration")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationConfiguration, &Group::setApplicationConfiguration));          
+          ->linkToProxy(PropertyProxyMemberFunction<Group, uint32_t>(*this, &Group::getApplicationConfiguration, &Group::setApplicationConfiguration));
       }
     }
   } // publishToPropertyTree
