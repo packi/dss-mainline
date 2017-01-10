@@ -4,6 +4,7 @@ EXTRA_DIST =
 CLEANFILES = build_info.h
 TESTS =
 noinst_LIBRARIES =
+noinst_PROGRAMS =
 BUILT_SOURCES = build_info.h
 
 build_info.h:
