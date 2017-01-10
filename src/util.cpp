@@ -70,6 +70,28 @@ namespace dss {
               ": " + e.what(), lsWarning);
         }
     }
+
+    std::vector<boost::shared_ptr<Group> > globalApps = _apartment->getGlobalApps();
+    foreach (boost::shared_ptr<Group> pGlobalApp, globalApps) {
+      if (!pGlobalApp->isSynchronized()) {
+        Logger::getInstance()->log(
+            "Forced configuration update in global application group " + intToString(pGlobalApp->getID()), lsInfo);
+
+        try {
+          _interface->createGroup(0, pGlobalApp->getID(), pGlobalApp->getApplicationType(),
+              pGlobalApp->getApplicationConfiguration(), pGlobalApp->getName());
+          _interface->groupSetApplication(
+              0, pGlobalApp->getID(), pGlobalApp->getApplicationType(), pGlobalApp->getApplicationConfiguration());
+
+          pGlobalApp->setIsSynchronized(true);
+        } catch (BusApiError& e) {
+          Logger::getInstance()->log(
+              "Error updating global application group " + intToString(pGlobalApp->getID()) + ": " + e.what(),
+              lsWarning);
+        }
+      }
+    }
+
     std::vector<boost::shared_ptr<Zone> > zones = _apartment->getZones();
     foreach(boost::shared_ptr<Zone> pZone, zones) {
       if (pZone->getID() == 0 || !pZone->isConnected()) {

@@ -43,7 +43,6 @@ namespace dss {
     m_ProtectionClass(wpc_none),
     m_Floor(0),
     m_ConfigurationLocked(false),
-    m_readFromDsm(false),
     m_automatic(false)
   {
   } // ctor
@@ -87,7 +86,15 @@ namespace dss {
     }
   } // publishToPropertyTree
 
-  bool Cluster::equalConfig(const ClusterSpec_t &cluster) {
+  void Cluster::setFromSpec(const ClusterSpec_t& spec) {
+    Group::setFromSpec(spec);
+    setLocation(static_cast<CardinalDirection_t>(spec.location));
+    setProtectionClass(static_cast<WindProtectionClass_t>(spec.protectionClass));
+    setConfigurationLocked(spec.configurationLocked);
+    setLockedScenes(spec.lockedScenes);
+  }
+
+  bool Cluster::isConfigEqual(const ClusterSpec_t &cluster) {
     if (m_LockedScenes.size() != cluster.lockedScenes.size()) {
       return false;
     }
@@ -96,14 +103,12 @@ namespace dss {
         return false;
       }
     }
-    return ((getApplicationType() == cluster.applicationType) &&
-            (getName() == cluster.Name) &&
+    return (Group::isConfigEqual(cluster) &&
             (m_Location == cluster.location) &&
             (m_ProtectionClass == cluster.protectionClass) &&
             (m_Floor == cluster.floor) &&
-            (m_ConfigurationLocked == cluster.configurationLocked) &&
-            (getApplicationConfiguration() == (int)cluster.applicationConfiguration));
-  } // equalConfig
+            (m_ConfigurationLocked == cluster.configurationLocked));
+  } // isConfigEqual
 
   void Cluster::reset() {
     setLocation(cd_none);
