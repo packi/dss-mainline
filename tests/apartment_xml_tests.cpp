@@ -187,11 +187,14 @@ BOOST_AUTO_TEST_CASE(testPersistCardinalDirection) {
   }
 
   {
+    DeviceSpec_t spec = {};
+    spec.FunctionID = 0x2131;
+    spec.ProductID = ProductID_KL_210;
+
     // create apartment xml
     Apartment apt1(NULL);
     boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-    dev1->setFunctionID(0x2131);
-    dev1->setProductID(ProductID_KL_210);
+    dev1->setPartialyFromSpec(spec);
     dev1->setCardinalDirection(cd_west);
     dev1->setWindProtectionClass(wpc_awning_class_2);
     dev1->setFloor(42);
@@ -239,17 +242,19 @@ BOOST_AUTO_TEST_CASE(testPersistVdcDevice) {
   }
 
   {
+    DeviceSpec_t spec = {};
+    spec.FunctionID = 0x2131;
+    spec.ProductID = ProductID_KL_210;
+
     // create apartment xml
     Apartment apt1(NULL);
     boost::shared_ptr<Device> dev1 = apt1.allocateDevice(dsuid1);
-    dev1->setFunctionID(0x2131);
-    dev1->setProductID(ProductID_KL_210);
+    dev1->setPartialyFromSpec(spec);
     dev1->setVdcDevice(true);
 
     // 2nd device without protecton calls, orientation
     boost::shared_ptr<Device> dev2 = apt1.allocateDevice(dsuid2);
-    dev2->setFunctionID(0x2133);
-    dev2->setProductID(ProductID_KL_210);
+    dev2->setPartialyFromSpec(spec);
     dev2->setVdcDevice(false);
 
     ModelPersistence persist1(apt1);

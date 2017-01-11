@@ -111,11 +111,13 @@ static const int MAX_CLUSTERS = GroupIDAppUserMax - GroupIDAppUserMin + 1;
 BOOST_AUTO_TEST_SUITE(clustertest)
 
   BOOST_AUTO_TEST_CASE(assignSingleDeviceDirection) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 0x2131;
+  spec.ProductID = ProductID_KL_200;
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setFunctionID(0x2131);
-  dev1->setProductID(ProductID_KL_200);
+  dev1->setPartialyFromSpec(spec);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
   std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
 
@@ -184,14 +186,15 @@ BOOST_AUTO_TEST_SUITE(clustertest)
 }
 
 BOOST_AUTO_TEST_CASE(assignDoubeDeviceDirection) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 0x2131;
+  spec.ProductID = ProductID_KL_210;
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setFunctionID(0x2131);
-  dev1->setProductID(ProductID_KL_210);
+  dev1->setPartialyFromSpec(spec);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
-  dev2->setFunctionID(0x2131);
-  dev2->setProductID(ProductID_KL_210);
+  dev2->setPartialyFromSpec(spec);
   std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
 
   // check no cluster is assigned
@@ -314,11 +317,14 @@ void makeClustersInconsistent(Apartment &_apartment, boost::shared_ptr<Device> &
 }
 
 BOOST_AUTO_TEST_CASE(consistencyCheckUnlocked) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 0x2131;
+  spec.ProductID = ProductID_KL_200;
+
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setFunctionID(0x2131);
-   dev1->setProductID(ProductID_KL_200);
+  dev1->setPartialyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setWindProtectionClass(wpc_blind_class_1);
@@ -376,11 +382,14 @@ BOOST_AUTO_TEST_CASE(consistencyCheckUnlocked) {
 }
 
 BOOST_AUTO_TEST_CASE(consistencyCheckLocked) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 0x2131;
+  spec.ProductID = ProductID_KL_200;
+
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setFunctionID(0x2131);
-  dev1->setProductID(ProductID_KL_200);
+  dev1->setPartialyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setWindProtectionClass(wpc_blind_class_1);
@@ -436,14 +445,15 @@ BOOST_AUTO_TEST_CASE(consistencyCheckLocked) {
 }
 
 BOOST_AUTO_TEST_CASE(joinCheckUnlocked) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 0x2131;
+  spec.ProductID = ProductID_KL_200;
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setFunctionID(0x2131);
-  dev1->setProductID(ProductID_KL_200);
+  dev1->setPartialyFromSpec(spec);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
-  dev2->setFunctionID(0x2131);
-  dev2->setProductID(ProductID_KL_200);
+  dev2->setPartialyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_north);
@@ -484,14 +494,16 @@ BOOST_AUTO_TEST_CASE(joinCheckUnlocked) {
 }
 
 BOOST_AUTO_TEST_CASE(joinCheckLocked) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 0x2131;
+  spec.ProductID = ProductID_KL_200;
+
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setFunctionID(0x2131);
-  dev1->setProductID(ProductID_KL_200);
+  dev1->setPartialyFromSpec(spec);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
-  dev2->setFunctionID(0x2131);
-  dev2->setProductID(ProductID_KL_200);
+  dev2->setPartialyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_north);
@@ -579,11 +591,14 @@ BOOST_AUTO_TEST_CASE(getClusterUnassigned) {
 }
 
 BOOST_AUTO_TEST_CASE(unassignmentCheck) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 0x2131;
+  spec.ProductID = ProductID_KL_200;
+
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setFunctionID(0x2131);
-  dev1->setProductID(ProductID_KL_200);
+  dev1->setPartialyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_none);

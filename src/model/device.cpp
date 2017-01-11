@@ -600,19 +600,25 @@ namespace dss {
            (m_LastCalledScene != SceneStandBy);
   } // isOn
 
+  void Device::setPartialyFromSpec(const DeviceSpec_t& spec) {
+    m_FunctionID = spec.FunctionID;
+    m_ProductID = spec.ProductID;
+    m_VendorID = spec.VendorID;
+    m_RevisionID = spec.revisionId;
+    m_IsLockedInDSM = spec.Locked;
+    m_OutputMode = spec.OutputMode;
+    m_ActiveGroup = spec.activeGroup;
+    m_DefaultGroup = spec.defaultGroup;
+
+    calculateHWInfo();
+    updateIconPath();
+    updateAKMNode();
+    publishValveTypeToPropertyTree();
+  }
+
   int Device::getFunctionID() const {
     return m_FunctionID;
   } // getFunctionID
-
-  void Device::setFunctionID(const int _value) {
-    m_FunctionID = _value;
-    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
-      calculateHWInfo();
-    }
-    updateIconPath();
-
-    publishValveTypeToPropertyTree();
-  } // setFunctionID
 
   int Device::getProductID() const {
     return m_ProductID;
@@ -625,14 +631,6 @@ namespace dss {
     }
 
   }
-  void Device::setProductID(const int _value) {
-    m_ProductID = _value;
-    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
-      calculateHWInfo();
-    }
-    updateIconPath();
-    updateAKMNode();
-    } // setProductID
 
   int Device::getRevisionID() const {
     if (isVdcDevice()) {
@@ -641,21 +639,9 @@ namespace dss {
     return m_RevisionID;
   } // getRevisionID
 
-  void Device::setRevisionID(const int _value) {
-    m_RevisionID = _value;
-  } // setRevisionID
-
   int Device::getVendorID() const {
     return m_VendorID;
   } // getVendrID
-
-  void Device::setVendorID(const int _value) {
-    m_VendorID = _value;
-    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
-      calculateHWInfo();
-    }
-    updateIconPath();
-  } // setVendorID
 
   void Device::fillSensorTable(std::vector<DeviceSensorSpec_t>& _slist) {
     DeviceSensorSpec_t sensorInputReserved1 = { SensorType::Reserved1, 0, 0, 0 };

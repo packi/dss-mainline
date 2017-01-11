@@ -109,7 +109,7 @@ namespace dss {
     uint8_t SensorConversionFlag;
   } DeviceSensorSpec_t;
 
-  typedef struct {
+  struct DeviceSpec_t {
     devid_t ShortAddress;
     uint16_t FunctionID;
     uint16_t ProductID;
@@ -136,7 +136,7 @@ namespace dss {
     bool outputChannelsValid;
     uint8_t activeGroup;
     uint8_t defaultGroup;
-  } DeviceSpec_t;
+  };
 
   typedef struct {
     uint32_t Hash;

@@ -389,17 +389,14 @@ namespace dss {
     dev->setShortAddress(_spec.ShortAddress);
     dev->setDSMeter(_dsMeter);
     dev->setZoneID(_zone->getID());
-    dev->setFunctionID(_spec.FunctionID);
-    dev->setProductID(_spec.ProductID);
-    dev->setVendorID(_spec.VendorID);
-    dev->setRevisionID(_spec.revisionId);
-    dev->setIsLockedInDSM(_spec.Locked);
-    dev->setOutputMode(_spec.OutputMode);
 
-    if (_dsMeter->getApiVersion() >= 0x303) {
-      dev->setActiveGroup(_spec.activeGroup);
-      dev->setDefaultGroup(_spec.defaultGroup);
+    if (_dsMeter->getApiVersion() < 0x303) {
+      _spec.activeGroup = 0;
+      _spec.defaultGroup = 0;
     }
+
+    dev->setPartialyFromSpec(_spec);
+    // TODO(someday): move more setters into setSpec
 
     dev->setButtonActiveGroup(_spec.buttonActiveGroup);
     dev->setButtonGroupMembership(_spec.buttonGroupMembership);
