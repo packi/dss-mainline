@@ -5,14 +5,14 @@
     // OE_CORE version
     #define DS_OVERRIDE
     #define DS_NULLPTR 0
-    #define DS_STATIC_ASSERT(...)
+    #define DS_STATIC_ASSERT(condition, message)
   #endif
 #endif
 #ifndef DS_OVERRIDE
     // C++11 capable version
     #define DS_OVERRIDE override
     #define DS_NULLPTR nullptr
-    #define DS_STATIC_ASSERT(condition, message) static_assert((condition), message)
+    #define DS_STATIC_ASSERT(condition, message) static_assert((condition), (message))
 #endif
 
 // define to `[[fallthrough]]` on c++17 complaint compilers
