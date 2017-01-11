@@ -12,7 +12,7 @@
     // C++11 capable version
     #define DS_OVERRIDE override
     #define DS_NULLPTR nullptr
-    #define DS_STATIC_ASSERT(...) static_assert(##__VA_ARGS__)
+    #define DS_STATIC_ASSERT(condition, message) static_assert((condition), message)
 #endif
 
 // define to `[[fallthrough]]` on c++17 complaint compilers

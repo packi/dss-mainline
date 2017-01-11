@@ -28,6 +28,7 @@
 
 #include <stdexcept>
 #include <boost/ref.hpp>
+#include <ds/str.h>
 
 #include "src/foreach.h"
 #include "src/businterface.h"
@@ -489,8 +490,8 @@ namespace dss {
         throw DSSException("Group with id " + intToString(_groupNumber) + " only allowed in Zone 0");
       }
       try {
-        Logger::getInstance()->log("Configure user group " + intToString(_groupNumber) +
-            " with standard-id " + applicationTypeToString(applicationType), lsInfo);
+        Logger::getInstance()->log(ds::str("Configure user group ", _groupNumber,
+            " with standard-id ", applicationType), lsInfo);
         boost::shared_ptr<Cluster> pCluster = m_Apartment.getCluster(_groupNumber);
         pCluster->setName(_name);
         pCluster->setApplicationType(applicationType);

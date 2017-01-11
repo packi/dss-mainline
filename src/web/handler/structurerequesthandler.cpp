@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include "foreach.h"
 #include <digitalSTROM/dsuid.h>
+#include <ds/str.h>
 
 #include "src/businterface.h"
 #include "src/ds485types.h"
@@ -617,7 +618,7 @@ namespace dss {
     if (!(dev->isInGroup(static_cast<int>(gr->getApplicationType())) ||
           (dev->getDeviceType() == DEVICE_TYPE_AKM) ||
           (dev->getDeviceType() == DEVICE_TYPE_UMR))) {
-      return JSONWriter::failure("Devices does not match color of group (" + applicationTypeToString(gr->getApplicationType()) + ")");
+      return JSONWriter::failure(ds::str("Devices does not match applicationType of group (", gr->getApplicationType(), ")"));
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
