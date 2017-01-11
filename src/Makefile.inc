@@ -16,7 +16,8 @@ libds_a_LIB = \
         libds.a \
         $(BOOST_SYSTEM_LIB) \
         $(BOOST_THREAD_LIB) \
-        $(BOOST_CHRONO_LIB)
+        $(BOOST_CHRONO_LIB) \
+        -lpthread
 
 noinst_LIBRARIES += libds-catch-main.a
 libds_catch_main_a_SOURCES = \

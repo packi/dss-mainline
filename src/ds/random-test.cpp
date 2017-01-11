@@ -17,19 +17,54 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "random.h"
-#include "catch.hpp"
+#include <thread>
+#include <limits>
+#include <catch.hpp>
 
 namespace ds {
 
-TEST_CASE("dsRandintSmoke", "[dsRandint][dsRandom][ds]") {
-    CHECK(ds::randint(0,0) == 0);
-    CHECK(ds::randint(1,1) == 1);
-    CHECK(ds::randint(2,2) == 2);
-    for (int i = 0; i < 10; i++) {
-      auto x = ds::randint(7,10);
-      CHECK(x >= 7);
-      CHECK(x <= 10);
+static const char* TAGS = "[dsRandint][dsRandom][ds]";
+
+TEST_CASE("dsRandintOneValue", TAGS) {
+    CHECK(ds::randint(0, 0) == 0);
+    CHECK(ds::randint(1, 1) == 1);
+    CHECK(ds::randint(2, 2) == 2);
+    CHECK(ds::randint(0, 100) >= 0);
+    CHECK(ds::randint(0, 100) <= 100);
+    CHECK(ds::randint(1000, 2000) >= 1000);
+    CHECK(ds::randint(1000, 2000) <= 2000);
+}
+
+TEST_CASE("dsRandintBuckets", TAGS) {
+    auto min = 0;
+    auto max = 1000000;
+    std::vector<int> buckets(10, 0);
+    auto bucketsSize = buckets.size();
+    auto itemsPerBucket = 50;
+    for (int i = 0; i < bucketsSize * itemsPerBucket; i++) {
+        auto x = ds::randint(0, max);
+        ++buckets.at((x - min) * bucketsSize / (max - min));
+    }
+    for (int i = 0; i < bucketsSize; i++) {
+        CHECK(buckets.at(i) > itemsPerBucket / 4);
     }
 }
+
+TEST_CASE("dsRandintThreadRandomSeed", TAGS) {
+    auto firstValue = 0LL;
+    auto setFirstValueInNewThread = [&](){
+        std::thread thread([&](){
+            firstValue = ds::randint(std::numeric_limits<long long>::min(), std::numeric_limits<long long>::max());
+        });
+        thread.join();
+    };
+    setFirstValueInNewThread();
+    CHECK(firstValue != 0);
+    auto firstValue1 = firstValue;
+
+    setFirstValueInNewThread();
+    CHECK(firstValue != firstValue1);
+}
+
 
 } // namespace ds
