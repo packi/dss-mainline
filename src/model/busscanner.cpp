@@ -345,7 +345,7 @@ namespace dss {
         ", Active: " + intToString(_spec.ActiveState));
     log("InitializeDevice: Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
         ", Product-ID: " + unsignedLongIntToHexString(_spec.ProductID) +
-        ", Revision-ID: " + unsignedLongIntToHexString(_spec.Version) +
+        ", Revision-ID: " + unsignedLongIntToHexString(_spec.revisionId) +
         ", Vendor-ID: " + unsignedLongIntToHexString(_spec.VendorID)
         );
 
@@ -392,7 +392,7 @@ namespace dss {
     dev->setFunctionID(_spec.FunctionID);
     dev->setProductID(_spec.ProductID);
     dev->setVendorID(_spec.VendorID);
-    dev->setRevisionID(_spec.Version);
+    dev->setRevisionID(_spec.revisionId);
     dev->setIsLockedInDSM(_spec.Locked);
     dev->setOutputMode(_spec.OutputMode);
 

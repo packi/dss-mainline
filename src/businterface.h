@@ -114,7 +114,7 @@ namespace dss {
     uint16_t FunctionID;
     uint16_t ProductID;
     uint16_t VendorID;
-    uint16_t Version;
+    uint16_t revisionId;
     bool Locked;
     uint8_t ActiveState;
     uint8_t OutputMode;
