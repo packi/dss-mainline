@@ -18,11 +18,11 @@ libds_a_LIB = \
         $(BOOST_THREAD_LIB) \
         $(BOOST_CHRONO_LIB)
 
-noinst_LIBRARIES += libds-test.a
-libds_test_a_SOURCES = \
-        ../src/ds/test-main.cpp
-libds_test_a_LIB = \
-        libds-test.a
+noinst_LIBRARIES += libds-catch-main.a
+libds_catch_main_a_SOURCES = \
+        ../src/ds/catch-main.cpp
+libds_catch_main_a_LIB = \
+        libds-catch-main.a
 
 DS_TESTS += ds-tests
 ds_tests_SOURCES = \
@@ -30,7 +30,7 @@ ds_tests_SOURCES = \
         ../src/ds/str-test.cpp \
         ../src/ds/random-test.cpp
 ds_tests_LDADD = \
-        $(libds_test_a_LIB) \
+        $(libds_catch_main_a_LIB) \
         $(libds_a_LIB)
 
 check_PROGRAMS += $(DS_TESTS)
