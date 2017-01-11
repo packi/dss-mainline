@@ -24,18 +24,19 @@
 #include "scenehelper.h"
 #include <ds/str.h>
 #include <web/webrequests.h>
+#include <propertysystem.h>
 
 namespace dss {
 
 class Behavior {
-private:
+protected:
   uint32_t m_configuration;
-
+  PropertyNodePtr& m_pPropertyNode;
 public:
-  Behavior(int configuration);
+  Behavior(PropertyNodePtr& propertyNode, int configuration);
   virtual ~Behavior();
 
-  uint32_t getConfiguration() { return m_configuration; }
+  uint32_t getConfiguration() const { return m_configuration; }
   void setConfiguration(uint32_t configuration) { m_configuration = configuration; }
 
   virtual void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const = 0;
@@ -43,12 +44,15 @@ public:
 
   virtual int getNextScene(int currentScene) = 0;
   virtual int getPreviousScene(int currentScene) = 0;
+
+  virtual void publishToPropertyTree();
+  virtual void removeFromPropertyTree();
 };
 
 class DefaultBehavior : public Behavior {
 public:
-  DefaultBehavior();
-  DefaultBehavior(int configuration);
+  DefaultBehavior(PropertyNodePtr& propertyNode);
+  DefaultBehavior(PropertyNodePtr& propertyNode, int configuration);
   ~DefaultBehavior();
 
   void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const DS_OVERRIDE;
@@ -59,9 +63,15 @@ public:
 };
 
 class VentilationBehavior : public Behavior {
+private:
+  static const std::vector<int> offsetToSceneId;
+  static const std::map<int, int> sceneIdTooffset;
+
+  std::string getActiveBasicScenes() const;
+
 public:
-  VentilationBehavior();
-  VentilationBehavior(int configuration);
+  VentilationBehavior(PropertyNodePtr& propertyNode);
+  VentilationBehavior(PropertyNodePtr& propertyNode, int configuration);
   ~VentilationBehavior();
 
   void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const DS_OVERRIDE;
@@ -69,6 +79,9 @@ public:
 
   int getNextScene(int currentScene) DS_OVERRIDE;
   int getPreviousScene(int currentScene) DS_OVERRIDE;
+
+  void publishToPropertyTree() DS_OVERRIDE;
+  void removeFromPropertyTree() DS_OVERRIDE;
 };
 
 } /* namespace dss */
