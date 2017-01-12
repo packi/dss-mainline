@@ -33,6 +33,7 @@
 #include "src/comm-channel.h"
 #include "src/ds485types.h"
 #include "src/model/deviceinterface.h"
+#include "src/model/group.h"
 #include "src/model/modelconst.h"
 #include "src/model/scenehelper.h"
 #include "src/security/user.h"
@@ -149,6 +150,28 @@ std::string DeviceInterfaceRequestHandler::getConsumption(const RestfulRequest& 
   json.add("consumption", static_cast<unsigned long long>(interface->getPowerConsumption()));
   return json.successJSON();
 }
+std::string DeviceInterfaceRequestHandler::nextScene(const RestfulRequest& request, DeviceInterfacePtr& interface,
+    SceneAccessCategory sceneCategory, const std::string& sessionToken) {
+  auto groupPtr = boost::dynamic_pointer_cast<Group>(interface);
+  if ((groupPtr != NULL) && ((groupPtr->getApplicationType() == ApplicationType::Ventilation) ||
+                                (groupPtr->getApplicationType() == ApplicationType::ApartmentVentilation))) {
+    groupPtr->nextScene(coJSON, sceneCategory);
+    return JSONWriter::success();
+  } else {
+    return JSONWriter::failure("Operation allowed only on Ventilation groups.");
+  }
+}
+std::string DeviceInterfaceRequestHandler::previousScene(const RestfulRequest& request, DeviceInterfacePtr& interface,
+    SceneAccessCategory sceneCategory, const std::string& sessionToken) {
+  auto groupPtr = boost::dynamic_pointer_cast<Group>(interface);
+  if ((groupPtr != NULL) && ((groupPtr->getApplicationType() == ApplicationType::Ventilation) ||
+                                (groupPtr->getApplicationType() == ApplicationType::ApartmentVentilation))) {
+    groupPtr->previousScene(coJSON, sceneCategory);
+    return JSONWriter::success();
+  } else {
+    return JSONWriter::failure("Operation allowed only on Ventilation groups.");
+  }
+}
 std::string DeviceInterfaceRequestHandler::blink(const RestfulRequest& request, DeviceInterfacePtr& interface,
     SceneAccessCategory sceneCategory, const std::string& sessionToken) {
   interface->blink(coJSON, sceneCategory, sessionToken);
@@ -232,6 +255,10 @@ std::string DeviceInterfaceRequestHandler::handleDeviceInterfaceRequest(
     return undoScene(request, interface, sceneCategory, sessionToken);
   } else if (request.getMethod() == "getConsumption") {
     return getConsumption(request, interface, sceneCategory, sessionToken);
+  } else if (request.getMethod() == "nextScene") {
+    return nextScene(request, interface, sceneCategory, sessionToken);
+  } else if (request.getMethod() == "previousScene") {
+    return previousScene(request, interface, sceneCategory, sessionToken);
   } else if (request.getMethod() == "blink") {
     return blink(request, interface, sceneCategory, sessionToken);
   } else if (request.getMethod() == "increaseOutputChannelValue") {
@@ -252,6 +279,7 @@ bool DeviceInterfaceRequestHandler::isDeviceInterfaceCall(const RestfulRequest& 
          _request.getMethod() == "setValue" || _request.getMethod() == "callScene" ||
          _request.getMethod() == "callSceneMin" || _request.getMethod() == "saveScene" ||
          _request.getMethod() == "undoScene" || _request.getMethod() == "getConsumption" ||
+         _request.getMethod() == "nextScene" || _request.getMethod() == "previousScene" ||
          _request.getMethod() == "blink" || _request.getMethod() == "increaseOutputChannelValue" ||
          _request.getMethod() == "decreaseOutputChannelValue" || _request.getMethod() == "stopOutputChannelValue" ||
          _request.getMethod() == "pushSensorValue";
