@@ -33,6 +33,7 @@
 
 #include <digitalSTROM/dsuid.h>
 
+#include <ds/log.h>
 #include "src/businterface.h"
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
@@ -1147,8 +1148,10 @@ namespace dss {
         " dsm = " + (m_dsm ? dsuid2str(m_dsm->getDSID()) : "NULL") +
         ", dev = " + (m_device ? dsuid2str(m_device->getDSID()) : "NULL"), lsDebug);
 
+    DSS* dss = DS_NULLPTR;
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getSecurity().loginAsSystemUser("BinaryInputScanner needs system-rights");
+      dss = DSS::getInstance();
+      dss->getSecurity().loginAsSystemUser("BinaryInputScanner needs system-rights");
     }
 
     m_dsmApiHandle = DsmApiInitialize();
@@ -1159,6 +1162,9 @@ namespace dss {
     int result = DsmApiOpen(m_dsmApiHandle, m_busConnection.c_str(), 0);
     if (result < 0) {
       throw std::runtime_error(std::string("BinaryInputScanner: Unable to open connection to: ") + m_busConnection);
+    }
+    if (dss) {
+      dss->setDsmApiBlockingCallback(m_dsmApiHandle);
     }
 
     std::vector<boost::shared_ptr<Device> > devices;
