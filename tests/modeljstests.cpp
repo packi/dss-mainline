@@ -118,11 +118,15 @@ BOOST_AUTO_TEST_CASE(testBasics) {
 } // testBasics
 
 BOOST_AUTO_TEST_CASE(testSets) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 1;
+
   Apartment apt(NULL);
 
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsuid1);
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid2);
+  dev1->setPartiallyFromSpec(spec);
   dev1->setShortAddress(1);
   dev1->setDSMeter(meter);
   dev1->addToGroup(1);
@@ -130,8 +134,8 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev1->setIsConnected(true);
   dev1->setZoneID(1);
   dev1->setName("dev1");
-  dev1->setFunctionID(1);
   boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsuid3);
+  dev2->setPartiallyFromSpec(spec);
   dev2->setShortAddress(2);
   dev2->setDSMeter(meter);
   dev2->addToGroup(1);
@@ -139,7 +143,6 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev2->setIsConnected(true);
   dev2->setZoneID(2);
   dev2->setName("dev2");
-  dev2->setFunctionID(1);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();

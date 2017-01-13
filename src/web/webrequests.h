@@ -37,6 +37,7 @@
 #include "src/ds485types.h"
 #include "src/dss.h"
 #include "src/model/modelconst.h"
+#include "src/foreach.h"
 
 #include <external/civetweb/civetweb.h>
 
@@ -95,12 +96,8 @@ namespace dss {
     void add(std::string _name, unsigned long long int _value);
     void add(std::string _name, bool _value);
     void add(std::string _name, double _value);
-    void add(const std::string& name, SensorType x) { add(name, static_cast<int>(x)); }
-    void add(const std::string& name, BinaryInputType x) { add(name, static_cast<int>(x)); }
-    void add(const std::string& name, BinaryInputId x) { add(name, static_cast<int>(x)); }
-    void add(const std::string& name, GroupType x) { add(name, static_cast<int>(x)); }
     void add(std::string name, const dsuid_t &dsuid) { add(name, dsuid2str(dsuid)); }
-    void add(std::string _value);
+    void add(const std::string &value);
     void add(const char* _value);
     void add(int _value);
     void add(unsigned _value);
@@ -109,6 +106,23 @@ namespace dss {
     void add(bool _value);
     void add(double _value);
     void add(const dsuid_t &dsuid) { add(dsuid2str(dsuid)); }
+
+    // serialize all enums as ints
+    template <typename T, typename = typename std::enable_if<std::is_enum<T>::value>::type>
+    void add(T x) { add(static_cast<int>(x)); }
+    template <typename T, typename = typename std::enable_if<std::is_enum<T>::value>::type>
+    void add(const std::string& name, T x) { add(name); add(x); }
+
+    template <typename T>
+    void add(const std::string& name, const std::vector<T>& items) {
+      add(name);
+      startArray();
+      BOOST_FOREACH(auto&& item, items) {
+        add(item);
+      }
+      endArray();
+    }
+
     void addNull();
     void startArray(std::string _name);
     void startArray();
@@ -116,6 +130,7 @@ namespace dss {
     void startObject(std::string _name);
     void startObject();
     void endObject();
+
     std::string raw();
     static std::string success();
     static std::string success(std::string _message);

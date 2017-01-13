@@ -346,7 +346,7 @@ namespace dss {
         ", Active: " + intToString(_spec.ActiveState));
     log("InitializeDevice: Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
         ", Product-ID: " + unsignedLongIntToHexString(_spec.ProductID) +
-        ", Revision-ID: " + unsignedLongIntToHexString(_spec.Version) +
+        ", Revision-ID: " + unsignedLongIntToHexString(_spec.revisionId) +
         ", Vendor-ID: " + unsignedLongIntToHexString(_spec.VendorID)
         );
 
@@ -390,17 +390,14 @@ namespace dss {
     dev->setShortAddress(_spec.ShortAddress);
     dev->setDSMeter(_dsMeter);
     dev->setZoneID(_zone->getID());
-    dev->setFunctionID(_spec.FunctionID);
-    dev->setProductID(_spec.ProductID);
-    dev->setVendorID(_spec.VendorID);
-    dev->setRevisionID(_spec.Version);
-    dev->setIsLockedInDSM(_spec.Locked);
-    dev->setOutputMode(_spec.OutputMode);
 
-    if (_dsMeter->getApiVersion() >= 0x303) {
-      dev->setActiveGroup(_spec.activeGroup);
-      dev->setDefaultGroup(_spec.defaultGroup);
+    if (_dsMeter->getApiVersion() < 0x303) {
+      _spec.activeGroup = 0;
+      _spec.defaultGroup = 0;
     }
+
+    dev->setPartiallyFromSpec(_spec);
+    // TODO(someday): move more setters into setSpec
 
     dev->setButtonActiveGroup(_spec.buttonActiveGroup);
     dev->setButtonGroupMembership(_spec.buttonGroupMembership);

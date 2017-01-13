@@ -93,8 +93,8 @@ namespace dss {
     ret.deviceClass = rootReader["deviceClass"].getValueAsString();
     ret.deviceClassVersion = rootReader["deviceClassVersion"].getValueAsString();
 
-    ret.modelFeatures = boost::make_shared<std::vector<int> >();
-    std::vector<int>& features = *ret.modelFeatures;
+    ret.modelFeatures = boost::make_shared<std::vector<ModelFeatureId> >();
+    auto&& features = *ret.modelFeatures;
     VdcElementReader featuresReader = rootReader["modelFeatures"];
     for (VdcElementReader::iterator it = featuresReader.begin(); it != featuresReader.end(); it++) {
       VdcElementReader featureReader = *it;

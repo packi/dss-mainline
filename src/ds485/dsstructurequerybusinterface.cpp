@@ -497,7 +497,7 @@ namespace dss {
       uint8_t name[NAME_LEN];
       int ret = DeviceInfo_by_index(m_DSMApiHandle, _dsMeterID, _zoneID, iDevice,
           &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
-          &spec.Version, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
+          &spec.revisionId, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
           &spec.LTMode, groups, name, &spec.DSID, &spec.activeGroup, &spec.defaultGroup);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
@@ -533,7 +533,7 @@ namespace dss {
       uint8_t name[NAME_LEN];
       int ret = DeviceInfo_by_index_only_inactive(m_DSMApiHandle, _dsMeterID, _zoneID, iDevice,
           &spec.ShortAddress, &spec.VendorID, &spec.ProductID, &spec.FunctionID,
-          &spec.Version, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
+          &spec.revisionId, &spec.ZoneID, &spec.ActiveState, &locked, &spec.OutputMode,
           &spec.LTMode, groups, name, &spec.DSID, &spec.activeGroup, &spec.defaultGroup);
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
@@ -561,7 +561,7 @@ namespace dss {
     uint8_t name[NAME_LEN];
     int ret = DeviceInfo_by_device_id(m_DSMApiHandle, _dsMeterID, _id,
         &result.ShortAddress, &result.VendorID, &result.ProductID, &result.FunctionID,
-        &result.Version, &result.ZoneID, &result.ActiveState, &locked, &result.OutputMode,
+        &result.revisionId, &result.ZoneID, &result.ActiveState, &locked, &result.OutputMode,
         &result.LTMode, groups, name, &result.DSID, &result.activeGroup, &result.defaultGroup);
     DSBusInterface::checkResultCode(ret);
     if (_id != result.ShortAddress) {
