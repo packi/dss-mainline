@@ -72,7 +72,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_ApplicationType = applicationType;
 
     // remove potential entries from current object
-    m_pApplicationBehavior->removeFromPropertyTree();
+    m_pApplicationBehavior = NULL;
 
     if ((applicationType == ApplicationType::Ventilation) ||
         (applicationType == ApplicationType::ApartmentVentilation)) {
@@ -80,9 +80,6 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     } else {
       m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode));
     }
-
-    // add new entries connected to newly create object
-    m_pApplicationBehavior->publishToPropertyTree();
 
     if (getZoneID() == 0) {
       return;

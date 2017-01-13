@@ -37,9 +37,15 @@ using rapidjson::StringBuffer;
 using rapidjson::Writer;
 
 Behavior::Behavior(PropertyNodePtr& propertyNode, int configuration)
-    : m_configuration(configuration), m_pPropertyNode(propertyNode) {}
+    : m_configuration(configuration), m_pPropertyNode(propertyNode) {
+  // this function will publish only if the property tree node was already created.
+  // otherwise additional call to publishToPropertyTree() may be needed.
+  publishToPropertyTree();
+}
 
-Behavior::~Behavior() {}
+Behavior::~Behavior() {
+  removeFromPropertyTree();
+}
 
 void Behavior::publishToPropertyTree() {
   if (m_pPropertyNode != NULL) {
@@ -91,12 +97,18 @@ const std::map<int, int> VentilationBehavior::sceneIdTooffset = {
     {SceneOff, 0}, {Scene1, 1}, {Scene2, 2}, {Scene3, 3}, {Scene4, 4}};
 
 // By default the ventilation configuration activates all basic scenes (0 value is active)
-VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode) : Behavior(propertyNode, 0) {}
+VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode) : Behavior(propertyNode, 0) {
+  publishMyToPropertyTree();
+}
 
 VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode, int configuration)
-    : Behavior(propertyNode, configuration) {}
+    : Behavior(propertyNode, configuration) {
+  publishMyToPropertyTree();
+}
 
-VentilationBehavior::~VentilationBehavior() {}
+VentilationBehavior::~VentilationBehavior() {
+  removeMyFromPropertyTree();
+}
 
 void VentilationBehavior::serializeConfiguration(uint32_t configuration, JSONWriter& writer) const {
   writer.startArray("activeBasicScenes");
@@ -172,9 +184,7 @@ std::string VentilationBehavior::getActiveBasicScenes() const {
   return ret;
 }
 
-void VentilationBehavior::publishToPropertyTree() {
-  Behavior::publishToPropertyTree();
-
+void VentilationBehavior::publishMyToPropertyTree() {
   if (m_pPropertyNode != NULL) {
     m_pPropertyNode->createProperty("activeBasicScenes")
         ->linkToProxy(PropertyProxyMemberFunction<VentilationBehavior, std::string, false>(
@@ -182,14 +192,22 @@ void VentilationBehavior::publishToPropertyTree() {
   }
 }
 
-void VentilationBehavior::removeFromPropertyTree() {
+void VentilationBehavior::removeMyFromPropertyTree() {
   if (m_pPropertyNode != NULL) {
     auto&& childNode = m_pPropertyNode->getProperty("activeBasicScenes");
     if (childNode != NULL) {
       m_pPropertyNode->removeChild(childNode);
     }
   }
+}
 
+void VentilationBehavior::publishToPropertyTree() {
+  Behavior::publishToPropertyTree();
+  publishMyToPropertyTree();
+}
+
+void VentilationBehavior::removeFromPropertyTree() {
+  removeMyFromPropertyTree();
   Behavior::removeFromPropertyTree();
 }
 

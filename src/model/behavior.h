@@ -69,6 +69,8 @@ private:
 
   std::string getActiveBasicScenes() const;
 
+  void publishMyToPropertyTree();
+  void removeMyFromPropertyTree();
 public:
   VentilationBehavior(PropertyNodePtr& propertyNode);
   VentilationBehavior(PropertyNodePtr& propertyNode, int configuration);
