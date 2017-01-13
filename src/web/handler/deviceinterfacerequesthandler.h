@@ -61,6 +61,10 @@ private:
       const std::string& sessionToken);
   std::string getConsumption(const RestfulRequest& request, DeviceInterfacePtr& interface,
       SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string nextScene(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string previousScene(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
   std::string blink(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
       const std::string& sessionToken);
   std::string increaseOutputChannelValue(const RestfulRequest& request, DeviceInterfacePtr& interface,
