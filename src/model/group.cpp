@@ -72,7 +72,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_ApplicationType = applicationType;
 
     // remove potential entries from current object
-    m_pApplicationBehavior = NULL;
+    m_pApplicationBehavior.reset(NULL);
 
     if ((applicationType == ApplicationType::Ventilation) ||
         (applicationType == ApplicationType::ApartmentVentilation)) {

@@ -38,13 +38,14 @@ using rapidjson::Writer;
 
 Behavior::Behavior(PropertyNodePtr& propertyNode, int configuration)
     : m_configuration(configuration), m_pPropertyNode(propertyNode) {
-  // this function will publish only if the property tree node was already created.
+  // this virtual function will publish only if the property tree node was already created.
   // otherwise additional call to publishToPropertyTree() may be needed.
-  publishToPropertyTree();
+  Behavior::publishToPropertyTree();
 }
 
 Behavior::~Behavior() {
-  removeFromPropertyTree();
+  // this function is virtual
+  Behavior::removeFromPropertyTree();
 }
 
 void Behavior::publishToPropertyTree() {
