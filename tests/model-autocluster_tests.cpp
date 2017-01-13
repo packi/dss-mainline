@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_SUITE(clustertest)
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setPartialyFromSpec(spec);
+  dev1->setPartiallyFromSpec(spec);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
   std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
 
@@ -192,9 +192,9 @@ BOOST_AUTO_TEST_CASE(assignDoubeDeviceDirection) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setPartialyFromSpec(spec);
+  dev1->setPartiallyFromSpec(spec);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
-  dev2->setPartialyFromSpec(spec);
+  dev2->setPartiallyFromSpec(spec);
   std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
 
   // check no cluster is assigned
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE(consistencyCheckUnlocked) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setPartialyFromSpec(spec);
+  dev1->setPartiallyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setWindProtectionClass(wpc_blind_class_1);
@@ -389,7 +389,7 @@ BOOST_AUTO_TEST_CASE(consistencyCheckLocked) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setPartialyFromSpec(spec);
+  dev1->setPartiallyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setWindProtectionClass(wpc_blind_class_1);
@@ -451,9 +451,9 @@ BOOST_AUTO_TEST_CASE(joinCheckUnlocked) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setPartialyFromSpec(spec);
+  dev1->setPartiallyFromSpec(spec);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
-  dev2->setPartialyFromSpec(spec);
+  dev2->setPartiallyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_north);
@@ -501,9 +501,9 @@ BOOST_AUTO_TEST_CASE(joinCheckLocked) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setPartialyFromSpec(spec);
+  dev1->setPartiallyFromSpec(spec);
   boost::shared_ptr<Device> dev2 = apt1.allocateDevice(DSUID_BROADCAST);
-  dev2->setPartialyFromSpec(spec);
+  dev2->setPartiallyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_north);
@@ -598,7 +598,7 @@ BOOST_AUTO_TEST_CASE(unassignmentCheck) {
   Apartment apt1(NULL);
   InstanceHelper helper(&apt1);
   boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-  dev1->setPartialyFromSpec(spec);
+  dev1->setPartiallyFromSpec(spec);
 
   // Assign device to a cluster
   dev1->setCardinalDirection(cd_none);

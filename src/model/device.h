@@ -468,7 +468,7 @@ namespace dss {
     virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category);
 
-    void setPartialyFromSpec(const DeviceSpec_t& spec);
+    void setPartiallyFromSpec(const DeviceSpec_t& spec);
 
     /** Returns the function ID of the device.
      * A function ID specifies a certain subset of functionality that

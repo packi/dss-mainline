@@ -395,7 +395,7 @@ namespace dss {
       _spec.defaultGroup = 0;
     }
 
-    dev->setPartialyFromSpec(_spec);
+    dev->setPartiallyFromSpec(_spec);
     // TODO(someday): move more setters into setSpec
 
     dev->setButtonActiveGroup(_spec.buttonActiveGroup);

@@ -70,13 +70,13 @@ public:
     firstZone->addDevice(devRef);
     dev->setName(m_ValidName);
     dev->addToGroup(m_ValidGroupID);
-    dev->setPartialyFromSpec(spec);
+    dev->setPartiallyFromSpec(spec);
     boost::shared_ptr<Device> dev2 = m_pApartment->allocateDevice(dsuid_from_dsid(m_ValidDSID));
     DeviceReference devRef2(dev2, m_pApartment.get());
     firstZone->addDevice(devRef2);
     dev2->setName(m_ValidName);
     dev2->addToGroup(m_ValidGroupID);
-    dev2->setPartialyFromSpec(spec);
+    dev2->setPartiallyFromSpec(spec);
   }
 protected:
   boost::shared_ptr<Apartment> m_pApartment;

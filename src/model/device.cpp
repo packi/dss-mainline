@@ -600,7 +600,7 @@ namespace dss {
            (m_LastCalledScene != SceneStandBy);
   } // isOn
 
-  void Device::setPartialyFromSpec(const DeviceSpec_t& spec) {
+  void Device::setPartiallyFromSpec(const DeviceSpec_t& spec) {
     m_FunctionID = spec.FunctionID;
     m_ProductID = spec.ProductID;
     m_VendorID = spec.VendorID;

@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(testPersistCardinalDirection) {
     // create apartment xml
     Apartment apt1(NULL);
     boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-    dev1->setPartialyFromSpec(spec);
+    dev1->setPartiallyFromSpec(spec);
     dev1->setCardinalDirection(cd_west);
     dev1->setWindProtectionClass(wpc_awning_class_2);
     dev1->setFloor(42);
@@ -249,12 +249,12 @@ BOOST_AUTO_TEST_CASE(testPersistVdcDevice) {
     // create apartment xml
     Apartment apt1(NULL);
     boost::shared_ptr<Device> dev1 = apt1.allocateDevice(dsuid1);
-    dev1->setPartialyFromSpec(spec);
+    dev1->setPartiallyFromSpec(spec);
     dev1->setVdcDevice(true);
 
     // 2nd device without protecton calls, orientation
     boost::shared_ptr<Device> dev2 = apt1.allocateDevice(dsuid2);
-    dev2->setPartialyFromSpec(spec);
+    dev2->setPartiallyFromSpec(spec);
     dev2->setVdcDevice(false);
 
     ModelPersistence persist1(apt1);
