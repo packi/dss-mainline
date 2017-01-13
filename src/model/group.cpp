@@ -49,7 +49,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
     m_ApplicationType(ApplicationType::None),
-    m_pApplicationBehavior(new DefaultBehavior()),
+    m_pApplicationBehavior(new DefaultBehavior(m_pPropertyNode)),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
@@ -71,11 +71,14 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   void Group::setApplicationType(ApplicationType applicationType) {
     m_ApplicationType = applicationType;
 
+    // remove potential entries from current object
+    m_pApplicationBehavior.reset(NULL);
+
     if ((applicationType == ApplicationType::Ventilation) ||
         (applicationType == ApplicationType::ApartmentVentilation)) {
-      m_pApplicationBehavior.reset(new VentilationBehavior());
+      m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode));
     } else {
-      m_pApplicationBehavior.reset(new DefaultBehavior());
+      m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode));
     }
 
     if (getZoneID() == 0) {
@@ -275,8 +278,8 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
         m_pPropertyNode->createProperty("connectedDevices")
           ->linkToProxy(PropertyProxyReference<int>(m_connectedDevices, false));
-        m_pPropertyNode->createProperty("configuration")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, uint32_t>(*this, &Group::getApplicationConfiguration, &Group::setApplicationConfiguration));
+
+        m_pApplicationBehavior->publishToPropertyTree();
       }
     }
   } // publishToPropertyTree
