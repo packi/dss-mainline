@@ -132,13 +132,39 @@ uint32_t VentilationBehavior::deserializeConfiguration(const std::string& jsonCo
 }
 
 int VentilationBehavior::getNextScene(int currentScene) {
-  // TODO(soon): Add implementation of Ventilation specific state machine
-  return SceneHelper::getNextScene(currentScene);
+  auto activeScenes = getActiveBasicScenes();
+
+  if (activeScenes.size() == 0) {
+    // if no scenes are active we cannot find next scene
+    throw std::runtime_error("Could not find next active scene");
+  } else {
+    auto sceneIt = find(activeScenes.begin(), activeScenes.end(), currentScene);
+
+    // if we could not find current scene in allowed scenes, or this is already the biggest possible return it
+    if ((sceneIt == activeScenes.end()) || (currentScene == activeScenes.back())) {
+      return activeScenes.back();
+    } else {
+      return *(++sceneIt);
+    }
+  }
 }
 
 int VentilationBehavior::getPreviousScene(int currentScene) {
-  // TODO(soon): Add implementation of Ventilation specific state machine
-  return SceneHelper::getPreviousScene(currentScene);
+  auto activeScenes = getActiveBasicScenes();
+
+  if (activeScenes.size() == 0) {
+    // if no scenes are active we cannot find previous scene
+    throw std::runtime_error("Could not find previous active scene");
+  } else {
+    auto sceneIt = find(activeScenes.begin(), activeScenes.end(), currentScene);
+
+    // if we could not find current scene in allowed scenes, or this is already the lowest possible return it
+    if ((sceneIt == activeScenes.end()) || (currentScene == activeScenes.front())) {
+      return activeScenes.front();
+    } else {
+      return *(--sceneIt);
+    }
+  }
 }
 
 std::string VentilationBehavior::getPropertyActiveBasicScenes() const {
