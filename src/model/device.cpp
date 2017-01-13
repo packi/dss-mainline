@@ -610,7 +610,9 @@ namespace dss {
     m_ActiveGroup = spec.activeGroup;
     m_DefaultGroup = spec.defaultGroup;
 
-    calculateHWInfo();
+    if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
+      calculateHWInfo();
+    }
     updateIconPath();
     updateAKMNode();
     publishValveTypeToPropertyTree();
