@@ -95,7 +95,6 @@ namespace dss {
   class VdcElementReader;
   struct VdsdSpec_t;
   struct DeviceSpec_t;
-  enum class ModelFeatureId;
 
   typedef struct {
     bool dontcare;
