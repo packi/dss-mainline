@@ -87,7 +87,12 @@ namespace dss {
 
     /** Translates the configuration back and forth between binary and JSON format */
     void serializeApplicationConfiguration(uint32_t configuration, JSONWriter& writer) const {
-      return m_pApplicationBehavior->serializeConfiguration(configuration, writer);
+      m_pApplicationBehavior->serializeConfiguration(configuration, writer);
+    }
+    std::string serializeApplicationConfiguration(uint32_t configuration) const {
+      JSONWriter writer(JSONWriter::jsonNoneResult);
+      m_pApplicationBehavior->serializeConfiguration(configuration, writer);
+      return writer.successJSON();
     }
     uint32_t deserializeApplicationConfiguration(const std::string& jsonConfiguration) const {
       return m_pApplicationBehavior->deserializeConfiguration(jsonConfiguration);

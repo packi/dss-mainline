@@ -635,6 +635,67 @@ BOOST_AUTO_TEST_CASE(testConnectedDevice) {
   BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 0);
 } // testConnectedDevice
 
+BOOST_AUTO_TEST_CASE(testGroupConfiguration) {
+  Apartment apt(NULL);
+  InstanceHelper helper(&apt);
+  PropertySystem propSys;
+  apt.setPropertySystem(&propSys);
+
+  // create the AV group
+  if (apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation) == NULL) {
+    GroupSpec_t groupSpec = { 0 };
+    groupSpec.GroupID = GroupIDGlobalAppDsVentilation;
+    groupSpec.applicationType = ApplicationType::ApartmentVentilation;
+    groupSpec.applicationConfiguration = 0;
+
+    apt.getZone(0)->addGroup(Group::make(groupSpec, apt.getZone(0)));
+  }
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+
+  boost::scoped_ptr<ScriptContext> ctx(env->getContext());
+
+  std::string jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[0,5,17,18,19]}");
+  BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x00);
+
+  // try normal set on AV group
+  ctx->evaluate<void>("getZoneByID(0).setGroupConfiguration(64, \"{\\\"activeBasicScenes\\\":[5,17,18]}\")");
+
+  jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[5,17,18]}");
+  BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x11);
+
+  // try different overload
+  ctx->evaluate<void>("getZoneByID(0).setGroupConfiguration(64, 64, \"{\\\"activeBasicScenes\\\":[17,18,19]}\")");
+
+  jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[17,18,19]}");
+  BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x03);
+
+  // try to do not allowed actions
+  ctx->evaluate<void>("getZoneByID(0).setGroupConfiguration(10)");
+  ctx->evaluate<void>("getZoneByID(0).setGroupConfiguration(64,10,\"{}\")");
+
+  // check that the configuration did not change
+  jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[17,18,19]}");
+  BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x03);
+
+  // set default configuration again
+  ctx->evaluate<void>("getZoneByID(0).setGroupConfiguration(64)");
+
+  jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[0,5,17,18,19]}");
+  BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x00);
+
+
+
+} // testConnectedDevice
+
 BOOST_AUTO_TEST_CASE(testStateSensors) {
   Apartment apt(NULL);
   PropertySystem propSys;
