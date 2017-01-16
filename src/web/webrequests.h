@@ -117,7 +117,7 @@ namespace dss {
     void add(const std::string& name, const std::vector<T>& items) {
       add(name);
       startArray();
-      BOOST_FOREACH(auto&& item, items) {
+      foreach(auto&& item, items) {
         add(item);
       }
       endArray();
