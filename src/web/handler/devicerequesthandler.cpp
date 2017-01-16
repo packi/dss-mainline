@@ -469,7 +469,7 @@ namespace dss {
       pDevice->setDeviceButtonID(value);
 
       if (pDevice->is2WayMaster()) {
-        DeviceFeatures_t features = pDevice->getFeatures();
+        DeviceFeatures_t features = pDevice->getDeviceFeatures();
         if (!features.syncButtonID) {
           return JSONWriter::success();
         }
@@ -497,7 +497,7 @@ namespace dss {
       }
 
 
-      DeviceFeatures_t features = pDevice->getFeatures();
+      DeviceFeatures_t features = pDevice->getDeviceFeatures();
       if (features.pairing == false) {
         return JSONWriter::failure("This device does not support button pairing");
       }
@@ -664,7 +664,7 @@ namespace dss {
       pDevice->setDeviceButtonActiveGroup(value);
 
       if (pDevice->is2WayMaster()) {
-        DeviceFeatures_t features = pDevice->getFeatures();
+        DeviceFeatures_t features = pDevice->getDeviceFeatures();
         if (!features.syncButtonID) {
           return JSONWriter::success();
         }
@@ -690,7 +690,7 @@ namespace dss {
       std::string action = "none";
       pDevice->setDeviceOutputMode(value);
       if (pDevice->getDeviceType() == DEVICE_TYPE_UMR) {
-        DeviceFeatures_t features = pDevice->getFeatures();
+        DeviceFeatures_t features = pDevice->getDeviceFeatures();
         if (features.pairing == false) {
           json.add("action", action);
           DeviceReference dr(pDevice, &m_Apartment);
@@ -899,7 +899,7 @@ namespace dss {
         }
 
         if (angle != -1) {
-          DeviceFeatures_t features = pDevice->getFeatures();
+          DeviceFeatures_t features = pDevice->getDeviceFeatures();
           if (!features.hasOutputAngle) {
             return JSONWriter::failure("Device does not support output angle configuration");
           }
@@ -935,7 +935,7 @@ namespace dss {
       }
 
       json.add("value", pDevice->getSceneValue(id));
-      DeviceFeatures_t features = pDevice->getFeatures();
+      DeviceFeatures_t features = pDevice->getDeviceFeatures();
       if (features.hasOutputAngle) {
         json.add("angle", pDevice->getSceneAngle(id));
       }
@@ -1908,7 +1908,7 @@ namespace dss {
         return JSONWriter::failure("no device for given dsuid");
       }
 
-      DeviceFeatures_t features = device->getFeatures();
+      DeviceFeatures_t features = device->getDeviceFeatures();
       if (!features.posTimeMax) {
         return JSONWriter::failure("maximum motion time setting not supported by "
                             "this device");
@@ -1932,7 +1932,7 @@ namespace dss {
       }
 
       uint16_t value = 0;
-      DeviceFeatures_t features = device->getFeatures();
+      DeviceFeatures_t features = device->getDeviceFeatures();
       if (features.posTimeMax) {
         value = device->getDeviceMaxMotionTime();
       }

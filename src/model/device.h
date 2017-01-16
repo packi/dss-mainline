@@ -408,7 +408,7 @@ namespace dss {
     DeviceTypes_t getDeviceType() const;
     int getDeviceNumber() const;
     DeviceClasses_t getDeviceClass() const;
-    const DeviceFeatures_t getFeatures() const;
+    const DeviceFeatures_t getDeviceFeatures() const;
     std::string getAKMInputProperty() const;
     int multiDeviceIndex() const;
 

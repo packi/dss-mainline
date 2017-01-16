@@ -978,7 +978,7 @@ namespace dss {
   }
 
   int Device::getSceneAngle(const int _scene) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (features.hasOutputAngle) {
       return getDeviceConfig(CfgClassSceneAngle, _scene);
     } else {
@@ -987,7 +987,7 @@ namespace dss {
   }
 
   void Device::setSceneAngle(const int _scene, const int _angle) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.hasOutputAngle) {
       throw std::runtime_error("Device does not support output angle setting");
     }
@@ -1654,7 +1654,7 @@ namespace dss {
 
   bool Device::is2WayMaster() const {
 
-    if (!getFeatures().pairing) {
+    if (!getDeviceFeatures().pairing) {
       return false;
     }
 
@@ -1970,7 +1970,7 @@ namespace dss {
     }
   }
 
-  const DeviceFeatures_t Device::getFeatures() const {
+  const DeviceFeatures_t Device::getDeviceFeatures() const {
     DeviceFeatures_t features;
     features.pairing = false;
     features.syncButtonID = false;
@@ -2979,7 +2979,7 @@ namespace dss {
   }
 
   uint16_t Device::getDeviceMaxMotionTime() {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.posTimeMax) {
       throw std::runtime_error("Maximum motion time setting not supported"
                                "by this device");
@@ -2991,7 +2991,7 @@ namespace dss {
   }
 
   void Device::setDeviceMaxMotionTime(uint16_t seconds) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.posTimeMax) {
       throw std::runtime_error("Maximum motion time setting not supported"
                                "by this device");
