@@ -1123,8 +1123,6 @@ std::string ModelFeatures::getFeatureName(ModelFeatureId _feature)
       return "outconfigswitch";
     case ModelFeatureId::temperatureoffset:
       return "temperatureoffset";
-    default:
-      break;
   }
 
   throw std::runtime_error("unknown feature encountered");
