@@ -29,6 +29,7 @@
 
 #include "base.h"
 #include "exception.h"
+#include "model-features.h"
 
 namespace dss {
   double sensorValueToDouble(SensorType _sensorType, int _sensorValue) {
@@ -374,6 +375,16 @@ namespace dss {
         return 0;
     }
     return 0;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, ModelFeatureId x) {
+    return [&]()-> std::ostream& {
+      try {
+        return stream << ModelFeatures::getFeatureName(x);
+      } catch (std::exception &e) {
+        return stream << "unknown";
+      }
+    }() << '(' << static_cast<int>(x) << ')';
   }
 
 } // namespace dss
