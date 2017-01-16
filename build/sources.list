@@ -14,14 +14,6 @@ libdsscore_a_SOURCES =  \
 	../src/defaultbuseventsink.h \
 	../src/ds/asio/timer.cpp \
 	../src/ds/asio/timer.h \
-	../src/ds/common.cpp \
-	../src/ds/common.h \
-	../src/ds/log.h \
-	../src/ds/log.cpp \
-	../src/ds/random.h \
-	../src/ds/random.cpp \
-	../src/ds/str.cpp \
-	../src/ds/str.h \
 	../src/ds485/dsactionrequest.cpp \
 	../src/ds485/dsactionrequest.h \
 	../src/ds485/dsbusinterface.cpp \

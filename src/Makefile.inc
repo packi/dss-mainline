@@ -1,3 +1,44 @@
+DS_TESTS =
+noinst_LIBRARIES += libds.a
+libds_a_SOURCES = \
+        ../src/ds/common.cpp \
+        ../src/ds/common.h \
+        ../src/ds/log.cpp \
+        ../src/ds/log.h \
+        ../src/ds/random.cpp \
+        ../src/ds/random.h \
+        ../src/ds/str.cpp \
+        ../src/ds/str.h
+libds_a_CPPFLAGS = \
+        $(AM_CPPFLAGS) \
+        $(BOOST_CPPFLAGS)
+libds_a_LIB = \
+        libds.a \
+        $(BOOST_SYSTEM_LIB) \
+        $(BOOST_THREAD_LIB) \
+        $(BOOST_CHRONO_LIB) \
+        -lpthread
+
+noinst_LIBRARIES += libds-catch-main.a
+libds_catch_main_a_SOURCES = \
+        ../src/ds/catch-main.cpp
+libds_catch_main_a_LIB = \
+        libds-catch-main.a
+
+DS_TESTS += ds-tests
+ds_tests_SOURCES = \
+        ../src/ds/log-test.cpp \
+        ../src/ds/str-test.cpp \
+        ../src/ds/random-test.cpp
+ds_tests_LDADD = \
+        $(libds_catch_main_a_LIB) \
+        $(libds_a_LIB)
+
+check_PROGRAMS += $(DS_TESTS)
+TESTS += $(DS_TESTS)
+
+### dss
+
 bin_PROGRAMS += dss
 
 EXTRA_DIST +=	../src/messages/messaging.proto \
@@ -63,7 +104,8 @@ libdsscore_a_CXXFLAGS = \
 			$(BOOST_CPPFLAGS) \
 			$(LIBPROTOBUF_CFLAGS) \
 			$(LIBCOMMCHANNEL_CFLAGS) \
-			$(LIBDSUID_CFLAGS)
+			$(LIBDSUID_CFLAGS) \
+			$(libds_a_CPPFLAGS)
 
 dss_SOURCES = ../main.cpp
 
@@ -105,7 +147,8 @@ dss_LDADD = libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
 			$(BOOST_SYSTEM_LIB) \
 			$(BOOST_THREAD_LIB) \
 			$(BOOST_CHRONO_LIB) \
-			$(SQLITE3_LIBS)
+			$(SQLITE3_LIBS) \
+			$(libds_a_LIB)
 
 ../src/dss.cpp: build_info.h
 

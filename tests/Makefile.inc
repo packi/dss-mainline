@@ -22,6 +22,7 @@ dsstests_CXXFLAGS = \
 
 dsstests_LDADD = \
 			libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
+			$(libds_a_LIB) \
 			$(BOOST_LDFLAGS) \
 			$(BOOST_THREAD_LIBS) \
 			$(BOOST_SYSTEM_LIBS) \
