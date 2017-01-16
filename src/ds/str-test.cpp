@@ -19,7 +19,7 @@
 #include "str.h"
 #include "catch.hpp"
 
-namespace ds {
+static const char* TAGS = "[dsStr][ds]";
 
 namespace {
 enum class Enum { A, B };
@@ -31,7 +31,7 @@ std::ostream& operator<<(std::ostream& stream, Enum x) {
   }
 }
 
-TEST_CASE("dsStrSmoke", "[dsStr][ds]") {
+TEST_CASE("dsStr", TAGS) {
     CHECK(ds::str() == "");
     CHECK(ds::str("a") == "a");
     CHECK(ds::str("a", "b") == "ab");
@@ -39,5 +39,3 @@ TEST_CASE("dsStrSmoke", "[dsStr][ds]") {
     CHECK(ds::str("a", -4, "b") == "a-4b");
     CHECK(ds::str("-", Enum::A, Enum::B, "-") == "-ab-");
 }
-
-} // namespace ds
