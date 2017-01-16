@@ -39,15 +39,15 @@ TEST_CASE("dsRandomRandintBuckets", TAGS) {
     auto min = 0;
     auto max = 1000000;
     std::vector<int> buckets(10, 0);
-    auto bucketsSize = buckets.size();
+    size_t bucketsSize = buckets.size();
     auto itemsPerBucket = 50;
     // Split the random values range into buckets and
     // count the number of random values that fall into each bucket
-    for (int i = 0; i < bucketsSize * itemsPerBucket; i++) {
+    for (size_t i = 0; i < bucketsSize * itemsPerBucket; i++) {
         auto x = ds::randint(min, max);
         ++buckets.at((x - min) * bucketsSize / (max - min));
     }
-    for (int i = 0; i < bucketsSize; i++) {
+    for (size_t i = 0; i < bucketsSize; i++) {
         CHECK(buckets.at(i) > itemsPerBucket / 4);
     }
 }

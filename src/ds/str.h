@@ -32,7 +32,7 @@ std::string str(Args&&... args);
 
 namespace _private {
 
-inline void strRecursive(std::ostream& ostream) {}
+inline void strRecursive(std::ostream&) {}
 template <typename Arg, typename... Args>
 void strRecursive(std::ostream& ostream, Arg&& arg, Args&&... args) {
     ostream << std::forward<Arg>(arg);
