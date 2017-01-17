@@ -874,7 +874,7 @@ namespace dss {
 
   static JSPropertySpec prop_properties[] = {
     {"name", 0, 0, prop_JSGet, NULL},
-    {NULL}
+    {}
   };
 
   void PropertyScriptExtension::extendContext(ScriptContext& _context) {
