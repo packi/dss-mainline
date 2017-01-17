@@ -59,6 +59,10 @@ public:
     m_FunctionID = 6;
     m_ProductID = 9;
     m_RevisionID = 3;
+    DeviceSpec_t spec = {};
+    spec.FunctionID = m_FunctionID;
+    spec.ProductID = m_ProductID;
+    spec.revisionId = m_RevisionID;
 
     boost::shared_ptr<Zone> firstZone = m_pApartment->allocateZone(m_ValidZoneID);
     boost::shared_ptr<Device> dev = m_pApartment->allocateDevice(m_ValidDSUID);
@@ -66,17 +70,13 @@ public:
     firstZone->addDevice(devRef);
     dev->setName(m_ValidName);
     dev->addToGroup(m_ValidGroupID);
-    dev->setFunctionID(m_FunctionID);
-    dev->setProductID(m_ProductID);
-    dev->setRevisionID(m_RevisionID);
+    dev->setPartiallyFromSpec(spec);
     boost::shared_ptr<Device> dev2 = m_pApartment->allocateDevice(dsuid_from_dsid(m_ValidDSID));
     DeviceReference devRef2(dev2, m_pApartment.get());
     firstZone->addDevice(devRef2);
     dev2->setName(m_ValidName);
     dev2->addToGroup(m_ValidGroupID);
-    dev2->setFunctionID(m_FunctionID);
-    dev2->setProductID(m_ProductID);
-    dev2->setRevisionID(m_RevisionID);
+    dev2->setPartiallyFromSpec(spec);
   }
 protected:
   boost::shared_ptr<Apartment> m_pApartment;

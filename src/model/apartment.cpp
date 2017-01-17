@@ -58,8 +58,9 @@ namespace dss {
 
   //================================================== Apartment
 
-  Apartment::Apartment(DSS* _pDSS)
-  : m_pBusInterface(NULL),
+  Apartment::Apartment(DSS* dss)
+  : m_dss(dss),
+    m_pBusInterface(NULL),
     m_pModelMaintenance(NULL),
     m_pPropertySystem(NULL),
     m_pMetering(NULL)
@@ -88,62 +89,62 @@ namespace dss {
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDYellow, _zone));
     grp->setName("yellow");
-    grp->setApplicationType(GroupIDYellow);
+    grp->setApplicationType(ApplicationType::Lights);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDGray, _zone));
     grp->setName("gray");
-    grp->setApplicationType(GroupIDGray);
+    grp->setApplicationType(ApplicationType::Blinds);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDHeating, _zone));
     grp->setName("heating");
-    grp->setApplicationType(GroupIDHeating);
+    grp->setApplicationType(ApplicationType::Heating);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDCyan, _zone));
     grp->setName("cyan");
-    grp->setApplicationType(GroupIDCyan);
+    grp->setApplicationType(ApplicationType::Audio);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDViolet, _zone));
     grp->setName("magenta");
-    grp->setApplicationType(GroupIDViolet);
+    grp->setApplicationType(ApplicationType::Video);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDRed, _zone));
     grp->setName("reserved1");
-    grp->setApplicationType(0);
+    grp->setApplicationType(ApplicationType::None);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDGreen, _zone));
     grp->setName("reserved2");
-    grp->setApplicationType(0);
+    grp->setApplicationType(ApplicationType::None);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDBlack, _zone));
     grp->setName("black");
-    grp->setApplicationType(0);
+    grp->setApplicationType(ApplicationType::None);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDCooling, _zone));
     grp->setName("cooling");
-    grp->setApplicationType(GroupIDCooling);
+    grp->setApplicationType(ApplicationType::Cooling);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDVentilation, _zone));
     grp->setName("ventilation");
-    grp->setApplicationType(GroupIDVentilation);
+    grp->setApplicationType(ApplicationType::Ventilation);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDWindow, _zone));
     grp->setName("window");
-    grp->setApplicationType(GroupIDWindow);
+    grp->setApplicationType(ApplicationType::Window);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDControlTemperature, _zone));
     grp->setName("controltemperature");
-    grp->setApplicationType(GroupIDControlTemperature);
+    grp->setApplicationType(ApplicationType::Temperature);
     grp->setIsValid(true);
     _zone->addGroup(grp);
   } // addDefaultGroupsToZone
@@ -188,15 +189,22 @@ namespace dss {
     throw ItemNotFoundException(_zoneName);
   } // getZone(name)
 
-  boost::shared_ptr<Zone> Apartment::getZone(const int _id) {
+  boost::weak_ptr<Zone> Apartment::tryGetZone(const int id) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    foreach(boost::shared_ptr<Zone> zone, m_Zones) {
-      if(zone->getID() == _id) {
+    foreach (auto&& zone, m_Zones) {
+      if(zone->getID() == id) {
         return zone;
       }
     }
-    throw ItemNotFoundException(intToString(_id));
-  } // getZone(id)
+    return boost::weak_ptr<Zone>();
+  }
+
+  boost::shared_ptr<Zone> Apartment::getZone(const int id) {
+    if (auto&& zone = tryGetZone(id).lock()) {
+      return zone;
+    }
+    throw ItemNotFoundException(intToString(id));
+  }
 
   std::vector<boost::shared_ptr<Zone> > Apartment::getZones() {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
@@ -270,7 +278,7 @@ namespace dss {
   boost::shared_ptr<Cluster> Apartment::getEmptyCluster() {
     // find a group slot with unassigned state machine id
     foreach (boost::shared_ptr<Cluster> pCluster, getClusters()) {
-      if (pCluster->getApplicationType() == 0) {
+      if (pCluster->getApplicationType() == ApplicationType::None) {
         return pCluster;
       }
     }
@@ -347,6 +355,14 @@ namespace dss {
           boost::shared_ptr<Cluster> pCluster = boost::make_shared<Cluster>(i, boost::ref<Apartment>(*this));
           result->addGroup(pCluster);
         }
+
+        // pre-create apartment ventilation group
+        boost::shared_ptr<Group> group;
+        group.reset(new Group(GroupIDGlobalAppDsVentilation, result));
+        group->setName("apartmentVentilation");
+        group->setApplicationType(ApplicationType::ApartmentVentilation);
+        group->setIsValid(true);  // TODO(soon): this may not be needed for AV (maybe it is only valid when devices are present)
+        result->addGroup(group);
       }
     } else {
       result->publishToPropertyTree();

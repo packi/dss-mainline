@@ -14,12 +14,6 @@ libdsscore_a_SOURCES =  \
 	../src/defaultbuseventsink.h \
 	../src/ds/asio/timer.cpp \
 	../src/ds/asio/timer.h \
-	../src/ds/common.cpp \
-	../src/ds/common.h \
-	../src/ds/log.h \
-	../src/ds/log.cpp \
-	../src/ds/string.cpp \
-	../src/ds/string.h \
 	../src/ds485/dsactionrequest.cpp \
 	../src/ds485/dsactionrequest.h \
 	../src/ds485/dsbusinterface.cpp \
@@ -83,15 +77,17 @@ libdsscore_a_SOURCES =  \
 	../src/model/apartment.h \
 	../src/model/autoclustermaintenance.cpp \
 	../src/model/autoclustermaintenance.h \
+	../src/model/behavior.cpp \
+	../src/model/behavior.h \
 	../src/model/busscanner.cpp \
 	../src/model/busscanner.h \
 	../src/model/cluster.cpp \
 	../src/model/cluster.h \
-	../src/model/composed-group-state.h \
-	../src/model/composed-group-state.cpp \
+	../src/model/status-bit.cpp \
+	../src/model/status-bit.h \
+	../src/model/status.h \
+	../src/model/status.cpp \
 	../src/model/data_types.cpp \
-	../src/model/data_types.cpp \
-	../src/model/data_types.h \
 	../src/model/data_types.h \
 	../src/model/device.cpp \
 	../src/model/device.h \

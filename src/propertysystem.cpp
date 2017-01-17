@@ -1468,6 +1468,7 @@ namespace dss {
   //==================================================== Default property values
 
   template <> const int PropertyProxy<int>::DefaultValue = 0;
+  template <> const unsigned int PropertyProxy<unsigned int>::DefaultValue = 0u;
   template <> const bool PropertyProxy<bool>::DefaultValue = false;
   template <> const std::string PropertyProxy<std::string>::DefaultValue = std::string();
   template <> const double PropertyProxy<double>::DefaultValue = 0.0;

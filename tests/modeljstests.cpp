@@ -118,11 +118,15 @@ BOOST_AUTO_TEST_CASE(testBasics) {
 } // testBasics
 
 BOOST_AUTO_TEST_CASE(testSets) {
+  DeviceSpec_t spec = {};
+  spec.FunctionID = 1;
+
   Apartment apt(NULL);
 
   boost::shared_ptr<DSMeter> meter = apt.allocateDSMeter(dsuid1);
 
   boost::shared_ptr<Device> dev1 = apt.allocateDevice(dsuid2);
+  dev1->setPartiallyFromSpec(spec);
   dev1->setShortAddress(1);
   dev1->setDSMeter(meter);
   dev1->addToGroup(1);
@@ -130,8 +134,8 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev1->setIsConnected(true);
   dev1->setZoneID(1);
   dev1->setName("dev1");
-  dev1->setFunctionID(1);
   boost::shared_ptr<Device> dev2 = apt.allocateDevice(dsuid3);
+  dev2->setPartiallyFromSpec(spec);
   dev2->setShortAddress(2);
   dev2->setDSMeter(meter);
   dev2->addToGroup(1);
@@ -139,7 +143,6 @@ BOOST_AUTO_TEST_CASE(testSets) {
   dev2->setIsConnected(true);
   dev2->setZoneID(2);
   dev2->setName("dev2");
-  dev2->setFunctionID(1);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -684,7 +687,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
   // create 2 clusters
   boost::shared_ptr<Cluster> cluster1 = apt.getCluster(16);
   cluster1->setLocation(cd_north);
-  cluster1->setApplicationType(3);
+  cluster1->setApplicationType(ApplicationType::Heating);
   cluster1->setProtectionClass(wpc_awning_class_2);
   cluster1->setFloor(2);
   cluster1->setConfigurationLocked(true);
@@ -694,7 +697,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
 
   boost::shared_ptr<Cluster> cluster2 = apt.getCluster(38);
   cluster2->setLocation(cd_south);
-  cluster2->setApplicationType(4);
+  cluster2->setApplicationType(ApplicationType::Audio);
   cluster2->setProtectionClass(wpc_awning_class_1);
   cluster2->setFloor(1);
   cluster2->setConfigurationLocked(false);
@@ -743,7 +746,8 @@ BOOST_AUTO_TEST_CASE(testCluster) {
     BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("id"), cluster->getID());
     std::string name(ctx->getRootObject().getProperty<std::string>("name"));
     BOOST_CHECK_EQUAL(name.compare(cluster->getName()), 0);
-    BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("standardGroup"),      cluster->getApplicationType());
+    BOOST_CHECK_EQUAL(static_cast<ApplicationType>(ctx->getRootObject().getProperty<int>("standardGroup")),
+        cluster->getApplicationType());
     BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("location"),           cluster->getLocation());
     BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("protectionClass"),    cluster->getProtectionClass());
     BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("floor"),              cluster->getFloor());

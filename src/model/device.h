@@ -94,6 +94,7 @@ namespace dss {
   class DSMeter;
   class VdcElementReader;
   struct VdsdSpec_t;
+  struct DeviceSpec_t;
 
   typedef struct {
     bool dontcare;
@@ -172,16 +173,15 @@ namespace dss {
     void setInputId(BinaryInputId inputId);
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
+
+    void updateStatusBitHandle();
   private:
     __DECL_LOG_CHANNEL__;
     Device& m_device;
     std::string m_name;
     boost::shared_ptr<State> m_state;
-    class GroupStateHandle;
-    friend class GroupStateHandle;
-    std::unique_ptr<GroupStateHandle> m_groupState;
-
-    void updateGroupState();
+    class StatusBitHandle;
+    std::unique_ptr<StatusBitHandle> m_statusBitHandle;
   };
 
   typedef struct {
@@ -319,7 +319,7 @@ namespace dss {
     std::string m_VdcHardwareInfo;
     std::string m_VdcHardwareVersion;
     std::string m_VdcIconPath;
-    boost::shared_ptr<std::vector<int> > m_VdcModelFeatures;
+    boost::shared_ptr<std::vector<ModelFeatureId> > m_VdcModelFeatures;
     bool m_hasActions;
 
     DeviceValveType_t m_ValveType;
@@ -467,34 +467,28 @@ namespace dss {
     virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category);
     virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category);
 
+    void setPartiallyFromSpec(const DeviceSpec_t& spec);
+
     /** Returns the function ID of the device.
      * A function ID specifies a certain subset of functionality that
      * a device implements.
      */
     int getFunctionID() const;
-    /** Sets the functionID to \a _value */
-    void setFunctionID(const int _value);
 
     /** Returns the Product ID of the device.
      * The Product ID identifies the manufacturer and type of device.
      */
     int getProductID() const;
-    /** Sets the ProductID to \a _value */
-    void setProductID(const int _value);
 
     /** Returns the Revision ID of the device.
      * The revision identifies the device hardware revision.
      */
     int getRevisionID() const;
-    /** Sets the ProductID to \a _value */
-    void setRevisionID(const int _value);
 
     /** Returns the Vendor ID of the device.
      * The ID identifies the device hardware vendor.
      */
     int getVendorID() const;
-    /** Sets the VendorID to \a _value */
-    void setVendorID(const int _value);
 
     /** Returns the name of the device. */
     const std::string& getName() const;
@@ -532,6 +526,8 @@ namespace dss {
     int getJokerGroup() const;
     /** Returns the zoneID that this device group is in. */
     int getGroupZoneID(int groupID) const;
+    /// Returns zone local group or global group
+    boost::weak_ptr<Group> tryGetGroup(int groupId) const;
 
     /** Removes the device from all group.
      * The device will remain in the broadcastgroup though.
@@ -618,7 +614,6 @@ namespace dss {
     /** Device level active and default group used for Global Applications. */
     void setActiveGroup(const int _value) { m_ActiveGroup = _value; }
     int getActiveGroup() const { return m_ActiveGroup; }
-    void setDefaultGroup(const int _value) { m_DefaultGroup = _value; }
     int getDefaultGroup() const { return m_DefaultGroup; }
 
     void setButtonSetsLocalPriority(const bool _value) { m_ButtonSetsLocalPriority = _value; }
@@ -731,8 +726,8 @@ namespace dss {
       m_VdcIconPath = _value; updateIconPath();
     }
     const std::string& getVdcIconPath() const { return m_VdcIconPath; }
-    void setVdcModelFeatures(const boost::shared_ptr<std::vector<int> >& _value) { m_VdcModelFeatures = _value; }
-    const boost::shared_ptr<std::vector<int> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }
+    void setVdcModelFeatures(const boost::shared_ptr<std::vector<ModelFeatureId> >& _value) { m_VdcModelFeatures = _value; }
+    const boost::shared_ptr<std::vector<ModelFeatureId> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }
 
     void setHasActions(bool x) { m_hasActions = x; }
     bool getHasActions() const { return m_hasActions; }

@@ -50,6 +50,7 @@ namespace dss {
   class DSBusInterface : public ThreadedSubsystem,
                          public BusInterface {
   private:
+    DSS* m_dss;
     boost::shared_ptr<DSActionRequest> m_pActionRequestInterface;
     boost::shared_ptr<DSDeviceBusInterface> m_pDeviceBusInterface;
     boost::shared_ptr<DSMeteringBusInterface> m_pMeteringBusInterface;

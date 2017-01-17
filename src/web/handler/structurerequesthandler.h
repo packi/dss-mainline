@@ -60,6 +60,8 @@ namespace dss {
     std::string groupRemoveDevice(const RestfulRequest& _request);
     std::string groupSetName(const RestfulRequest& _request);
     std::string groupSetColor(const RestfulRequest& _request);
+    std::string groupGetConfiguration(const RestfulRequest& _request);
+    std::string groupSetConfiguration(const RestfulRequest& _request);
     std::string clusterSetColor(const RestfulRequest& _request);
     std::string clusterSetName(const RestfulRequest& _request);
     std::string clusterSetConfigLock(const RestfulRequest& _request);

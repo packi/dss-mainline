@@ -171,12 +171,16 @@ namespace dss {
     return getVdcProperty(_meter, _meter, query);
   }
 
-  void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name) {
+  void DSStructureModifyingBusInterface::createGroup(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _stateMachineID);
+    int ret = ZoneGroupModify_add(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, static_cast<int>(applicationType));
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    ret = ZoneGroupProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, static_cast<int>(applicationType), applicationConfig);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
 
@@ -186,7 +190,7 @@ namespace dss {
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // createGroup
 
-  void DSStructureModifyingBusInterface::createCluster(uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name) {
+  void DSStructureModifyingBusInterface::createCluster(uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig, const std::string& _name) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
@@ -196,7 +200,12 @@ namespace dss {
     //DSBusInterface::checkBroadcastResultCode(ret);
     //usleep(BROADCAST_SLEEP_MICROSECONDS);
 
-    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, _stateMachineID);
+    // TODO(someday): We will be able to remove this call when new DSM is available
+    int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _groupID, static_cast<int>(applicationType));
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
+
+    ret = ClusterProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _groupID, static_cast<int>(applicationType), applicationConfig);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
 
@@ -217,7 +226,12 @@ namespace dss {
     //DSBusInterface::checkBroadcastResultCode(ret);
     //usleep(BROADCAST_SLEEP_MICROSECONDS);
 
+    // TODO(someday): We will be able to remove this call when new DSM is available
     int ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0);
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
+
+    ret = ClusterProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, 0, 0);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
 
@@ -231,13 +245,19 @@ namespace dss {
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   } // removeCluster
 
-  void DSStructureModifyingBusInterface::groupSetStateMachine(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID) {
+  void DSStructureModifyingBusInterface::groupSetApplication(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     int ret;
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, _stateMachineID);
+
+    // TODO(someday): We will be able to remove this call when new DSM is available
+    ret = ZoneGroupProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, static_cast<int>(applicationType));
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
+
+    ret = ZoneGroupProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _zoneID, _groupID, static_cast<int>(applicationType), applicationConfig);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } // groupSetStandardID
@@ -443,13 +463,18 @@ namespace dss {
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }
 
-  void DSStructureModifyingBusInterface::clusterSetStateMachine(uint8_t _clusterID, uint8_t _stateMachineID) {
+  void DSStructureModifyingBusInterface::clusterSetApplication(uint8_t _clusterID, ApplicationType applicationType, uint32_t applicationConfig) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     int ret;
     if (m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, _stateMachineID);
+    // TODO(someday): We will be able to remove this call when new DSM is available
+    ret = ClusterProperties_set_state_machine(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, static_cast<int>(applicationType));
+    DSBusInterface::checkBroadcastResultCode(ret);
+    usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
+
+    ret = ClusterProperties_set_application(m_DSMApiHandle, DSUID_BROADCAST, _clusterID, static_cast<int>(applicationType), applicationConfig);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_CLUSTER_SLEEP_MICROSECONDS);
   }

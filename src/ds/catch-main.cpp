@@ -16,4 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
-#include "string.h"
+
+// Provide `main` function for unit test binary that uses catch framework.
+
+#define CATCH_CONFIG_MAIN
+
+#include "catch.hpp"

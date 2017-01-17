@@ -95,8 +95,8 @@ namespace dss {
     m_writer.String(_name);
     m_writer.Double(_value);
   }
-  void JSONWriter::add(std::string _value) {
-    add(_value.c_str());
+  void JSONWriter::add(const std::string &value) {
+    add(value.c_str());
   }
   void JSONWriter::add(const char* _value) {
     m_writer.String(_value);

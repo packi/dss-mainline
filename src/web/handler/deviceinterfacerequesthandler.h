@@ -25,21 +25,61 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "src/model/deviceinterface.h"
 #include "src/web/webrequests.h"
 
 namespace dss {
 
-  class IDeviceInterface;
-  class RestfulRequest;
+class IDeviceInterface;
+class RestfulRequest;
 
-  class DeviceInterfaceRequestHandler : public WebServerRequestHandlerJSON {
-  public:
-    std::string handleDeviceInterfaceRequest(const RestfulRequest& _request, boost::shared_ptr<IDeviceInterface> _interface, boost::shared_ptr<Session> _session);
+typedef boost::shared_ptr<IDeviceInterface> DeviceInterfacePtr;
 
-  protected:
-    std::string getCategory(const RestfulRequest& _request);
-    bool isDeviceInterfaceCall(const RestfulRequest& _request);
-  };
+class DeviceInterfaceRequestHandler : public WebServerRequestHandlerJSON {
+public:
+  std::string handleDeviceInterfaceRequest(
+      const RestfulRequest& request, DeviceInterfacePtr interface, boost::shared_ptr<Session> session);
+
+private:
+  std::string turnOn(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string turnOff(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string increaseValue(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string decreaseValue(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string setValue(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string callScene(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string callSceneMin(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string saveScene(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string undoScene(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string getConsumption(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string nextScene(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string previousScene(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string blink(const RestfulRequest& request, DeviceInterfacePtr& interface, SceneAccessCategory sceneCategory,
+      const std::string& sessionToken);
+  std::string increaseOutputChannelValue(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string decreaseOutputChannelValue(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string stopOutputChannelValue(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+  std::string pushSensorValue(const RestfulRequest& request, DeviceInterfacePtr& interface,
+      SceneAccessCategory sceneCategory, const std::string& sessionToken);
+
+protected:
+  std::string getCategory(const RestfulRequest& _request);
+  bool isDeviceInterfaceCall(const RestfulRequest& _request);
+};
 
 } // namespace dss
 

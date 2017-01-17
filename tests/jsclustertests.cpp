@@ -108,13 +108,13 @@ BOOST_AUTO_TEST_CASE(testJSClusterCreate_single) {
   std::vector<boost::shared_ptr<Cluster> > clusters = apt1.getClusters();
   boost::shared_ptr<Cluster> assignedCluster;
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
-    if (cluster->getApplicationType() != 0) {
+    if (cluster->getApplicationType() != ApplicationType::None) {
       assignedCluster = cluster;
     }
   }
   BOOST_CHECK(assignedCluster != NULL);
   BOOST_CHECK(output.compare(assignedCluster->getName()) == 0);
-  BOOST_CHECK_EQUAL(assignedCluster->getApplicationType(), 2);
+  BOOST_CHECK_EQUAL(assignedCluster->getApplicationType(), ApplicationType::Blinds);
 }
 
 BOOST_AUTO_TEST_CASE(testJSClusterCreate_use_all_clusters) {
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(testJSClusterCreate_use_all_clusters) {
   boost::shared_ptr<Cluster> assignedCluster;
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
     BOOST_CHECK(output.compare(cluster->getName()) == 0);
-    BOOST_CHECK_EQUAL(cluster->getApplicationType(), 2);
+    BOOST_CHECK_EQUAL(cluster->getApplicationType(), ApplicationType::Blinds);
   }
 }
 
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(testJSClusterRelease) {
   // create cluster
   std::string output = "test";
   boost::shared_ptr<Cluster> cluster = apt1.getEmptyCluster();
-  cluster->setApplicationType(2);
+  cluster->setApplicationType(ApplicationType::Blinds);
   cluster->setName(output);
 
   // create device and add to cluster
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(testJSClusterAddRemoveDevice) {
   // create cluster
   std::string output = "test";
   boost::shared_ptr<Cluster> cluster = apt1.getEmptyCluster();
-  cluster->setApplicationType(2);
+  cluster->setApplicationType(ApplicationType::Blinds);
   cluster->setName(output);
 
   // create device and add to cluster
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(testJSClusterLockUnlock) {
   // create cluster
   std::string output = "test";
   boost::shared_ptr<Cluster> cluster = apt1.getEmptyCluster();
-  cluster->setApplicationType(2);
+  cluster->setApplicationType(ApplicationType::Blinds);
   cluster->setName(output);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(testJSClusterSetGetName) {
   // create cluster
   std::string output = "test";
   boost::shared_ptr<Cluster> cluster = apt1.getEmptyCluster();
-  cluster->setApplicationType(2);
+  cluster->setApplicationType(ApplicationType::Blinds);
   cluster->setName(output);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());

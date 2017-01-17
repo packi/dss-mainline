@@ -160,7 +160,7 @@ template <typename... Args>
 SqlStatement::BindScope SqlStatement::bind(Args&&... args) {
   BindScope bindScope(*this);
   bindRecursive(1, std::forward<Args>(args)...);
-  return std::move(bindScope);
+  return bindScope;
 }
 
 } // namespace

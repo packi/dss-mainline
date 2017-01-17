@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include "foreach.h"
 #include <digitalSTROM/dsuid.h>
+#include <ds/str.h>
 
 #include "src/businterface.h"
 #include "src/ds485types.h"
@@ -442,7 +443,7 @@ namespace dss {
 
   std::string StructureRequestHandler::addCluster(const RestfulRequest& _request) {
     boost::shared_ptr<Cluster> pCluster;
-    int stateMachineID = 0;
+    int applicationType = 0;
     std::string clusterName;
 
     // find a group slot with unassigned state machine id
@@ -457,19 +458,25 @@ namespace dss {
       clusterName = st.convert(_request.getParameter("name"));
       clusterName = escapeHTML(clusterName);
     }
-    if (_request.hasParameter("color")) {
-      stateMachineID = strToIntDef(_request.getParameter("color"), 0);
+
+    if (_request.hasParameter("applicationType")) {
+      applicationType  = strToIntDef(_request.getParameter("applicationType"), 0);
+    } else if (_request.hasParameter("color")) {
+      Logger::getInstance()->log("addCluster parameter \"color\" is deprecated, use \"applicationType\"", lsWarning);
+      applicationType = strToIntDef(_request.getParameter("color"), 0);
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), stateMachineID, clusterName);
+    manipulator.createGroup(m_Apartment.getZone(0), pCluster->getID(), static_cast<ApplicationType>(applicationType),
+        0, clusterName);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
     JSONWriter json;
     json.add("clusterID", pCluster->getID());
     json.add("name", clusterName);
-    json.add("color", stateMachineID);
+    json.add("color", pCluster->getColor());
+    json.add("applicationType", applicationType);
     return json.successJSON();
   } // addCluster
 
@@ -478,7 +485,7 @@ namespace dss {
     boost::shared_ptr<Group> pGroup;
     int groupID = -1;
     int zoneID = -1;
-    int stateMachineID = 0;
+    int groupColor = 0;
     std::string groupName;
 
     if (_request.hasParameter("zoneID")) {
@@ -525,11 +532,11 @@ namespace dss {
       // find a group slot with unassigned state machine id
       for (groupID = GroupIDAppUserMin; groupID <= GroupIDAppUserMax; groupID++) {
         pGroup = zone->getGroup(groupID);
-        if (pGroup->getApplicationType() == 0) {
+        if (pGroup->getApplicationType() == ApplicationType::None) {
           break;
         }
       }
-      if (pGroup->getApplicationType() > 0) {
+      if (pGroup->getApplicationType() != ApplicationType::None) {
         pGroup.reset();
       }
     } else if (groupID == -3) {
@@ -552,11 +559,11 @@ namespace dss {
       groupName = escapeHTML(groupName);
     }
     if (_request.hasParameter("groupColor")) {
-      stateMachineID = strToIntDef(_request.getParameter("groupColor"), 0);
+      groupColor = strToIntDef(_request.getParameter("groupColor"), 0);
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.createGroup(zone, groupID, stateMachineID, groupName);
+    manipulator.createGroup(zone, groupID, static_cast<ApplicationType>(groupColor), 0, groupName);
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
@@ -564,7 +571,7 @@ namespace dss {
     json.add("groupID", groupID);
     json.add("zoneID", zoneID);
     json.add("groupName", groupName);
-    json.add("groupColor", stateMachineID);
+    json.add("groupColor", groupColor);
     return json.successJSON();
   } // addGroup
 
@@ -608,10 +615,10 @@ namespace dss {
       }
     }
 
-    if (!(dev->isInGroup(gr->getApplicationType()) ||
+    if (!(dev->isInGroup(static_cast<int>(gr->getApplicationType())) ||
           (dev->getDeviceType() == DEVICE_TYPE_AKM) ||
           (dev->getDeviceType() == DEVICE_TYPE_UMR))) {
-      return JSONWriter::failure("Devices does not match color of group (" + intToString(gr->getApplicationType()) + ")");
+      return JSONWriter::failure(ds::str("Devices does not match applicationType of group (", gr->getApplicationType(), ")"));
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
@@ -865,10 +872,120 @@ namespace dss {
       return JSONWriter::failure("Invalid value for parameter newColor: '" + _request.getParameter("newColor") + "'");
     }
 
+    std::string configuration = "{}";
+    if (_request.hasParameter("configuration")) {
+      configuration = _request.getParameter("configuration");
+    }
+
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.groupSetApplicationType(group, newColor);
+    manipulator.groupSetApplication(
+        group, static_cast<ApplicationType>(newColor), group->deserializeApplicationConfiguration(configuration));
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+    return JSONWriter::success();
+  }
+
+  std::string StructureRequestHandler::groupGetConfiguration(const RestfulRequest& _request) {
+    boost::shared_ptr<Zone> zone;
+    boost::shared_ptr<Group> group;
+    int groupID = -1;
+    int zoneID = 0;
+
+    if (_request.hasParameter("zoneID")) {
+      std::string zoneIDStr = _request.getParameter("zoneID");
+      zoneID = strToIntDef(zoneIDStr, -1);
+    }
+
+    zone = m_Apartment.getZone(zoneID);
+
+    if (zoneID < 0 || !zone) {
+      return JSONWriter::failure("Invalid value for parameter zoneID : '" + _request.getParameter("zoneID") + "'");
+    }
+
+    if (_request.hasParameter("groupID")) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      groupID = strToIntDef(groupIDStr, -1);
+    }
+
+    group = zone->getGroup(groupID);
+    if ((groupID < 1) || !group) {
+      return JSONWriter::failure("Could not find group with id : '" + _request.getParameter("groupID") + "'");
+    }
+
+    // Currently configuration for zone related groups in zone 0 are undefined
+    if ((zone->getID() == 0) && (isDefaultGroup(group->getID()))) {
+      return JSONWriter::failure(
+          "Configuration for group : '" + _request.getParameter("groupID") + "' in zone 0 is not defined");
+    }
+
+    JSONWriter json;
+    group->serializeApplicationConfiguration(group->getApplicationConfiguration(), json);
+    return json.successJSON();
+  }
+
+  std::string StructureRequestHandler::groupSetConfiguration(const RestfulRequest& _request) {
+    boost::shared_ptr<Zone> zone;
+    boost::shared_ptr<Group> group;
+    int groupID = -1;
+    int zoneID = 0;
+    int applicationType = -1;
+
+    if (_request.hasParameter("zoneID")) {
+      std::string zoneIDStr = _request.getParameter("zoneID");
+      zoneID = strToIntDef(zoneIDStr, -1);
+    }
+
+    zone = m_Apartment.getZone(zoneID);
+
+    if (zoneID < 0 || !zone) {
+      return JSONWriter::failure("Invalid value for parameter zoneID : '" + _request.getParameter("zoneID") + "'");
+    }
+
+    if (_request.hasParameter("groupID")) {
+      std::string groupIDStr = _request.getParameter("groupID");
+      groupID = strToIntDef(groupIDStr, -1);
+    }
+
+    group = zone->getGroup(groupID);
+    if ((groupID < 1) || !group) {
+      return JSONWriter::failure("Could not find group with id : '" + _request.getParameter("groupID") + "'");
+    }
+
+    // Currently configuration for zone related groups in zone 0 are undefined
+    if ((zone->getID() == 0) && (isDefaultGroup(group->getID()))) {
+      return JSONWriter::failure(
+          "Configuration for group : '" + _request.getParameter("groupID") + "' in zone 0 is not defined");
+    }
+
+    if (_request.hasParameter("applicationType")) {
+      std::string applicationTypeStr = _request.getParameter("applicationType");
+      applicationType = strToIntDef(applicationTypeStr, -1);
+    }
+
+    // if the applicationType was not provided we assume current group application type, but only for dS defined groups
+    if (applicationType < 0) {
+      if (isDefaultGroup(group->getID()) || isGlobalAppDsGroup(group->getID())) {
+        applicationType = static_cast<int>(group->getApplicationType());
+      } else {
+        return JSONWriter::failure("Invalid application Type: '" + _request.getParameter("applicationType") + "'");
+      }
+    }
+
+    // if not present the configuration is empty - default
+    std::string configuration = "{}";
+
+    if (_request.hasParameter("configuration")) {
+      configuration = _request.getParameter("configuration");
+    }
+
+    // set the configuration in the DSM
+    StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
+    manipulator.groupSetApplication(group, static_cast<ApplicationType>(applicationType),
+        group->deserializeApplicationConfiguration(configuration));
+
+    // raise ModelDirty to force rewrite of model data to apartment.xml
+    DSS::getInstance()->getModelMaintenance().addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
+
     return JSONWriter::success();
   }
 
@@ -921,8 +1038,14 @@ namespace dss {
       return JSONWriter::failure("Invalid value for parameter newColor: '" + _request.getParameter("newColor") + "'");
     }
 
+    std::string configuration = "{}";
+    if (_request.hasParameter("configuration")) {
+      configuration = _request.getParameter("configuration");
+    }
+
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
-    manipulator.clusterSetApplicationType(pCluster, newColor);
+    manipulator.clusterSetApplication(
+        pCluster, static_cast<ApplicationType>(newColor), pCluster->deserializeApplicationConfiguration(configuration));
 
     m_ModelMaintenance.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     return JSONWriter::success();
@@ -992,6 +1115,10 @@ namespace dss {
       return groupSetName(_request);
     } else if(_request.getMethod() == "groupSetColor") {
       return groupSetColor(_request);
+    } else if (_request.getMethod() == "groupGetConfiguration") {
+      return groupGetConfiguration(_request);
+    } else if (_request.getMethod() == "groupSetConfiguration") {
+      return groupSetConfiguration(_request);
     } else if(_request.getMethod() == "clusterSetName") {
       return clusterSetName(_request);
     } else if(_request.getMethod() == "clusterSetColor") {

@@ -25,7 +25,7 @@
 #include "modelconst.h"
 
 #include <math.h>
-#include <ds/string.h>
+#include <ds/str.h>
 
 #include "base.h"
 #include "exception.h"
@@ -259,32 +259,121 @@ namespace dss {
     return stream;
   }
 
-  std::ostream& operator<<(std::ostream& stream, BinaryInputType x) {
-    switch (x) {
-      case BinaryInputType::Presence: return stream << "presence";
-      case BinaryInputType::RoomBrightness: return stream << "roomBrightness";
-      case BinaryInputType::PresenceInDarkness: return stream << "presenceInDarkness";
-      case BinaryInputType::TwilightExternal: return stream << "twilightExternal";
-      case BinaryInputType::Movement: return stream << "movement";
-      case BinaryInputType::MovementInDarkness: return stream << "movementInDarkness";
-      case BinaryInputType::SmokeDetector: return stream << "smokeDetector";
-      case BinaryInputType::WindDetector: return stream << "windDetector";
-      case BinaryInputType::RainDetector: return stream << "rainDetector";
-      case BinaryInputType::SunRadiation: return stream << "sunRadiation";
-      case BinaryInputType::RoomThermostat: return stream << "roomThermostat";
-      case BinaryInputType::BatteryLow: return stream << "batteryLow";
-      case BinaryInputType::WindowContact: return stream << "windowContact";
-      case BinaryInputType::DoorContact: return stream << "doorContact";
-      case BinaryInputType::WindowTilt: return stream << "windowTilt";
-      case BinaryInputType::GarageDoorContact: return stream << "garageDoorContact";
-      case BinaryInputType::SunProtection: return stream << "sunProtection";
-      case BinaryInputType::FrostDetector: return stream << "frostDetector";
-      case BinaryInputType::HeatingSystem: return stream << "heatingSystem";
-      case BinaryInputType::HeatingSystemMode: return stream << "heatingSystemMode";
-      case BinaryInputType::PowerUp: return stream << "powerUp";
-      case BinaryInputType::Malfunction: return stream << "malfunction";
-      case BinaryInputType::Service: return stream << "service";
-    }
-    return stream << "unknown" << static_cast<int>(x);
+  std::ostream& operator<<(std::ostream& stream, StatusBitType x) {
+    return [&]()-> std::ostream& {
+      switch (x) {
+        case StatusBitType::MALFUNCTION: return stream << "malfunction";
+        case StatusBitType::SERVICE: return stream << "service";
+      }
+      return stream << "unknown";
+    }() << '(' << static_cast<int>(x) << ')';
   }
-}
+
+  std::ostream& operator<<(std::ostream& stream, BinaryInputType x) {
+    return [&]()-> std::ostream& {
+      switch (x) {
+        case BinaryInputType::Presence: return stream << "presence";
+        case BinaryInputType::RoomBrightness: return stream << "roomBrightness";
+        case BinaryInputType::PresenceInDarkness: return stream << "presenceInDarkness";
+        case BinaryInputType::TwilightExternal: return stream << "twilightExternal";
+        case BinaryInputType::Movement: return stream << "movement";
+        case BinaryInputType::MovementInDarkness: return stream << "movementInDarkness";
+        case BinaryInputType::SmokeDetector: return stream << "smokeDetector";
+        case BinaryInputType::WindDetector: return stream << "windDetector";
+        case BinaryInputType::RainDetector: return stream << "rainDetector";
+        case BinaryInputType::SunRadiation: return stream << "sunRadiation";
+        case BinaryInputType::RoomThermostat: return stream << "roomThermostat";
+        case BinaryInputType::BatteryLow: return stream << "batteryLow";
+        case BinaryInputType::WindowContact: return stream << "windowContact";
+        case BinaryInputType::DoorContact: return stream << "doorContact";
+        case BinaryInputType::WindowTilt: return stream << "windowTilt";
+        case BinaryInputType::GarageDoorContact: return stream << "garageDoorContact";
+        case BinaryInputType::SunProtection: return stream << "sunProtection";
+        case BinaryInputType::FrostDetector: return stream << "frostDetector";
+        case BinaryInputType::HeatingSystem: return stream << "heatingSystem";
+        case BinaryInputType::HeatingSystemMode: return stream << "heatingSystemMode";
+        case BinaryInputType::PowerUp: return stream << "powerUp";
+        case BinaryInputType::Malfunction: return stream << "malfunction";
+        case BinaryInputType::Service: return stream << "service";
+      }
+      return stream << "unknown";
+    }() << '(' << static_cast<int>(x) << ')';
+  }
+
+  boost::optional<StatusBitType> statusBitTypeForBinaryInputType(BinaryInputType x) {
+    switch (x) {
+      case BinaryInputType::Presence:
+      case BinaryInputType::RoomBrightness:
+      case BinaryInputType::PresenceInDarkness:
+      case BinaryInputType::TwilightExternal:
+      case BinaryInputType::Movement:
+      case BinaryInputType::MovementInDarkness:
+      case BinaryInputType::SmokeDetector:
+      case BinaryInputType::WindDetector:
+      case BinaryInputType::RainDetector:
+      case BinaryInputType::SunRadiation:
+      case BinaryInputType::RoomThermostat:
+      case BinaryInputType::BatteryLow:
+      case BinaryInputType::WindowContact:
+      case BinaryInputType::DoorContact:
+      case BinaryInputType::WindowTilt:
+      case BinaryInputType::GarageDoorContact:
+      case BinaryInputType::SunProtection:
+      case BinaryInputType::FrostDetector:
+      case BinaryInputType::HeatingSystem:
+      case BinaryInputType::HeatingSystemMode:
+      case BinaryInputType::PowerUp:
+        return boost::none;
+      case BinaryInputType::Malfunction:
+        return StatusBitType::MALFUNCTION;
+      case BinaryInputType::Service:
+        return StatusBitType::SERVICE;
+    }
+    return boost::none;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, ApplicationType x) {
+    return [&]()-> std::ostream& {
+      switch (x) {
+        case ApplicationType::None: return stream << "none";
+        case ApplicationType::Lights: return stream << "lights";
+        case ApplicationType::Blinds: return stream << "blinds";
+        case ApplicationType::Heating: return stream << "heating";
+        case ApplicationType::Audio: return stream << "audio";
+        case ApplicationType::Video: return stream << "video";
+        case ApplicationType::Cooling: return stream << "cooling";
+        case ApplicationType::Ventilation: return stream << "ventilation";
+        case ApplicationType::Window: return stream << "window";
+        case ApplicationType::Curtains: return stream << "curtains";
+        case ApplicationType::Temperature: return stream << "temperature";
+        case ApplicationType::ApartmentVentilation: return stream << "apartmentVentilation";
+      }
+      return stream << "unknown";
+    }() << '(' << static_cast<int>(x) << ')';
+  }
+
+  int getApplicationTypeColor(ApplicationType x) {
+    switch (x) {
+      case ApplicationType::Lights:
+        return ColorIDYellow;
+      case ApplicationType::Blinds:
+        return ColorIDGray;
+      case ApplicationType::Heating:
+      case ApplicationType::Cooling:
+      case ApplicationType::Ventilation:
+      case ApplicationType::Window:
+      case ApplicationType::Temperature:
+      case ApplicationType::ApartmentVentilation:
+        return ColorIDBlue;
+      case ApplicationType::Audio:
+        return ColorIDCyan;
+      case ApplicationType::Video:
+        return ColorIDViolet;
+      case ApplicationType::None:
+      case ApplicationType::Curtains:
+        return 0;
+    }
+    return 0;
+  }
+
+} // namespace dss

@@ -161,15 +161,15 @@ BOOST_AUTO_TEST_CASE(testApartmentXML) {
   boost::shared_ptr<Cluster> pClust;
   BOOST_CHECK_NO_THROW(pClust = apt.getCluster(16));
   BOOST_CHECK_EQUAL(pClust->getName(), "Jalousien");
-  BOOST_CHECK_EQUAL(pClust->getApplicationType(), 2);
+  BOOST_CHECK_EQUAL(pClust->getApplicationType(), ApplicationType::Blinds);
 
   BOOST_CHECK_NO_THROW(pClust = apt.getCluster(17));
   BOOST_CHECK_EQUAL(pClust->getName(), "Jalousien2");
-  BOOST_CHECK_EQUAL(pClust->getApplicationType(), 2);
+  BOOST_CHECK_EQUAL(pClust->getApplicationType(), ApplicationType::Blinds);
   BOOST_CHECK_EQUAL(pClust->getLocation(), cd_south_east);
   BOOST_CHECK_EQUAL(pClust->getProtectionClass(), wpc_awning_class_2);
   BOOST_CHECK_EQUAL(pClust->getFloor(), 1);
-  BOOST_CHECK_EQUAL(pClust->getApplicationType(), 2);
+  BOOST_CHECK_EQUAL(pClust->getApplicationType(), ApplicationType::Blinds);
   BOOST_CHECK_EQUAL(pClust->isConfigurationLocked(), false);
   BOOST_CHECK_EQUAL(pClust->isAutomatic(), true);
   BOOST_CHECK_EQUAL(pClust->getLockedScenes().size(), 4);
@@ -187,11 +187,14 @@ BOOST_AUTO_TEST_CASE(testPersistCardinalDirection) {
   }
 
   {
+    DeviceSpec_t spec = {};
+    spec.FunctionID = 0x2131;
+    spec.ProductID = ProductID_KL_210;
+
     // create apartment xml
     Apartment apt1(NULL);
     boost::shared_ptr<Device> dev1 = apt1.allocateDevice(DSUID_NULL);
-    dev1->setFunctionID(0x2131);
-    dev1->setProductID(ProductID_KL_210);
+    dev1->setPartiallyFromSpec(spec);
     dev1->setCardinalDirection(cd_west);
     dev1->setWindProtectionClass(wpc_awning_class_2);
     dev1->setFloor(42);
@@ -239,17 +242,19 @@ BOOST_AUTO_TEST_CASE(testPersistVdcDevice) {
   }
 
   {
+    DeviceSpec_t spec = {};
+    spec.FunctionID = 0x2131;
+    spec.ProductID = ProductID_KL_210;
+
     // create apartment xml
     Apartment apt1(NULL);
     boost::shared_ptr<Device> dev1 = apt1.allocateDevice(dsuid1);
-    dev1->setFunctionID(0x2131);
-    dev1->setProductID(ProductID_KL_210);
+    dev1->setPartiallyFromSpec(spec);
     dev1->setVdcDevice(true);
 
     // 2nd device without protecton calls, orientation
     boost::shared_ptr<Device> dev2 = apt1.allocateDevice(dsuid2);
-    dev2->setFunctionID(0x2133);
-    dev2->setProductID(ProductID_KL_210);
+    dev2->setPartiallyFromSpec(spec);
     dev2->setVdcDevice(false);
 
     ModelPersistence persist1(apt1);
@@ -294,7 +299,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
     zoneBroadcast->addGroup(pCluster);
 
     pCluster->setName("Testing");
-    pCluster->setApplicationType(4);
+    pCluster->setApplicationType(ApplicationType::Audio);
     pCluster->setLocation(cd_east);
     pCluster->setProtectionClass(wpc_blind_class_3);
     pCluster->setFloor(13);
@@ -318,7 +323,7 @@ BOOST_AUTO_TEST_CASE(testCluster) {
   boost::shared_ptr<Cluster> pClust;
   BOOST_CHECK_NO_THROW(pClust = apt2.getCluster(39));
   BOOST_CHECK_EQUAL(pClust->getName(), "Testing");
-  BOOST_CHECK_EQUAL(pClust->getApplicationType(), 4);
+  BOOST_CHECK_EQUAL(pClust->getApplicationType(), ApplicationType::Audio);
   BOOST_CHECK_EQUAL(pClust->getLocation(), cd_east);
   BOOST_CHECK_EQUAL(pClust->getProtectionClass(), wpc_blind_class_3);
   BOOST_CHECK_EQUAL(pClust->getFloor(), 13);

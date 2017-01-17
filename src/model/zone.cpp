@@ -141,15 +141,20 @@ namespace dss {
     return boost::shared_ptr<Group>();
   } // getGroup
 
-  boost::shared_ptr<Group> Zone::getGroup(const int _id) const {
-    for(std::vector<boost::shared_ptr<Group> >::const_iterator ipGroup = m_Groups.begin(), e = m_Groups.end();
-        ipGroup != e; ++ipGroup)
-    {
-        if((*ipGroup)->getID() == _id) {
-          return *ipGroup;
+  boost::weak_ptr<Group> Zone::tryGetGroup(const int id) const {
+    foreach (auto&& group, m_Groups) {
+        if (group->getID() == id) {
+          return group;
         }
     }
-    return boost::shared_ptr<Group>();
+    return boost::weak_ptr<Group>();
+  } // getGroup
+
+  boost::shared_ptr<Group> Zone::getGroup(const int id) const {
+    if (auto&& group = tryGetGroup(id).lock()) {
+      return group;
+    }
+    return boost::shared_ptr<Group>(); // TODO(someday): throw
   } // getGroup
 
   int Zone::getID() const {

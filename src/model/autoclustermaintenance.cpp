@@ -26,6 +26,7 @@
 
 #include "autoclustermaintenance.h"
 
+#include <ds/str.h>
 #include "src/dss.h"
 #include "src/model/apartment.h"
 #include "src/model/cluster.h"
@@ -150,8 +151,8 @@ void AutoClusterMaintenance::joinIdenticalClusters ()
       }
       if (cluster->getLocation() == clusters[index]->getLocation() &&
           cluster->getProtectionClass() == clusters[index]->getProtectionClass()) {
-        log("The clusters with ids " + intToString(cluster->getApplicationType()) + " and id " +
-            intToString(cluster->getApplicationType()) + " are identical", lsWarning);
+        log(ds::str("The clusters with ids ", cluster->getApplicationType(), " and id ",
+            clusters[index]->getApplicationType(), " are identical"), lsWarning);
         moveClusterDevices(clusters[index], cluster);
       }
     }
@@ -236,7 +237,7 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
 
   std::vector<boost::shared_ptr<Cluster> > clusters = m_pApartment->getClusters();
   foreach (boost::shared_ptr<Cluster> cluster, clusters) {
-    if ((cluster->getApplicationType() != 0) &&
+    if ((cluster->getApplicationType() != ApplicationType::None) &&
         (cluster->getProtectionClass() == _protection) &&
         (cluster->getLocation() == _cardinalDirection) &&
         (cluster->isAutomatic())) {
@@ -252,7 +253,8 @@ boost::shared_ptr<Cluster> AutoClusterMaintenance::findOrCreateCluster(CardinalD
 
   cluster->setLocation(_cardinalDirection);
   cluster->setProtectionClass(_protection);
-  cluster->setApplicationType(DEVICE_CLASS_GR);
+  // TODO: why do we create gray cluster?
+  cluster->setApplicationType(ApplicationType::Blinds);
 
   // Naming scheme: "<orientation> - Class <class> - <speed>m/s" (e.g. "South-West – Class 1 -9.8 m/s")
   // if no orientation is defined: only "Class z - x.y m/s" (no "none"-Orientation)
@@ -329,7 +331,7 @@ void AutoClusterMaintenance::busUpdateCluster(boost::shared_ptr<Cluster> _cluste
     // operation can be overridden for testing.
     StructureModifyingBusInterface* itf = m_pApartment->getBusInterface()->getStructureModifyingBusInterface();
     itf->clusterSetName(_cluster->getID(), _cluster->getName());
-    itf->clusterSetStateMachine(_cluster->getID(), _cluster->getApplicationType());
+    itf->clusterSetApplication(_cluster->getID(), _cluster->getApplicationType(), _cluster->getApplicationConfiguration());
     itf->clusterSetProperties(_cluster->getID(), _cluster->getLocation(),
                               _cluster->getFloor(), _cluster->getProtectionClass());
     itf->clusterSetLockedScenes(_cluster->getID(), _cluster->getLockedScenes());

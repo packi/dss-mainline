@@ -60,7 +60,7 @@ namespace dss {
 
         try {
           _interface->clusterSetName(pCluster->getID(), pCluster->getName());
-          _interface->clusterSetStateMachine(pCluster->getID(), pCluster->getApplicationType());
+          _interface->clusterSetApplication(pCluster->getID(), pCluster->getApplicationType(), pCluster->getApplicationConfiguration());
           _interface->clusterSetProperties(pCluster->getID(), pCluster->getLocation(),
                                            pCluster->getFloor(), pCluster->getProtectionClass());
           _interface->clusterSetLockedScenes(pCluster->getID(), pCluster->getLockedScenes());
@@ -70,6 +70,28 @@ namespace dss {
               ": " + e.what(), lsWarning);
         }
     }
+
+    std::vector<boost::shared_ptr<Group> > globalApps = _apartment->getGlobalApps();
+    foreach (boost::shared_ptr<Group> pGlobalApp, globalApps) {
+      if (!pGlobalApp->isSynchronized()) {
+        Logger::getInstance()->log(
+            "Forced configuration update in global application group " + intToString(pGlobalApp->getID()), lsInfo);
+
+        try {
+          _interface->createGroup(0, pGlobalApp->getID(), pGlobalApp->getApplicationType(),
+              pGlobalApp->getApplicationConfiguration(), pGlobalApp->getName());
+          _interface->groupSetApplication(
+              0, pGlobalApp->getID(), pGlobalApp->getApplicationType(), pGlobalApp->getApplicationConfiguration());
+
+          pGlobalApp->setIsSynchronized(true);
+        } catch (BusApiError& e) {
+          Logger::getInstance()->log(
+              "Error updating global application group " + intToString(pGlobalApp->getID()) + ": " + e.what(),
+              lsWarning);
+        }
+      }
+    }
+
     std::vector<boost::shared_ptr<Zone> > zones = _apartment->getZones();
     foreach(boost::shared_ptr<Zone> pZone, zones) {
       if (pZone->getID() == 0 || !pZone->isConnected()) {
@@ -81,9 +103,9 @@ namespace dss {
           if (isZoneUserGroup(pGroup->getID())) {
             try {
               _interface->createGroup(pZone->getID(), pGroup->getID(),
-                  pGroup->getApplicationType(), pGroup->getName());
-              _interface->groupSetStateMachine(pZone->getID(), pGroup->getID(),
-                  pGroup->getApplicationType());
+                  pGroup->getApplicationType(), pGroup->getApplicationConfiguration(), pGroup->getName());
+              _interface->groupSetApplication(pZone->getID(), pGroup->getID(),
+                  pGroup->getApplicationType(), pGroup->getApplicationConfiguration());
               pGroup->setIsSynchronized(true);
             } catch (BusApiError& e) {
               Logger::getInstance()->log("Error updating user group configuration in zone " +

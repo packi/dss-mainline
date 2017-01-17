@@ -23,9 +23,10 @@
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 #endif
-
-
 #include "group.h"
+
+#include <ds/str.h>
+
 #include "zone.h"
 #include "scenehelper.h"
 #include "set.h"
@@ -34,20 +35,26 @@
 #include "src/propertysystem.h"
 
 #include "src/model/modelconst.h"
+#include "status-bit.h"
+#include "status.h"
+
 namespace dss {
 
     //============================================= Group
+
+__DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
   Group::Group(const int _id, boost::shared_ptr<Zone> _pZone)
   : AddressableModelItem(&_pZone->getApartment()),
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
-    m_ApplicationType(0),
-    m_ApplicationConfiguration(0),
+    m_ApplicationType(ApplicationType::None),
+    m_pApplicationBehavior(new DefaultBehavior(m_pPropertyNode)),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
     m_SyncPending(false),
+    m_readFromDsm(false),
     m_connectedDevices(0)
   {
   } // ctor
@@ -56,21 +63,31 @@ namespace dss {
 
   bool Group::isValid() const {
     if (isDefaultGroup(m_GroupID) || isAppUserGroup(m_GroupID)) {
-      return m_IsValid && (m_ApplicationType > 0);
+      return m_IsValid && (m_ApplicationType != ApplicationType::None);
     }
     return m_IsValid;
   } // isValid
 
-  void Group::setApplicationType(const int applicationType) {
+  void Group::setApplicationType(ApplicationType applicationType) {
     m_ApplicationType = applicationType;
+
+    // remove potential entries from current object
+    m_pApplicationBehavior.reset(NULL);
+
+    if ((applicationType == ApplicationType::Ventilation) ||
+        (applicationType == ApplicationType::ApartmentVentilation)) {
+      m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode));
+    } else {
+      m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode));
+    }
+
     if (getZoneID() == 0) {
       return;
     }
 
     if (m_GroupID == GroupIDYellow) {
       // zone.123.light
-      boost::shared_ptr<Group> me =
-          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<Group> me = sharedFromThis();
       boost::shared_ptr<State> state = boost::make_shared<State>(me, State::makeGroupName(*this));
 
       try {
@@ -78,8 +95,7 @@ namespace dss {
       } catch (ItemDuplicateException& ex) {} // we only care that it exists
     } else if (m_GroupID == GroupIDHeating) {
       // zone.123.heating
-      boost::shared_ptr<Group> me =
-          boost::static_pointer_cast<Group>(shared_from_this());
+      boost::shared_ptr<Group> me = sharedFromThis();
       boost::shared_ptr<State> state = boost::make_shared<State>(me, State::makeGroupName(*this));
 
       try {
@@ -88,8 +104,19 @@ namespace dss {
     }
   } // getID
 
-  void Group::setApplicationConfiguration(const int applicationConfiguration) {
-    m_ApplicationConfiguration = applicationConfiguration;
+  int Group::getColor() const {
+    return getApplicationTypeColor(m_ApplicationType);
+  }
+
+  void Group::setFromSpec(const GroupSpec_t& spec) {
+    setName(spec.Name);
+    setApplicationType(spec.applicationType);
+    setApplicationConfiguration(spec.applicationConfiguration);
+  }
+
+  bool Group::isConfigEqual(const GroupSpec_t& spec) {
+    return ((getName() == spec.Name) && (getApplicationType() == spec.applicationType) &&
+            (getApplicationConfiguration() == spec.applicationConfiguration));
   }
 
   Set Group::getDevices() const {
@@ -133,11 +160,11 @@ namespace dss {
   } // getPowerConsumption
 
   void Group::nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    callScene(_origin, _category, SceneHelper::getNextScene(m_LastCalledScene),  "", false);
+    callScene(_origin, _category, m_pApplicationBehavior->getNextScene(m_LastCalledScene),  "", false);
   } // nextScene
 
   void Group::previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    callScene(_origin, _category, SceneHelper::getPreviousScene(m_LastCalledScene), "", false);
+    callScene(_origin, _category, m_pApplicationBehavior->getPreviousScene(m_LastCalledScene), "", false);
   } // previousScene
 
   void Group::setSceneName(int _sceneNumber, const std::string& _name) {
@@ -242,15 +269,17 @@ namespace dss {
         m_pPropertyNode = m_pApartment->getPropertyNode()->createProperty("zones/zone" + intToString(m_ZoneID) + "/groups/group" + intToString(m_GroupID));
         m_pPropertyNode->createProperty("group")->setIntegerValue(m_GroupID);
         m_pPropertyNode->createProperty("color")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationType, &Group::setApplicationType));
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getColor));
+        m_pPropertyNode->createProperty("applicationType")
+          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationTypeInt, &Group::setApplicationTypeInt));
         m_pPropertyNode->createProperty("name")
           ->linkToProxy(PropertyProxyMemberFunction<Group, std::string>(*this, &Group::getName, &Group::setName));
         m_pPropertyNode->createProperty("lastCalledScene")
           ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getLastCalledScene));
         m_pPropertyNode->createProperty("connectedDevices")
           ->linkToProxy(PropertyProxyReference<int>(m_connectedDevices, false));
-        m_pPropertyNode->createProperty("configuration")
-          ->linkToProxy(PropertyProxyMemberFunction<Group, int>(*this, &Group::getApplicationConfiguration, &Group::setApplicationConfiguration));          
+
+        m_pApplicationBehavior->publishToPropertyTree();
       }
     }
   } // publishToPropertyTree
@@ -303,6 +332,26 @@ namespace dss {
     }
   }
 
+  StatusBit& Group::getStatusBit(StatusBitType type) {
+    if (!m_status) {
+      // Lazy created to avoid periodic broadcast of status current values
+      // for empty Statuses over dsm-api.
+      //
+      // It is possible to move this functionality to Status class.
+      // But we also save some memory this way as most groups don't have Status.
+      m_status.reset(new Status(*this));
+    }
+    if (StatusBit* bit = m_status->tryGetBit(type)) {
+      return *bit;
+    }
+    auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
+    log(ds::str("New status bit name:", name), lsNotice);
+    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(*m_status, type, std::move(name)));
+    auto&& bitRef = *bit;
+    m_status->insertBit(type, std::move(bit));
+    return bitRef;
+  }
+
   boost::mutex Group::m_SceneNameMutex;
 
   void Group::addConnectedDevice() {
@@ -318,12 +367,13 @@ namespace dss {
   boost::shared_ptr<Group> Group::make(const GroupSpec_t& _groupSpec, boost::shared_ptr<Zone> _pZone)
   {
     boost::shared_ptr<Group> pGroup(new Group(_groupSpec.GroupID, _pZone));
-
-    pGroup->setName(_groupSpec.Name);
-    pGroup->setApplicationType(_groupSpec.stateMachineID);
-    pGroup->setApplicationConfiguration(_groupSpec.stateMachineConfig);
+    pGroup->setFromSpec(_groupSpec);
 
     return pGroup;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, const Group &x) {
+    return stream << "zone." << x.getZoneID() << ".group." << x.getID();
   }
 
 } // namespace dss

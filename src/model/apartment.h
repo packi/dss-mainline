@@ -124,6 +124,7 @@ typedef struct {
                     public DeviceContainer
   {
   private:
+    DSS* m_dss;
     std::vector<boost::shared_ptr<Zone> > m_Zones;
     std::vector<boost::shared_ptr<DSMeter> > m_DSMeters;
     std::vector<boost::shared_ptr<Device> > m_Devices;
@@ -143,6 +144,7 @@ typedef struct {
     virtual ~Apartment();
 
     boost::recursive_mutex& getMutex() const { return m_mutex; }
+    DSS& getDss() { return *m_dss; }
 
     /** Returns a set containing all devices of the set */
     virtual Set getDevices() const;
@@ -155,6 +157,7 @@ typedef struct {
 
     /** Returns the Zone by name */
     boost::shared_ptr<Zone> getZone(const std::string& _zoneName);
+    boost::weak_ptr<Zone> tryGetZone(const int id);
     /** Returns the Zone by its id */
     boost::shared_ptr<Zone> getZone(const int _id);
     /** Returns a vector of all zones */

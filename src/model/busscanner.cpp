@@ -33,6 +33,7 @@
 
 #include <digitalSTROM/dsuid.h>
 
+#include <ds/log.h>
 #include "src/businterface.h"
 #include "src/foreach.h"
 #include "src/model/modelconst.h"
@@ -41,6 +42,7 @@
 #include "src/dss.h"
 #include "src/ds485types.h"
 #include "security/security.h"
+#include "src/ds/str.h"
 
 #include "modulator.h"
 #include "device.h"
@@ -134,6 +136,7 @@ namespace dss {
       if (_dsMeter->getCapability_HasDevices()) {
         std::vector<int> zoneIDs;
         try {
+          // TODO(soon): make sure that the DSM return zone 0 in this list if it contain apartment application group.
           zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
         } catch(BusApiError& e) {
           log("scanDSMeter: Error getting ZoneIDs", lsWarning);
@@ -269,10 +272,10 @@ namespace dss {
 
       // in case this DSM does not provide group configuration ignore it.
       if (_dsMeter->getApiVersion() < 0x303) {
-        cluster.stateMachineConfig = 0;
+        cluster.applicationConfiguration = 0;
       }
 
-      if (cluster.stateMachineID > 0) {
+      if (cluster.applicationType != ApplicationType::None) {
         log("scanDSMeter:    Found cluster with id: " + intToString(cluster.GroupID) +
             " and devices: " + intToString(cluster.NumberOfDevices));
       }
@@ -292,7 +295,7 @@ namespace dss {
        * if the configuration on the dSS and the dSM is different,
        * synchronize the settings back to the dSMs
        */
-      if (!pCluster->equalConfig(cluster)) {
+      if (!pCluster->isConfigEqual(cluster)) {
         pCluster->setIsSynchronized(false);
       }
 
@@ -300,14 +303,9 @@ namespace dss {
        * the dSM is the master source for this data. The dSS will take the data
        * from the first dSM that has a non-zero configuration.
        */
-      if ((pCluster->getApplicationType() == 0) ||
-          ((pCluster->getApplicationType() > 0) && !pCluster->isReadFromDsm())) {
-        pCluster->setApplicationType(cluster.stateMachineID);
-        pCluster->setApplicationConfiguration(cluster.stateMachineConfig);
-        pCluster->setLocation(static_cast<CardinalDirection_t>(cluster.location));
-        pCluster->setProtectionClass(static_cast<WindProtectionClass_t>(cluster.protectionClass));
-        pCluster->setConfigurationLocked(cluster.configurationLocked);
-        pCluster->setLockedScenes(cluster.lockedScenes);
+      if ((pCluster->getApplicationType() == ApplicationType::None) ||
+          ((pCluster->getApplicationType() != ApplicationType::None) && !pCluster->isReadFromDsm())) {
+        pCluster->setFromSpec(cluster);
         pCluster->setReadFromDsm(true);
       }
 
@@ -348,7 +346,7 @@ namespace dss {
         ", Active: " + intToString(_spec.ActiveState));
     log("InitializeDevice: Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
         ", Product-ID: " + unsignedLongIntToHexString(_spec.ProductID) +
-        ", Revision-ID: " + unsignedLongIntToHexString(_spec.Version) +
+        ", Revision-ID: " + unsignedLongIntToHexString(_spec.revisionId) +
         ", Vendor-ID: " + unsignedLongIntToHexString(_spec.VendorID)
         );
 
@@ -392,17 +390,14 @@ namespace dss {
     dev->setShortAddress(_spec.ShortAddress);
     dev->setDSMeter(_dsMeter);
     dev->setZoneID(_zone->getID());
-    dev->setFunctionID(_spec.FunctionID);
-    dev->setProductID(_spec.ProductID);
-    dev->setVendorID(_spec.VendorID);
-    dev->setRevisionID(_spec.Version);
-    dev->setIsLockedInDSM(_spec.Locked);
-    dev->setOutputMode(_spec.OutputMode);
 
-    if (_dsMeter->getApiVersion() >= 0x303) {
-      dev->setActiveGroup(_spec.activeGroup);
-      dev->setDefaultGroup(_spec.defaultGroup);
+    if (_dsMeter->getApiVersion() < 0x303) {
+      _spec.activeGroup = 0;
+      _spec.defaultGroup = 0;
     }
+
+    dev->setPartiallyFromSpec(_spec);
+    // TODO(someday): move more setters into setSpec
 
     dev->setButtonActiveGroup(_spec.buttonActiveGroup);
     dev->setButtonGroupMembership(_spec.buttonGroupMembership);
@@ -729,7 +724,7 @@ namespace dss {
       return false;
     }
 
-    foreach(GroupSpec_t group, groups) {
+    foreach(GroupSpec_t& group, groups) {
       if ((group.GroupID == 0) || isAppUserGroup(group.GroupID)) {
         // ignore broadcast group and clusters
         continue;
@@ -737,59 +732,82 @@ namespace dss {
 
       // in case this DSM does not provide group configuration it is invalid and should be ignored
       if (_dsMeter->getApiVersion() < 0x303) {
-        group.stateMachineConfig = 0;
+        group.applicationConfiguration = 0;
       }
 
       log("scanDSMeter:    Found group with id: " + intToString(group.GroupID) +
           " and devices: " + intToString(group.NumberOfDevices));
 
       // apartment-wide unique standard- and user-groups published in zone<0>
-      boost::shared_ptr<Group> pGroup;
-      boost::shared_ptr<Group> groupOnZone;
+      boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
 
       if (isDefaultGroup(group.GroupID)) {
-        groupOnZone = _zone->getGroup(group.GroupID);
-        if (groupOnZone == NULL) {
+        boost::shared_ptr<Group> zoneGroup = _zone->tryGetGroup(group.GroupID).lock();
+
+        // TODO(soon): re-implement the configuration synchronization logic for default groups
+        if (zoneGroup == NULL) {
+          // note: This should never happen as default groups are created during zone allocation
           log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone = Group::make(group, _zone);
-          _zone->addGroup(groupOnZone);
+          zoneGroup = Group::make(group, _zone);
+          _zone->addGroup(zoneGroup);
         }
-        groupOnZone->setIsPresent(true);
-        groupOnZone->setIsConnected(true);
-        groupOnZone->setLastCalledScene(SceneOff);
-        groupOnZone->setIsValid(true);
+        zoneGroup->setIsPresent(true);
+        zoneGroup->setIsConnected(true);
+        zoneGroup->setLastCalledScene(SceneOff);
+        zoneGroup->setIsValid(true);
 
-        try {
-          pGroup = m_Apartment.getGroup(group.GroupID);
-        } catch (ItemNotFoundException&) {
-          boost::shared_ptr<Zone> zoneBroadcast = m_Apartment.getZone(0);
-          pGroup = Group::make(group, zoneBroadcast);
-          zoneBroadcast->addGroup(pGroup);
+        boost::shared_ptr<Group> broadcastGroup = zoneBroadcast->tryGetGroup(group.GroupID).lock();
+
+        if (broadcastGroup == NULL) {
+          // note: This should never happen as default groups are created during zone allocation
+          log(" scanDSMeter:    Adding new group to broadcast zone");
+          broadcastGroup = Group::make(group, zoneBroadcast);
+          zoneBroadcast->addGroup(broadcastGroup);
         }
-        pGroup->setIsPresent(true);
-        pGroup->setIsConnected(true);
-        pGroup->setLastCalledScene(SceneOff);
-        pGroup->setIsValid(true);
+        broadcastGroup->setIsPresent(true);
+        broadcastGroup->setIsConnected(true);
+        broadcastGroup->setLastCalledScene(SceneOff);
+        broadcastGroup->setIsValid(true);
+      } else if (isGlobalAppGroup(group.GroupID)) {
+        boost::shared_ptr<Group> globalAppGroup = zoneBroadcast->tryGetGroup(group.GroupID).lock();
 
-      } else {
-
-        groupOnZone = _zone->getGroup(group.GroupID);
-        if (groupOnZone == NULL) {
-          log(" scanDSMeter:    Adding new group to zone");
-          groupOnZone = Group::make(group, _zone);
-          _zone->addGroup(groupOnZone);
-        } else {
-          if ( (groupOnZone->getName() != group.Name) ||
-               (groupOnZone->getApplicationType() != group.stateMachineID) ||
-               (groupOnZone->getApplicationConfiguration() != (int)group.stateMachineConfig)) {
-            groupOnZone->setIsSynchronized(false);
+        if (globalAppGroup == NULL) {
+          log(" scanDSMeter:    Adding new apartment application group");
+          globalAppGroup = Group::make(group, zoneBroadcast);
+          globalAppGroup->setReadFromDsm(true);
+          zoneBroadcast->addGroup(globalAppGroup);
+        } else if (!globalAppGroup->isConfigEqual(group)) {
+          if (!globalAppGroup->isReadFromDsm()) {
+            // First DSM is owner of Apartment Application group
+            globalAppGroup->setFromSpec(group);
+            globalAppGroup->setReadFromDsm(true);
+          } else {
+            // All other DSMs need to be overwritten in synchronizeGroups() function
+            globalAppGroup->setIsSynchronized(false);
           }
         }
-        groupOnZone->setIsPresent(true);
-        groupOnZone->setIsConnected(true);
-        groupOnZone->setLastCalledScene(SceneOff);
-        groupOnZone->setIsValid(true);
 
+        globalAppGroup->setIsPresent(true);
+        globalAppGroup->setIsConnected(true);
+        globalAppGroup->setLastCalledScene(SceneOff);
+        globalAppGroup->setIsValid(true);
+      } else {
+        boost::shared_ptr<Group> userGroup = _zone->tryGetGroup(group.GroupID).lock();
+
+        if (userGroup == NULL) {
+          log(" scanDSMeter:    Adding new group to zone");
+          userGroup = Group::make(group, _zone);
+          _zone->addGroup(userGroup);
+        } else {
+          // DSS is the owner of user groups configuration we will overwrite in DSM
+          if (!userGroup->isConfigEqual(group)) {
+            userGroup->setIsSynchronized(false);
+          }
+        }
+        userGroup->setIsPresent(true);
+        userGroup->setIsConnected(true);
+        userGroup->setLastCalledScene(SceneOff);
+        userGroup->setIsValid(true);
       }
     }
     return true;
@@ -1127,8 +1145,10 @@ namespace dss {
         " dsm = " + (m_dsm ? dsuid2str(m_dsm->getDSID()) : "NULL") +
         ", dev = " + (m_device ? dsuid2str(m_device->getDSID()) : "NULL"), lsDebug);
 
+    DSS* dss = DS_NULLPTR;
     if (DSS::hasInstance()) {
-      DSS::getInstance()->getSecurity().loginAsSystemUser("BinaryInputScanner needs system-rights");
+      dss = DSS::getInstance();
+      dss->getSecurity().loginAsSystemUser("BinaryInputScanner needs system-rights");
     }
 
     m_dsmApiHandle = DsmApiInitialize();
@@ -1139,6 +1159,9 @@ namespace dss {
     int result = DsmApiOpen(m_dsmApiHandle, m_busConnection.c_str(), 0);
     if (result < 0) {
       throw std::runtime_error(std::string("BinaryInputScanner: Unable to open connection to: ") + m_busConnection);
+    }
+    if (dss) {
+      dss->setDsmApiBlockingCallback(m_dsmApiHandle);
     }
 
     std::vector<boost::shared_ptr<Device> > devices;

@@ -34,28 +34,39 @@
 namespace dss {
 
   class Zone;
+  class Status;
+  class StatusBit;
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
                 public AddressableModelItem {
   private:
+    __DECL_LOG_CHANNEL__;
     int m_ZoneID;
     int m_GroupID;
-    int m_ApplicationType;
-    int m_ApplicationConfiguration;
+    ApplicationType m_ApplicationType;
+    std::unique_ptr<Behavior> m_pApplicationBehavior;
     int m_LastCalledScene;
     int m_LastButOneCalledScene;
     bool m_IsValid;
     bool m_SyncPending;
+    bool m_readFromDsm;
     std::string m_AssociatedSet;
     std::map<uint8_t, std::string> m_SceneNames;
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
     int m_connectedDevices;
+    std::unique_ptr<Status> m_status; // lazy created in getStatusBit
+
+    // getter and setter for property proxy
+    int getApplicationTypeInt() const { return static_cast<int>(getApplicationType()); }
+    void setApplicationTypeInt(int applicationType) { setApplicationType(static_cast<ApplicationType>(applicationType)); }
   public:
     /** Constructs a group with the given id belonging to \a _zoneID. */
     Group(const int _id, boost::shared_ptr<Zone> _pZone);
     virtual ~Group();
+    boost::shared_ptr<Group> sharedFromThis() { return boost::static_pointer_cast<Group>(shared_from_this()); }
+
     virtual Set getDevices() const;
 
     /** Returns the id of the group */
@@ -63,12 +74,24 @@ namespace dss {
     int getZoneID() const { return m_ZoneID; }
 
     /** Returns the type of the application that this group is implementing */
-    int getApplicationType() const { return m_ApplicationType; }
-    void setApplicationType(const int applicationType);
+    ApplicationType getApplicationType() const { return m_ApplicationType; }
+    void setApplicationType(ApplicationType applicationType);
 
-    /** Returns the configuration of this group */
-    int getApplicationConfiguration() const { return m_ApplicationConfiguration; }
-    void setApplicationConfiguration(const int applicationConfiguration);
+    int getColor() const;
+
+    /** Returns and sets the configuration of this group */
+    uint32_t getApplicationConfiguration() const { return m_pApplicationBehavior->getConfiguration(); }
+    void setApplicationConfiguration(const uint32_t applicationConfiguration) {
+      return m_pApplicationBehavior->setConfiguration(applicationConfiguration);
+    }
+
+    /** Translates the configuration back and forth between binary and JSON format */
+    void serializeApplicationConfiguration(uint32_t configuration, JSONWriter& writer) const {
+      return m_pApplicationBehavior->serializeConfiguration(configuration, writer);
+    }
+    uint32_t deserializeApplicationConfiguration(const std::string& jsonConfiguration) const {
+      return m_pApplicationBehavior->deserializeConfiguration(jsonConfiguration);
+    }
 
     /** returns true if the group is configured and usable */
     bool isValid() const;
@@ -76,6 +99,12 @@ namespace dss {
 
     bool isSynchronized() const { return !m_SyncPending; }
     void setIsSynchronized(const bool _value) { m_SyncPending = !_value; }
+
+    void setReadFromDsm(const bool _readFromDsm) { m_readFromDsm = _readFromDsm; }
+    bool isReadFromDsm() const { return m_readFromDsm; }
+
+    void setFromSpec(const GroupSpec_t& spec);
+    bool isConfigEqual(const GroupSpec_t& spec);
 
     std::string getAssociatedSet() const { return m_AssociatedSet; }
     void setAssociatedSet(const std::string& _value) { m_AssociatedSet = _value; }
@@ -124,12 +153,17 @@ namespace dss {
     void sensorPush(const dsuid_t& _sourceID, SensorType _type, double _value);
     void sensorInvalid(SensorType _type);
 
+    /// Get group StatusBit instance for given status type
+    StatusBit& getStatusBit(StatusBitType statusBitType);
+
     void addConnectedDevice();
     void removeConnectedDevice();
     bool hasConnectedDevices() { return (m_connectedDevices > 0); }
 
     static boost::shared_ptr<Group> make(const GroupSpec_t& _spec, boost::shared_ptr<Zone> _pZone);
   }; // Group
+
+  std::ostream& operator<<(std::ostream &, const Group &);
 
 } // namespace dss
 

@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <boost/optional.hpp>
 
 namespace dss {
 
@@ -158,7 +159,7 @@ namespace dss {
   const uint8_t SensorFunction_Generic11 = 11;
 
   enum class SensorType {
-    Status = 0, ///< Status sensor value. See also \ref StatusSensorBits.
+    Status = 0, ///< Status sensor value. Value bits are defined by \re StatusBitType
     ActivePower = 4,
     OutputCurrent = 5,
     ElectricMeter = 6,
@@ -187,12 +188,6 @@ namespace dss {
     UnknownType = 255,
   };
 
-  // Interpretation of SensorType::Status bit values.
-  enum class StatusSensorBits {
-    MALFUNCTION = 0,
-    SERVICE = 1,
-  };
-
   const int SensorMaxLifeTime = 3600; /* 1h */
 
   double sensorValueToDouble(SensorType _sensorType, const int _sensorValue);
@@ -200,6 +195,15 @@ namespace dss {
   uint8_t sensorTypeToPrecision(SensorType _sensorType);
   std::string sensorTypeName(SensorType _sensorType);
   std::ostream& operator<<(std::ostream& stream, SensorType type);
+
+  /// Status types. Constant value represent bit number of SensorType::Status value.
+  enum class StatusBitType : std::size_t {
+    MALFUNCTION = 0,
+    SERVICE = 1,
+  };
+  /// Maximal StatusBitType value. Restriction imposed by SensorValue range.
+  static constexpr std::size_t STATUS_BIT_TYPE_MAX = 11;
+  std::ostream& operator<<(std::ostream& stream, StatusBitType type);
 
   enum class BinaryInputType {
     Presence = 1,
@@ -227,6 +231,25 @@ namespace dss {
     Service = 23,
   };
   std::ostream& operator<<(std::ostream& stream, BinaryInputType type);
+  boost::optional<StatusBitType> statusBitTypeForBinaryInputType(BinaryInputType type);
+
+  enum class ApplicationType {
+    None = 0,
+    Lights = 1,
+    Blinds = 2,
+    Heating = 3,
+    Audio = 4,
+    Video = 5,
+    Cooling = 9,
+    Ventilation = 10,
+    Window = 11,
+    Curtains = 12,
+    Temperature = 48,
+    ApartmentVentilation = 64,
+  };
+
+  std::ostream& operator<<(std::ostream& stream, ApplicationType type);
+  int getApplicationTypeColor(ApplicationType type);
 
   enum class BinaryInputState {
     Inactive = 0,
@@ -458,6 +481,55 @@ namespace dss {
   #define Fid_105_Mask_ExtraHardware 0x08
   #define Fid_105_Mask_OutputPresent 0x10
   #define Fid_105_Mask_VariableRamptime 0x20
+
+  /// documentation:
+  ///  http://redmine.digitalstrom.org/attachments/download/6076/model-features.pdf
+  ///  http://redmine.digitalstrom.org/projects/dss/wiki/Model_Features
+  enum class ModelFeatureId {
+    dontcare = 0,
+    blink = 1,
+    ledauto = 2,
+    leddark = 3,
+    transt = 4,
+    outmode = 5,
+    outmodeswitch = 6,
+    outvalue8 = 7,
+    pushbutton = 8,
+    pushbdevice = 9,
+    pushbsensor = 10,
+    pushbarea = 11,
+    pushbadvanced = 12,
+    pushbcombined = 13,
+    shadeprops = 14,
+    shadeposition = 15,
+    motiontimefins = 16,
+    optypeconfig = 17,
+    shadebladeang = 18,
+    highlevel = 19,
+    consumption = 20,
+    jokerconfig = 21,
+    akmsensor = 22,
+    akminput = 23,
+    akmdelay = 24,
+    twowayconfig = 25,
+    outputchannels = 26,
+    heatinggroup = 27,
+    heatingoutmode = 28,
+    heatingprops = 29,
+    pwmvalue = 30,
+    valvetype = 31,
+    extradimmer = 32,
+    umvrelay = 33,
+    blinkconfig = 34,
+    umroutmode = 35,
+    locationconfig = 36,
+    windprotectionconfigawning = 37,
+    windprotectionconfigblind = 38,
+    impulseconfig = 39,
+    outmodegeneric = 40,
+    outconfigswitch = 41,
+    temperatureoffset = 42,
+  };
 
 } // namespace dss
 #endif

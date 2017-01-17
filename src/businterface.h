@@ -32,6 +32,7 @@
 #include <limits.h>
 
 #include "ds485types.h"
+#include "model/behavior.h"
 #include "sceneaccess.h"
 #include "model/deviceinterface.h"
 
@@ -65,26 +66,21 @@ namespace dss {
     uint8_t ApartmentState;
   } DSMeterSpec_t;
 
-  typedef struct {
+  typedef struct GroupSpec {
     uint8_t GroupID;
-    uint8_t stateMachineID;
+    ApplicationType applicationType;
     uint16_t NumberOfDevices;
     std::string Name;
-    uint32_t stateMachineConfig;
+    uint32_t applicationConfiguration;
   } GroupSpec_t;
 
-  typedef struct {
-    uint8_t GroupID;
-    uint8_t stateMachineID;
+  typedef struct ClusterSpec : public GroupSpec {
     bool canHaveStateMachine;
-    uint16_t NumberOfDevices;
-    std::string Name;
     uint16_t protectionClass;
     uint16_t location;
     uint16_t floor;
     bool configurationLocked;
     std::vector<int> lockedScenes;
-    uint32_t stateMachineConfig;
   } ClusterSpec_t;
 
   typedef struct {
@@ -113,12 +109,12 @@ namespace dss {
     uint8_t SensorConversionFlag;
   } DeviceSensorSpec_t;
 
-  typedef struct {
+  struct DeviceSpec_t {
     devid_t ShortAddress;
     uint16_t FunctionID;
     uint16_t ProductID;
     uint16_t VendorID;
-    uint16_t Version;
+    uint16_t revisionId;
     bool Locked;
     uint8_t ActiveState;
     uint8_t OutputMode;
@@ -140,7 +136,7 @@ namespace dss {
     bool outputChannelsValid;
     uint8_t activeGroup;
     uint8_t defaultGroup;
-  } DeviceSpec_t;
+  };
 
   typedef struct {
     uint32_t Hash;
@@ -366,15 +362,15 @@ namespace dss {
     virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name) = 0;
 
     /** Create and manage user groups */
-    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name) = 0;
+    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig, const std::string& _name) = 0;
     virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID) = 0;
-    virtual void groupSetStateMachine(uint16_t _zoneID, uint8_t _groupID, uint8_t _stateMachineID) = 0;
+    virtual void groupSetApplication(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig) = 0;
     virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) = 0;
 
-    virtual void createCluster(uint8_t _groupID, uint8_t _stateMachineID, const std::string& _name) = 0;
+    virtual void createCluster(uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig, const std::string& _name) = 0;
     virtual void removeCluster(uint8_t _clusterID) = 0;
     virtual void clusterSetName(uint8_t _clusterID, const std::string& _name) = 0;
-    virtual void clusterSetStateMachine(uint8_t _clusterID, uint8_t _stateMachineID) = 0;
+    virtual void clusterSetApplication(uint8_t _clusterID, ApplicationType applicationType, uint32_t applicationConfig) = 0;
     virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) = 0;
     virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) = 0;
     virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) = 0;

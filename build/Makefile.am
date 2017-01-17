@@ -4,7 +4,9 @@ EXTRA_DIST =
 CLEANFILES = build_info.h
 TESTS =
 noinst_LIBRARIES =
+noinst_PROGRAMS =
 BUILT_SOURCES = build_info.h
+AM_CPPFLAGS = -I$(top_srcdir)/external
 
 build_info.h:
 	$(top_srcdir)/tools/dss_gen_version_unix.sh .. .

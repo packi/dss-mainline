@@ -65,6 +65,7 @@ namespace dss {
 
   DSBusInterface::DSBusInterface(DSS* _pDSS, ModelMaintenance* _pModelMaintenance)
   : ThreadedSubsystem(_pDSS, "DSBusInterface"),
+    m_dss(_pDSS),
     m_SystemUser(NULL),
     m_pModelMaintenance(_pModelMaintenance),
     m_dsmApiHandle(NULL),
@@ -223,6 +224,9 @@ namespace dss {
       if(result < 0) {
         log("Couldn't open dsmapi connection to '" + m_connectionURI + "' result: " + intToString(result));
         return;
+      }
+      if (m_dss) {
+        m_dss->setDsmApiBlockingCallback(m_dsmApiHandle);
       }
 
       // read out own dsid
