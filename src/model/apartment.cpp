@@ -355,6 +355,14 @@ namespace dss {
           boost::shared_ptr<Cluster> pCluster = boost::make_shared<Cluster>(i, boost::ref<Apartment>(*this));
           result->addGroup(pCluster);
         }
+
+        // pre-create apartment ventilation group
+        boost::shared_ptr<Group> group;
+        group.reset(new Group(GroupIDGlobalAppDsVentilation, result));
+        group->setName("apartmentVentilation");
+        group->setApplicationType(ApplicationType::ApartmentVentilation);
+        group->setIsValid(true);  // TODO(soon): this may not be needed for AV (maybe it is only valid when devices are present)
+        result->addGroup(group);
       }
     } else {
       result->publishToPropertyTree();
