@@ -324,7 +324,7 @@ namespace dss {
     boost::shared_ptr<SubscriptionOptions> getOptions() { return m_SubscriptionOptions; }
     boost::shared_ptr<const SubscriptionOptions> getOptions() const { return m_SubscriptionOptions; }
 
-    const EventPropertyFilterOption getFilterMode() { return m_FilterOption; }
+    EventPropertyFilterOption getFilterMode() { return m_FilterOption; }
     EventPropertyFilter** const getFilter() { return m_Filter.c_array(); }
 
     void addPropertyFilter(EventPropertyFilter* _pPropertyFilter);

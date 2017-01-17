@@ -2209,7 +2209,7 @@ namespace dss {
     return (hasOutput() && (getDeviceClass() == DEVICE_CLASS_BL));
   }
 
-  const DeviceValveType_t Device::getValveType () const {
+  DeviceValveType_t Device::getValveType () const {
     return m_ValveType;
   }
 
@@ -2308,7 +2308,7 @@ namespace dss {
     return "";
   }
 
-  const uint8_t Device::getBinaryInputCount() const {
+  uint8_t Device::getBinaryInputCount() const {
     return (uint8_t) m_binaryInputs.size();
   }
 
@@ -2482,7 +2482,7 @@ namespace dss {
     return m_binaryInputs[_inputIndex];
   }
 
-  const uint8_t Device::getSensorCount() const {
+  uint8_t Device::getSensorCount() const {
     return (uint8_t) m_sensorInputCount;
   }
 
@@ -2583,7 +2583,7 @@ namespace dss {
     }
   }
 
-  const int Device::getOutputChannelIndex(int _channelId) const {
+  int Device::getOutputChannelIndex(int _channelId) const {
     int index = 0;
     for (std::vector<int>::const_iterator it = m_outputChannels.begin();
             it != m_outputChannels.end();
@@ -2596,14 +2596,14 @@ namespace dss {
     return -1;
   }
 
-  const int Device::getOutputChannel(int _index) const {
+  int Device::getOutputChannel(int _index) const {
     if (_index > m_outputChannelCount) {
       return -1;
     }
     return m_outputChannels[_index];
   }
 
-  const int Device::getOutputChannelCount() const {
+  int Device::getOutputChannelCount() const {
     return m_outputChannelCount;
   }
 
@@ -2629,7 +2629,7 @@ namespace dss {
     throw ItemNotFoundException(std::string("Device::getSensor: no sensor with given type found"));
   }
 
-  const void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
+  void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
     }
@@ -2641,7 +2641,7 @@ namespace dss {
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
 
-  const void Device::setSensorValue(int _sensorIndex, double _sensorValue) const {
+  void Device::setSensorValue(int _sensorIndex, double _sensorValue) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
     }
@@ -2653,7 +2653,7 @@ namespace dss {
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
 
-  const void Device::setSensorDataValidity(int _sensorIndex, bool _valid) const {
+  void Device::setSensorDataValidity(int _sensorIndex, bool _valid) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
     }
