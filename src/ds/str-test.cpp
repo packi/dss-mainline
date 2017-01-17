@@ -28,6 +28,7 @@ std::ostream& operator<<(std::ostream& stream, Enum x) {
       case Enum::A: return stream << "a";
       case Enum::B: return stream << "b";
     }
+    return stream << "?";
   }
 }
 
