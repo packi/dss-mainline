@@ -558,7 +558,7 @@ namespace dss {
 
     /** Returns the short address of the device. This is the address
      * the device got from the dSM. */
-    devid_t getShortAddress() const;
+    const devid_t& getShortAddress() const { return m_ShortAddress; }
     /** Sets the short-address of the device. */
     void setShortAddress(const devid_t _shortAddress);
 

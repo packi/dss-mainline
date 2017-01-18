@@ -1238,10 +1238,6 @@ namespace dss {
     return (_other.m_DSID == m_DSID);
   } // operator==
 
-  devid_t Device::getShortAddress() const {
-    return m_ShortAddress;
-  } // getShortAddress
-
   void Device::setShortAddress(const devid_t _shortAddress) {
     m_ShortAddress = _shortAddress;
     m_LastKnownShortAddress = _shortAddress;
