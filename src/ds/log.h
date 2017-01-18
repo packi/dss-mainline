@@ -100,9 +100,8 @@ constexpr const char *trimArg(const char *x) {
 //
 #define DS_ASSERT(condition, ...) \
     if (DS_LIKELY(condition)) {} else { \
-        std::cerr << ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ', #condition \
+        ::ds::log::_private::assert_(ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ', #condition \
             DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
-        abort(); \
     }
 #define DS_FAIL_ASSERT(...) \
     if (false) {} else { \
@@ -110,6 +109,11 @@ constexpr const char *trimArg(const char *x) {
             DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
         abort(); \
     }
+
+namespace _private {
+//assert is macro, so we cannot reuse its name here
+void assert_(const std::string& message);
+} // namespace _private
 
 } // namespace log
 } // namespace ds

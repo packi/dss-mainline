@@ -19,9 +19,7 @@
 #include "log.h"
 #include "catch.hpp"
 
-namespace ds {
-
-TEST_CASE("dsAssume", "[dsLog][ds]") {
+TEST_CASE("dsRequire", "[dsLog][ds]") {
     try {
         auto&& x = 5;
         DS_REQUIRE(x == 4, x);
@@ -35,4 +33,7 @@ TEST_CASE("dsAssume", "[dsLog][ds]") {
     }
 }
 
-} // namespace ds
+TEST_CASE("dsAssert", "[dsLog][ds]") {
+    DS_ASSERT(true);
+    DS_ASSERT(true, "hi");
+}
