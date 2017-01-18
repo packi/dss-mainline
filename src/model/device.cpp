@@ -144,7 +144,7 @@ namespace dss {
     try {
       m_device.getApartment().removeState(m_state);
     } catch (const std::exception& e) {
-      Logger::getInstance()->log(std::string("~DeviceBinaryInput: remove state failed:") + e.what(), lsWarning);
+      log(std::string("~DeviceBinaryInput: remove state failed:") + e.what(), lsWarning);
     }
   }
 
@@ -243,6 +243,7 @@ namespace dss {
   }
 
   //================================================== Device
+  __DEFINE_LOG_CHANNEL__(Device, lsNotice);
 
   Device::Device(dsuid_t _dsid, Apartment* _pApartment)
   : AddressableModelItem(_pApartment),
@@ -343,7 +344,7 @@ namespace dss {
           dev->getParentNode()->removeChild(dev);
         }
       } catch (std::runtime_error &err) {
-        Logger::getInstance()->log(err.what());
+        log(err.what(), lsError);
       }
 
       if (m_pApartment->getPropertyNode() != NULL) {
@@ -1323,9 +1324,9 @@ namespace dss {
       if (m_pAliasNode == NULL) {
         PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
         if (node != NULL) {
-          Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
+          log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
           if (node->size() > 0) {
-            Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
+            log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
             return;
           }
         }
@@ -1379,10 +1380,10 @@ namespace dss {
           gsubnode->createProperty("id")->setIntegerValue(_groupID);
         }
       } else {
-        Logger::getInstance()->log("Device " + dsuid2str(m_DSID) + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
+        log("Device " + dsuid2str(m_DSID) + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID), lsDebug);
       }
     } else {
-      Logger::getInstance()->log("Device::addToGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
+      log("Device::addToGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
     }
   } // addToGroup
 
@@ -1407,7 +1408,7 @@ namespace dss {
         }
       }
     } else {
-      Logger::getInstance()->log("Device::removeFromGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
+      log("Device::removeFromGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
     }
   } // removeFromGroup
 
@@ -1671,7 +1672,7 @@ namespace dss {
                 IsEvenDsuid(m_DSID))); // even dSID
       }
     } catch (std::runtime_error &err) {
-      Logger::getInstance()->log(err.what());
+      log(err.what(), lsError);
     }
     return ret;
   }
@@ -1705,7 +1706,7 @@ namespace dss {
         }
       }
     } catch (std::runtime_error &err) {
-      Logger::getInstance()->log(err.what());
+      log(err.what(), lsError);
     }
 
     return ret;
@@ -2187,7 +2188,7 @@ namespace dss {
       deviceType = DEVICE_VALVE_UNKNOWN;
       assigned = true;
     } else {
-      Logger::getInstance()->log(std::string("Invalid valve type: ") + _string,
+      log(std::string("Invalid valve type: ") + _string,
                                  lsWarning);
     }
 
@@ -2367,7 +2368,7 @@ namespace dss {
           }
         }
       } catch (std::runtime_error& ex) {
-          Logger::getInstance()->log("Device::initStates:" + dsuid2str(m_DSID)
+          log("Device::initStates:" + dsuid2str(m_DSID)
               + " state:" + stateName + " what:" + ex.what(), lsError);
           throw ex;
       }
@@ -2380,14 +2381,14 @@ namespace dss {
       try {
         m_pApartment->removeState(state.second);
       } catch (ItemNotFoundException& e) {
-        Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
+        log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
       }
     }
     m_states.clear();
   }
 
   void Device::setStateValue(const std::string& name, const std::string& value) {
-    Logger::getInstance()->log("Device::setStateValue name:" + name + " value:" + value, lsDebug);
+    log("Device::setStateValue name:" + name + " value:" + value, lsDebug);
     try {
       BOOST_FOREACH(const States::value_type& state, m_states) {
         if (state.first == name) {
@@ -2395,7 +2396,7 @@ namespace dss {
         }
       }
     } catch(std::runtime_error& e) {
-      Logger::getInstance()->log("Device::setStateValue name:" + name
+      log("Device::setStateValue name:" + name
           + " value:" + value + " what:" + e.what(), lsWarning);
     }
   }
@@ -2412,10 +2413,10 @@ namespace dss {
             break;
           }
         }
-        Logger::getInstance()->log("Device::setStateValues name:" + stateName + " value:" + *newValue, lsDebug);
+        log("Device::setStateValues name:" + stateName + " value:" + *newValue, lsDebug);
         statePair.second->setState(coDsmApi, *newValue);
       } catch(std::runtime_error& e) {
-        Logger::getInstance()->log("Device::setStateValues name:" + stateName
+        log("Device::setStateValues name:" + stateName
             + " value:" + *newValue + " what:" + e.what(), lsWarning);
       }
     }

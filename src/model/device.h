@@ -250,6 +250,7 @@ namespace dss {
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
   private:
+    __DECL_LOG_CHANNEL__;
     std::string m_Name;
     dsuid_t m_DSID;
     devid_t m_ShortAddress;
