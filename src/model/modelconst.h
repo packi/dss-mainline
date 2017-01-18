@@ -531,6 +531,8 @@ namespace dss {
     temperatureoffset = 42,
   };
 
+  const char* modelFeatureName(ModelFeatureId x);
+  ModelFeatureId modelFeatureFromName(const std::string& x);
   std::ostream& operator<<(std::ostream& stream, ModelFeatureId x);
 
 } // namespace dss

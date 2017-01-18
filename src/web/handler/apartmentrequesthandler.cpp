@@ -576,9 +576,8 @@ namespace dss {
             auto&& model = f.at(i);
             json.startObject(model->first);
 
-            for (size_t devf = 0; devf < model->second->size(); devf++) {
-              ModelFeatureId feature = model->second->at(devf);
-              json.add(ModelFeatures::getInstance()->getFeatureName(feature), true);
+            foreach(auto&& feature, *model->second) {
+              json.add(modelFeatureName(feature), true);
             }
             json.endObject();
           }
@@ -587,9 +586,8 @@ namespace dss {
         json.endObject();
         
         json.startObject("reference");
-        auto&& all = ModelFeatures::getInstance()->getAvailableFeatures();
-        for (size_t a = 0; a < all->size(); a++) {
-          json.add(ModelFeatures::getInstance()->getFeatureName(all->at(a)), false);
+        foreach (auto&& feature, *ModelFeatures::getInstance()->getAvailableFeatures()) {
+          json.add(modelFeatureName(feature), false);
         }
         json.endObject();
 
