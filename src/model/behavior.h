@@ -45,8 +45,8 @@ public:
   virtual int getNextScene(int currentScene) = 0;
   virtual int getPreviousScene(int currentScene) = 0;
 
-  virtual void publishToPropertyTree();
-  virtual void removeFromPropertyTree();
+  virtual void publishToPropertyTree() = 0;
+  virtual void removeFromPropertyTree() = 0;
 };
 
 class DefaultBehavior : public Behavior {
@@ -60,6 +60,9 @@ public:
 
   int getNextScene(int currentScene) DS_OVERRIDE;
   int getPreviousScene(int currentScene) DS_OVERRIDE;
+
+  void publishToPropertyTree() DS_OVERRIDE;
+  void removeFromPropertyTree() DS_OVERRIDE;
 };
 
 class VentilationBehavior : public Behavior {
@@ -68,9 +71,6 @@ private:
   static const std::map<int, int> sceneIdTooffset;
 
   std::string getActiveBasicScenes() const;
-
-  void publishMyToPropertyTree();
-  void removeMyFromPropertyTree();
 public:
   VentilationBehavior(PropertyNodePtr& propertyNode);
   VentilationBehavior(PropertyNodePtr& propertyNode, int configuration);
