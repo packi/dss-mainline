@@ -651,7 +651,7 @@ namespace dss {
 
     // valve configuration
     bool isValveDevice() const;
-    const DeviceValveType_t getValveType() const;
+    DeviceValveType_t getValveType() const;
     void setValveType(DeviceValveType_t _type);
 
     std::string getValveTypeAsString() const;
@@ -686,7 +686,7 @@ namespace dss {
     void setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL, const std::string& _configLink);
     void setOemProductInfoState(const DeviceOEMState_t _state);
     std::string getOemProductInfoStateAsString() const { return oemStateToString(m_OemProductInfoState); }
-    const DeviceOEMState_t getOemProductInfoState() const { return m_OemProductInfoState; }
+    DeviceOEMState_t getOemProductInfoState() const { return m_OemProductInfoState; }
     const std::string& getOemProductName() const { return m_OemProductName; }
     const std::string& getOemProductIcon() const { return m_OemProductIcon; }
     const std::string& getOemProductURL() const { return m_OemProductURL; }
@@ -733,7 +733,7 @@ namespace dss {
     bool getHasActions() const { return m_hasActions; }
 
     void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
-    const uint8_t getBinaryInputCount() const;
+    uint8_t getBinaryInputCount() const;
     const std::vector<boost::shared_ptr<DeviceBinaryInput> >& getBinaryInputs() const;
     const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
     void setBinaryInputTarget(uint8_t _index, GroupType targetGroupType, uint8_t targetGroup);
@@ -748,19 +748,19 @@ namespace dss {
     void setStateValues(const std::vector<std::pair<std::string, std::string> >& values);
 
     void setSensors(const std::vector<DeviceSensorSpec_t>& _binaryInput);
-    const uint8_t getSensorCount() const;
+    uint8_t getSensorCount() const;
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
     const boost::shared_ptr<DeviceSensor_t> getSensorByType(SensorType _sensorType) const;
-    const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
-    const void setSensorValue(int _sensorIndex, double _sensorValue) const;
-    const void setSensorDataValidity(int _sensorIndex, bool _valid) const;
+    void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
+    void setSensorValue(int _sensorIndex, double _sensorValue) const;
+    void setSensorDataValidity(int _sensorIndex, bool _valid) const;
     bool isSensorDataValid(int _sensorIndex) const;
 
     void setOutputChannels(const std::vector<int>& _outputChannels);
-    const int getOutputChannelCount() const;
-    const int getOutputChannelIndex(int _channelId) const;
-    const int getOutputChannel(int _index) const;
+    int getOutputChannelCount() const;
+    int getOutputChannelIndex(int _channelId) const;
+    int getOutputChannel(int _index) const;
 
     uint8_t getDeviceUMVRelayValue();
     void setDeviceUMVRelayValue(uint8_t _value);

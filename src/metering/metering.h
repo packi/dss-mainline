@@ -117,7 +117,7 @@ namespace dss {
                    etEnergy,       /**< Energy counter. */
                  } SeriesTypes;
 
-    const std::vector<boost::shared_ptr<MeteringConfigChain> > getConfig() const { return m_Config; }
+    const std::vector<boost::shared_ptr<MeteringConfigChain> >& getConfig() const { return m_Config; }
     const std::string& getStorageLocation() const { return m_MeteringStorageLocation; }
     void postMeteringEvent(boost::shared_ptr<DSMeter> _meter, unsigned int _valuePower, unsigned long long _valueEnergy, DateTime _sampledAt);
     void setMeteringBusInterface(MeteringBusInterface* _value) { m_pMeteringBusInterface = _value; }
@@ -152,10 +152,10 @@ namespace dss {
 
     void addConfig(MeteringConfig _config);
 
-    const int size() const;
+    int size() const;
 
-    const int getResolution(int _index) const;
-    const int getNumberOfValues(int _index) const;
+    int getResolution(int _index) const;
+    int getNumberOfValues(int _index) const;
 
     int getCheckIntervalSeconds() const;
   }; // MeteringConfigChain

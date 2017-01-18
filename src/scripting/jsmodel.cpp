@@ -1611,7 +1611,7 @@ namespace dss {
 
   static JSPropertySpec set_properties[] = {
     {"className", 0, 0, set_JSGet, NULL},
-    {NULL}
+    {}
   };
 
   JSBool dev_turn_on(JSContext* cx, uintN argc, jsval* vp) {
