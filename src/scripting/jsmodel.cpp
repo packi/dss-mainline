@@ -4590,6 +4590,144 @@ namespace dss {
     return JS_FALSE;
   } // zone_addDevice
 
+  JSBool zone_getGroupConfiguration(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_getGroupConfiguration: ext of wrong type");
+        return JS_FALSE;
+      }
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      uint8_t groupID;
+      if (pZone != NULL && argc >= 1) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+        } catch (ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch (std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        if (!pGroup) {
+          JS_ReportWarning(cx, "Model.zone_getGroupConfiguration: group with id \"%d\" not found", groupID);
+          return JS_FALSE;
+        }
+
+        // Currently configuration for zone related groups in zone 0 are undefined
+        if ((pZone->getID() == 0) && (isDefaultGroup(pGroup->getID()))) {
+          JS_ReportWarning(cx,
+              "Model.zone_getGroupConfiguration: Configuration for group with id \"%d\" in zone 0 is not defined",
+              groupID);
+          return JS_FALSE;
+        }
+
+        // read configuration from group and serialize it to JSON object
+        std::string configJson = pGroup->serializeApplicationConfiguration(pGroup->getApplicationConfiguration());
+        JSString* str = JS_NewStringCopyN(cx, configJson.c_str(), configJson.size());
+        JS_SET_RVAL(cx, vp, STRING_TO_JSVAL(str));
+        return JS_TRUE;
+      }
+    } catch (ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_getGroupConfiguration
+
+  // this function provide 3 overloads:
+  // setGroupConfiguration(int groupID) - sets default configuration for group
+  // setGroupConfiguration(int groupID, string jsonConfiguration) - sets the configuration written in JSON format without changing the application Type.
+  //                                                                Cannot be used for cluster and user groups.
+  // setGroupConfiguration(int groupID, int applicationType, string jsonConfiguration) - sets the configuration for specified application type.
+  JSBool zone_setGroupConfiguration(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_setGroupConfiguration: ext of wrong type");
+        return JS_FALSE;
+      }
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      uint8_t groupID;
+      std::string jsonConfiguration = "{}";
+      int applicationType = -1;
+      if (pZone != NULL && argc >= 1) {
+        try {
+          groupID = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+
+          if (argc == 2) {
+            jsonConfiguration = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]);
+          } else if (argc > 2) {
+            applicationType = ctx->convertTo<int>(JS_ARGV(cx, vp)[1]);
+            jsonConfiguration = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]);
+          }
+        } catch (ScriptException& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        } catch (std::invalid_argument& e) {
+          JS_ReportError(cx, e.what());
+          return JS_FALSE;
+        }
+
+        boost::shared_ptr<Group> pGroup = pZone->getGroup(groupID);
+        if (!pGroup) {
+          JS_ReportWarning(cx, "Model.zone_setGroupConfiguration: group with id \"%d\" not found", groupID);
+          return JS_FALSE;
+        }
+
+        // Currently configuration for zone related groups in zone 0 are undefined
+        if ((pZone->getID() == 0) && (isDefaultGroup(pGroup->getID()))) {
+          JS_ReportWarning(cx,
+              "Model.zone_setGroupConfiguration: Configuration for group with id \"%d\" in zone 0 is not defined",
+              groupID);
+          return JS_FALSE;
+        }
+
+        // if the applicationType was not provided we assume current group application type, but only for dS defined
+        // groups
+        if (applicationType < 0) {
+          if (isDefaultGroup(pGroup->getID()) || isGlobalAppDsGroup(pGroup->getID())) {
+            applicationType = static_cast<int>(pGroup->getApplicationType());
+          } else {
+            JS_ReportWarning(cx, "Model.zone_setGroupConfiguration: Invalid application Type \"%d\"", applicationType);
+            return JS_FALSE;
+          }
+        }
+
+        StructureManipulator manipulator(*ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
+            *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(), ext->getApartment());
+
+        // set the configuration in selected group
+        manipulator.groupSetApplication(pGroup, static_cast<ApplicationType>(applicationType),
+            pGroup->deserializeApplicationConfiguration(jsonConfiguration));
+
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      }
+    } catch (ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  } // zone_setGroupConfiguration
 
   JSFunctionSpec zone_methods[] = {
     JS_FS("getDevices", zone_getDevices, 0, 0),
@@ -4613,6 +4751,8 @@ namespace dss {
     JS_FS("getAssignedSensor", zone_getAssignedSensor, 1, 0),
     JS_FS("addStateSensor", zone_addStateSensor, 3, 0),
     JS_FS("addDevice", zone_addDevice, 1, 0),
+    JS_FS("getGroupConfiguration", zone_getGroupConfiguration, 1, 0),
+    JS_FS("setGroupConfiguration", zone_setGroupConfiguration, 1, 0),
     JS_FS_END
   };
 
@@ -4701,8 +4841,7 @@ namespace dss {
     try {
       boost::shared_ptr<State> pState = static_cast<state_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pState;
       if (pState != NULL) {
-        if ((pState->getType() != StateType_Service) &&
-            (pState->getType() != StateType_Script)) {
+        if ((pState->getType() != StateType_Service) && (pState->getType() != StateType_Script)) {
           JS_ReportError(cx, "State type is not allowed to be set by scripting");
           JS_SET_RVAL(cx, vp, JSVAL_NULL);
           return JS_FALSE;
