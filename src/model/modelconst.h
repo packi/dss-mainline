@@ -530,6 +530,9 @@ namespace dss {
     outconfigswitch = 41,
     temperatureoffset = 42,
     apartmentapplication = 43,
+    ftwtempcontrolventilationselect = 44,
+    ftwdisplaysettings = 45,
+    ftwbacklighttimeout = 46
   };
 
   boost::optional<const char*> modelFeatureName(ModelFeatureId x);

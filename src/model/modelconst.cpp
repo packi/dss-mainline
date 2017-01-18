@@ -468,6 +468,12 @@ namespace dss {
         return "temperatureoffset";
       case ModelFeatureId::apartmentapplication:
         return "apartmentapplication";
+      case ModelFeatureId::ftwtempcontrolventilationselect:
+        return "ftwtempcontrolventilationselect";
+      case ModelFeatureId::ftwdisplaysettings:
+        return "ftwdisplaysettings";
+      case ModelFeatureId::ftwbacklighttimeout:
+        return "ftwbacklighttimeout";
     }
     return boost::none;
   }
@@ -561,7 +567,14 @@ namespace dss {
       return ModelFeatureId::temperatureoffset;
     } else if (x == "apartmentapplication") {
       return ModelFeatureId::apartmentapplication;
+    } else if (x == "ftwtempcontrolventilationselect") {
+      return ModelFeatureId::ftwtempcontrolventilationselect;
+    } else if (x == "ftwdisplaysettings") {
+      return ModelFeatureId::ftwdisplaysettings;
+    } else if (x == "ftwbacklighttimeout") {
+      return ModelFeatureId::ftwbacklighttimeout;
     }
+
     return boost::none;
   }
 

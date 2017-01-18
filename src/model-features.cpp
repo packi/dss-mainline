@@ -65,7 +65,8 @@ const char *UMV204 =    "UMV:204";
 const char *UMV200 =    "UMV:200";
 const char *UMV210 =    "UMV:210";
 const char *UMR200 =    "UMR:200";
-const char *SK20 =     "SK:20";
+const char *SK20 =      "SK:20"; // wildcard for all SK-20*
+const char *SK204 =     "SK:204";
 const char *AKM2 =      "AKM:2"; // wildcard for all AKM-2*
 
 // all available features
@@ -113,7 +114,10 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::impulseconfig,
   ModelFeatureId::outmodegeneric,
   ModelFeatureId::outconfigswitch,
-  ModelFeatureId::temperatureoffset
+  ModelFeatureId::temperatureoffset,
+  ModelFeatureId::ftwtempcontrolventilationselect,
+  ModelFeatureId::ftwdisplaysettings,
+  ModelFeatureId::ftwbacklighttimeout
 };
 
 // model features
@@ -514,6 +518,14 @@ const ModelFeatureId MF_BL_KL2[] =
   ModelFeatureId::ledauto
 };
 
+const ModelFeatureId MF_BL_SK204[] =
+{
+    ModelFeatureId::temperatureoffset,
+    ModelFeatureId::ftwtempcontrolventilationselect,
+    ModelFeatureId::ftwdisplaysettings,
+    ModelFeatureId::ftwbacklighttimeout
+};
+
 const ModelFeatureId MF_TK_TKM2[] =
 {
   ModelFeatureId::blink,
@@ -840,6 +852,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_BL_KL2, ARRAY_END(MF_BL_KL2));
   setFeatures(ColorIDBlue, KL2, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
+  fv->assign(MF_BL_SK204, ARRAY_END(MF_BL_SK204));
+  setFeatures(ColorIDBlue, SK204, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<ModelFeatureId> >();
