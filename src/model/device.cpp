@@ -3263,4 +3263,8 @@ namespace dss {
     m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t(std::move(x)));
   }
 
+  std::ostream& operator<<(std::ostream& stream, const Device& x) {
+    return stream << x.getName();
+  }
+
 } // namespace dss
