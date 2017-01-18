@@ -322,6 +322,7 @@ namespace dss {
     std::string m_VdcIconPath;
     boost::shared_ptr<std::vector<ModelFeatureId> > m_VdcModelFeatures;
     bool m_hasActions;
+    std::map<ModelFeatureId, bool> m_modelFeatures;
 
     DeviceValveType_t m_ValveType;
 
@@ -346,6 +347,9 @@ namespace dss {
     int m_floor;
     int m_pairedDevices; // currently relevant for TNY only
     bool m_visible; // currently relevant for TNY only
+
+    void updateModelFeatures();
+    void republishModelFeaturesToPropertyTree();
 
   protected:
     /** Sends the application a note that something has changed.
@@ -732,6 +736,8 @@ namespace dss {
 
     void setHasActions(bool x) { m_hasActions = x; }
     bool getHasActions() const { return m_hasActions; }
+
+    const std::map<ModelFeatureId, bool>& getModelFeatures() const { return m_modelFeatures; }
 
     void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     const uint8_t getBinaryInputCount() const;

@@ -113,6 +113,8 @@ namespace dss {
     template <typename T, typename = typename std::enable_if<std::is_enum<T>::value>::type>
     void add(const std::string& name, T x) { add(name); add(x); }
 
+    void add(ModelFeatureId x) { add(modelFeatureName(x)); }
+
     template <typename T>
     void add(const std::string& name, const std::vector<T>& items) {
       add(name);
@@ -121,6 +123,17 @@ namespace dss {
         add(item);
       }
       endArray();
+    }
+
+    template <class Key, class T, class Compare, class Alloc>
+    void add(const std::string& name, const std::map<T, Key, Compare, Alloc>& map) {
+      add(name);
+      startObject();
+      foreach(auto&& entry, map) {
+        add(entry.first);
+        add(entry.second);
+      }
+      endObject();
     }
 
     void addNull();

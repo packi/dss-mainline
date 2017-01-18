@@ -71,6 +71,7 @@ namespace dss {
     _json.add("OemProductURL", _device.getDevice()->getOemProductURL());
     _json.add("OemInternetState", _device.getDevice()->getOemInetStateAsString());
     _json.add("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
+    _json.add("modelFeatures", _device.getDevice()->getModelFeatures());
     _json.add("isVdcDevice", _device.getDevice()->isVdcDevice());
     if (_device.getDevice()->isVdcDevice()) {
       _json.add("VdcHardwareModelGuid", _device.getDevice()->getVdcHardwareModelGuid());

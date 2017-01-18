@@ -466,6 +466,8 @@ namespace dss {
         return "outconfigswitch";
       case ModelFeatureId::temperatureoffset:
         return "temperatureoffset";
+      case ModelFeatureId::apartmentapplication:
+        return "apartmentapplication";
     }
     DS_FAIL_REQUIRE("unknown feature", x);
   }
@@ -557,6 +559,8 @@ namespace dss {
       return ModelFeatureId::outconfigswitch;
     } else if (x == "temperatureoffset") {
       return ModelFeatureId::temperatureoffset;
+    } else if (x == "apartmentapplication") {
+      return ModelFeatureId::apartmentapplication;
     }
 
     DS_FAIL_REQUIRE("unknown feature", x);

@@ -58,6 +58,7 @@
 #include "src/protobufjson.h"
 #include "status-bit.h"
 #include "status.h"
+#include "src/model-features.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -592,6 +593,8 @@ namespace dss {
     if (m_DSMeterDSID != DSUID_NULL) {
       setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
     }
+
+    republishModelFeaturesToPropertyTree();
   } // publishToPropertyTree
 
   bool Device::isOn() const {
@@ -614,6 +617,7 @@ namespace dss {
     if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
+    updateModelFeatures();
     updateIconPath();
     updateAKMNode();
     publishValveTypeToPropertyTree();
@@ -1875,6 +1879,38 @@ namespace dss {
     // if GTIN is known ...
     if (devGTIN) {
       m_GTIN = devGTIN;
+    }
+  }
+
+  void Device::updateModelFeatures() {
+    decltype(m_modelFeatures) modelFeatures;
+    auto&& subclass = (m_FunctionID >> 6) & 0x3F;
+    if (subclass == 0x07) {
+      modelFeatures[ModelFeatureId::apartmentapplication] = true;
+    }
+    if (m_modelFeatures == modelFeatures) {
+      return;
+    }
+    m_modelFeatures.swap(modelFeatures);
+    republishModelFeaturesToPropertyTree();
+  }
+
+  void Device::republishModelFeaturesToPropertyTree() {
+    if (!m_pPropertyNode) {
+      return;
+    }
+    // remove old nodes
+    {
+      auto&& node = m_pPropertyNode->getProperty("modelFeatures");
+      if (node) {
+        m_pPropertyNode->removeChild(node);
+      }
+    }
+    // add new nodes
+    auto&& modelFeaturesNode = m_pPropertyNode->createProperty("modelFeatures");
+    foreach(auto&& modelFeature, m_modelFeatures) {
+      auto&& node = modelFeaturesNode->createProperty(modelFeatureName(modelFeature.first));
+      node->setValue(modelFeature.second);
     }
   }
 

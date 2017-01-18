@@ -529,6 +529,7 @@ namespace dss {
     outmodegeneric = 40,
     outconfigswitch = 41,
     temperatureoffset = 42,
+    apartmentapplication = 43,
   };
 
   const char* modelFeatureName(ModelFeatureId x);
