@@ -24,12 +24,19 @@ if test -n "$MT_SEARCHPATH_PROGS"; then
     export PATH=$PATH:$MT_SEARCHPATH_PROGS
 fi
 
-CXXFLAGS="$CXXFLAGS -std=gnu++0x"
+DSS_CPPFLAGS=""
+DSS_CPPFLAGS+=" -Werror=return-type -Werror=int-to-pointer-cast"
+DSS_CPPFLAGS+=" -Wno-unused-parameter"
+
+DSS_CXXFLAGS="-std=gnu++0x"
+
+CFLAGS="$DSS_CPPFLAGS $CFLAGS"
+CXXFLAGS="$DSS_CPPFLAGS $DSS_CXXFLAGS $CXXFLAGS"
 MT_OPTION([debug], [enable],
           [enable debug flags during compilation],
           [
-            CFLAGS="$CFLAGS -D_DEBUG -g -Wall -O1"
-            CXXFLAGS="$CXXFLAGS -D_DEBUG -g -Wall -O1"
+            CFLAGS="-D_DEBUG -g -Wall -O1 $CFLAGS"
+            CXXFLAGS="-D_DEBUG -g -Wall -O1 $CXXFLAGS"
           ],
           [])
 
