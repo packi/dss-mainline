@@ -1908,9 +1908,14 @@ namespace dss {
     }
     // add new nodes
     auto&& modelFeaturesNode = m_pPropertyNode->createProperty("modelFeatures");
-    foreach(auto&& modelFeature, m_modelFeatures) {
-      auto&& node = modelFeaturesNode->createProperty(modelFeatureName(modelFeature.first));
-      node->setValue(modelFeature.second);
+    foreach(auto&& modelFeaturePair, m_modelFeatures) {
+      auto&& id = modelFeaturePair.first;
+      if (auto&& name = modelFeatureName(id)) {
+        auto&& node = modelFeaturesNode->createProperty(*name);
+        node->setValue(modelFeaturePair.second);
+      } else {
+        log(ds::str("Cannot publish model feature ", id), lsWarning);
+      }
     }
   }
 

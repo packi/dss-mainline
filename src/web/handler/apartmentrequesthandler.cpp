@@ -577,7 +577,9 @@ namespace dss {
             json.startObject(model->first);
 
             foreach(auto&& feature, *model->second) {
-              json.add(modelFeatureName(feature), true);
+              if (auto&& name = modelFeatureName(feature)) {
+                json.add(*name, true);
+              }
             }
             json.endObject();
           }
@@ -587,7 +589,9 @@ namespace dss {
         
         json.startObject("reference");
         foreach (auto&& feature, *ModelFeatures::getInstance()->getAvailableFeatures()) {
-          json.add(modelFeatureName(feature), false);
+          if (auto&& name = modelFeatureName(feature)) {
+            json.add(*name, false);
+          }
         }
         json.endObject();
 

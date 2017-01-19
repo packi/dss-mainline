@@ -532,7 +532,7 @@ namespace dss {
     apartmentapplication = 43,
   };
 
-  const char* modelFeatureName(ModelFeatureId x);
+  boost::optional<const char*> modelFeatureName(ModelFeatureId x);
   boost::optional<ModelFeatureId> modelFeatureFromName(const std::string& x);
   std::ostream& operator<<(std::ostream& stream, ModelFeatureId x);
 

@@ -378,7 +378,7 @@ namespace dss {
     return 0;
   }
 
-  const char* modelFeatureName(ModelFeatureId x) {
+  boost::optional<const char*> modelFeatureName(ModelFeatureId x) {
     switch (x) {
       case ModelFeatureId::dontcare:
         return "dontcare";
@@ -469,7 +469,7 @@ namespace dss {
       case ModelFeatureId::apartmentapplication:
         return "apartmentapplication";
     }
-    DS_FAIL_REQUIRE("unknown feature", x);
+    return boost::none;
   }
 
   boost::optional<ModelFeatureId> modelFeatureFromName(const std::string& x) {
@@ -568,9 +568,9 @@ namespace dss {
 
   std::ostream& operator<<(std::ostream& stream, ModelFeatureId x) {
     return [&]()-> std::ostream& {
-      try {
-        return stream << modelFeatureName(x);
-      } catch (std::exception &e) {
+      if (auto&& name = modelFeatureName(x)) {
+        return stream << *name;
+      } else {
         return stream << "unknown";
       }
     }() << '(' << static_cast<int>(x) << ')';
