@@ -2953,6 +2953,9 @@ namespace dss {
                (getDeviceNumber() == 200) &&
                (getDeviceClass() == DEVICE_CLASS_SW)) {
       deviceCount = 4;
+    } else if ((getDeviceType() == DEVICE_TYPE_SK) &&
+               (getDeviceNumber() == 204)) {
+      deviceCount = 2;
     } else if ((m_FunctionID & 0xffc0) == 0x1000) {
       switch (m_FunctionID & 0x7) {
         case 0: deviceCount = 1; break;
@@ -3091,8 +3094,11 @@ namespace dss {
   }
 
   void Device::setPairedDevices(int _num) {
-    if (isMainDevice() && (m_pairedDevices != _num) &&
-        (m_pPropertyNode != NULL)) {
+    bool update = (m_pairedDevices != _num);
+
+    m_pairedDevices = _num;
+
+    if (isMainDevice() && update && (m_pPropertyNode != NULL)) {
       PropertyNodePtr paired = m_pPropertyNode->getPropertyByName("pairedDevices");
       if (paired != NULL) {
         m_pPropertyNode->removeChild(paired);
@@ -3103,15 +3109,13 @@ namespace dss {
         for (int i = 0; i < _num - 1; i++) {
           PropertyNodePtr sub = m_pPropertyNode->
               createProperty("pairedDevices/device" + intToString(i));
-         dsuid_t next;
+          dsuid_t next;
           dsuid_get_next_dsuid(current, &next);
           sub->createProperty("dSUID")->setStringValue(dsuid2str(next));
           current = next;
         }
       }
     }
-
-    m_pairedDevices = _num;
   }
 
   int Device::getPairedDevices() const {
