@@ -533,7 +533,7 @@ namespace dss {
   };
 
   const char* modelFeatureName(ModelFeatureId x);
-  ModelFeatureId modelFeatureFromName(const std::string& x);
+  boost::optional<ModelFeatureId> modelFeatureFromName(const std::string& x);
   std::ostream& operator<<(std::ostream& stream, ModelFeatureId x);
 
 } // namespace dss

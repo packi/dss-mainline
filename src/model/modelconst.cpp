@@ -472,7 +472,7 @@ namespace dss {
     DS_FAIL_REQUIRE("unknown feature", x);
   }
 
-  ModelFeatureId modelFeatureFromName(const std::string& x) {
+  boost::optional<ModelFeatureId> modelFeatureFromName(const std::string& x) {
     if (x == "dontcare") {
       return ModelFeatureId::dontcare;
     } else if (x == "blink") {
@@ -562,8 +562,7 @@ namespace dss {
     } else if (x == "apartmentapplication") {
       return ModelFeatureId::apartmentapplication;
     }
-
-    DS_FAIL_REQUIRE("unknown feature", x);
+    return boost::none;
   }
 
 
