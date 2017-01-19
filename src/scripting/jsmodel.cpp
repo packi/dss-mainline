@@ -2744,7 +2744,7 @@ namespace dss {
         try {
           pDevice->setDeviceButtonID(buttonId);
           if (pDevice->is2WayMaster()) {
-            DeviceFeatures_t features = pDevice->getFeatures();
+            DeviceFeatures_t features = pDevice->getDeviceFeatures();
             if (!features.syncButtonID) {
               JS_ResumeRequest(cx, ref);
               return JS_TRUE;

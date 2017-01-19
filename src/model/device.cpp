@@ -58,6 +58,7 @@
 #include "src/protobufjson.h"
 #include "status-bit.h"
 #include "status.h"
+#include "src/model-features.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -144,7 +145,7 @@ namespace dss {
     try {
       m_device.getApartment().removeState(m_state);
     } catch (const std::exception& e) {
-      Logger::getInstance()->log(std::string("~DeviceBinaryInput: remove state failed:") + e.what(), lsWarning);
+      log(std::string("~DeviceBinaryInput: remove state failed:") + e.what(), lsWarning);
     }
   }
 
@@ -243,6 +244,7 @@ namespace dss {
   }
 
   //================================================== Device
+  __DEFINE_LOG_CHANNEL__(Device, lsNotice);
 
   Device::Device(dsuid_t _dsid, Apartment* _pApartment)
   : AddressableModelItem(_pApartment),
@@ -343,7 +345,7 @@ namespace dss {
           dev->getParentNode()->removeChild(dev);
         }
       } catch (std::runtime_error &err) {
-        Logger::getInstance()->log(err.what());
+        log(err.what(), lsError);
       }
 
       if (m_pApartment->getPropertyNode() != NULL) {
@@ -587,6 +589,8 @@ namespace dss {
     if (m_DSMeterDSID != DSUID_NULL) {
       setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
     }
+
+    republishModelFeaturesToPropertyTree();
   } // publishToPropertyTree
 
   bool Device::isOn() const {
@@ -609,6 +613,7 @@ namespace dss {
     if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
+    updateModelFeatures();
     updateIconPath();
     updateAKMNode();
     publishValveTypeToPropertyTree();
@@ -974,7 +979,7 @@ namespace dss {
   }
 
   int Device::getSceneAngle(const int _scene) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (features.hasOutputAngle) {
       return getDeviceConfig(CfgClassSceneAngle, _scene);
     } else {
@@ -983,7 +988,7 @@ namespace dss {
   }
 
   void Device::setSceneAngle(const int _scene, const int _angle) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.hasOutputAngle) {
       throw std::runtime_error("Device does not support output angle setting");
     }
@@ -1234,10 +1239,6 @@ namespace dss {
     return (_other.m_DSID == m_DSID);
   } // operator==
 
-  devid_t Device::getShortAddress() const {
-    return m_ShortAddress;
-  } // getShortAddress
-
   void Device::setShortAddress(const devid_t _shortAddress) {
     m_ShortAddress = _shortAddress;
     m_LastKnownShortAddress = _shortAddress;
@@ -1323,9 +1324,9 @@ namespace dss {
       if (m_pAliasNode == NULL) {
         PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
         if (node != NULL) {
-          Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
+          log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
           if (node->size() > 0) {
-            Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
+            log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
             return;
           }
         }
@@ -1379,10 +1380,10 @@ namespace dss {
           gsubnode->createProperty("id")->setIntegerValue(_groupID);
         }
       } else {
-        Logger::getInstance()->log("Device " + dsuid2str(m_DSID) + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
+        log("Device " + dsuid2str(m_DSID) + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID), lsDebug);
       }
     } else {
-      Logger::getInstance()->log("Device::addToGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
+      log("Device::addToGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
     }
   } // addToGroup
 
@@ -1407,7 +1408,7 @@ namespace dss {
         }
       }
     } else {
-      Logger::getInstance()->log("Device::removeFromGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
+      log("Device::removeFromGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
     }
   } // removeFromGroup
 
@@ -1650,7 +1651,7 @@ namespace dss {
 
   bool Device::is2WayMaster() const {
 
-    if (!getFeatures().pairing) {
+    if (!getDeviceFeatures().pairing) {
       return false;
     }
 
@@ -1671,7 +1672,7 @@ namespace dss {
                 IsEvenDsuid(m_DSID))); // even dSID
       }
     } catch (std::runtime_error &err) {
-      Logger::getInstance()->log(err.what());
+      log(err.what(), lsError);
     }
     return ret;
   }
@@ -1705,7 +1706,7 @@ namespace dss {
         }
       }
     } catch (std::runtime_error &err) {
-      Logger::getInstance()->log(err.what());
+      log(err.what(), lsError);
     }
 
     return ret;
@@ -1877,6 +1878,43 @@ namespace dss {
     }
   }
 
+  void Device::updateModelFeatures() {
+    decltype(m_modelFeatures) modelFeatures;
+    auto&& subclass = (m_FunctionID >> 6) & 0x3F;
+    if (subclass == 0x07) {
+      modelFeatures[ModelFeatureId::apartmentapplication] = true;
+    }
+    if (m_modelFeatures == modelFeatures) {
+      return;
+    }
+    m_modelFeatures.swap(modelFeatures);
+    republishModelFeaturesToPropertyTree();
+  }
+
+  void Device::republishModelFeaturesToPropertyTree() {
+    if (!m_pPropertyNode) {
+      return;
+    }
+    // remove old nodes
+    {
+      auto&& node = m_pPropertyNode->getProperty("modelFeatures");
+      if (node) {
+        m_pPropertyNode->removeChild(node);
+      }
+    }
+    // add new nodes
+    auto&& modelFeaturesNode = m_pPropertyNode->createProperty("modelFeatures");
+    foreach(auto&& modelFeaturePair, m_modelFeatures) {
+      auto&& id = modelFeaturePair.first;
+      if (auto&& name = modelFeatureName(id)) {
+        auto&& node = modelFeaturesNode->createProperty(*name);
+        node->setValue(modelFeaturePair.second);
+      } else {
+        log(ds::str("Cannot publish model feature ", id), lsWarning);
+      }
+    }
+  }
+
   void Device::updateIconPath() {
     if (!m_iconPath.empty()) {
       m_iconPath.clear();
@@ -1966,7 +2004,7 @@ namespace dss {
     }
   }
 
-  const DeviceFeatures_t Device::getFeatures() const {
+  const DeviceFeatures_t Device::getDeviceFeatures() const {
     DeviceFeatures_t features;
     features.pairing = false;
     features.syncButtonID = false;
@@ -2187,7 +2225,7 @@ namespace dss {
       deviceType = DEVICE_VALVE_UNKNOWN;
       assigned = true;
     } else {
-      Logger::getInstance()->log(std::string("Invalid valve type: ") + _string,
+      log(std::string("Invalid valve type: ") + _string,
                                  lsWarning);
     }
 
@@ -2367,7 +2405,7 @@ namespace dss {
           }
         }
       } catch (std::runtime_error& ex) {
-          Logger::getInstance()->log("Device::initStates:" + dsuid2str(m_DSID)
+          log("Device::initStates:" + dsuid2str(m_DSID)
               + " state:" + stateName + " what:" + ex.what(), lsError);
           throw ex;
       }
@@ -2380,14 +2418,14 @@ namespace dss {
       try {
         m_pApartment->removeState(state.second);
       } catch (ItemNotFoundException& e) {
-        Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
+        log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
       }
     }
     m_states.clear();
   }
 
   void Device::setStateValue(const std::string& name, const std::string& value) {
-    Logger::getInstance()->log("Device::setStateValue name:" + name + " value:" + value, lsDebug);
+    log("Device::setStateValue name:" + name + " value:" + value, lsDebug);
     try {
       BOOST_FOREACH(const States::value_type& state, m_states) {
         if (state.first == name) {
@@ -2395,7 +2433,7 @@ namespace dss {
         }
       }
     } catch(std::runtime_error& e) {
-      Logger::getInstance()->log("Device::setStateValue name:" + name
+      log("Device::setStateValue name:" + name
           + " value:" + value + " what:" + e.what(), lsWarning);
     }
   }
@@ -2412,10 +2450,10 @@ namespace dss {
             break;
           }
         }
-        Logger::getInstance()->log("Device::setStateValues name:" + stateName + " value:" + *newValue, lsDebug);
+        log("Device::setStateValues name:" + stateName + " value:" + *newValue, lsDebug);
         statePair.second->setState(coDsmApi, *newValue);
       } catch(std::runtime_error& e) {
-        Logger::getInstance()->log("Device::setStateValues name:" + stateName
+        log("Device::setStateValues name:" + stateName
             + " value:" + *newValue + " what:" + e.what(), lsWarning);
       }
     }
@@ -2975,7 +3013,7 @@ namespace dss {
   }
 
   uint16_t Device::getDeviceMaxMotionTime() {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.posTimeMax) {
       throw std::runtime_error("Maximum motion time setting not supported"
                                "by this device");
@@ -2987,7 +3025,7 @@ namespace dss {
   }
 
   void Device::setDeviceMaxMotionTime(uint16_t seconds) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.posTimeMax) {
       throw std::runtime_error("Maximum motion time setting not supported"
                                "by this device");
@@ -3257,6 +3295,10 @@ namespace dss {
 
   void Device::setVdcSpec(VdsdSpec_t &&x) {
     m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t(std::move(x)));
+  }
+
+  std::ostream& operator<<(std::ostream& stream, const Device& x) {
+    return stream << x.getName();
   }
 
 } // namespace dss

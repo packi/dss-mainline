@@ -80,11 +80,15 @@ constexpr const char *trimArg(const char *x) {
 // Example:
 //
 // DS_REQUIRE(value >= 0, "Value cannot be negative.", value);
+// DS_FAIL_REQUIRE("Unknown", value);
 //
 #define DS_REQUIRE(condition, ...) \
     if (DS_LIKELY(condition)) {} else \
         throw std::runtime_error(ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ', #condition \
             DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__)))
+#define DS_FAIL_REQUIRE(...) \
+    throw std::runtime_error(ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ' \
+        DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__)))
 
 // Assert the `condition` is true.
 // This macro should be used to check for bugs in the surrounding code (broken invariant, ...)
@@ -92,10 +96,17 @@ constexpr const char *trimArg(const char *x) {
 // Example:
 //
 // DS_ASSERT(m_state == State::CONNECTED, m_state);
+// DS_FAIL_ASSERT("Invalid", m_state);
 //
 #define DS_ASSERT(condition, ...) \
     if (DS_LIKELY(condition)) {} else { \
         std::cerr << ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ', #condition \
+            DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
+        abort(); \
+    }
+#define DS_FAIL_ASSERT(...) \
+    if (false) {} else { \
+        std::cerr << ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ' \
             DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
         abort(); \
     }

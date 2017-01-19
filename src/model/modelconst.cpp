@@ -26,9 +26,11 @@
 
 #include <math.h>
 #include <ds/str.h>
+#include <ds/log.h>
 
 #include "base.h"
 #include "exception.h"
+#include "model-features.h"
 
 namespace dss {
   double sensorValueToDouble(SensorType _sensorType, int _sensorValue) {
@@ -374,6 +376,204 @@ namespace dss {
         return 0;
     }
     return 0;
+  }
+
+  boost::optional<const char*> modelFeatureName(ModelFeatureId x) {
+    switch (x) {
+      case ModelFeatureId::dontcare:
+        return "dontcare";
+      case ModelFeatureId::blink:
+        return "blink";
+      case ModelFeatureId::ledauto:
+        return "ledauto";
+      case ModelFeatureId::leddark:
+        return "leddark";
+      case ModelFeatureId::transt:
+        return "transt";
+      case ModelFeatureId::outmode:
+        return "outmode";
+      case ModelFeatureId::outmodeswitch:
+        return "outmodeswitch";
+      case ModelFeatureId::outvalue8:
+        return "outvalue8";
+      case ModelFeatureId::pushbutton:
+        return "pushbutton";
+      case ModelFeatureId::pushbdevice:
+        return "pushbdevice";
+      case ModelFeatureId::pushbarea:
+        return "pushbarea";
+      case ModelFeatureId::pushbadvanced:
+        return "pushbadvanced";
+      case ModelFeatureId::pushbcombined:
+        return "pushbcombined";
+      case ModelFeatureId::shadeprops:
+        return "shadeprops";
+      case ModelFeatureId::shadeposition:
+        return "shadeposition";
+      case ModelFeatureId::motiontimefins:
+        return "motiontimefins";
+      case ModelFeatureId::optypeconfig:
+        return "optypeconfig";
+      case ModelFeatureId::shadebladeang:
+        return "shadebladeang";
+      case ModelFeatureId::highlevel:
+        return "highlevel";
+      case ModelFeatureId::consumption:
+        return "consumption";
+      case ModelFeatureId::jokerconfig:
+        return "jokerconfig";
+      case ModelFeatureId::akmsensor:
+        return "akmsensor";
+      case ModelFeatureId::akminput:
+        return "akminput";
+      case ModelFeatureId::akmdelay:
+        return "akmdelay";
+      case ModelFeatureId::twowayconfig:
+        return "twowayconfig";
+      case ModelFeatureId::outputchannels:
+        return "outputchannels";
+      case ModelFeatureId::heatinggroup:
+        return "heatinggroup";
+      case ModelFeatureId::heatingoutmode:
+        return "heatingoutmode";
+      case ModelFeatureId::heatingprops:
+        return "heatingprops";
+      case ModelFeatureId::pwmvalue:
+        return "pwmvalue";
+      case ModelFeatureId::valvetype:
+        return "valvetype";
+      case ModelFeatureId::extradimmer:
+        return "extradimmer";
+      case ModelFeatureId::umvrelay:
+        return "umvrelay";
+      case ModelFeatureId::blinkconfig:
+        return "blinkconfig";
+      case ModelFeatureId::impulseconfig:
+        return "impulseconfig";
+      case ModelFeatureId::umroutmode:
+        return "umroutmode";
+      case ModelFeatureId::pushbsensor:
+        return "pushbsensor";
+      case ModelFeatureId::locationconfig:
+        return "locationconfig";
+      case ModelFeatureId::windprotectionconfigawning:
+        return "windprotectionconfigawning";
+      case ModelFeatureId::windprotectionconfigblind:
+        return "windprotectionconfigblind";
+      case ModelFeatureId::outmodegeneric:
+        return "outmodegeneric";
+      case ModelFeatureId::outconfigswitch:
+        return "outconfigswitch";
+      case ModelFeatureId::temperatureoffset:
+        return "temperatureoffset";
+      case ModelFeatureId::apartmentapplication:
+        return "apartmentapplication";
+    }
+    return boost::none;
+  }
+
+  boost::optional<ModelFeatureId> modelFeatureFromName(const std::string& x) {
+    if (x == "dontcare") {
+      return ModelFeatureId::dontcare;
+    } else if (x == "blink") {
+      return ModelFeatureId::blink;
+    } else if (x == "ledauto") {
+      return ModelFeatureId::ledauto;
+    } else if (x == "leddark") {
+      return ModelFeatureId::leddark;
+    } else if (x == "transt") {
+      return ModelFeatureId::transt;
+    } else if (x == "outmode") {
+      return ModelFeatureId::outmode;
+    } else if (x == "outmodeswitch") {
+      return ModelFeatureId::outmodeswitch;
+    } else if (x == "outvalue8") {
+      return ModelFeatureId::outvalue8;
+    } else if (x == "pushbutton") {
+      return ModelFeatureId::pushbutton;
+    } else if (x == "pushbdevice") {
+      return ModelFeatureId::pushbdevice;
+    } else if (x == "pushbarea") {
+      return ModelFeatureId::pushbarea;
+    } else if (x == "pushbadvanced") {
+      return ModelFeatureId::pushbadvanced;
+    } else if (x == "pushbcombined") {
+      return ModelFeatureId::pushbcombined;
+    } else if (x == "shadeprops") {
+      return ModelFeatureId::shadeprops;
+    } else if (x == "shadeposition") {
+      return ModelFeatureId::shadeposition;
+    } else if (x == "motiontimefins") {
+      return ModelFeatureId::motiontimefins;
+    } else if (x == "optypeconfig") {
+      return ModelFeatureId::optypeconfig;
+    } else if (x == "shadebladeang") {
+      return ModelFeatureId::shadebladeang;
+    } else if (x == "highlevel") {
+      return ModelFeatureId::highlevel;
+    } else if (x == "consumption") {
+      return ModelFeatureId::consumption;
+    } else if (x == "jokerconfig") {
+      return ModelFeatureId::jokerconfig;
+    } else if (x == "akmsensor") {
+      return ModelFeatureId::akmsensor;
+    } else if (x == "akminput") {
+      return ModelFeatureId::akminput;
+    } else if (x == "akmdelay") {
+      return ModelFeatureId::akmdelay;
+    } else if (x == "twowayconfig") {
+      return ModelFeatureId::twowayconfig;
+    } else if (x == "outputchannels") {
+      return ModelFeatureId::outputchannels;
+    } else if (x == "heatinggroup") {
+      return ModelFeatureId::heatinggroup;
+    } else if (x == "heatingoutmode") {
+      return ModelFeatureId::heatingoutmode;
+    } else if (x == "heatingprops") {
+      return ModelFeatureId::heatingprops;
+    } else if (x == "pwmvalue") {
+      return ModelFeatureId::pwmvalue;
+    } else if (x == "valvetype") {
+      return ModelFeatureId::valvetype;
+    } else if (x == "extradimmer") {
+      return ModelFeatureId::extradimmer;
+    } else if (x == "umvrelay") {
+      return ModelFeatureId::umvrelay;
+    } else if (x == "blinkconfig") {
+      return ModelFeatureId::blinkconfig;
+    } else if (x == "impulseconfig") {
+      return ModelFeatureId::impulseconfig;
+    } else if (x == "umroutmode") {
+      return ModelFeatureId::umroutmode;
+    } else if (x == "pushbsensor") {
+      return ModelFeatureId::pushbsensor;
+    } else if (x == "locationconfig") {
+      return ModelFeatureId::locationconfig;
+    } else if (x == "windprotectionconfigblind") {
+      return ModelFeatureId::windprotectionconfigblind;
+    } else if (x == "windprotectionconfigawning") {
+      return ModelFeatureId::windprotectionconfigawning;
+    } else if (x == "outmodegeneric") {
+      return ModelFeatureId::outmodegeneric;
+    } else if (x == "outconfigswitch") {
+      return ModelFeatureId::outconfigswitch;
+    } else if (x == "temperatureoffset") {
+      return ModelFeatureId::temperatureoffset;
+    } else if (x == "apartmentapplication") {
+      return ModelFeatureId::apartmentapplication;
+    }
+    return boost::none;
+  }
+
+
+  std::ostream& operator<<(std::ostream& stream, ModelFeatureId x) {
+    return [&]()-> std::ostream& {
+      if (auto&& name = modelFeatureName(x)) {
+        return stream << *name;
+      } else {
+        return stream << "unknown";
+      }
+    }() << '(' << static_cast<int>(x) << ')';
   }
 
 } // namespace dss

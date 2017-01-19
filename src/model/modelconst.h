@@ -529,7 +529,12 @@ namespace dss {
     outmodegeneric = 40,
     outconfigswitch = 41,
     temperatureoffset = 42,
+    apartmentapplication = 43,
   };
+
+  boost::optional<const char*> modelFeatureName(ModelFeatureId x);
+  boost::optional<ModelFeatureId> modelFeatureFromName(const std::string& x);
+  std::ostream& operator<<(std::ostream& stream, ModelFeatureId x);
 
 } // namespace dss
 #endif

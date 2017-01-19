@@ -250,6 +250,7 @@ namespace dss {
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
   private:
+    __DECL_LOG_CHANNEL__;
     std::string m_Name;
     dsuid_t m_DSID;
     devid_t m_ShortAddress;
@@ -321,6 +322,7 @@ namespace dss {
     std::string m_VdcIconPath;
     boost::shared_ptr<std::vector<ModelFeatureId> > m_VdcModelFeatures;
     bool m_hasActions;
+    std::map<ModelFeatureId, bool> m_modelFeatures;
 
     DeviceValveType_t m_ValveType;
 
@@ -345,6 +347,9 @@ namespace dss {
     int m_floor;
     int m_pairedDevices; // currently relevant for TNY only
     bool m_visible; // currently relevant for TNY only
+
+    void updateModelFeatures();
+    void republishModelFeaturesToPropertyTree();
 
   protected:
     /** Sends the application a note that something has changed.
@@ -408,7 +413,7 @@ namespace dss {
     DeviceTypes_t getDeviceType() const;
     int getDeviceNumber() const;
     DeviceClasses_t getDeviceClass() const;
-    const DeviceFeatures_t getFeatures() const;
+    const DeviceFeatures_t getDeviceFeatures() const;
     std::string getAKMInputProperty() const;
     int multiDeviceIndex() const;
 
@@ -558,7 +563,7 @@ namespace dss {
 
     /** Returns the short address of the device. This is the address
      * the device got from the dSM. */
-    devid_t getShortAddress() const;
+    const devid_t& getShortAddress() const { return m_ShortAddress; }
     /** Sets the short-address of the device. */
     void setShortAddress(const devid_t _shortAddress);
 
@@ -731,6 +736,8 @@ namespace dss {
 
     void setHasActions(bool x) { m_hasActions = x; }
     bool getHasActions() const { return m_hasActions; }
+
+    const std::map<ModelFeatureId, bool>& getModelFeatures() const { return m_modelFeatures; }
 
     void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
     uint8_t getBinaryInputCount() const;

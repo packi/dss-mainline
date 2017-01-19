@@ -117,10 +117,27 @@ namespace dss {
     void add(const std::string& name, const std::vector<T>& items) {
       add(name);
       startArray();
-      BOOST_FOREACH(auto&& item, items) {
+      foreach(auto&& item, items) {
         add(item);
       }
       endArray();
+    }
+
+    // Add object key. Return false if the object entry cannot be serialized and is skipped.
+    bool addKey(const char* x) { add(x); return true; }
+    bool addKey(const std::string& x) { add(x); return true; }
+    bool addKey(ModelFeatureId x);
+
+    template <class Key, class T, class Compare, class Alloc>
+    void add(const std::string& name, const std::map<T, Key, Compare, Alloc>& map) {
+      add(name);
+      startObject();
+      foreach(auto&& entry, map) {
+        if (addKey(entry.first)) {
+          add(entry.second);
+        }
+      }
+      endObject();
     }
 
     void addNull();
