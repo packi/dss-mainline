@@ -408,6 +408,7 @@ namespace dss {
   const uint8_t CfgClassFunction = 0x03;
   const uint8_t CfgClassSensorEvent = 0x06;
   const uint8_t CfgClassRuntime = 0x40;
+  const uint8_t CfgClassConfigDataSK = 0x7e;
   const uint8_t CfgClassScene = 0x80;
   const uint8_t CfgClassSceneExtention = 0x81;
   const uint8_t CfgClassSceneAngle = 0x82;
@@ -451,6 +452,8 @@ namespace dss {
   const uint8_t CfgFunction_Tiny_SWThreshold = CfgFunction_UMR_SWThreshold;
 
   const uint8_t CfgFunction_SK_TempOffsetExt = 0x51;
+  const uint8_t CfgFunction_SK_Config = 0x96;
+  const uint8_t CfgFunction_SK_BacklightDuration = 0x97;
   const uint8_t CfgRuntime_Shade_Position = 0x02;
   const uint8_t CfgRuntime_Shade_PositionAngle = 0x04;
   const uint8_t CfgRuntime_Shade_PositionCurrent = 0x06;
@@ -530,6 +533,9 @@ namespace dss {
     outconfigswitch = 41,
     temperatureoffset = 42,
     apartmentapplication = 43,
+    ftwtempcontrolventilationselect = 44,
+    ftwdisplaysettings = 45,
+    ftwbacklighttimeout = 46
   };
 
   boost::optional<const char*> modelFeatureName(ModelFeatureId x);

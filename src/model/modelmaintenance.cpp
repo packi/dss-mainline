@@ -2186,7 +2186,16 @@ namespace dss {
       devRef.getDevice()->setOemInfoState(_state);
       devRef.getDevice()->setConfigLock(_isConfigLocked);
       devRef.getDevice()->setVisibility(_isVisible);
-      devRef.getDevice()->setPairedDevices(_pairedDevices);
+      // special case BL SK-204, firmware does not provide the number
+      // of paired devices so we had to hardcode it in the busscanner;
+      // at the same time the TNY reader does read out the visibility bit
+      // which we will use below, but we will keep our hardcoded pairing
+      // setting
+      if (!((devRef.getDevice()->getDeviceType() == DEVICE_TYPE_SK) &&
+            (devRef.getDevice()->getDeviceNumber() == 204) &&
+            (devRef.getDevice()->getDeviceClass() == DEVICE_CLASS_BL))) {
+        devRef.getDevice()->setPairedDevices(_pairedDevices);
+      }
     } catch(std::runtime_error& e) {
       log(std::string("Error updating OEM data of device: ") + e.what(), lsWarning);
     }
@@ -2466,8 +2475,17 @@ namespace dss {
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
       boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
       boost::shared_ptr<Device> pDev = devRef.getDevice();
+      // special case BL SK-204, firmware does not provide the number
+      // of paired devices so we had to hardcode it in the busscanner;
+      // at the same time the TNY reader does read out the visibility bit
+      // which we will use below, but we will keep our hardcoded pairing
+      // setting
+      if (!((pDev->getDeviceType() == DEVICE_TYPE_SK) &&
+            (pDev->getDeviceNumber() == 204) &&
+            (pDev->getDeviceClass() == DEVICE_CLASS_BL))) {
+        pDev->setPairedDevices(_pairedDevices);
+      }
 
-      pDev->setPairedDevices(_pairedDevices);
       pDev->setVisibility(_visible);
       addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
     } catch(ItemNotFoundException& e) {
