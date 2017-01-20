@@ -21,8 +21,6 @@
 #include <limits>
 #include <catch.hpp>
 
-namespace ds {
-
 static const char* TAGS = "[dsRandom][ds]";
 
 TEST_CASE("dsRandomRandintOneValue", TAGS) {
@@ -67,6 +65,3 @@ TEST_CASE("dsRandomEachThreadSeedIsRandom", TAGS) {
     setFirstValueInNewThread();
     CHECK(firstValue != firstValue1); // chance of collision 1 / 2^64
 }
-
-
-} // namespace ds
