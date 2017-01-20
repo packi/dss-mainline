@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <list>
 #include <vector>
+#include <ds/common.h>
 
 #include "messages/messaging.pb.h"
 #include "logger.h"
@@ -42,8 +43,6 @@ public:
     static CommChannel* getInstance();
     virtual ~CommChannel();
 
-    virtual void messageReceived(boost::shared_ptr<CC::CommunicationData> comm);
-
     void run();
     void shutdown();
     bool isSceneLocked(uint32_t scene);
@@ -55,6 +54,7 @@ public:
 
 private:
     CommChannel();
+    void messageReceived(boost::shared_ptr<CC::CommunicationData> comm) DS_OVERRIDE;
     void lockMessageList();
     void unlockMessageList();
     std::string sendMessage(const std::string& message);
