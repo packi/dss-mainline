@@ -20,8 +20,11 @@
 #include "catch.hpp"
 
 TEST_CASE("dsRequire", "[dsLog][ds]") {
+    auto&& x = 5;
+    DS_REQUIRE(x == 5);
+    DS_REQUIRE(x == 5, "should not happen");
+    DS_REQUIRE(x == 5, "should not happen", x);
     try {
-        auto&& x = 5;
         DS_REQUIRE(x == 4, x);
         CHECK(false);
     } catch (const std::exception &e) {
@@ -34,6 +37,7 @@ TEST_CASE("dsRequire", "[dsLog][ds]") {
 }
 
 TEST_CASE("dsAssert", "[dsLog][ds]") {
+    // make sure the code compiles
     DS_ASSERT(true);
     DS_ASSERT(true, "hi");
 }
