@@ -17,7 +17,7 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "str.h"
-#include "catch.hpp"
+#include <ds/catch/catch.h>
 
 static const char* TAGS = "[dsStr][ds]";
 

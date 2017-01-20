@@ -21,7 +21,7 @@ libds_a_LIB = \
 
 noinst_LIBRARIES += libds-catch-main.a
 libds_catch_main_a_SOURCES = \
-        ../src/ds/catch-main.cpp
+        ../src/ds/catch/main.cpp
 libds_catch_main_a_LIB = \
         libds-catch-main.a
 

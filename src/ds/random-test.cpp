@@ -19,7 +19,7 @@
 #include "random.h"
 #include <thread>
 #include <limits>
-#include <catch.hpp>
+#include <ds/catch/catch.h>
 
 static const char* TAGS = "[dsRandom][ds]";
 

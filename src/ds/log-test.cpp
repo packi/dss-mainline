@@ -17,23 +17,16 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "log.h"
-#include "catch.hpp"
+#include <ds/catch/catch.h>
 
 TEST_CASE("dsRequire", "[dsLog][ds]") {
     auto&& x = 5;
     DS_REQUIRE(x == 5);
     DS_REQUIRE(x == 5, "should not happen");
     DS_REQUIRE(x == 5, "should not happen", x);
-    try {
-        DS_REQUIRE(x == 4, x);
-        CHECK(false);
-    } catch (const std::exception &e) {
-        // TODO(someday): introduce macro that checks substring in exception message
-        auto&& what = std::string(e.what());
-        INFO(what);
-        CHECK(what.find("x == 4") != std::string::npos);
-        CHECK(what.find("x:5") != std::string::npos);
-    }
+
+    CHECK_THROWS_FIND(DS_REQUIRE(x == 4, x), "x == 4");
+    CHECK_THROWS_FIND(DS_REQUIRE(x == 4, x), "x:5");
 }
 
 TEST_CASE("dsAssert", "[dsLog][ds]") {
