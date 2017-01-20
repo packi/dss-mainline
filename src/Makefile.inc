@@ -35,6 +35,7 @@ ds_tests_LDADD = \
         $(libds_a_LIB)
 
 check_PROGRAMS += $(DS_TESTS)
+noinst_PROGRAMS += $(DS_TESTS)
 TESTS += $(DS_TESTS)
 
 ### dss
