@@ -38,15 +38,12 @@ using rapidjson::Value;
 using rapidjson::StringBuffer;
 using rapidjson::Writer;
 
-Behavior::Behavior(PropertyNodePtr& propertyNode, int configuration)
-    : m_configuration(configuration), m_pPropertyNode(propertyNode) {}
+Behavior::Behavior(PropertyNodePtr& propertyNode, int currentScene, int configuration)
+    : m_pPropertyNode(propertyNode), m_currentScene(currentScene), m_configuration(configuration) {}
 
 Behavior::~Behavior() {}
 
-DefaultBehavior::DefaultBehavior(PropertyNodePtr& propertyNode) : Behavior(propertyNode, 0) {}
-
-DefaultBehavior::DefaultBehavior(PropertyNodePtr& propertyNode, int configuration)
-    : Behavior(propertyNode, configuration) {}
+DefaultBehavior::DefaultBehavior(PropertyNodePtr& propertyNode, int currentScene) : Behavior(propertyNode, currentScene, 0) {}
 
 DefaultBehavior::~DefaultBehavior() {}
 
@@ -66,9 +63,9 @@ uint32_t DefaultBehavior::deserializeConfiguration(const std::string& jsonConfig
   return 0u;
 }
 
-int DefaultBehavior::getNextScene(int currentScene) { return SceneHelper::getNextScene(currentScene); }
+int DefaultBehavior::getNextScene() { return SceneHelper::getNextScene(m_currentScene); }
 
-int DefaultBehavior::getPreviousScene(int currentScene) { return SceneHelper::getPreviousScene(currentScene); }
+int DefaultBehavior::getPreviousScene() { return SceneHelper::getPreviousScene(m_currentScene); }
 
 void DefaultBehavior::publishToPropertyTree() {}
 
@@ -78,16 +75,38 @@ void DefaultBehavior::removeFromPropertyTree() {}
 const std::vector<int> VentilationBehavior::offsetToSceneId = {SceneOff, Scene1, Scene2, Scene3, Scene4, SceneBoost};
 
 // By default the ventilation configuration activates all basic scenes (0 value is active)
-VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode) : Behavior(propertyNode, 0) {
-  publishToPropertyTree();
-}
-
-VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode, int configuration)
-    : Behavior(propertyNode, configuration) {
+VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode, int currentScene) : Behavior(propertyNode, SceneOff, 0) {
+  // make sure the current scene is valid
+  setCurrentScene(currentScene);
   publishToPropertyTree();
 }
 
 VentilationBehavior::~VentilationBehavior() { removeFromPropertyTree(); }
+
+void VentilationBehavior::setCurrentScene(int currentScene) {
+  auto&& activeScenes = getActiveBasicScenes();
+
+  // if no scenes are allowed we force off state
+  if (activeScenes.size() == 0) {
+    m_currentScene = SceneOff;
+  } else {
+    // if this scene is an allowed basic scene just set it
+    if (find(activeScenes.begin(), activeScenes.end(), currentScene) != activeScenes.end()) {
+      m_currentScene = currentScene;
+    } else {
+      switch (currentScene) {
+        case SceneFire:
+        case SceneSmoke:
+        case SceneGas:
+          m_currentScene = getActiveBasicScenes().front();
+          break;
+        default:
+          // ignore all other scenes as they do not change ventilation level
+          break;
+      }
+    }
+  }
+}
 
 void VentilationBehavior::serializeConfiguration(uint32_t configuration, JSONWriter& writer) const {
   writer.startArray("activeBasicScenes");
@@ -131,17 +150,17 @@ uint32_t VentilationBehavior::deserializeConfiguration(const std::string& jsonCo
   return configuration;
 }
 
-int VentilationBehavior::getNextScene(int currentScene) {
-  auto activeScenes = getActiveBasicScenes();
+int VentilationBehavior::getNextScene() {
+  auto&& activeScenes = getActiveBasicScenes();
 
   if (activeScenes.size() == 0) {
     // if no scenes are active we cannot find next scene
     throw std::runtime_error("Could not find next active scene");
   } else {
-    auto sceneIt = find(activeScenes.begin(), activeScenes.end(), currentScene);
+    auto sceneIt = find(activeScenes.begin(), activeScenes.end(), m_currentScene);
 
     // if we could not find current scene in allowed scenes, or this is already the biggest possible return it
-    if ((sceneIt == activeScenes.end()) || (currentScene == activeScenes.back())) {
+    if ((sceneIt == activeScenes.end()) || (m_currentScene == activeScenes.back())) {
       return activeScenes.back();
     } else {
       return *(++sceneIt);
@@ -149,17 +168,17 @@ int VentilationBehavior::getNextScene(int currentScene) {
   }
 }
 
-int VentilationBehavior::getPreviousScene(int currentScene) {
-  auto activeScenes = getActiveBasicScenes();
+int VentilationBehavior::getPreviousScene() {
+  auto&& activeScenes = getActiveBasicScenes();
 
   if (activeScenes.size() == 0) {
     // if no scenes are active we cannot find previous scene
     throw std::runtime_error("Could not find previous active scene");
   } else {
-    auto sceneIt = find(activeScenes.begin(), activeScenes.end(), currentScene);
+    auto sceneIt = find(activeScenes.begin(), activeScenes.end(), m_currentScene);
 
     // if we could not find current scene in allowed scenes, or this is already the lowest possible return it
-    if ((sceneIt == activeScenes.end()) || (currentScene == activeScenes.front())) {
+    if ((sceneIt == activeScenes.end()) || (m_currentScene == activeScenes.front())) {
       return activeScenes.front();
     } else {
       return *(--sceneIt);
@@ -200,12 +219,19 @@ void VentilationBehavior::publishToPropertyTree() {
     m_pPropertyNode->createProperty("activeBasicScenes")
         ->linkToProxy(PropertyProxyMemberFunction<VentilationBehavior, std::string, false>(
             *this, &VentilationBehavior::getPropertyActiveBasicScenes));
+    m_pPropertyNode->createProperty("lastCalledBasicScene")
+        ->linkToProxy(PropertyProxyMemberFunction<VentilationBehavior, int>(
+            *this, &VentilationBehavior::getCurrentScene));
   }
 }
 
 void VentilationBehavior::removeFromPropertyTree() {
   if (m_pPropertyNode != NULL) {
     auto&& childNode = m_pPropertyNode->getProperty("activeBasicScenes");
+    if (childNode != NULL) {
+      m_pPropertyNode->removeChild(childNode);
+    }
+    childNode = m_pPropertyNode->getProperty("lastCalledBasicScene");
     if (childNode != NULL) {
       m_pPropertyNode->removeChild(childNode);
     }

@@ -30,11 +30,15 @@ namespace dss {
 
 class Behavior {
 protected:
-  uint32_t m_configuration;
   PropertyNodePtr& m_pPropertyNode;
+  int m_currentScene;
+  uint32_t m_configuration;
 public:
-  Behavior(PropertyNodePtr& propertyNode, int configuration);
+  Behavior(PropertyNodePtr& propertyNode, int currentScene, int configuration);
   virtual ~Behavior();
+
+  virtual int getCurrentScene() const { return m_currentScene; }
+  virtual void setCurrentScene(int currentScene) { m_currentScene = currentScene; }
 
   uint32_t getConfiguration() const { return m_configuration; }
   void setConfiguration(uint32_t configuration) { m_configuration = configuration; }
@@ -42,8 +46,8 @@ public:
   virtual void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const = 0;
   virtual uint32_t deserializeConfiguration(const std::string& jsonConfiguration) const = 0;
 
-  virtual int getNextScene(int currentScene) = 0;
-  virtual int getPreviousScene(int currentScene) = 0;
+  virtual int getNextScene() = 0;
+  virtual int getPreviousScene() = 0;
 
   virtual void publishToPropertyTree() = 0;
   virtual void removeFromPropertyTree() = 0;
@@ -51,15 +55,14 @@ public:
 
 class DefaultBehavior : public Behavior {
 public:
-  DefaultBehavior(PropertyNodePtr& propertyNode);
-  DefaultBehavior(PropertyNodePtr& propertyNode, int configuration);
+  DefaultBehavior(PropertyNodePtr& propertyNode, int currentScene);
   ~DefaultBehavior();
 
   void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const DS_OVERRIDE;
   uint32_t deserializeConfiguration(const std::string& jsonConfiguration) const DS_OVERRIDE;
 
-  int getNextScene(int currentScene) DS_OVERRIDE;
-  int getPreviousScene(int currentScene) DS_OVERRIDE;
+  int getNextScene() DS_OVERRIDE;
+  int getPreviousScene() DS_OVERRIDE;
 
   void publishToPropertyTree() DS_OVERRIDE;
   void removeFromPropertyTree() DS_OVERRIDE;
@@ -73,15 +76,16 @@ private:
   std::string getPropertyActiveBasicScenes() const;
   std::vector<int> getActiveBasicScenes() const;
 public:
-  VentilationBehavior(PropertyNodePtr& propertyNode);
-  VentilationBehavior(PropertyNodePtr& propertyNode, int configuration);
+  VentilationBehavior(PropertyNodePtr& propertyNode, int currentScene);
   ~VentilationBehavior();
+
+  void setCurrentScene(int currentScene) DS_OVERRIDE;
 
   void serializeConfiguration(uint32_t configuration, JSONWriter& writer) const DS_OVERRIDE;
   uint32_t deserializeConfiguration(const std::string& jsonConfiguration) const DS_OVERRIDE;
 
-  int getNextScene(int currentScene) DS_OVERRIDE;
-  int getPreviousScene(int currentScene) DS_OVERRIDE;
+  int getNextScene() DS_OVERRIDE;
+  int getPreviousScene() DS_OVERRIDE;
 
   void publishToPropertyTree() DS_OVERRIDE;
   void removeFromPropertyTree() DS_OVERRIDE;
