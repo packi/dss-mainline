@@ -6,7 +6,6 @@
 
 #include <assert.h>
 #include <boost/bind.hpp>
-#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/make_shared.hpp>
 #include <libical/ical.h>
