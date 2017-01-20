@@ -18,7 +18,7 @@
  */
 
 #include "vdc-db-fetcher.h"
-
+#include <ds/log.h>
 #include "src/logger.h"
 #include "src/sqlite3_wrapper.h"
 
@@ -47,12 +47,12 @@ VdcDbFetcher::VdcDbFetcher(DSS &dss) :
 }
 
 void VdcDbFetcher::asyncLoop() {
+  DS_ASSERT(m_dss.getIoService().thisThreadMatches());
   if (!m_enabled) {
     log("VdcDbFetcher disabled", lsNotice);
     return;
   }
   assert(m_period.count() != 0);
-  m_dss.assertIoServiceThread();
   m_timer.expires_from_now(m_period);
   m_timer.async_wait([=](const error_code &e) {
     if (e) {

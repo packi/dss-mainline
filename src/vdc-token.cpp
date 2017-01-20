@@ -20,6 +20,7 @@
 
 */
 #include "vdc-token.h"
+#include <ds/log.h>
 #include "dss.h"
 #include "base.h"
 #include "datetools.h"
@@ -105,7 +106,7 @@ void VdcToken::asyncRestart() {
 }
 
 void VdcToken::asyncLoop() {
-  m_dss.assertIoServiceThread();
+  DS_ASSERT(m_dss.getIoService().thisThreadMatches());
   assert(m_enabled);
   auto isExpired = this->isExpired();
   boost::chrono::seconds timeout;

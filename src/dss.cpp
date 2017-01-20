@@ -43,12 +43,14 @@
 #include <sys/resource.h>
 #include <boost/asio/io_service.hpp>
 #include <thread>
+#include <condition_variable>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/finder.hpp>
 
 #include <ds/log.h>
+#include <ds/asio/io-service.h>
 #include "logger.h"
 #include "propertysystem.h"
 #include "eventinterpreterplugins.h"
@@ -137,8 +139,9 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
   bool DSS::s_shutdown;
 
   struct DSS::Impl {
-    boost::asio::io_service m_ioService;
-    std::thread m_ioServiceThread;
+    boost::optional<std::thread> m_ioServiceThread;
+
+    ds::asio::IoService& getIoService() { return *m_ioService; }
 
     /// Objects synchronized to ioService event loop
     struct IoServiceObjects {
@@ -151,34 +154,55 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     };
     std::unique_ptr<IoServiceObjects> m_ioServiceObjects; // created when DSS is initialized
 
-    Impl() : m_ioServiceThread([&](){ ioServiceThreadRun(); }) {
+    Impl() : m_ioService(DS_NULLPTR), m_stopping(false) {
+      // start io service thread, create ioService instance in it
+      // and assing m_ioService to point to it.
+      std::mutex mutex;
+      std::condition_variable conditionVariable;
+      std::unique_lock<std::mutex> lock(mutex);
+      m_ioServiceThread.emplace([&mutex, &conditionVariable, this](){
+        ds::asio::IoService ioService; // allocated on thread stack and published to `this`
+        {
+          std::unique_lock<std::mutex> lock2(mutex);
+          m_ioService = &ioService;
+        }
+        conditionVariable.notify_one();
+        // NOTE: `mutex` and `conditionVariable` are dangling references from this point
+
+        ioServiceThreadRun();
+      });
+      conditionVariable.wait(lock, [&]{ return bool(m_ioService); });
     }
+
     ~Impl() {
-      m_ioService.stop();
-      m_ioServiceThread.join();
+      m_stopping = true;
+      m_ioService->stop();
+      m_ioServiceThread->join();
     }
 
     void ioServiceThreadRun() {
-      boost::asio::io_service::work work(m_ioService); // run until ioService is stopped.
-      while (1) {
+      auto&& ioService = getIoService();
+      boost::asio::io_service::work work(ioService); // block in `run()` until `m_stopping`
+      while (!m_stopping) {
         try {
-          m_ioService.run();
+          ioService.run();
           break; //run() exited normally
         } catch (std::exception &e) {
           Logger::getInstance()->log(std::string("io_service") + e.what(), lsError);
         }
-        m_ioServiceObjects.reset();
       }
+      // TODO(someday): move out from here by introducing observer pattern
+      m_ioServiceObjects.reset();
     }
 
-    bool isIoServiceThread() {
-      return m_ioServiceThread.get_id() == std::this_thread::get_id();
-    }
+  private:
+    ds::asio::IoService* m_ioService; // never null outside of constructor and destructor
+    std::atomic_bool m_stopping;
   };
 
   DSS::DSS()
       : m_impl(new Impl())
-      , m_ioService(m_impl->m_ioService)
+      , m_ioService(m_impl->getIoService())
       , m_commChannel(NULL)
   {
     m_ShutdownFlag = false;
@@ -674,7 +698,7 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
         m_impl->m_ioServiceObjects = std::unique_ptr<Impl::IoServiceObjects>(new Impl::IoServiceObjects(*this));
       });
       // dispatch task in io_service thread and block till it finishes.
-      m_impl->m_ioService.dispatch([&]() { task(); });
+      m_ioService.dispatch([&]() { task(); });
       task.get_future().get();  // throws if task throws
     }
 
@@ -956,12 +980,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     return DateTime().getTimezoneOffset();
   }
 
-  void DSS::assertIoServiceThread() {
-    assert(m_impl->isIoServiceThread());
-  }
-
   void DSS::assertBlockingAllowed() {
-    assert(!m_impl->isIoServiceThread());
+    DS_ASSERT(!m_ioService.thisThreadMatches());
   }
 
   void DSS::setDsmApiBlockingCallback(void *dsmApiHandle) {

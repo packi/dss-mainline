@@ -12,8 +12,6 @@ libdsscore_a_SOURCES =  \
 	../src/datetools.h \
 	../src/defaultbuseventsink.cpp \
 	../src/defaultbuseventsink.h \
-	../src/ds/asio/timer.cpp \
-	../src/ds/asio/timer.h \
 	../src/ds485/dsactionrequest.cpp \
 	../src/ds485/dsactionrequest.h \
 	../src/ds485/dsbusinterface.cpp \

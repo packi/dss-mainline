@@ -38,9 +38,9 @@
 
 #include "comm-channel.h"
 
-namespace boost {
+namespace ds {
 namespace asio {
-  class io_service;
+  class IoService;
 } // namespace asio
 } // namespace boost
 
@@ -107,7 +107,7 @@ namespace dss {
     boost::shared_ptr<BonjourHandler> m_pBonjour;
     boost::shared_ptr<Watchdog> m_pWatchdog;
     boost::shared_ptr<BusEventSink> m_pDefaultBusEventSink;
-    boost::asio::io_service& m_ioService;
+    ds::asio::IoService& m_ioService;
     std::string m_dataDirectory;
     std::string m_configDirectory;
     std::string m_webrootDirectory;
@@ -174,9 +174,7 @@ namespace dss {
     BonjourHandler& getBonjourHandler() { return *m_pBonjour; }
 
     // ioService serving as single threaded even loop
-    boost::asio::io_service& getIoService() { return m_ioService; }
-    // Assert that current thread is ioService thread
-    void assertIoServiceThread();
+    ds::asio::IoService& getIoService() { return m_ioService; }
     // Assert that blocking is allowed in current context. E.g. eventLoop tread must not be blocked
     void assertBlockingAllowed();
     void setDsmApiBlockingCallback(void *dsmApiHandle);

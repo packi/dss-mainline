@@ -22,6 +22,7 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/chrono/chrono.hpp>
 #include <ds/common.h>
+#include "io-service.h"
 
 namespace ds {
 namespace asio {
@@ -35,7 +36,7 @@ namespace asio {
 class Timer : public ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock> {
 public:
     typedef duration Duration;
-    Timer(boost::asio::io_service& ioService)
+    Timer(ds::asio::IoService& ioService)
         : ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock>(ioService) {
     }
     /// Expires randomly in closed interval [a, b] relatively to now.

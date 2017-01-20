@@ -1,4 +1,7 @@
 DS_TESTS =
+
+### ds
+
 noinst_LIBRARIES += libds.a
 libds_a_SOURCES = \
         ../src/ds/common.cpp \
@@ -25,6 +28,8 @@ libds_catch_main_a_SOURCES = \
 libds_catch_main_a_LIB = \
         libds-catch-main.a
 
+### ds-asio
+
 DS_TESTS += ds-tests
 ds_tests_SOURCES = \
         ../src/ds/log-test.cpp \
@@ -33,6 +38,29 @@ ds_tests_SOURCES = \
 ds_tests_LDADD = \
         $(libds_catch_main_a_LIB) \
         $(libds_a_LIB)
+
+noinst_LIBRARIES += libds-asio.a
+libds_asio_a_SOURCES = \
+	../src/ds/asio/io-service.cpp \
+	../src/ds/asio/io-service.h \
+	../src/ds/asio/timer.cpp \
+	../src/ds/asio/timer.h
+libds_asio_a_CPPFLAGS = \
+        $(libds_a_CPPFLAGS)
+libds_asio_a_LIB = \
+        libds-asio.a \
+        $(libds_a_LIB)
+
+DS_TESTS += ds-asio-tests
+ds_asio_tests_SOURCES = \
+        ../src/ds/asio/io-service-test.cpp \
+        ../src/ds/asio/timer-test.cpp
+ds_asio_tests_CPPFLAGS = \
+        $(libds_asio_a_CPPFLAGS)
+ds_asio_tests_LDADD = \
+        $(libds_catch_main_a_LIB) \
+        $(libds_asio_a_LIB)
+
 
 check_PROGRAMS += $(DS_TESTS)
 noinst_PROGRAMS += $(DS_TESTS)
@@ -149,7 +177,8 @@ dss_LDADD = libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
 			$(BOOST_THREAD_LIB) \
 			$(BOOST_CHRONO_LIB) \
 			$(SQLITE3_LIBS) \
-			$(libds_a_LIB)
+			$(libds_a_LIB) \
+			$(libds_asio_a_LIB)
 
 ../src/dss.cpp: build_info.h
 
