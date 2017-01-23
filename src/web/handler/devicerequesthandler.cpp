@@ -2339,8 +2339,7 @@ namespace dss {
       }
 
       int value = strToIntDef(_request.getParameter("seconds"), -1);
-      // Simon asked for a maximum of 240 seconds
-      if ((value < 1) || (value > 240)) {
+      if ((value < 1) || (value > UCHAR_MAX)) {
         return JSONWriter::failure("Invalid 'seconds' parameter value");
       }
 
