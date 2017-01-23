@@ -136,7 +136,6 @@ namespace dss {
       if (_dsMeter->getCapability_HasDevices()) {
         std::vector<int> zoneIDs;
         try {
-          // TODO(soon): make sure that the DSM return zone 0 in this list if it contain apartment application group.
           zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
         } catch(BusApiError& e) {
           log("scanDSMeter: Error getting ZoneIDs", lsWarning);
@@ -144,6 +143,9 @@ namespace dss {
         }
         foreach(int zoneID, zoneIDs) {
           log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
+          if (zoneID == 0) {
+            continue;
+          }
           boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
           zone->addToDSMeter(_dsMeter);
           zone->setIsPresent(true);
@@ -152,6 +154,16 @@ namespace dss {
             return false;
           }
         }
+
+        // scan groups and status of apartment zone "0", but not devices or temperature control
+        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(0);
+        try {
+          scanGroupsOfZone(_dsMeter, zone);
+          // TODO(soon): read scene history
+        } catch(BusApiError& e) {
+          log("scanDSMeter: error scanning zone 0: " + std::string(e.what()), lsWarning);
+        }
+
         scanClusters(_dsMeter);
         scanPowerStates(_dsMeter);
       }
