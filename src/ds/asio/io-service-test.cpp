@@ -31,7 +31,7 @@ TEST_CASE("dsAsioIoService", TAGS) {
 
     SECTION("run throws in non-matching thread") {
         std::thread thread([&]{
-            REQUIRE_THROWS_FIND(ioService.run(), "run() is called from wrong thread");
+            CHECK_THROWS_FIND(ioService.run(), "run() is called from wrong thread");
         });
         thread.join();
     }
