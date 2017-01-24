@@ -28,3 +28,6 @@
 #define DS_LIKELY(condition) (bool(condition))
 #define DS_UNLIKELY(condition) (bool(condition))
 #endif
+
+/// Macro expanding to `,`. Useful to pass comma to macro without starting next argument
+#define DS_COMMA ,
