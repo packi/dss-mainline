@@ -24,6 +24,7 @@ static const char* TAGS = "[dsAsioTimer][dsAsio][ds]";
 TEST_CASE("dsAsioTimer", TAGS) {
     ds::asio::catch_::IoService ioService;
     ds::asio::Timer timer(ioService);
+    auto&& LATENCY = ds::asio::catch_::LATENCY;
 
     SECTION("is started") {
         timer.expires_from_now(boost::chrono::milliseconds(0));
@@ -34,15 +35,37 @@ TEST_CASE("dsAsioTimer", TAGS) {
         });
 
         SECTION("and callback is called") {
-            CHECK_RUN_STOP(ioService);
+            CHECK_STOP_RUN(ioService);
             CHECK(asyncWaitCalled == true);
         }
 
         SECTION("callback is NOT called after cancel") {
             timer.cancel();
-            CHECK_RUN_NO_STOP(ioService);
+            CHECK_NO_STOP_RUN(ioService);
             CHECK(asyncWaitCalled == false);
         }
+    }
+
+    SECTION("expiresFromNow") {
+        timer.expiresFromNow(boost::chrono::milliseconds(0), [&] { ioService.stop(); });
+        CHECK_STOP_RUN(ioService);
+    }
+
+    SECTION("expiresNow") {
+        timer.expiresNow([&] { ioService.stop(); });
+        CHECK_STOP_RUN(ioService);
+    }
+
+    SECTION("randomlyExpiresFromNow") {
+        timer.randomlyExpiresFromNow(LATENCY * 3 / 4, LATENCY, [&] { ioService.stop(); });
+        CHECK_NO_STOP_RUN_FOR(ioService, LATENCY / 2);
+        CHECK_STOP_RUN_FOR(ioService, LATENCY);
+    }
+
+    SECTION("randomlyExpiresFromNowPercentDown") {
+        timer.randomlyExpiresFromNowPercentDown(LATENCY, 25, [&] { ioService.stop(); });
+        CHECK_NO_STOP_RUN_FOR(ioService, LATENCY / 2);
+        CHECK_STOP_RUN_FOR(ioService, LATENCY);
     }
 }
 

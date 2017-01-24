@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <ds/common.h>
 #include <ds/asio/io-service.h>
 #include <ds/asio/timer.h>
 #include <ds/catch/catch.h>
@@ -23,21 +24,24 @@ namespace ds {
 namespace asio {
 namespace catch_ {
 
-/// ds::asio::IoService specialized for use in catch unit tests
+/// ds::asio::IoService specialized for use in catch unit tests.
+///
+/// It has always work to do
 class IoService : public ::ds::asio::IoService {
 public:
-  IoService() {}
-  ~IoService() {}
+    IoService() = default;
+    ~IoService() = default;
 
-  enum RunResult { STOPPED, EXPIRED };
+    enum RunResult { STOPPED, EXPIRED };
 
-  /// Run io_service till stopped up up for \ref duration.
-  /// @return true when run stopped before
-  RunResult run(boost::chrono::milliseconds duration);
+    /// Run io_service till stopped up up for \ref duration.
+    /// @return true when run stopped before
+    RunResult runFor(boost::chrono::milliseconds duration);
 
 private:
-  /// Hide because it is not appropriate to call `run` in tests
-  std::size_t run() { return ds::asio::IoService::run(); }
+    /// Hide because it is not appropriate to call `run` in tests
+    std::size_t run() { return ds::asio::IoService::run(); }
+    std::size_t run_one() { return ds::asio::IoService::run_one(); }
 };
 
 /**
@@ -51,34 +55,56 @@ static constexpr boost::chrono::milliseconds TIMEOUT = boost::chrono::millisecon
  */
 static constexpr boost::chrono::milliseconds LATENCY = boost::chrono::milliseconds(12);
 
-
-#define INTERNAL_RUN_STOP(ioService, macro) \
+#define INTERNAL_STOP_RUN_FOR(ioService, duration, macro) \
         do { \
-            ::boost::chrono::milliseconds dsAsioCatchDuration = ::ds::asio::catch_::TIMEOUT / 2; \
+            DS_STATIC_ASSERT(std::is_base_of<::ds::asio::catch_::IoService DS_COMMA decltype(ioService)>::value, \
+                    "ioService must be if ::ds::asio::catch_::IoService type"); \
+            auto dsAsioCatchDuration = (duration); \
             INFO("Running even loop for " << dsAsioCatchDuration.count() << "ms and expect stop"); \
-            macro(ioService.run(dsAsioCatchDuration) == ::ds::asio::catch_::IoService::RunResult::STOPPED); \
+            macro(ioService.runFor(dsAsioCatchDuration) == ::ds::asio::catch_::IoService::RunResult::STOPPED); \
         } while (0)
-#define REQUIRE_RUN_STOP(ioService) INTERNAL_RUN_STOP(ioService, REQUIRE)
-#define CHECK_RUN_STOP(ioService) INTERNAL_RUN_STOP(ioService, CHECK)
 
-#define INTERNAL_RUN_NO_STOP(ioService, macro) \
+/// Run event loop and require stop
+#define REQUIRE_STOP_RUN(ioService) INTERNAL_STOP_RUN_FOR(ioService, ::ds::asio::catch_::TIMEOUT / 2, REQUIRE)
+
+/// Run event loop and check stop
+#define CHECK_STOP_RUN(ioService) INTERNAL_STOP_RUN_FOR(ioService, ::ds::asio::catch_::TIMEOUT / 2, CHECK)
+
+/// Run event loop for duration and require stop
+#define REQUIRE_STOP_RUN_FOR(ioService, duration) INTERNAL_STOP_RUN_FOR(ioService, duration, REQUIRE)
+
+/// Run event loop for duration and check stop
+#define CHECK_STOP_RUN_FOR(ioService, duration) INTERNAL_STOP_RUN_FOR(ioService, duration, CHECK)
+
+#define INTERNAL_NO_STOP_RUN_FOR(ioService, duration, macro) \
         do { \
-            ::boost::chrono::milliseconds dsAsioCatchDuration = ::ds::asio::catch_::LATENCY * 2; \
+            DS_STATIC_ASSERT(std::is_base_of<::ds::asio::catch_::IoService DS_COMMA decltype(ioService)>::value, \
+                    "ioService must be if ::ds::asio::catch_::IoService type"); \
+            auto dsAsioCatchDuration = (duration); \
             INFO("Running even loop for " << dsAsioCatchDuration.count() << "ms and expect NO stop"); \
-            macro(ioService.run(dsAsioCatchDuration) == ::ds::asio::catch_::IoService::RunResult::EXPIRED); \
+            macro(ioService.runFor(dsAsioCatchDuration) == ::ds::asio::catch_::IoService::RunResult::EXPIRED); \
         } while (0)
-#define REQUIRE_RUN_NO_STOP(ioService) INTERNAL_RUN_NO_STOP(ioService, REQUIRE)
-#define CHECK_RUN_NO_STOP(ioService) INTERNAL_RUN_NO_STOP(ioService, CHECK)
+
+/// Run event loop and require NO stop
+#define REQUIRE_NO_STOP_RUN(ioService) INTERNAL_NO_STOP_RUN_FOR(ioService, ::ds::asio::catch_::LATENCY * 2, REQUIRE)
+
+/// Run event loop and check NO stop
+#define CHECK_NO_STOP_RUN(ioService) INTERNAL_NO_STOP_RUN_FOR(ioService, ::ds::asio::catch_::LATENCY * 2, CHECK)
+
+/// Run event loop for duration and require NO stop
+#define REQUIRE_NO_STOP_RUN_FOR(ioService, duration) INTERNAL_NO_STOP_RUN_FOR(ioService, duration, REQUIRE)
+
+/// Run event loop for duration and check NO stop
+#define CHECK_NO_STOP_RUN_FOR(ioService, duration) INTERNAL_NO_STOP_RUN_FOR(ioService, duration, CHECK)
 
 // implementation details
 
 // Can be moved to .cpp, if more code accumulates here. This file is header only for now.
-IoService::RunResult IoService::run(boost::chrono::milliseconds duration) {
+inline IoService::RunResult IoService::runFor(boost::chrono::milliseconds duration) {
   ds::asio::Timer timer(*this);
   RunResult result = RunResult::STOPPED;
 
-  timer.expires_from_now(duration);
-  timer.asyncWait([&]() {
+  timer.expiresFromNow(duration, [&] {
       result = RunResult::EXPIRED;
       stop();
   });

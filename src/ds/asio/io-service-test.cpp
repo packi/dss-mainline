@@ -18,20 +18,22 @@
 */
 #include "io-service.h"
 #include <thread>
-#include <ds/catch/catch.h>
+#include <ds/asio/catch.h>
 
 static const char* TAGS = "[dsAsioIoService][dsAsio][ds]";
 
 TEST_CASE("dsAsioIoService", TAGS) {
-    ds::asio::IoService ioService;
+    ds::asio::catch_::IoService ioService;
+    auto&& LATENCY = ds::asio::catch_::LATENCY;
 
     SECTION("run works in matching thread") {
-        ioService.run();
+        ioService.post([&] { ioService.stop(); });
+        CHECK_STOP_RUN(ioService);
     }
 
     SECTION("run throws in non-matching thread") {
         std::thread thread([&]{
-            CHECK_THROWS_FIND(ioService.run(), "run() is called from wrong thread");
+            CHECK_THROWS_FIND(ioService.runFor(LATENCY), "run() is called from wrong thread");
         });
         thread.join();
     }
