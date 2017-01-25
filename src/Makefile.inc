@@ -63,7 +63,6 @@ ds_asio_tests_LDADD = \
 
 
 check_PROGRAMS += $(DS_TESTS)
-noinst_PROGRAMS += $(DS_TESTS)
 TESTS += $(DS_TESTS)
 
 ### dss
