@@ -19,7 +19,9 @@
 #include "log.h"
 #include <ds/catch/catch.h>
 
-TEST_CASE("dsRequire", "[dsLog][ds]") {
+static const char* TAGS = "[dsLog][ds]";
+
+TEST_CASE("dsRequire", TAGS) {
     auto&& x = 5;
     DS_REQUIRE(x == 5);
     DS_REQUIRE(x == 5, "should not happen");
@@ -29,7 +31,7 @@ TEST_CASE("dsRequire", "[dsLog][ds]") {
     CHECK_THROWS_FIND(DS_REQUIRE(x == 4, x), "x:5");
 }
 
-TEST_CASE("dsAssert", "[dsLog][ds]") {
+TEST_CASE("dsAssert", TAGS) {
     // make sure the code compiles
     DS_ASSERT(true);
     DS_ASSERT(true, "hi");
