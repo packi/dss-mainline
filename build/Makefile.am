@@ -17,3 +17,7 @@ include ../unix/Makefile.inc
 include ../src/Makefile.inc
 include ../tests/Makefile.inc
 
+# build tests for the default make targets only when enabled
+if AUTOBUILD_TESTS
+noinst_PROGRAMS += $(check_PROGRAMS)
+endif
