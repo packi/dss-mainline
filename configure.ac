@@ -40,6 +40,20 @@ MT_OPTION([debug], [enable],
           ],
           [])
 
+AUTOBUILD_TESTS="yes"
+AC_ARG_ENABLE([tests-autobuild],
+    [AC_HELP_STRING([--disable-tests-autobuild],
+                    [exclude tests from the default make target (default: no)]) ],
+    [
+        if test "x$enableval" = "xno"; then
+            AUTOBUILD_TESTS="no"
+        elif test "x$enableval" = "xyes"; then
+            AUTOBUILD_TESTS="yes"
+        fi
+    ]
+)
+AM_CONDITIONAL(AUTOBUILD_TESTS, test "x$AUTOBUILD_TESTS" = "xyes")
+
 MT_OPTION([asserts], [disable],
           [enable asserts during compilation (default: enabled)],
           [],
