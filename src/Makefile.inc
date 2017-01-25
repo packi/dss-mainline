@@ -32,6 +32,7 @@ libds_catch_main_a_LIB = \
 
 DS_TESTS += ds-tests
 ds_tests_SOURCES = \
+        ../src/ds/common-test.cpp \
         ../src/ds/log-test.cpp \
         ../src/ds/str-test.cpp \
         ../src/ds/random-test.cpp
