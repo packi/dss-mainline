@@ -136,6 +136,9 @@ libdsscore_a_CXXFLAGS = \
 			$(LIBDSUID_CFLAGS) \
 			$(libds_a_CPPFLAGS)
 
+libdsscore_a_LIB = \
+        $(libds_asio_a_LIB)
+
 dss_SOURCES = ../main.cpp
 
 dss_CXXFLAGS = \
@@ -177,8 +180,7 @@ dss_LDADD = libdsscore.a libunix.a libcivetweb.a libprotomessages.a \
 			$(BOOST_THREAD_LIB) \
 			$(BOOST_CHRONO_LIB) \
 			$(SQLITE3_LIBS) \
-			$(libds_a_LIB) \
-			$(libds_asio_a_LIB)
+			$(libdsscore_a_LIB)
 
 ../src/dss.cpp: build_info.h
 
