@@ -75,7 +75,7 @@ void DefaultBehavior::publishToPropertyTree() {}
 void DefaultBehavior::removeFromPropertyTree() {}
 
 // mapping bit offsets to sceneId
-const std::vector<int> VentilationBehavior::offsetToSceneId = {SceneOff, Scene1, Scene2, Scene3, Scene4};
+const std::vector<int> VentilationBehavior::offsetToSceneId = {SceneOff, Scene1, Scene2, Scene3, Scene4, SceneBoost};
 
 // By default the ventilation configuration activates all basic scenes (0 value is active)
 VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode) : Behavior(propertyNode, 0) {
@@ -113,7 +113,7 @@ uint32_t VentilationBehavior::deserializeConfiguration(const std::string& jsonCo
     }
 
     // we set all scenes as inactive, and mark only the active ones
-    configuration = 0x1F;
+    configuration = 0x3F;
 
     for (rapidjson::SizeType i = 0; i < activeBasicScenes.Size(); i++) {
       int basicSceneId = activeBasicScenes[i].GetInt();
@@ -123,7 +123,7 @@ uint32_t VentilationBehavior::deserializeConfiguration(const std::string& jsonCo
         configuration &= ~(1 << (sceneIt - offsetToSceneId.begin()));
       } else {
         throw std::runtime_error(ds::str("Basic SceneId:", basicSceneId, " not valid (should be ", (int)SceneOff, ", ",
-            (int)Scene1, ", ", (int)Scene2, ", ", (int)Scene3, " or ", (int)Scene4, ")"));
+            (int)Scene1, ", ", (int)Scene2, ", ", (int)Scene3, ", ", (int)Scene4, " or ", (int)SceneBoost, ")"));
       }
     }
   }
@@ -133,12 +133,12 @@ uint32_t VentilationBehavior::deserializeConfiguration(const std::string& jsonCo
 
 int VentilationBehavior::getNextScene(int currentScene) {
   // TODO(soon): Add implementation of Ventilation specific state machine
-  throw std::runtime_error("Not implemented");
+  return SceneHelper::getNextScene(currentScene);
 }
 
 int VentilationBehavior::getPreviousScene(int currentScene) {
   // TODO(soon): Add implementation of Ventilation specific state machine
-  throw std::runtime_error("Not implemented");
+  return SceneHelper::getPreviousScene(currentScene);
 }
 
 std::string VentilationBehavior::getPropertyActiveBasicScenes() const {

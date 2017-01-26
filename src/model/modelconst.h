@@ -70,6 +70,7 @@ namespace dss {
   const uint8_t SceneOffE2 = 0x22;
   const uint8_t SceneOnE2 = 0x23;
   const uint8_t SceneOffE3 = 0x24;
+  const uint8_t SceneBoost = 0x24;   // redefined in context of ventilation group
   const uint8_t SceneOnE3 = 0x25;
   const uint8_t SceneOffE4 = 0x26;
   const uint8_t SceneOnE4 = 0x27;
