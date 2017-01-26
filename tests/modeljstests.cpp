@@ -659,7 +659,7 @@ BOOST_AUTO_TEST_CASE(testGroupConfiguration) {
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
 
   std::string jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
-  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[0,5,17,18,19]}");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[0,5,17,18,19,36]}");
   BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x00);
 
   // try normal set on AV group
@@ -667,13 +667,13 @@ BOOST_AUTO_TEST_CASE(testGroupConfiguration) {
 
   jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
   BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[5,17,18]}");
-  BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x11);
+  BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x31);
 
   // try different overload
-  ctx->evaluate<void>("getZoneByID(0).setGroupConfiguration(64, 64, \"{\\\"activeBasicScenes\\\":[17,18,19]}\")");
+  ctx->evaluate<void>("getZoneByID(0).setGroupConfiguration(64, 64, \"{\\\"activeBasicScenes\\\":[17,18,19,36]}\")");
 
   jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
-  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[17,18,19]}");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[17,18,19,36]}");
   BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x03);
 
   // try to do not allowed actions
@@ -682,14 +682,14 @@ BOOST_AUTO_TEST_CASE(testGroupConfiguration) {
 
   // check that the configuration did not change
   jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
-  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[17,18,19]}");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[17,18,19,36]}");
   BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x03);
 
   // set default configuration again
   ctx->evaluate<void>("getZoneByID(0).setGroupConfiguration(64)");
 
   jsonConfiguration = ctx->evaluate<std::string>("getZoneByID(0).getGroupConfiguration(64)");
-  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[0,5,17,18,19]}");
+  BOOST_CHECK_EQUAL(jsonConfiguration, "{\"activeBasicScenes\":[0,5,17,18,19,36]}");
   BOOST_CHECK_EQUAL(apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation)->getApplicationConfiguration(), 0x00);
 
 
