@@ -401,8 +401,6 @@ namespace dss {
     return isDefaultGroup(groupId) || isAppUserGroup(groupId) || isZoneUserGroup(groupId) || isControlGroup(groupId) || isGlobalAppGroup(groupId);
   }
 
-  const uint64_t DSIDHeader = 0x3504175FE0000000ll;
-
   const uint8_t CfgClassComm = 0x00;
   const uint8_t CfgClassDevice = 0x01;
   const uint8_t CfgClassPlatform = 0x02;
