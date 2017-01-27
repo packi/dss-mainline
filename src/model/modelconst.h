@@ -324,6 +324,7 @@ namespace dss {
   const int ColorIDRed = 6;
   const int ColorIDGreen = 7;
   const int ColorIDBlack = 8;
+  const int ColorIDWhite = 9;
 
   // TODO(someday): Remove this type and variables that use it altogether?
   // https://git.digitalstrom.org/brano/dss-mainline/commit/d17f16eb550c0cb32c910372f8d137ba32338a68#note_35767

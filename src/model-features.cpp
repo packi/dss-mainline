@@ -710,7 +710,7 @@ ModelFeatures* ModelFeatures::getInstance()
     return m_instance;
 }
 
-ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
+ModelFeatures::ModelFeatures() : m_features(ColorIDWhite + 1) {
   // initialize "our" devices
   boost::shared_ptr<std::vector<ModelFeatureId> > fv;
   fv = boost::make_shared<std::vector<ModelFeatureId> >();
@@ -929,7 +929,7 @@ void ModelFeatures::setFeatures(int _color, std::string _model, boost::shared_pt
     throw std::runtime_error("invalid feature array\n");
   }
 
-  if ((_color < ColorIDYellow) || (_color > ColorIDBlack)) {
+  if ((_color < ColorIDYellow) || (_color > ColorIDWhite)) {
     throw std::runtime_error("can not save feature: unsupported device color");
   }
   boost::mutex::scoped_lock lock(m_lock);
@@ -945,7 +945,7 @@ void ModelFeatures::setFeatures(int _color, std::string _model, boost::shared_pt
 }
 
 std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<ModelFeatureId> > > > > ModelFeatures::getFeatures(int _color) {
-  if ((_color < ColorIDYellow) || (_color > ColorIDBlack)) {
+  if ((_color < ColorIDYellow) || (_color > ColorIDWhite)) {
     throw std::runtime_error("can not retrieve features: unsupported device color");
   }
 
@@ -978,6 +978,8 @@ std::string ModelFeatures::colorToString(int _color)
       return "GN";
     case ColorIDBlack:
       return "SW";
+    case ColorIDWhite:
+      return "WE";
     default:
       break;
   }

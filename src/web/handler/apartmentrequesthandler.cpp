@@ -568,7 +568,7 @@ namespace dss {
         JSONWriter json;
 
         json.startObject("modelFeatures");
-        for (int colorID = ColorIDYellow; colorID <= ColorIDBlack; colorID++) {
+        for (int colorID = ColorIDYellow; colorID <= ColorIDWhite; colorID++) {
           auto&& f = ModelFeatures::getInstance()->getFeatures(colorID);
           json.startObject(ModelFeatures::getInstance()->colorToString(colorID));
 
