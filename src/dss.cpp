@@ -167,8 +167,8 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
         {
           std::unique_lock<std::mutex> lock2(mutex);
           m_ioService = &ioService;
+          conditionVariable.notify_one();
         }
-        conditionVariable.notify_one();
         // NOTE: `mutex` and `conditionVariable` are dangling references from this point
 
         ioServiceThreadRun();
