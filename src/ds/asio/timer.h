@@ -22,6 +22,7 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/chrono/chrono.hpp>
 #include <ds/common.h>
+#include "io-service.h"
 
 namespace ds {
 namespace asio {
@@ -34,15 +35,36 @@ namespace asio {
 /// It will be much easier to deploy this change if all code uses this class.
 class Timer : public ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock> {
 public:
+    typedef ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock> Super;
     typedef duration Duration;
-    Timer(boost::asio::io_service& ioService)
-        : ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock>(ioService) {
+    Timer(ds::asio::IoService& ioService)
+        : Super(ioService) {
     }
+
+    /// Convenient method calling `expires_from_now(x)` and `asyncWait(f)`.
+    template <typename F>
+    void expiresFromNow(Duration d, F &&f) {
+        expires_from_now(d);
+        asyncWait(std::forward<F>(f));
+    }
+
+    /// Convenient method calling `expiresFromNow(0, f)`.
+    template <typename F>
+    void expiresNow(F &&f) { expiresFromNow(Duration(0), std::forward<F>(f)); }
+
     /// Expires randomly in closed interval [a, b] relatively to now.
-    void randomlyExpiresFromNow(Duration a, Duration b);
+    template <typename F>
+    void randomlyExpiresFromNow(Duration a, Duration b, F &&f) {
+        randomlyExpiresFromNow(a, b);
+        asyncWait(std::forward<F>(f));
+    }
 
     /// Expires randomly in closed interval [d - d * p / 100, d] relatively to now.
-    void randomlyExpiresFromNowPercentDown(Duration d, int p);
+    template <typename F>
+    void randomlyExpiresFromNowPercentDown(Duration d, int p, F &&f) {
+        randomlyExpiresFromNowPercentDown(d, p);
+        asyncWait(std::forward<F>(f));
+    }
 
     /// Calls async_wait, but calls callback only on NO error.
     ///
@@ -50,6 +72,7 @@ public:
     template <typename F>
     void asyncWait(F &&f) {
         static_assert(std::is_void<decltype(f())>::value, "required F type: void ()");
+        // TODO(c++14): move capture f
         async_wait([f](boost::system::error_code e) {
             if (e) {
                 return; //timer was aborted
@@ -57,6 +80,10 @@ public:
             f();
         });
     }
+
+private:
+    void randomlyExpiresFromNow(Duration a, Duration b);
+    void randomlyExpiresFromNowPercentDown(Duration d, int p);
 };
 
 } // namespace asio

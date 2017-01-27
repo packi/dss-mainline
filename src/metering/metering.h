@@ -24,7 +24,6 @@
 #ifndef METERING_H_
 #define METERING_H_
 
-#include "src/thread.h"
 #include "src/subsystem.h"
 #include "src/datetools.h"
 

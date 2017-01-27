@@ -19,13 +19,11 @@
 #include "random.h"
 #include <thread>
 #include <limits>
-#include <catch.hpp>
-
-namespace ds {
+#include <ds/catch/catch.h>
 
 static const char* TAGS = "[dsRandom][ds]";
 
-TEST_CASE("dsRandomRandintOneValue", TAGS) {
+TEST_CASE("dsRandomRandint oneValue", TAGS) {
     CHECK(ds::randint(0, 0) == 0);
     CHECK(ds::randint(1, 1) == 1);
     CHECK(ds::randint(2, 2) == 2);
@@ -35,7 +33,7 @@ TEST_CASE("dsRandomRandintOneValue", TAGS) {
     CHECK(ds::randint(1000, 2000) <= 2000);
 }
 
-TEST_CASE("dsRandomRandintBuckets", TAGS) {
+TEST_CASE("dsRandomRandint distributes evenly", TAGS) {
     auto min = 0;
     auto max = 1000000;
     std::vector<int> buckets(10, 0);
@@ -52,7 +50,7 @@ TEST_CASE("dsRandomRandintBuckets", TAGS) {
     }
 }
 
-TEST_CASE("dsRandomEachThreadSeedIsRandom", TAGS) {
+TEST_CASE("dsRandomRandint each thread is randomly seeded", TAGS) {
     auto firstValue = 0LL;
     auto setFirstValueInNewThread = [&](){
         std::thread thread([&](){
@@ -67,6 +65,3 @@ TEST_CASE("dsRandomEachThreadSeedIsRandom", TAGS) {
     setFirstValueInNewThread();
     CHECK(firstValue != firstValue1); // chance of collision 1 / 2^64
 }
-
-
-} // namespace ds

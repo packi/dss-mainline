@@ -12,7 +12,7 @@
     // C++11 capable version
     #define DS_OVERRIDE override
     #define DS_NULLPTR nullptr
-    #define DS_STATIC_ASSERT(condition, message) static_assert((condition), (message))
+    #define DS_STATIC_ASSERT(condition, message) static_assert((condition), message)
 #endif
 
 // define to `[[fallthrough]]` on c++17 complaint compilers
@@ -28,3 +28,6 @@
 #define DS_LIKELY(condition) (bool(condition))
 #define DS_UNLIKELY(condition) (bool(condition))
 #endif
+
+/// Macro expanding to `,`. Useful to pass comma to macro without starting next argument
+#define DS_COMMA ,

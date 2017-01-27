@@ -20,8 +20,6 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include <boost/thread.hpp>
-
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 #endif

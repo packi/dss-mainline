@@ -16,27 +16,28 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
-#include "str.h"
+#include "common.h"
 #include <ds/catch/catch.h>
 
-static const char* TAGS = "[dsStr][ds]";
+static const char* TAGS = "[dsCommon][ds]";
 
 namespace {
-enum class Enum { A, B };
-std::ostream& operator<<(std::ostream& stream, Enum x) {
-    switch (x) {
-      case Enum::A: return stream << "a";
-      case Enum::B: return stream << "b";
-    }
-    return stream << "?";
-  }
+class Base {
+public:
+    virtual void virtualFoo();
+};
+
+class Child : public Base {
+    virtual void virtualFoo() DS_OVERRIDE;
+};
+
+TEST_CASE("DS_STATIC_ASSERT", TAGS) {
+    DS_STATIC_ASSERT(true, "");
+    DS_STATIC_ASSERT(std::is_base_of<Base DS_COMMA Child>::value, "`Base` must be base of `Child`");
 }
 
-TEST_CASE("dsStr", TAGS) {
-    CHECK(ds::str() == "");
-    CHECK(ds::str("a") == "a");
-    CHECK(ds::str("a", "b") == "ab");
-    CHECK(ds::str("a", 4, "b") == "a4b");
-    CHECK(ds::str("a", -4, "b") == "a-4b");
-    CHECK(ds::str("-", Enum::A, Enum::B, "-") == "-ab-");
+TEST_CASE("DS_NULLPTR", TAGS) {
+    CHECK((void *) 0 == DS_NULLPTR);
 }
+
+} // namespace

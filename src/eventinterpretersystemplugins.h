@@ -111,7 +111,6 @@ namespace dss {
       std::string m_delay;
       std::string m_path;
 
-      static void *staticThreadProc(void *arg);
       boost::shared_ptr<Device> getDeviceFromNode(PropertyNodePtr _actionNode);
       void executeZoneScene(PropertyNodePtr _actionNode);
       void executeZoneUndoScene(PropertyNodePtr _actionNode);

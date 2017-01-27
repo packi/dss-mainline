@@ -643,7 +643,7 @@ BOOST_AUTO_TEST_CASE(testGroupConfiguration) {
 
   // create the AV group
   if (apt.getZone(0)->getGroup(GroupIDGlobalAppDsVentilation) == NULL) {
-    GroupSpec_t groupSpec = { 0 };
+    GroupSpec_t groupSpec = {};
     groupSpec.GroupID = GroupIDGlobalAppDsVentilation;
     groupSpec.applicationType = ApplicationType::ApartmentVentilation;
     groupSpec.applicationConfiguration = 0;

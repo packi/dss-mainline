@@ -16,9 +16,25 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
+#include "io-service.h"
+#include <thread>
+#include <ds/asio/catch.h>
 
-// Provide `main` function for unit test binary that uses catch framework.
+static const char* TAGS = "[dsAsioIoService][dsAsio][ds]";
 
-#define CATCH_CONFIG_MAIN
+TEST_CASE("dsAsioIoService", TAGS) {
+    ds::asio::catch_::IoService ioService;
+    auto&& LATENCY = ds::asio::catch_::LATENCY;
 
-#include "catch.hpp"
+    SECTION("run works in matching thread") {
+        ioService.post([&] { ioService.stop(); });
+        CHECK_STOP_RUN(ioService);
+    }
+
+    SECTION("run throws in non-matching thread") {
+        std::thread thread([&]{
+            CHECK_THROWS_FIND(ioService.runFor(LATENCY), "run() is called from wrong thread");
+        });
+        thread.join();
+    }
+}
