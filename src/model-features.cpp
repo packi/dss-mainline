@@ -117,7 +117,8 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::temperatureoffset,
   ModelFeatureId::ftwtempcontrolventilationselect,
   ModelFeatureId::ftwdisplaysettings,
-  ModelFeatureId::ftwbacklighttimeout
+  ModelFeatureId::ftwbacklighttimeout,
+  ModelFeatureId::ventconfig
 };
 
 // model features
@@ -520,10 +521,11 @@ const ModelFeatureId MF_BL_KL2[] =
 
 const ModelFeatureId MF_BL_SK204[] =
 {
-    ModelFeatureId::temperatureoffset,
-    ModelFeatureId::ftwtempcontrolventilationselect,
-    ModelFeatureId::ftwdisplaysettings,
-    ModelFeatureId::ftwbacklighttimeout
+  ModelFeatureId::temperatureoffset,
+  ModelFeatureId::ftwtempcontrolventilationselect,
+  ModelFeatureId::ftwdisplaysettings,
+  ModelFeatureId::ftwbacklighttimeout,
+  ModelFeatureId::ventconfig
 };
 
 const ModelFeatureId MF_TK_TKM2[] =
