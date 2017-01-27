@@ -66,11 +66,12 @@ public:
 };
 
 class VentilationBehavior : public Behavior {
+
 private:
   static const std::vector<int> offsetToSceneId;
-  static const std::map<int, int> sceneIdTooffset;
 
-  std::string getActiveBasicScenes() const;
+  std::string getPropertyActiveBasicScenes() const;
+  std::vector<int> getActiveBasicScenes() const;
 public:
   VentilationBehavior(PropertyNodePtr& propertyNode);
   VentilationBehavior(PropertyNodePtr& propertyNode, int configuration);
