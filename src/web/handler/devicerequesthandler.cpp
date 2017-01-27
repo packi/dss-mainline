@@ -658,7 +658,7 @@ namespace dss {
     } else if (_request.getMethod() == "setButtonActiveGroup") {
       int value = strToIntDef(_request.getParameter("groupID"), -2);
       if ((value != BUTTON_ACTIVE_GROUP_RESET) &&
-          ((value < -1) || (value > 63))) {
+          ((value < -1) || (value > GroupIDGlobalAppMax))) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
       pDevice->setDeviceButtonActiveGroup(value);
@@ -1119,7 +1119,7 @@ namespace dss {
         return JSONWriter::failure("Invalid or missing parameter 'groupType'");
       }
       int gid = strToIntDef(_request.getParameter("groupId"), -1);
-      if (gid < 0 || gid > 63) {
+      if (gid < 0 || gid > GroupIDGlobalAppMax) {
         return JSONWriter::failure("Invalid or missing parameter 'groupId'");
       }
       pDevice->setDeviceBinaryInputTargetId(index, gid);

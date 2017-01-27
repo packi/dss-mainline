@@ -603,6 +603,12 @@ namespace dss {
       } catch (ItemNotFoundException& e) {
         return JSONWriter::failure("Invalid value for parameter clusterID : '" + intToString(id) + "'");
       }
+    } else if (isGlobalAppGroup(id)) {
+      try {
+        gr = m_Apartment.getGroup(id);
+      } catch (ItemNotFoundException& e) {
+        return JSONWriter::failure("Invalid value for parameter apartment groupID : '" + intToString(id) + "'");
+      }
     } else {
       try {
         boost::shared_ptr<Zone> zone = m_Apartment.getZone(dev->getZoneID());
