@@ -244,8 +244,8 @@ namespace dss {
     Cooling = 9,
     Ventilation = 10,
     Window = 11,
-    Curtains = 12,
-    Temperature = 48,
+    Recirculation = 12,
+    ControlTemperature = 48,
     ApartmentVentilation = 64,
   };
 
@@ -345,7 +345,7 @@ namespace dss {
   const int GroupIDCooling = 9;
   const int GroupIDVentilation = 10;
   const int GroupIDWindow = 11;
-  const int GroupIDCurtain = 12;
+  const int GroupIDRecirculation = 12;
   const int GroupIDReserved3 = 13;
   const int GroupIDReserved4 = 14;
   const int GroupIDReserved5 = 15;

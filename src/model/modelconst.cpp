@@ -346,8 +346,8 @@ namespace dss {
         case ApplicationType::Cooling: return stream << "cooling";
         case ApplicationType::Ventilation: return stream << "ventilation";
         case ApplicationType::Window: return stream << "window";
-        case ApplicationType::Curtains: return stream << "curtains";
-        case ApplicationType::Temperature: return stream << "temperature";
+        case ApplicationType::Recirculation: return stream << "recirculation";
+        case ApplicationType::ControlTemperature: return stream << "controlTemperature";
         case ApplicationType::ApartmentVentilation: return stream << "apartmentVentilation";
       }
       return stream << "unknown";
@@ -363,8 +363,9 @@ namespace dss {
       case ApplicationType::Heating:
       case ApplicationType::Cooling:
       case ApplicationType::Ventilation:
+      case ApplicationType::Recirculation:
       case ApplicationType::Window:
-      case ApplicationType::Temperature:
+      case ApplicationType::ControlTemperature:
       case ApplicationType::ApartmentVentilation:
         return ColorIDBlue;
       case ApplicationType::Audio:
@@ -372,7 +373,6 @@ namespace dss {
       case ApplicationType::Video:
         return ColorIDViolet;
       case ApplicationType::None:
-      case ApplicationType::Curtains:
         return 0;
     }
     return 0;
