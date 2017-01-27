@@ -1122,7 +1122,8 @@ namespace dss {
       if (gid < 0 || gid > 63) {
         return JSONWriter::failure("Invalid or missing parameter 'groupId'");
       }
-      pDevice->setDeviceBinaryInputTarget(index, static_cast<GroupType>(gtype), gid);
+      pDevice->setDeviceBinaryInputTargetId(index, gid);
+      pDevice->setDeviceBinaryInputTargetType(index, static_cast<GroupType>(gtype));
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputId") {
       int index = strToIntDef(_request.getParameter("index"), -1);

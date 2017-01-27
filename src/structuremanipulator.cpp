@@ -700,8 +700,8 @@ namespace dss {
     if (isAppUserGroup(_group->getID())) {
       if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) && (_device->getBinaryInputCount() == 1)) {
         /* AKM with single input, set active group to last group */
-        _device->setDeviceBinaryInputTarget(0, GroupType::Standard, _group->getID());
-        _device->setBinaryInputTarget(0, GroupType::Standard, _group->getID());
+        _device->setDeviceBinaryInputTargetId(0, _group->getID());
+        _device->setBinaryInputTargetId(0, _group->getID());
       } else if (_device->getOutputMode() == 0) {
         /* device has no output, button is active on group */
         _device->setDeviceButtonActiveGroup(_group->getID());
@@ -736,8 +736,8 @@ namespace dss {
         (_device->getBinaryInputCount() == 1) &&
         (_group->getID() == _device->getBinaryInputs()[0]->m_targetGroupId)) {
       /* AKM with single input, active on removed group */
-      _device->setDeviceBinaryInputTarget(0, GroupType::Standard, GroupIDBlack);
-      _device->setBinaryInputTarget(0, GroupType::Standard, GroupIDBlack);
+      _device->setDeviceBinaryInputTargetId(0, GroupIDBlack);
+      _device->setBinaryInputTargetId(0, GroupIDBlack);
     } else if (_group->getID() == _device->getButtonActiveGroup()) {
       /* device has no output, button is active on removed group */
       _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
