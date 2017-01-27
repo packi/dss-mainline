@@ -155,7 +155,9 @@ const char* kDatabaseDirectory = PACKAGE_DATADIR "/data/databases";
     std::unique_ptr<IoServiceObjects> m_ioServiceObjects; // created when DSS is initialized
 
     Impl() : m_ioService(DS_NULLPTR), m_stopping(false) {
-      // start io service thread, create ioService instance in it
+      // `ds::asio::IoService` requires its construct to run in the same thread
+      // as its event loop `run()` method. So we need a bit of dance here.
+      // Start io service thread, create ioService instance in it
       // and assing m_ioService to point to it.
       std::mutex mutex;
       std::condition_variable conditionVariable;
