@@ -611,8 +611,8 @@ namespace dss {
               (_pDevice->getOemInfoState() != DEVICE_OEM_UNKNOWN) &&
               (_pDevice->getOemInfoState() != DEVICE_OEM_LOADING) &&
               ((_pDevice->getDeviceType() == DEVICE_TYPE_TNY) ||
-               (_pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
-               (_pDevice->getDeviceNumber() == 204))) {
+               ((_pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
+               (_pDevice->getDeviceNumber() == 204)))) {
       // this is an optimization for TNY and SK-204, the visibility flag
       // at bank 1 / 0x1f is also retrieved by the OEM reader, so when the
       // OEM data is being read, we will get the visibility from there.
