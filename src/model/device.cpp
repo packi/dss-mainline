@@ -149,16 +149,23 @@ namespace dss {
     }
   }
 
-  void DeviceBinaryInput::setTarget(GroupType targetGroupType, uint8_t targetGroupId) {
-    if (m_targetGroupType == targetGroupType && m_targetGroupId == targetGroupId) {
+  void DeviceBinaryInput::setTargetId(uint8_t targetGroupId) {
+    if (m_targetGroupId == targetGroupId) {
       return;
     }
     log(std::string("setTarget this:") + m_name
-        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType))
         + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
-    m_targetGroupType = targetGroupType;
     updateStatusBitHandle();
+  }
+
+  void DeviceBinaryInput::setTargetType(GroupType targetGroupType) {
+    if (m_targetGroupType == targetGroupType) {
+      return;
+    }
+    log(std::string("setTarget this:") + m_name
+        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType)), lsInfo);
+    m_targetGroupType = targetGroupType;
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
@@ -2269,15 +2276,27 @@ namespace dss {
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, static_cast<int>(inputType));
   }
 
-  void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, GroupType targetType, uint8_t _targetGroup)
+  void Device::setDeviceBinaryInputTargetId(uint8_t _inputIndex, uint8_t _targetGroup)
   {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
-    uint8_t val = (static_cast<int>(targetType) & 0x3) << 6;
-    val |= (_targetGroup & 0x3f);
-    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, val);
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, _targetGroup);
+  }
+
+  void Device::setDeviceBinaryInputTargetType(uint8_t _inputIndex, GroupType targetType)
+  {
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    uint8_t val = (static_cast<int>(m_binaryInputs[_inputIndex]->m_inputId) & 0xf) << 4;
+    if (_inputIndex == m_binaryInputs.size()) {
+      val |= 0x80;
+    }
+    val |= static_cast<int>(m_binaryInputs[_inputIndex]->m_targetGroupType) & 0x3;
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
   }
 
   BinaryInputType Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
@@ -2297,6 +2316,7 @@ namespace dss {
     if (_inputIndex == m_binaryInputs.size()) {
       val |= 0x80;
     }
+    val |= static_cast<int>(m_binaryInputs[_inputIndex]->m_targetGroupType) & 0x3;
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
   }
 
@@ -2346,9 +2366,14 @@ namespace dss {
     return (uint8_t) m_binaryInputs.size();
   }
 
-  void Device::setBinaryInputTarget(uint8_t index, GroupType targetGroupType, uint8_t targetGroup) {
+  void Device::setBinaryInputTargetId(uint8_t index, uint8_t targetGroupId) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    getBinaryInput(index)->setTarget(targetGroupType, targetGroup);
+    getBinaryInput(index)->setTargetId(targetGroupId);
+  }
+
+  void Device::setBinaryInputTargetType(uint8_t index, GroupType targetGroupType) {
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
+    getBinaryInput(index)->setTargetType(targetGroupType);
   }
 
   void Device::setBinaryInputId(uint8_t index, BinaryInputId inputId) {

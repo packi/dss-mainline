@@ -603,6 +603,12 @@ namespace dss {
       } catch (ItemNotFoundException& e) {
         return JSONWriter::failure("Invalid value for parameter clusterID : '" + intToString(id) + "'");
       }
+    } else if (isGlobalAppGroup(id)) {
+      try {
+        gr = m_Apartment.getGroup(id);
+      } catch (ItemNotFoundException& e) {
+        return JSONWriter::failure("Invalid value for parameter apartment groupID : '" + intToString(id) + "'");
+      }
     } else {
       try {
         boost::shared_ptr<Zone> zone = m_Apartment.getZone(dev->getZoneID());
@@ -613,12 +619,6 @@ namespace dss {
       } catch (ItemNotFoundException& e) {
         return JSONWriter::failure("Could not get relevant zone.");
       }
-    }
-
-    if (!(dev->isInGroup(static_cast<int>(gr->getApplicationType())) ||
-          (dev->getDeviceType() == DEVICE_TYPE_AKM) ||
-          (dev->getDeviceType() == DEVICE_TYPE_UMR))) {
-      return JSONWriter::failure(ds::str("Devices does not match applicationType of group (", gr->getApplicationType(), ")"));
     }
 
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);

@@ -387,9 +387,6 @@ namespace dss {
       if (m_pStructureBusInterface == NULL) {
           return JSONWriter::failure("No handle to bus interface");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_SW) {
-          return JSONWriter::failure("Device is not joker device");
-      }
 
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
       boost::shared_ptr<Group> group = m_Apartment.getZone(0)->getGroup(newGroupId);
@@ -658,7 +655,7 @@ namespace dss {
     } else if (_request.getMethod() == "setButtonActiveGroup") {
       int value = strToIntDef(_request.getParameter("groupID"), -2);
       if ((value != BUTTON_ACTIVE_GROUP_RESET) &&
-          ((value < -1) || (value > 63))) {
+          ((value < -1) || (value > GroupIDGlobalAppMax))) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
       pDevice->setDeviceButtonActiveGroup(value);
@@ -1119,10 +1116,11 @@ namespace dss {
         return JSONWriter::failure("Invalid or missing parameter 'groupType'");
       }
       int gid = strToIntDef(_request.getParameter("groupId"), -1);
-      if (gid < 0 || gid > 63) {
+      if (gid < 0 || gid > GroupIDGlobalAppMax) {
         return JSONWriter::failure("Invalid or missing parameter 'groupId'");
       }
-      pDevice->setDeviceBinaryInputTarget(index, static_cast<GroupType>(gtype), gid);
+      pDevice->setDeviceBinaryInputTargetId(index, gid);
+      pDevice->setDeviceBinaryInputTargetType(index, static_cast<GroupType>(gtype));
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputId") {
       int index = strToIntDef(_request.getParameter("index"), -1);

@@ -1980,13 +1980,14 @@ namespace dss {
           uint8_t offset = (_configIndex - 0x40) % 3;
           switch (offset) {
           case 0:
-            device->setBinaryInputTarget(inputIndex, static_cast<GroupType>(_value >> 6), _value & 0x3f);
+            device->setBinaryInputTargetId(inputIndex, _value);
             break;
           case 1:
             device->setBinaryInputType(inputIndex, static_cast<BinaryInputType>(_value & 0xff));
             break;
           case 2:
             device->setBinaryInputId(inputIndex, static_cast<BinaryInputId>(_value >> 4));
+            device->setBinaryInputTargetType(inputIndex, static_cast<GroupType>(_value & 0x03));
             break;
           }
         }
