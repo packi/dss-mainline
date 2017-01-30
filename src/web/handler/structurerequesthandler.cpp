@@ -621,12 +621,6 @@ namespace dss {
       }
     }
 
-    if (!(dev->isInGroup(static_cast<int>(gr->getApplicationType())) ||
-          (dev->getDeviceType() == DEVICE_TYPE_AKM) ||
-          (dev->getDeviceType() == DEVICE_TYPE_UMR))) {
-      return JSONWriter::failure(ds::str("Devices does not match applicationType of group (", gr->getApplicationType(), ")"));
-    }
-
     StructureManipulator manipulator(m_Interface, m_QueryInterface, m_Apartment);
     try {
       if (((dev->getDeviceType() == DEVICE_TYPE_AKM) ||

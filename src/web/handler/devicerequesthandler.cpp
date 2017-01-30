@@ -387,9 +387,6 @@ namespace dss {
       if (m_pStructureBusInterface == NULL) {
           return JSONWriter::failure("No handle to bus interface");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_SW) {
-          return JSONWriter::failure("Device is not joker device");
-      }
 
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
       boost::shared_ptr<Group> group = m_Apartment.getZone(0)->getGroup(newGroupId);
