@@ -122,17 +122,7 @@ namespace dss {
     /** @copydoc Device::getLastCalledScene */
     int getLastCalledScene() const { return m_LastCalledScene; }
     /** @copydoc Device::setLastCalledScene */
-    void setLastCalledScene(const int _value) {
-      if (m_GroupID == GroupIDControlTemperature) {
-        if (_value >= 16) {
-          return;
-        }
-      }
-      if (_value != m_LastCalledScene) {
-        m_LastButOneCalledScene = m_LastCalledScene;
-        m_LastCalledScene = _value;
-      }
-    }
+    void setLastCalledScene(const int _value);
     /** @copydoc Device::setLastButOneCalledScene */
     void setLastButOneCalledScene(const int _value) {
       if (_value == m_LastCalledScene) {
