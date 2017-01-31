@@ -104,9 +104,14 @@ inline IoService::RunResult IoService::runFor(boost::chrono::milliseconds durati
   ds::asio::Timer timer(*this);
   RunResult result = RunResult::STOPPED;
 
+  // workaround for gcc4.5
+  // ../src/ds/asio/catch.h: In lambda function:
+  // ../src/ds/asio/catch.h:109:12: error: cannot call member function 'void boost::asio::io_service::stop()' without object
+  auto this_ = this;
+
   timer.expiresFromNow(duration, [&] {
       result = RunResult::EXPIRED;
-      stop();
+      this_->stop();
   });
 
   reset();
