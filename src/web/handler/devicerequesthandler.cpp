@@ -1466,14 +1466,15 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return JSONWriter::failure("No device for given dsuid");
       }
-      DeviceBank3_BL conf(device);
+      DeviceValveTimerSpec_t timerSpec;
+      device->getDeviceValveTimer(timerSpec);
 
       unsigned int protTimer;
       if (_request.getParameter("valveProtectionTimer", protTimer)) {
         if (protTimer > std::numeric_limits<uint16_t>::max()) {
           return JSONWriter::failure("valveProtectionTimer too large");
         }
-        conf.setValveProtectionTimer(protTimer);
+        timerSpec.protectionTimer = protTimer;
       };
 
       int emergencyValue;
@@ -1481,7 +1482,7 @@ namespace dss {
         if (emergencyValue < -100 || emergencyValue > 100) {
           return JSONWriter::failure("emergencyValue out of [-100:100] range");
         }
-        conf.setEmergencySetPoint(emergencyValue);
+        timerSpec.emergencyControlValue = emergencyValue;
       };
 
       unsigned int emergencyTimer;
@@ -1489,9 +1490,10 @@ namespace dss {
         if (emergencyTimer > std::numeric_limits<uint8_t>::max()) {
           return JSONWriter::failure("emergencyTimer too big");
         }
-        conf.setEmergencyTimer(emergencyTimer);
+        timerSpec.emergencyTimer = emergencyTimer;
       };
 
+      device->setDeviceValveTimer(timerSpec);
       return JSONWriter::success();
 
     } else if (_request.getMethod() == "getValveTimerMode") {
@@ -1501,12 +1503,13 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return JSONWriter::failure("No device for given dsuid");
       }
-      DeviceBank3_BL conf(device);
+      DeviceValveTimerSpec_t timerSpec;
+      device->getDeviceValveTimer(timerSpec);
 
       JSONWriter json;
-      json.add("valveProtectionTimer", conf.getValveProtectionTimer());
-      json.add("emergencyValue", conf.getEmergencySetPoint());
-      json.add("emergencyTimer", conf.getEmergencyTimer());
+      json.add("valveProtectionTimer", timerSpec.protectionTimer);
+      json.add("emergencyValue", timerSpec.emergencyControlValue);
+      json.add("emergencyTimer", timerSpec.emergencyTimer);
       return json.successJSON();
 
     } else if (_request.getMethod() == "setValvePwmMode") {
@@ -1516,47 +1519,50 @@ namespace dss {
       } catch(std::runtime_error& e) {
         return JSONWriter::failure("No device for given dsuid");
       }
-      DeviceBank3_BL conf(device);
+      DeviceValvePwmSpec_t pwmSpec;
+      device->getDeviceValvePwm(pwmSpec);
 
       unsigned pwmPeriod;
       if (_request.getParameter("pwmPeriod", pwmPeriod)) {
         if (pwmPeriod > std::numeric_limits<uint16_t>::max()) {
           return JSONWriter::failure("valveProtectionTimer too large");
         }
-        conf.setPwmPeriod(pwmPeriod);
+        pwmSpec.pwmPeriod = pwmPeriod;
       };
       int value;
       if (_request.getParameter("pwmMinX", value)) {
         if (value < 0  || value > 100) {
           return JSONWriter::failure("pwmMinX out of [0:100] range");
         }
-        conf.setPwmMinX(value);
+        pwmSpec.pwmMinX = value;
       };
       if (_request.getParameter("pwmMaxX", value)) {
         if (value < 0  || value > 100) {
           return JSONWriter::failure("pwmMaxX out of [0:100] range");
         }
-        conf.setPwmMaxX(value);
+        pwmSpec.pwmMaxX = value;
       };
       if (_request.getParameter("pwmMinY", value)) {
         if (value < 0  || value > 100) {
           return JSONWriter::failure("pwmMinY out of [0:100] range");
         }
-        conf.setPwmMinY(value);
+        pwmSpec.pwmMinY = value;
       };
       if (_request.getParameter("pwmMaxY", value)) {
         if (value < 0  || value > 100) {
           return JSONWriter::failure("pwmMaxY out of [0:100] range");
         }
-        conf.setPwmMaxY(value);
+        pwmSpec.pwmMaxY = value;
       };
       int offset;
       if (_request.getParameter("pwmOffset", offset)) {
         if (offset < -100 || offset > 100) {
           return JSONWriter::failure("PWM offset out of [-100:100] range");
         }
-        conf.setPwmOffset(offset);
+        pwmSpec.pwmOffset = offset;
       };
+
+      device->setDeviceValvePwm(pwmSpec);
       return JSONWriter::success();
 
     } else if (_request.getMethod() == "getValvePwmMode") {
@@ -1567,17 +1573,16 @@ namespace dss {
         return JSONWriter::failure("No device for given dsuid");
       }
 
+      DeviceValvePwmSpec_t pwmSpec;
+      device->getDeviceValvePwm(pwmSpec);
+
       JSONWriter json;
-      uint16_t value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
-      json.add("pwmPeriod", value);
-      value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinX);
-      json.add("pwmMinX", value & 0xff);
-      json.add("pwmMaxX", (value >> 8) & 0xff);
-      value = device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinY);
-      json.add("pwmMinY", value & 0xff);
-      json.add("pwmMaxY", (value >> 8) & 0xff);
-      int8_t value8 = device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
-      json.add("pwmOffset", value8);
+      json.add("pwmPeriod", pwmSpec.pwmPeriod);
+      json.add("pwmMinX", pwmSpec.pwmMinX);
+      json.add("pwmMaxX", pwmSpec.pwmMaxX);
+      json.add("pwmMinY", pwmSpec.pwmMinY);
+      json.add("pwmMaxY", pwmSpec.pwmMaxY);
+      json.add("pwmOffset", pwmSpec.pwmOffset);
       return json.successJSON();
 
     } else if (_request.getMethod() == "getValvePwmState") {
@@ -1588,10 +1593,12 @@ namespace dss {
         return JSONWriter::failure("No device for given dsuid");
       }
 
-      uint16_t value = device->getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
+      DeviceValvePwmStateSpec_t pwmStateSpec;
+      device->getDeviceValvePwmState(pwmStateSpec);
+
       JSONWriter json;
-      json.add("pwmValue", value & 0xff);
-      json.add("pwmPriorityMode", (value >> 8) & 0xff);
+      json.add("pwmValue", pwmStateSpec.pwmValue);
+      json.add("pwmPriorityMode", pwmStateSpec.pwmPriorityMode);
       return json.successJSON();
 
     } else if (_request.getMethod() == "setValveControlMode") {
