@@ -1073,7 +1073,7 @@ namespace dss {
 
   /** Configure climate actuator */
   void Device::setDeviceValveTimer(DeviceValveTimerSpec_t _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue, _config.emergencyControlValue);
@@ -1082,7 +1082,7 @@ namespace dss {
   } // setDeviceValveTimer
 
   void Device::getDeviceValveTimer(DeviceValveTimerSpec_t& _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     _config.emergencyControlValue = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue);
@@ -1091,7 +1091,7 @@ namespace dss {
   } // getDeviceValveTimer
 
   void Device::setDeviceValvePwm(DeviceValvePwmSpec_t _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod, _config.pwmPeriod);
@@ -1101,7 +1101,7 @@ namespace dss {
   } // setDeviceValvePwm
 
   void Device::getDeviceValvePwm(DeviceValvePwmSpec_t& _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     _config.pwmPeriod = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
@@ -1115,17 +1115,16 @@ namespace dss {
   } // getDeviceValvePwm
 
   void Device::getDeviceValvePwmState(DeviceValvePwmStateSpec_t& _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
-
     uint16_t value = getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
     _config.pwmValue = value & 0xff;
     _config.pwmPriorityMode = (value >> 8) & 0xff;
   } // getDeviceValvePwmState
 
   void Device::setDeviceValveControl(DeviceValveControlSpec_t _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     uint8_t value = _config.ctrlRawValue;
@@ -1138,7 +1137,7 @@ namespace dss {
   }
 
   void Device::getDeviceValveControl(DeviceValveControlSpec_t& _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     uint8_t value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig);
@@ -2255,7 +2254,8 @@ namespace dss {
   }
 
   bool Device::isValveDevice() const {
-    return (hasOutput() && (getDeviceClass() == DEVICE_CLASS_BL));
+    return (hasOutput() && ((getDeviceClass() == DEVICE_CLASS_BL) ||
+                               ((getDeviceType() == DEVICE_TYPE_UMR) && (getRevisionID() >= 0x0383))));
   }
 
   DeviceValveType_t Device::getValveType () const {
