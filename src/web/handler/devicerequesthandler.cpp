@@ -387,9 +387,6 @@ namespace dss {
       if (m_pStructureBusInterface == NULL) {
           return JSONWriter::failure("No handle to bus interface");
       }
-      if (pDevice->getDeviceClass() != DEVICE_CLASS_SW) {
-          return JSONWriter::failure("Device is not joker device");
-      }
 
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
       boost::shared_ptr<Group> group = m_Apartment.getZone(0)->getGroup(newGroupId);
@@ -469,7 +466,7 @@ namespace dss {
       pDevice->setDeviceButtonID(value);
 
       if (pDevice->is2WayMaster()) {
-        DeviceFeatures_t features = pDevice->getFeatures();
+        DeviceFeatures_t features = pDevice->getDeviceFeatures();
         if (!features.syncButtonID) {
           return JSONWriter::success();
         }
@@ -497,7 +494,7 @@ namespace dss {
       }
 
 
-      DeviceFeatures_t features = pDevice->getFeatures();
+      DeviceFeatures_t features = pDevice->getDeviceFeatures();
       if (features.pairing == false) {
         return JSONWriter::failure("This device does not support button pairing");
       }
@@ -658,13 +655,13 @@ namespace dss {
     } else if (_request.getMethod() == "setButtonActiveGroup") {
       int value = strToIntDef(_request.getParameter("groupID"), -2);
       if ((value != BUTTON_ACTIVE_GROUP_RESET) &&
-          ((value < -1) || (value > 63))) {
+          ((value < -1) || (value > GroupIDGlobalAppMax))) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
       pDevice->setDeviceButtonActiveGroup(value);
 
       if (pDevice->is2WayMaster()) {
-        DeviceFeatures_t features = pDevice->getFeatures();
+        DeviceFeatures_t features = pDevice->getDeviceFeatures();
         if (!features.syncButtonID) {
           return JSONWriter::success();
         }
@@ -690,7 +687,7 @@ namespace dss {
       std::string action = "none";
       pDevice->setDeviceOutputMode(value);
       if (pDevice->getDeviceType() == DEVICE_TYPE_UMR) {
-        DeviceFeatures_t features = pDevice->getFeatures();
+        DeviceFeatures_t features = pDevice->getDeviceFeatures();
         if (features.pairing == false) {
           json.add("action", action);
           DeviceReference dr(pDevice, &m_Apartment);
@@ -899,7 +896,7 @@ namespace dss {
         }
 
         if (angle != -1) {
-          DeviceFeatures_t features = pDevice->getFeatures();
+          DeviceFeatures_t features = pDevice->getDeviceFeatures();
           if (!features.hasOutputAngle) {
             return JSONWriter::failure("Device does not support output angle configuration");
           }
@@ -935,7 +932,7 @@ namespace dss {
       }
 
       json.add("value", pDevice->getSceneValue(id));
-      DeviceFeatures_t features = pDevice->getFeatures();
+      DeviceFeatures_t features = pDevice->getDeviceFeatures();
       if (features.hasOutputAngle) {
         json.add("angle", pDevice->getSceneAngle(id));
       }
@@ -1119,10 +1116,11 @@ namespace dss {
         return JSONWriter::failure("Invalid or missing parameter 'groupType'");
       }
       int gid = strToIntDef(_request.getParameter("groupId"), -1);
-      if (gid < 0 || gid > 63) {
+      if (gid < 0 || gid > GroupIDGlobalAppMax) {
         return JSONWriter::failure("Invalid or missing parameter 'groupId'");
       }
-      pDevice->setDeviceBinaryInputTarget(index, static_cast<GroupType>(gtype), gid);
+      pDevice->setDeviceBinaryInputTargetId(index, gid);
+      pDevice->setDeviceBinaryInputTargetType(index, static_cast<GroupType>(gtype));
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputId") {
       int index = strToIntDef(_request.getParameter("index"), -1);
@@ -1908,7 +1906,7 @@ namespace dss {
         return JSONWriter::failure("no device for given dsuid");
       }
 
-      DeviceFeatures_t features = device->getFeatures();
+      DeviceFeatures_t features = device->getDeviceFeatures();
       if (!features.posTimeMax) {
         return JSONWriter::failure("maximum motion time setting not supported by "
                             "this device");
@@ -1932,7 +1930,7 @@ namespace dss {
       }
 
       uint16_t value = 0;
-      DeviceFeatures_t features = device->getFeatures();
+      DeviceFeatures_t features = device->getDeviceFeatures();
       if (features.posTimeMax) {
         value = device->getDeviceMaxMotionTime();
       }
@@ -2168,6 +2166,197 @@ namespace dss {
       }
       pDevice->callAction(id, *paramsElement);
       return JSONWriter::success();
+    } else if (_request.getMethod() == "setSK204Config") {
+      std::string mode = _request.getParameter("mode");
+      if (mode.empty()) {
+        return JSONWriter::failure("missing parameter: mode");
+      }
+
+      if ((mode != "temperaturecontrol") &&
+          (mode != "temperaturecontrolventilation")) {
+        return JSONWriter::failure("invalid value for parameter \"mode\"");
+      }
+
+      if (!((pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
+            (pDevice->getDeviceNumber() == 204)) || !pDevice->isMainDevice())  {
+        JSONWriter::failure("request not supported on this device");
+      }
+
+      JSONWriter json;
+      std::string action = "none";
+
+      dsuid_t next;
+      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
+      boost::shared_ptr<Device> pPartnerDevice;
+
+      try {
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
+      } catch(ItemNotFoundException& e) {
+        return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+      }
+
+      bool targetVisibility = false; // only "temperaturecontrol"
+      bool currentVisibility = pPartnerDevice->isVisible();
+
+      if (mode == "temperaturecontrolventilation") {
+        targetVisibility = true;
+      }
+
+      if (targetVisibility != currentVisibility) {
+        if (currentVisibility == true) {
+          action = "remove";
+        } else {
+          action = "add";
+        }
+
+        pPartnerDevice->setVisibility(targetVisibility);
+
+        if (targetVisibility == true) {
+          StructureManipulator manipulator(*m_pStructureBusInterface,
+                                           *m_pStructureQueryBusInterface,
+                                            m_Apartment);
+
+          // follow the same logic with paired devices as everywhere else
+          if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
+            if (m_pStructureBusInterface != NULL) {
+              boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                        pDevice->getZoneID());
+              manipulator.addDeviceToZone(pPartnerDevice, zone);
+            }
+          }
+
+          // #3450 - remove slave devices from clusters
+          manipulator.deviceRemoveFromGroups(pPartnerDevice);
+        }
+      }
+
+      json.add("action", action);
+      DeviceReference dr(pPartnerDevice, &m_Apartment);
+      json.add("device");
+      toJSON(dr, json);
+
+      return json.successJSON();
+    } else if (_request.getMethod() == "getSK204Config") {
+
+      if (!((pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
+            (pDevice->getDeviceNumber() == 204)) || !pDevice->isMainDevice()) {
+        JSONWriter::failure("request not supported on this device");
+      }
+
+      JSONWriter json;
+
+      dsuid_t next;
+      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
+      boost::shared_ptr<Device> pPartnerDevice;
+
+      try {
+        pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
+      } catch(ItemNotFoundException& e) {
+        return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+      }
+
+      std::string mode = "temperaturecontrol";
+
+      if (pPartnerDevice->isVisible()) {
+        mode = "temperaturecontrolventilation";
+      }
+
+      json.add("mode", mode);
+      return json.successJSON();
+    } else if (_request.getMethod() == "setSK204DisplayMode") {
+      int humidity = -1;
+      int room_setpoint = -1;
+
+      if (!((pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
+            (pDevice->getDeviceNumber() == 204)) || !pDevice->isMainDevice())  {
+        JSONWriter::failure("request not supported on this device");
+      }
+
+      if (_request.hasParameter("roomsetpoint")) {
+        int value = strToIntDef(_request.getParameter("roomsetpoint"), -1);
+        if ((value != 0) && (value != 1)) {
+          return JSONWriter::failure("Invalid 'room_setpoint' parameter value");
+        } else {
+          room_setpoint = value;
+        }
+      }
+
+      if (_request.hasParameter("humidity")) {
+        int value = strToIntDef(_request.getParameter("humidity"), -1);
+        if ((value != 0) && (value != 1)) {
+          return JSONWriter::failure("Invalid 'humidity' parameter value");
+        } else {
+          humidity = value;
+        }
+      }
+
+      if ((room_setpoint == -1) && (humidity == -1)) {
+        return JSONWriter::success();
+      }
+
+      uint8_t config = pDevice->getDeviceConfig(CfgClassConfigDataSK, CfgFunction_SK_Config);
+      uint8_t read_config = config;
+
+      if (room_setpoint != -1) {
+        // Bit 1: room setpoint
+        config ^= (-room_setpoint ^ config) & (1 << 1);
+      }
+
+      if (humidity != -1) {
+        // Bit 3: humidity
+        config ^= (-humidity ^ config) & (1 << 3);
+      }
+
+      if (config != read_config) {
+        pDevice->setDeviceConfig(CfgClassConfigDataSK, CfgFunction_SK_Config, config);
+      }
+
+      return JSONWriter::success();
+    } else if (_request.getMethod() == "getSK204DisplayMode") {
+
+      if (!((pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
+            (pDevice->getDeviceNumber() == 204)) || !pDevice->isMainDevice())  {
+        JSONWriter::failure("request not supported on this device");
+      }
+
+      uint8_t config = pDevice->getDeviceConfig(CfgClassConfigDataSK, CfgFunction_SK_Config);
+
+      // Bit 1: room setpoint
+      uint8_t room_setpoint = (config >> 1) & 1;
+      // Bit 3: humidity
+      uint8_t humidity = (config >> 3) & 1;
+
+      JSONWriter json;
+      json.add("roomsetpoint", (bool)room_setpoint);
+      json.add("humidity", (bool)humidity);
+      return json.successJSON();
+    } else if (_request.getMethod() == "setSK204BacklightTimeout") {
+      if (((pDevice->getDeviceType() != DEVICE_TYPE_SK) &&
+           (pDevice->getDeviceNumber() != 204)) || !pDevice->isMainDevice()) {
+        JSONWriter::failure("request not supported on this device");
+      }
+
+      int value = strToIntDef(_request.getParameter("seconds"), -1);
+      if ((value < 1) || (value > UCHAR_MAX)) {
+        return JSONWriter::failure("Invalid 'seconds' parameter value");
+      }
+
+      pDevice->setDeviceConfig(CfgClassConfigDataSK, CfgFunction_SK_BacklightDuration, (uint8_t)value);
+
+      return JSONWriter::success();
+    } else if (_request.getMethod() == "getSK204BacklightTimeout") {
+
+      if (!((pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
+            (pDevice->getDeviceNumber() == 204)) || !pDevice->isMainDevice())  {
+        JSONWriter::failure("request not supported on this device");
+      }
+
+      uint8_t seconds = pDevice->getDeviceConfig(CfgClassConfigDataSK, CfgFunction_SK_BacklightDuration);
+
+      JSONWriter json;
+      json.add("seconds", (int)seconds);
+      return json.successJSON();
+
     } else {
       throw std::runtime_error("Unhandled function");
     }

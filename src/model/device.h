@@ -169,7 +169,8 @@ namespace dss {
     ~DeviceBinaryInput();
 
     const State& getState() const { return *m_state; }
-    void setTarget(GroupType type, uint8_t group);
+    void setTargetId(uint8_t group);
+    void setTargetType(GroupType type);
     void setInputId(BinaryInputId inputId);
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
@@ -250,6 +251,7 @@ namespace dss {
   class Device : public AddressableModelItem,
                  public boost::noncopyable {
   private:
+    __DECL_LOG_CHANNEL__;
     std::string m_Name;
     dsuid_t m_DSID;
     devid_t m_ShortAddress;
@@ -321,6 +323,7 @@ namespace dss {
     std::string m_VdcIconPath;
     boost::shared_ptr<std::vector<ModelFeatureId> > m_VdcModelFeatures;
     bool m_hasActions;
+    std::map<ModelFeatureId, bool> m_modelFeatures;
 
     DeviceValveType_t m_ValveType;
 
@@ -345,6 +348,9 @@ namespace dss {
     int m_floor;
     int m_pairedDevices; // currently relevant for TNY only
     bool m_visible; // currently relevant for TNY only
+
+    void updateModelFeatures();
+    void republishModelFeaturesToPropertyTree();
 
   protected:
     /** Sends the application a note that something has changed.
@@ -408,7 +414,7 @@ namespace dss {
     DeviceTypes_t getDeviceType() const;
     int getDeviceNumber() const;
     DeviceClasses_t getDeviceClass() const;
-    const DeviceFeatures_t getFeatures() const;
+    const DeviceFeatures_t getDeviceFeatures() const;
     std::string getAKMInputProperty() const;
     int multiDeviceIndex() const;
 
@@ -437,7 +443,8 @@ namespace dss {
 
     /** Binary input devices */
     void setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId _targetId);
-    void setDeviceBinaryInputTarget(uint8_t _inputIndex, GroupType targetType, uint8_t _targetGroup);
+    void setDeviceBinaryInputTargetId(uint8_t _inputIndex, uint8_t _targetGroup);
+    void setDeviceBinaryInputTargetType(uint8_t _inputIndex, GroupType targetType);
     void setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType _inputType);
     BinaryInputType getDeviceBinaryInputType(uint8_t _inputIndex);
     /** AKM2xx timeout settings */
@@ -558,7 +565,7 @@ namespace dss {
 
     /** Returns the short address of the device. This is the address
      * the device got from the dSM. */
-    devid_t getShortAddress() const;
+    const devid_t& getShortAddress() const { return m_ShortAddress; }
     /** Sets the short-address of the device. */
     void setShortAddress(const devid_t _shortAddress);
 
@@ -651,7 +658,7 @@ namespace dss {
 
     // valve configuration
     bool isValveDevice() const;
-    const DeviceValveType_t getValveType() const;
+    DeviceValveType_t getValveType() const;
     void setValveType(DeviceValveType_t _type);
 
     std::string getValveTypeAsString() const;
@@ -686,7 +693,7 @@ namespace dss {
     void setOemProductInfo(const std::string& _productName, const std::string& _iconPath, const std::string& _productURL, const std::string& _configLink);
     void setOemProductInfoState(const DeviceOEMState_t _state);
     std::string getOemProductInfoStateAsString() const { return oemStateToString(m_OemProductInfoState); }
-    const DeviceOEMState_t getOemProductInfoState() const { return m_OemProductInfoState; }
+    DeviceOEMState_t getOemProductInfoState() const { return m_OemProductInfoState; }
     const std::string& getOemProductName() const { return m_OemProductName; }
     const std::string& getOemProductIcon() const { return m_OemProductIcon; }
     const std::string& getOemProductURL() const { return m_OemProductURL; }
@@ -732,11 +739,14 @@ namespace dss {
     void setHasActions(bool x) { m_hasActions = x; }
     bool getHasActions() const { return m_hasActions; }
 
+    const std::map<ModelFeatureId, bool>& getModelFeatures() const { return m_modelFeatures; }
+
     void setBinaryInputs(const std::vector<DeviceBinaryInputSpec_t>& _binaryInput);
-    const uint8_t getBinaryInputCount() const;
+    uint8_t getBinaryInputCount() const;
     const std::vector<boost::shared_ptr<DeviceBinaryInput> >& getBinaryInputs() const;
     const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
-    void setBinaryInputTarget(uint8_t _index, GroupType targetGroupType, uint8_t targetGroup);
+    void setBinaryInputTargetId(uint8_t _index, uint8_t targetGroup);
+    void setBinaryInputTargetType(uint8_t _index, GroupType targetGroupType);
     void setBinaryInputId(uint8_t _index, BinaryInputId _inputId);
     void setBinaryInputType(uint8_t _index, BinaryInputType _inputType);
     void clearBinaryInputs();
@@ -748,19 +758,19 @@ namespace dss {
     void setStateValues(const std::vector<std::pair<std::string, std::string> >& values);
 
     void setSensors(const std::vector<DeviceSensorSpec_t>& _binaryInput);
-    const uint8_t getSensorCount() const;
+    uint8_t getSensorCount() const;
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
     const boost::shared_ptr<DeviceSensor_t> getSensorByType(SensorType _sensorType) const;
-    const void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
-    const void setSensorValue(int _sensorIndex, double _sensorValue) const;
-    const void setSensorDataValidity(int _sensorIndex, bool _valid) const;
+    void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
+    void setSensorValue(int _sensorIndex, double _sensorValue) const;
+    void setSensorDataValidity(int _sensorIndex, bool _valid) const;
     bool isSensorDataValid(int _sensorIndex) const;
 
     void setOutputChannels(const std::vector<int>& _outputChannels);
-    const int getOutputChannelCount() const;
-    const int getOutputChannelIndex(int _channelId) const;
-    const int getOutputChannel(int _index) const;
+    int getOutputChannelCount() const;
+    int getOutputChannelIndex(int _channelId) const;
+    int getOutputChannel(int _index) const;
 
     uint8_t getDeviceUMVRelayValue();
     void setDeviceUMVRelayValue(uint8_t _value);

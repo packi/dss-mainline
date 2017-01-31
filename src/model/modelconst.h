@@ -70,6 +70,7 @@ namespace dss {
   const uint8_t SceneOffE2 = 0x22;
   const uint8_t SceneOnE2 = 0x23;
   const uint8_t SceneOffE3 = 0x24;
+  const uint8_t SceneBoost = 0x24;   // redefined in context of ventilation group
   const uint8_t SceneOnE3 = 0x25;
   const uint8_t SceneOffE4 = 0x26;
   const uint8_t SceneOnE4 = 0x27;
@@ -243,8 +244,8 @@ namespace dss {
     Cooling = 9,
     Ventilation = 10,
     Window = 11,
-    Curtains = 12,
-    Temperature = 48,
+    Recirculation = 12,
+    ControlTemperature = 48,
     ApartmentVentilation = 64,
   };
 
@@ -323,6 +324,7 @@ namespace dss {
   const int ColorIDRed = 6;
   const int ColorIDGreen = 7;
   const int ColorIDBlack = 8;
+  const int ColorIDWhite = 9;
 
   // TODO(someday): Remove this type and variables that use it altogether?
   // https://git.digitalstrom.org/brano/dss-mainline/commit/d17f16eb550c0cb32c910372f8d137ba32338a68#note_35767
@@ -344,7 +346,7 @@ namespace dss {
   const int GroupIDCooling = 9;
   const int GroupIDVentilation = 10;
   const int GroupIDWindow = 11;
-  const int GroupIDCurtain = 12;
+  const int GroupIDRecirculation = 12;
   const int GroupIDReserved3 = 13;
   const int GroupIDReserved4 = 14;
   const int GroupIDReserved5 = 15;
@@ -400,14 +402,13 @@ namespace dss {
     return isDefaultGroup(groupId) || isAppUserGroup(groupId) || isZoneUserGroup(groupId) || isControlGroup(groupId) || isGlobalAppGroup(groupId);
   }
 
-  const uint64_t DSIDHeader = 0x3504175FE0000000ll;
-
   const uint8_t CfgClassComm = 0x00;
   const uint8_t CfgClassDevice = 0x01;
   const uint8_t CfgClassPlatform = 0x02;
   const uint8_t CfgClassFunction = 0x03;
   const uint8_t CfgClassSensorEvent = 0x06;
   const uint8_t CfgClassRuntime = 0x40;
+  const uint8_t CfgClassConfigDataSK = 0x7e;
   const uint8_t CfgClassScene = 0x80;
   const uint8_t CfgClassSceneExtention = 0x81;
   const uint8_t CfgClassSceneAngle = 0x82;
@@ -451,6 +452,8 @@ namespace dss {
   const uint8_t CfgFunction_Tiny_SWThreshold = CfgFunction_UMR_SWThreshold;
 
   const uint8_t CfgFunction_SK_TempOffsetExt = 0x51;
+  const uint8_t CfgFunction_SK_Config = 0x96;
+  const uint8_t CfgFunction_SK_BacklightDuration = 0x97;
   const uint8_t CfgRuntime_Shade_Position = 0x02;
   const uint8_t CfgRuntime_Shade_PositionAngle = 0x04;
   const uint8_t CfgRuntime_Shade_PositionCurrent = 0x06;
@@ -529,7 +532,15 @@ namespace dss {
     outmodegeneric = 40,
     outconfigswitch = 41,
     temperatureoffset = 42,
+    apartmentapplication = 43,
+    ftwtempcontrolventilationselect = 44,
+    ftwdisplaysettings = 45,
+    ftwbacklighttimeout = 46
   };
+
+  boost::optional<const char*> modelFeatureName(ModelFeatureId x);
+  boost::optional<ModelFeatureId> modelFeatureFromName(const std::string& x);
+  std::ostream& operator<<(std::ostream& stream, ModelFeatureId x);
 
 } // namespace dss
 #endif

@@ -29,6 +29,8 @@
 #include <map>
 #include <vector>
 
+#include "foreach.h"
+
 namespace dss {
 
 using rapidjson::Document;
@@ -36,38 +38,12 @@ using rapidjson::Value;
 using rapidjson::StringBuffer;
 using rapidjson::Writer;
 
-Behavior::Behavior(PropertyNodePtr& propertyNode, int configuration)
-    : m_configuration(configuration), m_pPropertyNode(propertyNode) {
-  // this virtual function will publish only if the property tree node was already created.
-  // otherwise additional call to publishToPropertyTree() may be needed.
-  Behavior::publishToPropertyTree();
-}
+Behavior::Behavior(PropertyNodePtr& propertyNode, int currentScene, int configuration)
+    : m_pPropertyNode(propertyNode), m_currentScene(currentScene), m_configuration(configuration) {}
 
-Behavior::~Behavior() {
-  // this function is virtual
-  Behavior::removeFromPropertyTree();
-}
+Behavior::~Behavior() {}
 
-void Behavior::publishToPropertyTree() {
-  if (m_pPropertyNode != NULL) {
-    m_pPropertyNode->createProperty("configuration")
-        ->linkToProxy(PropertyProxyMemberFunction<Behavior, uint32_t>(*this, &Behavior::getConfiguration));
-  }
-}
-
-void Behavior::removeFromPropertyTree() {
-  if (m_pPropertyNode != NULL) {
-    auto&& childNode = m_pPropertyNode->getProperty("configuration");
-    if (childNode != NULL) {
-      m_pPropertyNode->removeChild(childNode);
-    }
-  }
-}
-
-DefaultBehavior::DefaultBehavior(PropertyNodePtr& propertyNode) : Behavior(propertyNode, 0) {}
-
-DefaultBehavior::DefaultBehavior(PropertyNodePtr& propertyNode, int configuration)
-    : Behavior(propertyNode, configuration) {}
+DefaultBehavior::DefaultBehavior(PropertyNodePtr& propertyNode, int currentScene) : Behavior(propertyNode, currentScene, 0) {}
 
 DefaultBehavior::~DefaultBehavior() {}
 
@@ -87,39 +63,54 @@ uint32_t DefaultBehavior::deserializeConfiguration(const std::string& jsonConfig
   return 0u;
 }
 
-int DefaultBehavior::getNextScene(int currentScene) { return SceneHelper::getNextScene(currentScene); }
+int DefaultBehavior::getNextScene() { return SceneHelper::getNextScene(m_currentScene); }
 
-int DefaultBehavior::getPreviousScene(int currentScene) { return SceneHelper::getPreviousScene(currentScene); }
+int DefaultBehavior::getPreviousScene() { return SceneHelper::getPreviousScene(m_currentScene); }
+
+void DefaultBehavior::publishToPropertyTree() {}
+
+void DefaultBehavior::removeFromPropertyTree() {}
 
 // mapping bit offsets to sceneId
-const std::vector<int> VentilationBehavior::offsetToSceneId = {SceneOff, Scene1, Scene2, Scene3, Scene4};
-// mapping sceneId to bit offset
-const std::map<int, int> VentilationBehavior::sceneIdTooffset = {
-    {SceneOff, 0}, {Scene1, 1}, {Scene2, 2}, {Scene3, 3}, {Scene4, 4}};
+const std::vector<int> VentilationBehavior::offsetToSceneId = {SceneOff, Scene1, Scene2, Scene3, Scene4, SceneBoost};
 
 // By default the ventilation configuration activates all basic scenes (0 value is active)
-VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode) : Behavior(propertyNode, 0) {
-  publishMyToPropertyTree();
+VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode, int currentScene) : Behavior(propertyNode, SceneOff, 0) {
+  // make sure the current scene is valid
+  setCurrentScene(currentScene);
+  publishToPropertyTree();
 }
 
-VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode, int configuration)
-    : Behavior(propertyNode, configuration) {
-  publishMyToPropertyTree();
-}
+VentilationBehavior::~VentilationBehavior() { removeFromPropertyTree(); }
 
-VentilationBehavior::~VentilationBehavior() {
-  removeMyFromPropertyTree();
+void VentilationBehavior::setCurrentScene(int currentScene) {
+  auto&& activeScenes = getActiveBasicScenes();
+
+  // if no scenes are allowed we force off state
+  if (activeScenes.size() == 0) {
+    m_currentScene = SceneOff;
+  } else {
+    // if this scene is an allowed basic scene just set it
+    if (find(activeScenes.begin(), activeScenes.end(), currentScene) != activeScenes.end()) {
+      m_currentScene = currentScene;
+    } else {
+      switch (currentScene) {
+        case SceneFire:
+        case SceneSmoke:
+        case SceneGas:
+          m_currentScene = getActiveBasicScenes().front();
+          break;
+        default:
+          // ignore all other scenes as they do not change ventilation level
+          break;
+      }
+    }
+  }
 }
 
 void VentilationBehavior::serializeConfiguration(uint32_t configuration, JSONWriter& writer) const {
   writer.startArray("activeBasicScenes");
-
-  for (unsigned int i = 0; i < offsetToSceneId.size(); ++i) {
-    if ((configuration & (1 << i)) == 0) {
-      writer.add(offsetToSceneId.at(i));
-    }
-  }
-
+  foreach (auto scene, getActiveBasicScenes()) { writer.add(scene); }
   writer.endArray();
 }
 
@@ -141,15 +132,17 @@ uint32_t VentilationBehavior::deserializeConfiguration(const std::string& jsonCo
     }
 
     // we set all scenes as inactive, and mark only the active ones
-    configuration = 0x1F;
+    configuration = 0x3F;
 
     for (rapidjson::SizeType i = 0; i < activeBasicScenes.Size(); i++) {
       int basicSceneId = activeBasicScenes[i].GetInt();
-      if (sceneIdTooffset.find(basicSceneId) != sceneIdTooffset.end()) {
-        configuration &= ~(1 << sceneIdTooffset.at(basicSceneId));
+      auto sceneIt = find(offsetToSceneId.begin(), offsetToSceneId.end(), basicSceneId);
+
+      if (sceneIt != offsetToSceneId.end()) {
+        configuration &= ~(1 << (sceneIt - offsetToSceneId.begin()));
       } else {
         throw std::runtime_error(ds::str("Basic SceneId:", basicSceneId, " not valid (should be ", (int)SceneOff, ", ",
-            (int)Scene1, ", ", (int)Scene2, ", ", (int)Scene3, " or ", (int)Scene4, ")"));
+            (int)Scene1, ", ", (int)Scene2, ", ", (int)Scene3, ", ", (int)Scene4, " or ", (int)SceneBoost, ")"));
       }
     }
   }
@@ -157,59 +150,92 @@ uint32_t VentilationBehavior::deserializeConfiguration(const std::string& jsonCo
   return configuration;
 }
 
-int VentilationBehavior::getNextScene(int currentScene) {
-  // TODO(soon): Add implementation of Ventilation specific state machine
-  throw std::runtime_error("Not implemented");
+int VentilationBehavior::getNextScene() {
+  auto&& activeScenes = getActiveBasicScenes();
+
+  if (activeScenes.size() == 0) {
+    // if no scenes are active we cannot find next scene
+    throw std::runtime_error("Could not find next active scene");
+  } else {
+    auto sceneIt = find(activeScenes.begin(), activeScenes.end(), m_currentScene);
+
+    // if we could not find current scene in allowed scenes, or this is already the biggest possible return it
+    if ((sceneIt == activeScenes.end()) || (m_currentScene == activeScenes.back())) {
+      return activeScenes.back();
+    } else {
+      return *(++sceneIt);
+    }
+  }
 }
 
-int VentilationBehavior::getPreviousScene(int currentScene) {
-  // TODO(soon): Add implementation of Ventilation specific state machine
-  throw std::runtime_error("Not implemented");
+int VentilationBehavior::getPreviousScene() {
+  auto&& activeScenes = getActiveBasicScenes();
+
+  if (activeScenes.size() == 0) {
+    // if no scenes are active we cannot find previous scene
+    throw std::runtime_error("Could not find previous active scene");
+  } else {
+    auto sceneIt = find(activeScenes.begin(), activeScenes.end(), m_currentScene);
+
+    // if we could not find current scene in allowed scenes, or this is already the lowest possible return it
+    if ((sceneIt == activeScenes.end()) || (m_currentScene == activeScenes.front())) {
+      return activeScenes.front();
+    } else {
+      return *(--sceneIt);
+    }
+  }
 }
 
-std::string VentilationBehavior::getActiveBasicScenes() const {
+std::string VentilationBehavior::getPropertyActiveBasicScenes() const {
   std::string ret = "";
   bool first = true;
 
+  foreach (auto scene, getActiveBasicScenes()) {
+    if (first) {
+      first = false;
+    } else {
+      ret.append(",");
+    }
+    ret.append(ds::str(scene));
+  }
+
+  return ret;
+}
+
+std::vector<int> VentilationBehavior::getActiveBasicScenes() const {
+  std::vector<int> ret;
+
   for (unsigned int i = 0; i < offsetToSceneId.size(); ++i) {
     if ((m_configuration & (1 << i)) == 0) {
-      if (first) {
-        first = false;
-      } else {
-        ret.append(",");
-      }
-      ret.append(ds::str(offsetToSceneId.at(i)));
+      ret.push_back(offsetToSceneId.at(i));
     }
   }
 
   return ret;
 }
 
-void VentilationBehavior::publishMyToPropertyTree() {
+void VentilationBehavior::publishToPropertyTree() {
   if (m_pPropertyNode != NULL) {
     m_pPropertyNode->createProperty("activeBasicScenes")
         ->linkToProxy(PropertyProxyMemberFunction<VentilationBehavior, std::string, false>(
-            *this, &VentilationBehavior::getActiveBasicScenes));
+            *this, &VentilationBehavior::getPropertyActiveBasicScenes));
+    m_pPropertyNode->createProperty("lastCalledBasicScene")
+        ->linkToProxy(PropertyProxyMemberFunction<VentilationBehavior, int>(
+            *this, &VentilationBehavior::getCurrentScene));
   }
 }
 
-void VentilationBehavior::removeMyFromPropertyTree() {
+void VentilationBehavior::removeFromPropertyTree() {
   if (m_pPropertyNode != NULL) {
     auto&& childNode = m_pPropertyNode->getProperty("activeBasicScenes");
     if (childNode != NULL) {
       m_pPropertyNode->removeChild(childNode);
     }
+    childNode = m_pPropertyNode->getProperty("lastCalledBasicScene");
+    if (childNode != NULL) {
+      m_pPropertyNode->removeChild(childNode);
+    }
   }
-}
-
-void VentilationBehavior::publishToPropertyTree() {
-  Behavior::publishToPropertyTree();
-  publishMyToPropertyTree();
-}
-
-void VentilationBehavior::removeFromPropertyTree() {
-  removeMyFromPropertyTree();
-  Behavior::removeFromPropertyTree();
 }
 
 } /* namespace dss */

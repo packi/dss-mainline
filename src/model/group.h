@@ -87,7 +87,12 @@ namespace dss {
 
     /** Translates the configuration back and forth between binary and JSON format */
     void serializeApplicationConfiguration(uint32_t configuration, JSONWriter& writer) const {
-      return m_pApplicationBehavior->serializeConfiguration(configuration, writer);
+      m_pApplicationBehavior->serializeConfiguration(configuration, writer);
+    }
+    std::string serializeApplicationConfiguration(uint32_t configuration) const {
+      JSONWriter writer(JSONWriter::jsonNoneResult);
+      m_pApplicationBehavior->serializeConfiguration(configuration, writer);
+      return writer.successJSON();
     }
     uint32_t deserializeApplicationConfiguration(const std::string& jsonConfiguration) const {
       return m_pApplicationBehavior->deserializeConfiguration(jsonConfiguration);
@@ -117,17 +122,7 @@ namespace dss {
     /** @copydoc Device::getLastCalledScene */
     int getLastCalledScene() const { return m_LastCalledScene; }
     /** @copydoc Device::setLastCalledScene */
-    void setLastCalledScene(const int _value) {
-      if (m_GroupID == GroupIDControlTemperature) {
-        if (_value >= 16) {
-          return;
-        }
-      }
-      if (_value != m_LastCalledScene) {
-        m_LastButOneCalledScene = m_LastCalledScene;
-        m_LastCalledScene = _value;
-      }
-    }
+    void setLastCalledScene(const int _value);
     /** @copydoc Device::setLastButOneCalledScene */
     void setLastButOneCalledScene(const int _value) {
       if (_value == m_LastCalledScene) {

@@ -346,8 +346,6 @@ namespace dss {
       ctx->attachWrapper(wrapper);
       wrapper->init();
 
-      m_WrapperInAction = wrapper;
-
       {
         ScriptLock lock(ctx);
         JSContextThread th(ctx.get());
@@ -623,26 +621,6 @@ namespace dss {
       }
     }
   } // cleanupTerminatedScripts
-
-  boost::shared_ptr<ScriptContextWrapper> EventInterpreterPluginJavascript::getContextWrapperForContext(ScriptContext* _pContext) {
-    boost::shared_ptr<ScriptContextWrapper> result;
-    if(!m_WrapperInAction.expired()) {
-      result = m_WrapperInAction.lock();
-      if(result->get().get() != _pContext) {
-        result.reset();
-      }
-    }
-    typedef std::vector<boost::shared_ptr<ScriptContextWrapper> >::iterator tScriptContextWrapperIterator;
-    tScriptContextWrapperIterator ipScriptContextWrapper = m_WrappedContexts.begin();
-    while(ipScriptContextWrapper != m_WrappedContexts.end()) {
-      if((*ipScriptContextWrapper)->get().get() == _pContext) {
-        result = (*ipScriptContextWrapper);
-      }
-      ++ipScriptContextWrapper;
-    }
-    return result;
-  } // getContextWrapperForContext
-
 
   //================================================== EventRelayTarget
 

@@ -136,7 +136,6 @@ namespace dss {
       if (_dsMeter->getCapability_HasDevices()) {
         std::vector<int> zoneIDs;
         try {
-          // TODO(soon): make sure that the DSM return zone 0 in this list if it contain apartment application group.
           zoneIDs = m_Interface.getZones(_dsMeter->getDSID());
         } catch(BusApiError& e) {
           log("scanDSMeter: Error getting ZoneIDs", lsWarning);
@@ -144,6 +143,9 @@ namespace dss {
         }
         foreach(int zoneID, zoneIDs) {
           log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
+          if (zoneID == 0) {
+            continue;
+          }
           boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
           zone->addToDSMeter(_dsMeter);
           zone->setIsPresent(true);
@@ -152,6 +154,16 @@ namespace dss {
             return false;
           }
         }
+
+        // scan groups and status of apartment zone "0", but not devices or temperature control
+        boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(0);
+        try {
+          scanGroupsOfZone(_dsMeter, zone);
+          // TODO(soon): read scene history
+        } catch(BusApiError& e) {
+          log("scanDSMeter: error scanning zone 0: " + std::string(e.what()), lsWarning);
+        }
+
         scanClusters(_dsMeter);
         scanPowerStates(_dsMeter);
       }
@@ -532,6 +544,10 @@ namespace dss {
       }
     } else if (dev->getDeviceType() == DEVICE_TYPE_SDS) {
       dev->setPairedDevices(2);
+    } else if ((dev->getDeviceType() == DEVICE_TYPE_SK) &&
+               (dev->getDeviceClass() == DEVICE_CLASS_BL) &&
+               (dev->getDeviceNumber() == 204)) {
+      dev->setPairedDevices(2);
     }
 
     scheduleDeviceReadout(dev);
@@ -594,7 +610,14 @@ namespace dss {
     } else if (_pDevice->isPresent() &&
               (_pDevice->getOemInfoState() != DEVICE_OEM_UNKNOWN) &&
               (_pDevice->getOemInfoState() != DEVICE_OEM_LOADING) &&
-              (_pDevice->getDeviceType() == DEVICE_TYPE_TNY)) {
+              ((_pDevice->getDeviceType() == DEVICE_TYPE_TNY) ||
+               ((_pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
+               (_pDevice->getDeviceNumber() == 204)))) {
+      // this is an optimization for TNY and SK-204, the visibility flag
+      // at bank 1 / 0x1f is also retrieved by the OEM reader, so when the
+      // OEM data is being read, we will get the visibility from there.
+      // However, OEM data is only read once per device, so on all
+      // subsequent scans we need to read out the visibility explicitly
       boost::shared_ptr<DSDeviceBusInterface::TNYConfigReader> task;
       std::string connURI = m_Apartment.getBusInterface()->getConnectionURI();
       task = boost::make_shared<DSDeviceBusInterface::TNYConfigReader>(connURI);

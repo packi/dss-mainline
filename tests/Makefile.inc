@@ -55,5 +55,6 @@ dsstests_LDADD = \
 			$(BOOST_THREAD_LIB) \
 			$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
 			$(BOOST_CHRONO_LIB) \
-			$(SQLITE3_LIBS)
+			$(SQLITE3_LIBS) \
+			$(libdsscore_a_LIB)
 

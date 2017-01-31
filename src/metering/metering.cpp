@@ -684,15 +684,15 @@ static const int DISK_FLUSH_INTERVAL = 10*60; // ten minutes
     m_Chain.push_back(_config);
   }
 
-  const int MeteringConfigChain::size() const {
+  int MeteringConfigChain::size() const {
     return m_Chain.size();
   }
 
-  const int MeteringConfigChain::getResolution(int _index) const {
+  int MeteringConfigChain::getResolution(int _index) const {
     return m_Chain.at(_index).m_Resolution;
   }
 
-  const int MeteringConfigChain::getNumberOfValues(int _index) const {
+  int MeteringConfigChain::getNumberOfValues(int _index) const {
     return m_Chain.at(_index).m_NumberOfValues;
   }
 

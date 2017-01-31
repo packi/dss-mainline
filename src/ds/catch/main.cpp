@@ -16,27 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
-#include "str.h"
-#include <ds/catch/catch.h>
 
-static const char* TAGS = "[dsStr][ds]";
+// Provide `main` function for unit test binary that uses catch framework.
 
-namespace {
-enum class Enum { A, B };
-std::ostream& operator<<(std::ostream& stream, Enum x) {
-    switch (x) {
-      case Enum::A: return stream << "a";
-      case Enum::B: return stream << "b";
-    }
-    return stream << "?";
-  }
-}
+#define CATCH_CONFIG_MAIN
 
-TEST_CASE("dsStr", TAGS) {
-    CHECK(ds::str() == "");
-    CHECK(ds::str("a") == "a");
-    CHECK(ds::str("a", "b") == "ab");
-    CHECK(ds::str("a", 4, "b") == "a4b");
-    CHECK(ds::str("a", -4, "b") == "a-4b");
-    CHECK(ds::str("-", Enum::A, Enum::B, "-") == "-ab-");
-}
+#include "catch.h"

@@ -82,8 +82,7 @@ void Status::push() {
 void Status::asyncPeriodicPush() {
   log(ds::str("asyncPeriodicPush ", *this), lsDebug);
 
-  m_periodicPushTimer.randomlyExpiresFromNowPercentDown(PUSH_SENSOR_PERIOD, 25);
-  m_periodicPushTimer.asyncWait([this]() {
+  m_periodicPushTimer.randomlyExpiresFromNowPercentDown(PUSH_SENSOR_PERIOD, 25, [this] {
       push();
       asyncPeriodicPush(); // async loop
   });

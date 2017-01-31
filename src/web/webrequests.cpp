@@ -119,6 +119,17 @@ namespace dss {
   void JSONWriter::add(double _value) {
     m_writer.Double(_value);
   }
+  bool JSONWriter::addKey(ModelFeatureId x) {
+    if (auto&& name = modelFeatureName(x)) {
+      add(*name);
+      return true;
+    } else {
+      // Do not expose unknown model features to public api.
+      // We cannot give them real name.
+      return false;
+    }
+  }
+
   void JSONWriter::addNull() {
     m_writer.Null();
   }

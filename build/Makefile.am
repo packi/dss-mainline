@@ -6,7 +6,7 @@ TESTS =
 noinst_LIBRARIES =
 noinst_PROGRAMS =
 BUILT_SOURCES = build_info.h
-AM_CPPFLAGS = -I$(top_srcdir)/external
+AM_CPPFLAGS = -I$(top_srcdir)/external -I$(top_srcdir)/src
 
 build_info.h:
 	$(top_srcdir)/tools/dss_gen_version_unix.sh .. .
@@ -17,3 +17,7 @@ include ../unix/Makefile.inc
 include ../src/Makefile.inc
 include ../tests/Makefile.inc
 
+# build tests for the default make targets only when enabled
+if AUTOBUILD_TESTS
+noinst_PROGRAMS += $(check_PROGRAMS)
+endif

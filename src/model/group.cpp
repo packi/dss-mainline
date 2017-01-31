@@ -49,7 +49,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_ZoneID(_pZone->getID()),
     m_GroupID(_id),
     m_ApplicationType(ApplicationType::None),
-    m_pApplicationBehavior(new DefaultBehavior(m_pPropertyNode)),
+    m_pApplicationBehavior(new DefaultBehavior(m_pPropertyNode, SceneOff)),
     m_LastCalledScene(SceneOff),
     m_LastButOneCalledScene(SceneOff),
     m_IsValid(false),
@@ -76,9 +76,9 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
     if ((applicationType == ApplicationType::Ventilation) ||
         (applicationType == ApplicationType::ApartmentVentilation)) {
-      m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode));
+      m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode, getLastCalledScene()));
     } else {
-      m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode));
+      m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
     }
 
     if (getZoneID() == 0) {
@@ -129,6 +129,19 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     return *this;
   } // operator=
 
+  void Group::setLastCalledScene(const int _value) {
+    if (m_GroupID == GroupIDControlTemperature) {
+      if (_value >= 16) {
+        return;
+      }
+    }
+    if (_value != m_LastCalledScene) {
+      m_LastButOneCalledScene = m_LastCalledScene;
+      m_LastCalledScene = _value;
+      m_pApplicationBehavior->setCurrentScene(_value);
+    }
+  }
+
   void Group::callScene(const callOrigin_t _origin, const SceneAccessCategory _category, const int _sceneNr, const std::string _token, const bool _force) {
     // this might be redundant, but since a set could be
     // optimized if it contains only one device its safer like that...
@@ -160,11 +173,11 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   } // getPowerConsumption
 
   void Group::nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    callScene(_origin, _category, m_pApplicationBehavior->getNextScene(m_LastCalledScene),  "", false);
+    callScene(_origin, _category, m_pApplicationBehavior->getNextScene(),  "", false);
   } // nextScene
 
   void Group::previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) {
-    callScene(_origin, _category, m_pApplicationBehavior->getPreviousScene(m_LastCalledScene), "", false);
+    callScene(_origin, _category, m_pApplicationBehavior->getPreviousScene(), "", false);
   } // previousScene
 
   void Group::setSceneName(int _sceneNumber, const std::string& _name) {

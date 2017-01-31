@@ -71,6 +71,7 @@ namespace dss {
     _json.add("OemProductURL", _device.getDevice()->getOemProductURL());
     _json.add("OemInternetState", _device.getDevice()->getOemInetStateAsString());
     _json.add("OemIsIndependent", _device.getDevice()->getOemIsIndependent());
+    _json.add("modelFeatures", _device.getDevice()->getModelFeatures());
     _json.add("isVdcDevice", _device.getDevice()->isVdcDevice());
     if (_device.getDevice()->isVdcDevice()) {
       _json.add("VdcHardwareModelGuid", _device.getDevice()->getVdcHardwareModelGuid());
@@ -143,9 +144,6 @@ namespace dss {
     _json.add("buttonInputIndex", _device.getDevice()->getButtonInputIndex());
     _json.add("buttonInputCount", _device.getDevice()->getButtonInputCount());
     _json.add("AKMInputProperty", _device.getDevice()->getAKMInputProperty());
-
-    _json.add("ActiveGroup", _device.getDevice()->getActiveGroup());
-    _json.add("DefaultGroup", _device.getDevice()->getDefaultGroup());
 
     _json.startArray("groups");
     for (int g = 0; g < _device.getDevice()->getGroupsCount(); g++) {
@@ -232,7 +230,7 @@ namespace dss {
     _json.add("applicationType", static_cast<int>(_group->getApplicationType()));
     _json.add("isPresent", _group->isPresent());
     _json.add("isValid", _group->isValid());
-    _json.add("configuration", _group->getApplicationConfiguration());
+    _group->serializeApplicationConfiguration(_group->getApplicationConfiguration(), _json);
 
     _json.startArray("devices");
     Set devices = _group->getDevices();
@@ -259,6 +257,7 @@ namespace dss {
     _json.add("applicationType", static_cast<int>(_cluster->getApplicationType()));
     _json.add("isPresent", _cluster->isPresent());
     _json.add("isValid", _cluster->isValid());
+    _cluster->serializeApplicationConfiguration(_cluster->getApplicationConfiguration(), _json);
     _json.add("CardinalDirection", toString(_cluster->getLocation()));
     _json.add("ProtectionClass", _cluster->getProtectionClass());
     _json.add("isAutomatic", _cluster->isAutomatic());

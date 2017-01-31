@@ -17,3 +17,19 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "log.h"
+#include <iostream>
+#include <cstdlib>
+
+namespace ds {
+namespace log {
+namespace _private {
+
+void assert_(const std::string& x) {
+    std::cerr << x;
+    abort();
+}
+
+} // namespace _private
+
+} // namespace log
+} // namespace ds

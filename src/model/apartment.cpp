@@ -142,9 +142,14 @@ namespace dss {
     grp->setApplicationType(ApplicationType::Window);
     grp->setIsValid(true);
     _zone->addGroup(grp);
+    grp.reset(new Group(GroupIDRecirculation, _zone));
+    grp->setName("recirculation");
+    grp->setApplicationType(ApplicationType::Recirculation);
+    grp->setIsValid(true);
+    _zone->addGroup(grp);
     grp.reset(new Group(GroupIDControlTemperature, _zone));
     grp->setName("controltemperature");
-    grp->setApplicationType(ApplicationType::Temperature);
+    grp->setApplicationType(ApplicationType::ControlTemperature);
     grp->setIsValid(true);
     _zone->addGroup(grp);
   } // addDefaultGroupsToZone

@@ -65,7 +65,8 @@ const char *UMV204 =    "UMV:204";
 const char *UMV200 =    "UMV:200";
 const char *UMV210 =    "UMV:210";
 const char *UMR200 =    "UMR:200";
-const char *SK20 =     "SK:20";
+const char *SK20 =      "SK:20"; // wildcard for all SK-20*
+const char *SK204 =     "SK:204";
 const char *AKM2 =      "AKM:2"; // wildcard for all AKM-2*
 
 // all available features
@@ -113,7 +114,10 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::impulseconfig,
   ModelFeatureId::outmodegeneric,
   ModelFeatureId::outconfigswitch,
-  ModelFeatureId::temperatureoffset
+  ModelFeatureId::temperatureoffset,
+  ModelFeatureId::ftwtempcontrolventilationselect,
+  ModelFeatureId::ftwdisplaysettings,
+  ModelFeatureId::ftwbacklighttimeout
 };
 
 // model features
@@ -514,6 +518,14 @@ const ModelFeatureId MF_BL_KL2[] =
   ModelFeatureId::ledauto
 };
 
+const ModelFeatureId MF_BL_SK204[] =
+{
+    ModelFeatureId::temperatureoffset,
+    ModelFeatureId::ftwtempcontrolventilationselect,
+    ModelFeatureId::ftwdisplaysettings,
+    ModelFeatureId::ftwbacklighttimeout
+};
+
 const ModelFeatureId MF_TK_TKM2[] =
 {
   ModelFeatureId::blink,
@@ -698,7 +710,7 @@ ModelFeatures* ModelFeatures::getInstance()
     return m_instance;
 }
 
-ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
+ModelFeatures::ModelFeatures() : m_features(ColorIDWhite + 1) {
   // initialize "our" devices
   boost::shared_ptr<std::vector<ModelFeatureId> > fv;
   fv = boost::make_shared<std::vector<ModelFeatureId> >();
@@ -843,6 +855,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDBlack + 1) {
   fv.reset();
 
   fv = boost::make_shared<std::vector<ModelFeatureId> >();
+  fv->assign(MF_BL_SK204, ARRAY_END(MF_BL_SK204));
+  setFeatures(ColorIDBlue, SK204, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_GE_TKM2, ARRAY_END(MF_GE_TKM2));
   setFeatures(ColorIDYellow, TKM2, fv);
   fv.reset();
@@ -912,7 +929,7 @@ void ModelFeatures::setFeatures(int _color, std::string _model, boost::shared_pt
     throw std::runtime_error("invalid feature array\n");
   }
 
-  if ((_color < ColorIDYellow) || (_color > ColorIDBlack)) {
+  if ((_color < ColorIDYellow) || (_color > ColorIDWhite)) {
     throw std::runtime_error("can not save feature: unsupported device color");
   }
   boost::mutex::scoped_lock lock(m_lock);
@@ -928,7 +945,7 @@ void ModelFeatures::setFeatures(int _color, std::string _model, boost::shared_pt
 }
 
 std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<ModelFeatureId> > > > > ModelFeatures::getFeatures(int _color) {
-  if ((_color < ColorIDYellow) || (_color > ColorIDBlack)) {
+  if ((_color < ColorIDYellow) || (_color > ColorIDWhite)) {
     throw std::runtime_error("can not retrieve features: unsupported device color");
   }
 
@@ -939,195 +956,6 @@ std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std
   }
 
   return m_features.at(_color);
-}
-
-ModelFeatureId ModelFeatures::nameToFeature(std::string _name) {
-  if (_name == "dontcare") {
-    return ModelFeatureId::dontcare;
-  } else if (_name == "blink") {
-    return ModelFeatureId::blink;
-  } else if (_name == "ledauto") {
-    return ModelFeatureId::ledauto;
-  } else if (_name == "leddark") {
-    return ModelFeatureId::leddark;
-  } else if (_name == "transt") {
-    return ModelFeatureId::transt;
-  } else if (_name == "outmode") {
-    return ModelFeatureId::outmode;
-  } else if (_name == "outmodeswitch") {
-    return ModelFeatureId::outmodeswitch;
-  } else if (_name == "outvalue8") {
-    return ModelFeatureId::outvalue8;
-  } else if (_name == "pushbutton") {
-    return ModelFeatureId::pushbutton;
-  } else if (_name == "pushbdevice") {
-    return ModelFeatureId::pushbdevice;
-  } else if (_name == "pushbarea") {
-    return ModelFeatureId::pushbarea;
-  } else if (_name == "pushbadvanced") {
-    return ModelFeatureId::pushbadvanced;
-  } else if (_name == "pushbcombined") {
-    return ModelFeatureId::pushbcombined;
-  } else if (_name == "shadeprops") {
-    return ModelFeatureId::shadeprops;
-  } else if (_name == "shadeposition") {
-    return ModelFeatureId::shadeposition;
-  } else if (_name == "motiontimefins") {
-    return ModelFeatureId::motiontimefins;
-  } else if (_name == "optypeconfig") {
-    return ModelFeatureId::optypeconfig;
-  } else if (_name == "shadebladeang") {
-    return ModelFeatureId::shadebladeang;
-  } else if (_name == "highlevel") {
-    return ModelFeatureId::highlevel;
-  } else if (_name == "consumption") {
-    return ModelFeatureId::consumption;
-  } else if (_name == "jokerconfig") {
-    return ModelFeatureId::jokerconfig;
-  } else if (_name == "akmsensor") {
-    return ModelFeatureId::akmsensor;
-  } else if (_name == "akminput") {
-    return ModelFeatureId::akminput;
-  } else if (_name == "akmdelay") {
-    return ModelFeatureId::akmdelay;
-  } else if (_name == "twowayconfig") {
-    return ModelFeatureId::twowayconfig;
-  } else if (_name == "outputchannels") {
-    return ModelFeatureId::outputchannels;
-  } else if (_name == "heatinggroup") {
-    return ModelFeatureId::heatinggroup;
-  } else if (_name == "heatingoutmode") {
-    return ModelFeatureId::heatingoutmode;
-  } else if (_name == "heatingprops") {
-    return ModelFeatureId::heatingprops;
-  } else if (_name == "pwmvalue") {
-    return ModelFeatureId::pwmvalue;
-  } else if (_name == "valvetype") {
-    return ModelFeatureId::valvetype;
-  } else if (_name == "extradimmer") {
-    return ModelFeatureId::extradimmer;
-  } else if (_name == "umvrelay") {
-    return ModelFeatureId::umvrelay;
-  } else if (_name == "blinkconfig") {
-    return ModelFeatureId::blinkconfig;
-  } else if (_name == "impulseconfig") {
-    return ModelFeatureId::impulseconfig;
-  } else if (_name == "umroutmode") {
-    return ModelFeatureId::umroutmode;
-  } else if (_name == "pushbsensor") {
-    return ModelFeatureId::pushbsensor;
-  } else if (_name == "locationconfig") {
-    return ModelFeatureId::locationconfig;
-  } else if (_name == "windprotectionconfigblind") {
-    return ModelFeatureId::windprotectionconfigblind;
-  } else if (_name == "windprotectionconfigawning") {
-    return ModelFeatureId::windprotectionconfigawning;
-  } else if (_name == "outmodegeneric") {
-    return ModelFeatureId::outmodegeneric;
-  } else if (_name == "outconfigswitch") {
-    return ModelFeatureId::outconfigswitch;
-  } else if (_name == "temperatureoffset") {
-    return ModelFeatureId::temperatureoffset;
-  }
-
-  throw std::runtime_error("unknown feature encountered");
-}
-
-std::string ModelFeatures::getFeatureName(ModelFeatureId _feature)
-{
-  switch (_feature)
-  {
-    case ModelFeatureId::dontcare:
-      return "dontcare";
-    case ModelFeatureId::blink:
-      return "blink";
-    case ModelFeatureId::ledauto:
-      return "ledauto";
-    case ModelFeatureId::leddark:
-      return "leddark";
-    case ModelFeatureId::transt:
-      return "transt";
-    case ModelFeatureId::outmode:
-      return "outmode";
-    case ModelFeatureId::outmodeswitch:
-      return "outmodeswitch";
-    case ModelFeatureId::outvalue8:
-      return "outvalue8";
-    case ModelFeatureId::pushbutton:
-      return "pushbutton";
-    case ModelFeatureId::pushbdevice:
-      return "pushbdevice";
-    case ModelFeatureId::pushbarea:
-      return "pushbarea";
-    case ModelFeatureId::pushbadvanced:
-      return "pushbadvanced";
-    case ModelFeatureId::pushbcombined:
-      return "pushbcombined";
-    case ModelFeatureId::shadeprops:
-      return "shadeprops";
-    case ModelFeatureId::shadeposition:
-      return "shadeposition";
-    case ModelFeatureId::motiontimefins:
-      return "motiontimefins";
-    case ModelFeatureId::optypeconfig:
-      return "optypeconfig";
-    case ModelFeatureId::shadebladeang:
-      return "shadebladeang";
-    case ModelFeatureId::highlevel:
-      return "highlevel";
-    case ModelFeatureId::consumption:
-      return "consumption";
-    case ModelFeatureId::jokerconfig:
-      return "jokerconfig";
-    case ModelFeatureId::akmsensor:
-      return "akmsensor";
-    case ModelFeatureId::akminput:
-      return "akminput";
-    case ModelFeatureId::akmdelay:
-      return "akmdelay";
-    case ModelFeatureId::twowayconfig:
-      return "twowayconfig";
-    case ModelFeatureId::outputchannels:
-      return "outputchannels";
-    case ModelFeatureId::heatinggroup:
-      return "heatinggroup";
-    case ModelFeatureId::heatingoutmode:
-      return "heatingoutmode";
-    case ModelFeatureId::heatingprops:
-      return "heatingprops";
-    case ModelFeatureId::pwmvalue:
-      return "pwmvalue";
-    case ModelFeatureId::valvetype:
-      return "valvetype";
-    case ModelFeatureId::extradimmer:
-      return "extradimmer";
-    case ModelFeatureId::umvrelay:
-      return "umvrelay";
-    case ModelFeatureId::blinkconfig:
-      return "blinkconfig";
-    case ModelFeatureId::impulseconfig:
-      return "impulseconfig";
-    case ModelFeatureId::umroutmode:
-      return "umroutmode";
-    case ModelFeatureId::pushbsensor:
-      return "pushbsensor";
-    case ModelFeatureId::locationconfig:
-      return "locationconfig";
-    case ModelFeatureId::windprotectionconfigawning:
-      return "windprotectionconfigawning";
-    case ModelFeatureId::windprotectionconfigblind:
-      return "windprotectionconfigblind";
-    case ModelFeatureId::outmodegeneric:
-      return "outmodegeneric";
-    case ModelFeatureId::outconfigswitch:
-      return "outconfigswitch";
-    case ModelFeatureId::temperatureoffset:
-      return "temperatureoffset";
-    default:
-      break;
-  }
-
-  throw std::runtime_error("unknown feature encountered");
 }
 
 std::string ModelFeatures::colorToString(int _color)
@@ -1150,6 +978,8 @@ std::string ModelFeatures::colorToString(int _color)
       return "GN";
     case ColorIDBlack:
       return "SW";
+    case ColorIDWhite:
+      return "WE";
     default:
       break;
   }

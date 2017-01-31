@@ -61,7 +61,6 @@ namespace dss {
     static const std::string kCleanupScriptsEventName;
     PropertyNodePtr m_pScriptRootNode;
 
-    boost::weak_ptr<ScriptContextWrapper> m_WrapperInAction;
     std::vector<boost::shared_ptr<ScriptContextWrapper> > m_WrappedContexts;
   private:
     void initializeEnvironment();
@@ -72,8 +71,6 @@ namespace dss {
     ~EventInterpreterPluginJavascript();
 
     virtual void handleEvent(Event& _event, const EventSubscription& _subscription);
-
-    boost::shared_ptr<ScriptContextWrapper> getContextWrapperForContext(ScriptContext* _pContext);
   }; // EventInterpreterPluginJavascript
 
   //-------------------------------------------------- Event Relay

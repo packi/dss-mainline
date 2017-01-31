@@ -1056,7 +1056,9 @@ namespace dss {
     }
     _ofs << " configurationLocked=\"" << (_pDevice->isConfigLocked() ? "1" : "0") << "\"";
 
-    if (_pDevice->getDeviceType() == DEVICE_TYPE_TNY) {
+    if ((_pDevice->getDeviceType() == DEVICE_TYPE_TNY) ||
+        ((_pDevice->getDeviceType() == DEVICE_TYPE_SK) &&
+         (_pDevice->getDeviceNumber() == 204))) {
       _ofs << " pairedDevices=\"" << intToString(_pDevice->getPairedDevices()) << "\"";
     }
 

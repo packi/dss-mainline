@@ -58,6 +58,7 @@
 #include "src/protobufjson.h"
 #include "status-bit.h"
 #include "status.h"
+#include "src/model-features.h"
 
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
@@ -144,20 +145,27 @@ namespace dss {
     try {
       m_device.getApartment().removeState(m_state);
     } catch (const std::exception& e) {
-      Logger::getInstance()->log(std::string("~DeviceBinaryInput: remove state failed:") + e.what(), lsWarning);
+      log(std::string("~DeviceBinaryInput: remove state failed:") + e.what(), lsWarning);
     }
   }
 
-  void DeviceBinaryInput::setTarget(GroupType targetGroupType, uint8_t targetGroupId) {
-    if (m_targetGroupType == targetGroupType && m_targetGroupId == targetGroupId) {
+  void DeviceBinaryInput::setTargetId(uint8_t targetGroupId) {
+    if (m_targetGroupId == targetGroupId) {
       return;
     }
     log(std::string("setTarget this:") + m_name
-        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType))
         + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
-    m_targetGroupType = targetGroupType;
     updateStatusBitHandle();
+  }
+
+  void DeviceBinaryInput::setTargetType(GroupType targetGroupType) {
+    if (m_targetGroupType == targetGroupType) {
+      return;
+    }
+    log(std::string("setTarget this:") + m_name
+        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType)), lsInfo);
+    m_targetGroupType = targetGroupType;
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
@@ -243,6 +251,7 @@ namespace dss {
   }
 
   //================================================== Device
+  __DEFINE_LOG_CHANNEL__(Device, lsNotice);
 
   Device::Device(dsuid_t _dsid, Apartment* _pApartment)
   : AddressableModelItem(_pApartment),
@@ -343,7 +352,7 @@ namespace dss {
           dev->getParentNode()->removeChild(dev);
         }
       } catch (std::runtime_error &err) {
-        Logger::getInstance()->log(err.what());
+        log(err.what(), lsError);
       }
 
       if (m_pApartment->getPropertyNode() != NULL) {
@@ -460,10 +469,6 @@ namespace dss {
       ->linkToProxy(PropertyProxyReference<std::string>(m_HWInfo, false));
     m_pPropertyNode->createProperty("GTIN")
       ->linkToProxy(PropertyProxyReference<std::string>(m_GTIN, false));
-    m_pPropertyNode->createProperty("ActiveGroup")
-      ->linkToProxy(PropertyProxyReference<int>(m_ActiveGroup, false));
-    m_pPropertyNode->createProperty("DefaultGroup")
-      ->linkToProxy(PropertyProxyReference<int>(m_DefaultGroup, false));
 
     PropertyNodePtr oemNode = m_pPropertyNode->createProperty("productInfo");
     oemNode->createProperty("ProductState")
@@ -591,6 +596,8 @@ namespace dss {
     if (m_DSMeterDSID != DSUID_NULL) {
       setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
     }
+
+    republishModelFeaturesToPropertyTree();
   } // publishToPropertyTree
 
   bool Device::isOn() const {
@@ -613,6 +620,7 @@ namespace dss {
     if ((m_FunctionID != 0) && (m_ProductID != 0) && (m_VendorID != 0)) {
       calculateHWInfo();
     }
+    updateModelFeatures();
     updateIconPath();
     updateAKMNode();
     publishValveTypeToPropertyTree();
@@ -978,7 +986,7 @@ namespace dss {
   }
 
   int Device::getSceneAngle(const int _scene) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (features.hasOutputAngle) {
       return getDeviceConfig(CfgClassSceneAngle, _scene);
     } else {
@@ -987,7 +995,7 @@ namespace dss {
   }
 
   void Device::setSceneAngle(const int _scene, const int _angle) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.hasOutputAngle) {
       throw std::runtime_error("Device does not support output angle setting");
     }
@@ -1238,10 +1246,6 @@ namespace dss {
     return (_other.m_DSID == m_DSID);
   } // operator==
 
-  devid_t Device::getShortAddress() const {
-    return m_ShortAddress;
-  } // getShortAddress
-
   void Device::setShortAddress(const devid_t _shortAddress) {
     m_ShortAddress = _shortAddress;
     m_LastKnownShortAddress = _shortAddress;
@@ -1327,9 +1331,9 @@ namespace dss {
       if (m_pAliasNode == NULL) {
         PropertyNodePtr node = m_pApartment->getPropertyNode()->getProperty(basePath + "/" + dsuid2str(m_DSID));
         if (node != NULL) {
-          Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
+          log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " already exists", lsError);
           if (node->size() > 0) {
-            Logger::getInstance()->log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
+            log("Device::setZoneID: Target node for device " + dsuid2str(m_DSID) + " has children", lsFatal);
             return;
           }
         }
@@ -1383,10 +1387,10 @@ namespace dss {
           gsubnode->createProperty("id")->setIntegerValue(_groupID);
         }
       } else {
-        Logger::getInstance()->log("Device " + dsuid2str(m_DSID) + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID));
+        log("Device " + dsuid2str(m_DSID) + " (bus: " + intToString(m_ShortAddress) + ", zone: " + intToString(m_ZoneID) + ") is already in group " + intToString(_groupID), lsDebug);
       }
     } else {
-      Logger::getInstance()->log("Device::addToGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
+      log("Device::addToGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
     }
   } // addToGroup
 
@@ -1411,7 +1415,7 @@ namespace dss {
         }
       }
     } else {
-      Logger::getInstance()->log("Device::removeFromGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
+      log("Device::removeFromGroup: Group ID out of bounds: " + intToString(_groupID), lsInfo);
     }
   } // removeFromGroup
 
@@ -1654,7 +1658,7 @@ namespace dss {
 
   bool Device::is2WayMaster() const {
 
-    if (!getFeatures().pairing) {
+    if (!getDeviceFeatures().pairing) {
       return false;
     }
 
@@ -1675,7 +1679,7 @@ namespace dss {
                 IsEvenDsuid(m_DSID))); // even dSID
       }
     } catch (std::runtime_error &err) {
-      Logger::getInstance()->log(err.what());
+      log(err.what(), lsError);
     }
     return ret;
   }
@@ -1709,7 +1713,7 @@ namespace dss {
         }
       }
     } catch (std::runtime_error &err) {
-      Logger::getInstance()->log(err.what());
+      log(err.what(), lsError);
     }
 
     return ret;
@@ -1881,6 +1885,43 @@ namespace dss {
     }
   }
 
+  void Device::updateModelFeatures() {
+    decltype(m_modelFeatures) modelFeatures;
+    auto&& subclass = (m_FunctionID >> 6) & 0x3F;
+    if (subclass == 0x07) {
+      modelFeatures[ModelFeatureId::apartmentapplication] = true;
+    }
+    if (m_modelFeatures == modelFeatures) {
+      return;
+    }
+    m_modelFeatures.swap(modelFeatures);
+    republishModelFeaturesToPropertyTree();
+  }
+
+  void Device::republishModelFeaturesToPropertyTree() {
+    if (!m_pPropertyNode) {
+      return;
+    }
+    // remove old nodes
+    {
+      auto&& node = m_pPropertyNode->getProperty("modelFeatures");
+      if (node) {
+        m_pPropertyNode->removeChild(node);
+      }
+    }
+    // add new nodes
+    auto&& modelFeaturesNode = m_pPropertyNode->createProperty("modelFeatures");
+    foreach(auto&& modelFeaturePair, m_modelFeatures) {
+      auto&& id = modelFeaturePair.first;
+      if (auto&& name = modelFeatureName(id)) {
+        auto&& node = modelFeaturesNode->createProperty(*name);
+        node->setValue(modelFeaturePair.second);
+      } else {
+        log(ds::str("Cannot publish model feature ", id), lsWarning);
+      }
+    }
+  }
+
   void Device::updateIconPath() {
     if (!m_iconPath.empty()) {
       m_iconPath.clear();
@@ -1970,7 +2011,7 @@ namespace dss {
     }
   }
 
-  const DeviceFeatures_t Device::getFeatures() const {
+  const DeviceFeatures_t Device::getDeviceFeatures() const {
     DeviceFeatures_t features;
     features.pairing = false;
     features.syncButtonID = false;
@@ -2191,7 +2232,7 @@ namespace dss {
       deviceType = DEVICE_VALVE_UNKNOWN;
       assigned = true;
     } else {
-      Logger::getInstance()->log(std::string("Invalid valve type: ") + _string,
+      log(std::string("Invalid valve type: ") + _string,
                                  lsWarning);
     }
 
@@ -2209,7 +2250,7 @@ namespace dss {
     return (hasOutput() && (getDeviceClass() == DEVICE_CLASS_BL));
   }
 
-  const DeviceValveType_t Device::getValveType () const {
+  DeviceValveType_t Device::getValveType () const {
     return m_ValveType;
   }
 
@@ -2235,15 +2276,27 @@ namespace dss {
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 1, static_cast<int>(inputType));
   }
 
-  void Device::setDeviceBinaryInputTarget(uint8_t _inputIndex, GroupType targetType, uint8_t _targetGroup)
+  void Device::setDeviceBinaryInputTargetId(uint8_t _inputIndex, uint8_t _targetGroup)
   {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
-    uint8_t val = (static_cast<int>(targetType) & 0x3) << 6;
-    val |= (_targetGroup & 0x3f);
-    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, val);
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, _targetGroup);
+  }
+
+  void Device::setDeviceBinaryInputTargetType(uint8_t _inputIndex, GroupType targetType)
+  {
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
+    if (_inputIndex > m_binaryInputs.size()) {
+      throw ItemNotFoundException("Invalid binary input index");
+    }
+    uint8_t val = (static_cast<int>(m_binaryInputs[_inputIndex]->m_inputId) & 0xf) << 4;
+    if (_inputIndex == m_binaryInputs.size()) {
+      val |= 0x80;
+    }
+    val |= static_cast<int>(m_binaryInputs[_inputIndex]->m_targetGroupType) & 0x3;
+    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
   }
 
   BinaryInputType Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
@@ -2263,6 +2316,7 @@ namespace dss {
     if (_inputIndex == m_binaryInputs.size()) {
       val |= 0x80;
     }
+    val |= static_cast<int>(m_binaryInputs[_inputIndex]->m_targetGroupType) & 0x3;
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
   }
 
@@ -2308,13 +2362,18 @@ namespace dss {
     return "";
   }
 
-  const uint8_t Device::getBinaryInputCount() const {
+  uint8_t Device::getBinaryInputCount() const {
     return (uint8_t) m_binaryInputs.size();
   }
 
-  void Device::setBinaryInputTarget(uint8_t index, GroupType targetGroupType, uint8_t targetGroup) {
+  void Device::setBinaryInputTargetId(uint8_t index, uint8_t targetGroupId) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    getBinaryInput(index)->setTarget(targetGroupType, targetGroup);
+    getBinaryInput(index)->setTargetId(targetGroupId);
+  }
+
+  void Device::setBinaryInputTargetType(uint8_t index, GroupType targetGroupType) {
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
+    getBinaryInput(index)->setTargetType(targetGroupType);
   }
 
   void Device::setBinaryInputId(uint8_t index, BinaryInputId inputId) {
@@ -2371,7 +2430,7 @@ namespace dss {
           }
         }
       } catch (std::runtime_error& ex) {
-          Logger::getInstance()->log("Device::initStates:" + dsuid2str(m_DSID)
+          log("Device::initStates:" + dsuid2str(m_DSID)
               + " state:" + stateName + " what:" + ex.what(), lsError);
           throw ex;
       }
@@ -2384,14 +2443,14 @@ namespace dss {
       try {
         m_pApartment->removeState(state.second);
       } catch (ItemNotFoundException& e) {
-        Logger::getInstance()->log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
+        log(std::string("Apartment::removeDevice: Unknown state: ") + e.what(), lsWarning);
       }
     }
     m_states.clear();
   }
 
   void Device::setStateValue(const std::string& name, const std::string& value) {
-    Logger::getInstance()->log("Device::setStateValue name:" + name + " value:" + value, lsDebug);
+    log("Device::setStateValue name:" + name + " value:" + value, lsDebug);
     try {
       BOOST_FOREACH(const States::value_type& state, m_states) {
         if (state.first == name) {
@@ -2399,7 +2458,7 @@ namespace dss {
         }
       }
     } catch(std::runtime_error& e) {
-      Logger::getInstance()->log("Device::setStateValue name:" + name
+      log("Device::setStateValue name:" + name
           + " value:" + value + " what:" + e.what(), lsWarning);
     }
   }
@@ -2416,10 +2475,10 @@ namespace dss {
             break;
           }
         }
-        Logger::getInstance()->log("Device::setStateValues name:" + stateName + " value:" + *newValue, lsDebug);
+        log("Device::setStateValues name:" + stateName + " value:" + *newValue, lsDebug);
         statePair.second->setState(coDsmApi, *newValue);
       } catch(std::runtime_error& e) {
-        Logger::getInstance()->log("Device::setStateValues name:" + stateName
+        log("Device::setStateValues name:" + stateName
             + " value:" + *newValue + " what:" + e.what(), lsWarning);
       }
     }
@@ -2482,7 +2541,7 @@ namespace dss {
     return m_binaryInputs[_inputIndex];
   }
 
-  const uint8_t Device::getSensorCount() const {
+  uint8_t Device::getSensorCount() const {
     return (uint8_t) m_sensorInputCount;
   }
 
@@ -2583,7 +2642,7 @@ namespace dss {
     }
   }
 
-  const int Device::getOutputChannelIndex(int _channelId) const {
+  int Device::getOutputChannelIndex(int _channelId) const {
     int index = 0;
     for (std::vector<int>::const_iterator it = m_outputChannels.begin();
             it != m_outputChannels.end();
@@ -2596,14 +2655,14 @@ namespace dss {
     return -1;
   }
 
-  const int Device::getOutputChannel(int _index) const {
+  int Device::getOutputChannel(int _index) const {
     if (_index > m_outputChannelCount) {
       return -1;
     }
     return m_outputChannels[_index];
   }
 
-  const int Device::getOutputChannelCount() const {
+  int Device::getOutputChannelCount() const {
     return m_outputChannelCount;
   }
 
@@ -2629,7 +2688,7 @@ namespace dss {
     throw ItemNotFoundException(std::string("Device::getSensor: no sensor with given type found"));
   }
 
-  const void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
+  void Device::setSensorValue(int _sensorIndex, unsigned int _sensorValue) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
     }
@@ -2641,7 +2700,7 @@ namespace dss {
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
 
-  const void Device::setSensorValue(int _sensorIndex, double _sensorValue) const {
+  void Device::setSensorValue(int _sensorIndex, double _sensorValue) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
     }
@@ -2653,7 +2712,7 @@ namespace dss {
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
 
-  const void Device::setSensorDataValidity(int _sensorIndex, bool _valid) const {
+  void Device::setSensorDataValidity(int _sensorIndex, bool _valid) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
     }
@@ -2919,6 +2978,9 @@ namespace dss {
                (getDeviceNumber() == 200) &&
                (getDeviceClass() == DEVICE_CLASS_SW)) {
       deviceCount = 4;
+    } else if ((getDeviceType() == DEVICE_TYPE_SK) &&
+               (getDeviceNumber() == 204)) {
+      deviceCount = 2;
     } else if ((m_FunctionID & 0xffc0) == 0x1000) {
       switch (m_FunctionID & 0x7) {
         case 0: deviceCount = 1; break;
@@ -2979,7 +3041,7 @@ namespace dss {
   }
 
   uint16_t Device::getDeviceMaxMotionTime() {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.posTimeMax) {
       throw std::runtime_error("Maximum motion time setting not supported"
                                "by this device");
@@ -2991,7 +3053,7 @@ namespace dss {
   }
 
   void Device::setDeviceMaxMotionTime(uint16_t seconds) {
-    DeviceFeatures_t features = getFeatures();
+    DeviceFeatures_t features = getDeviceFeatures();
     if (!features.posTimeMax) {
       throw std::runtime_error("Maximum motion time setting not supported"
                                "by this device");
@@ -3057,8 +3119,11 @@ namespace dss {
   }
 
   void Device::setPairedDevices(int _num) {
-    if (isMainDevice() && (m_pairedDevices != _num) &&
-        (m_pPropertyNode != NULL)) {
+    bool update = (m_pairedDevices != _num);
+
+    m_pairedDevices = _num;
+
+    if (isMainDevice() && update && (m_pPropertyNode != NULL)) {
       PropertyNodePtr paired = m_pPropertyNode->getPropertyByName("pairedDevices");
       if (paired != NULL) {
         m_pPropertyNode->removeChild(paired);
@@ -3069,19 +3134,18 @@ namespace dss {
         for (int i = 0; i < _num - 1; i++) {
           PropertyNodePtr sub = m_pPropertyNode->
               createProperty("pairedDevices/device" + intToString(i));
-         dsuid_t next;
+          dsuid_t next;
           dsuid_get_next_dsuid(current, &next);
           sub->createProperty("dSUID")->setStringValue(dsuid2str(next));
           current = next;
         }
       }
     }
-
-    m_pairedDevices = _num;
   }
 
   int Device::getPairedDevices() const {
-    if (getDeviceType() == DEVICE_TYPE_TNY) {
+    if ((getDeviceType() == DEVICE_TYPE_TNY) ||
+        ((getDeviceType() == DEVICE_TYPE_SK) && (getDeviceNumber() == 204))) {
       return m_pairedDevices;
     }
 
@@ -3091,7 +3155,8 @@ namespace dss {
   void Device::setVisibility(bool _isVisible) {
     bool wasVisible = m_visible;
     m_visible = _isVisible;
-    if (getDeviceType() == DEVICE_TYPE_TNY) {
+    if ((getDeviceType() == DEVICE_TYPE_TNY) ||
+        ((getDeviceType() == DEVICE_TYPE_SK) && (getDeviceNumber() == 204))) {
       if (wasVisible && !m_visible) {
         removeFromPropertyTree();
       } else if (!wasVisible && m_visible) {
@@ -3101,7 +3166,8 @@ namespace dss {
   }
 
   void Device::setDeviceVisibility(bool _isVisible) {
-    if (getDeviceType() == DEVICE_TYPE_TNY) {
+    if ((getDeviceType() == DEVICE_TYPE_TNY) ||
+        ((getDeviceType() == DEVICE_TYPE_SK) && (getDeviceNumber() == 204))) {
       if (isMainDevice()) {
         throw std::runtime_error("Visibility setting not allowed on main device");
       }
@@ -3119,7 +3185,8 @@ namespace dss {
   }
 
   bool Device::isVisible() const {
-    if (getDeviceType() == DEVICE_TYPE_TNY) {
+    if ((getDeviceType() == DEVICE_TYPE_TNY) ||
+        ((getDeviceType() == DEVICE_TYPE_SK) && (getDeviceNumber() == 204))) {
       return m_visible;
     }
 
@@ -3261,6 +3328,10 @@ namespace dss {
 
   void Device::setVdcSpec(VdsdSpec_t &&x) {
     m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t(std::move(x)));
+  }
+
+  std::ostream& operator<<(std::ostream& stream, const Device& x) {
+    return stream << x.getName();
   }
 
 } // namespace dss

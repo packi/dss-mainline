@@ -76,7 +76,7 @@ namespace dss {
   static JSPropertySpec event_properties[] = {
     {"className", 0, 0, event_JSGet, NULL},
     {"name", 1, 0, event_JSGet, NULL},
-    {NULL}
+    {}
   };
 
   JSFunctionSpec event_methods[] = {
@@ -124,7 +124,7 @@ namespace dss {
     {"className", 0, 0, subscription_JSGet, NULL},
     {"eventName", 1, 0, subscription_JSGet, NULL},
     {"handlerName", 2, 0, subscription_JSGet, NULL},
-    {NULL}
+    {}
   };
 
   JSFunctionSpec subscription_methods[] = {

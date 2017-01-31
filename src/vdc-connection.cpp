@@ -101,10 +101,10 @@ namespace dss {
       if (!featureReader.getValueAsBool()) {
         continue;
       }
-      const std::string& featureName = featureReader.getName();
-      try {
-        features.push_back(ModelFeatures::getInstance()->nameToFeature(featureName));
-      } catch (std::runtime_error &ex) {
+      auto&& featureName = featureReader.getName();
+      if (auto&& feature = modelFeatureFromName(featureName)) {
+        features.push_back(*feature);
+      } else {
         Logger::getInstance()->log("Ignoring feature '" + featureName + "' from device " +
                                     dsuid2str(_device));
       }

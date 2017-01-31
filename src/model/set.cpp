@@ -392,14 +392,6 @@ namespace dss {
     return result;
   } // getPowerConsumption
 
-  std::ostream& operator<<(std::ostream& out, const Device& _dt) {
-    out << "Device ID " << _dt.getShortAddress();
-    if(!_dt.getName().empty()) {
-      out << " name: " << _dt.getName();
-    }
-    return out;
-  } // operator<<
-
   class BySensorSelector : public IDeviceSelector {
   private:
     SensorType m_sensorType;
