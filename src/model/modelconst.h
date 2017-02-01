@@ -160,7 +160,6 @@ namespace dss {
   const uint8_t SensorFunction_Generic11 = 11;
 
   enum class SensorType {
-    Status = 0, ///< Status sensor value. Value bits are defined by \re StatusBitType
     ActivePower = 4,
     OutputCurrent = 5,
     ElectricMeter = 6,
@@ -181,6 +180,7 @@ namespace dss {
     SoundPressureLevel = 25,
     RoomTemperatureSetpoint = 50,
     RoomTemperatureControlVariable = 51,
+    Status = 60, ///< Status sensor value. Value bits are defined by \re StatusBitType
     Reserved1 = 61,
     Reserved2 = 62,
     OutputCurrent16A = 64,
