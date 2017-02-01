@@ -1095,8 +1095,10 @@ namespace dss {
       throw DSSException("Not a climate device");
     }
     setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod, _config.pwmPeriod);
-    setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmMinX, _config.pwmMinX | (_config.pwmMaxX << 8));
-    setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmMinY, _config.pwmMinY | (_config.pwmMaxY << 8));
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinX, _config.pwmMinX);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxX, _config.pwmMaxX);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY, _config.pwmMinY);
+    setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY, _config.pwmMaxY);
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset, static_cast<uint8_t>(_config.pwmOffset));
   } // setDeviceValvePwm
 
