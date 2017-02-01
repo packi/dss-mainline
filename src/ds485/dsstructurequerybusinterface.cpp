@@ -375,7 +375,8 @@ namespace dss {
 
   void DSStructureQueryBusInterface::updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
     _spec.binaryInputsValid = false;
-    if ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0)) {
+    uint8_t subClass = ((_spec.FunctionID >> 6) & 0x3F);
+    if (((subClass == 0x04 || subClass == 0x07)) && ((_spec.FunctionID & 0x0008) > 0)) {
       try {
         _spec.binaryInputs.clear();
 
