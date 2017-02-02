@@ -824,6 +824,14 @@ namespace dss {
         removeFromGroup(g);
       }
     }
+
+    // remove from control groups
+    for (int g = GroupIDControlGroupMin; g <= GroupIDControlGroupMax; g++) {
+      if (isInGroup(g)) {
+        removeFromGroup(g);
+      }
+    }
+
     // remove also from GA groups
     for (int g = GroupIDGlobalAppMin; g <= GroupIDGlobalAppMax; g++) {
       if (isInGroup(g)) {
