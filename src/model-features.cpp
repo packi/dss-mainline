@@ -20,10 +20,7 @@
 
 */
 
-#ifdef HAVE_CONFIG_H
-  #include "config.h"
-#endif
-
+#include "model-features.h"
 #include <stdio.h>
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
@@ -31,7 +28,6 @@
 
 #include "base.h"
 #include "model/modelconst.h"
-#include "model-features.h"
 
 #define ARRAY_END(mf) (mf + ARRAY_SIZE(mf))
 
