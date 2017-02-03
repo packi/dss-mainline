@@ -24,6 +24,7 @@
 #define RESTFUL_H_INCLUDED
 
 #include <boost/function.hpp>
+#include <boost/optional/optional_fwd.hpp>
 
 
 namespace dss {
@@ -58,7 +59,13 @@ namespace dss {
       return (m_queryString.find("&" + _name + "=") != std::string::npos);
     }
 
-    const std::string getParameter(const std::string& _name) const;
+    boost::optional<std::string> tryGetParameter(const std::string& name) const;
+
+    /// throws if the parameter does not exist
+    std::string getRequiredParameter(const std::string& _name) const;
+
+    /// returns empty string if the parameter does not exist
+    std::string getParameter(const std::string& _name) const;
 
     template <typename T>
     bool getParameter(const std::string& _name, T &out) const;

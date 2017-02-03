@@ -29,6 +29,8 @@
 
 #include "restful.h"
 
+#include <boost/optional/optional.hpp>
+#include <ds/log.h>
 #include "base.h"
 
 namespace dss {
@@ -40,24 +42,37 @@ namespace dss {
     splitIntoMethodAndClass(_request);
   }
 
-  const std::string RestfulRequest::getParameter(const std::string& _name) const {
-    static const std::string& kEmptyString = "";
+  boost::optional<std::string> RestfulRequest::tryGetParameter(const std::string& parameter) const {
     size_t end, offset;
     std::string tmp;
 
     // we added leading "&" upon init
-    offset = m_queryString.find("&" + _name + "=");
+    offset = m_queryString.find("&" + parameter + "=");
     if (offset == std::string::npos) {
-      return kEmptyString;
+      return boost::none;
     }
 
-    offset += _name.length() + 2;
+    offset += parameter.length() + 2;
     end = m_queryString.find('&', offset);
     tmp = (end == std::string::npos) ?
       m_queryString.substr(offset) :
       m_queryString.substr(offset, end - offset);
 
     return urlDecode(tmp);
+  }
+
+  std::string RestfulRequest::getRequiredParameter(const std::string& parameter) const {
+    if (auto x = tryGetParameter(parameter)) {
+      return *x;
+    }
+    DS_FAIL_REQUIRE("Missing", parameter);
+  }
+
+  std::string RestfulRequest::getParameter(const std::string& parameter) const {
+    if (auto x = tryGetParameter(parameter)) {
+      return *x;
+    }
+    return std::string();
   }
 
   template <>
