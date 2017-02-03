@@ -923,7 +923,10 @@ namespace dss {
           } else if (strcmp(_name, "associatedSet") == 0) {
             m_tempGroup->setAssociatedSet(m_chardata);
           } else if (strcmp(_name, "color") == 0) {
-            m_tempGroup->setApplicationType(static_cast<ApplicationType>(strToUIntDef(m_chardata, 0)));
+            // the application type can be overwritten by configuration only for user groups not the default ones.
+            if (!isDefaultGroup(m_tempGroup->getID()) && !isGlobalAppDsGroup(m_tempGroup->getID()) ) {
+              m_tempGroup->setApplicationType(static_cast<ApplicationType>(strToUIntDef(m_chardata, 0)));
+            }
           } else if (strcmp(_name, "configuration") == 0) {
             m_tempGroup->setApplicationConfiguration(strToUIntDef(m_chardata, 0));
           }
