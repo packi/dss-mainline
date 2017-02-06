@@ -109,14 +109,12 @@ namespace dss {
       : m_inputIndex(index)
       , m_inputType(spec.InputType)
       , m_inputId(spec.InputID)
-      , m_targetGroupType(spec.TargetGroupType)
       , m_targetGroupId(spec.TargetGroup)
       , m_device(device)
       , m_name(m_device.getName() + "/" + intToString(index)) {
     log(std::string("DeviceBinaryInput this:") + m_name
         + " inputType:" + intToString(static_cast<int>(m_inputType))
         + " inputId:" + intToString(static_cast<int>(m_inputId))
-        + " targetGroupType:" + intToString(static_cast<int>(m_targetGroupType))
         + " targetGroupId:" + intToString(m_targetGroupId), lsInfo);
     m_state = boost::make_shared<State>(device.sharedFromThis(), index);
 
@@ -157,15 +155,6 @@ namespace dss {
         + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
     updateStatusBitHandle();
-  }
-
-  void DeviceBinaryInput::setTargetType(GroupType targetGroupType) {
-    if (m_targetGroupType == targetGroupType) {
-      return;
-    }
-    log(std::string("setTarget this:") + m_name
-        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType)), lsInfo);
-    m_targetGroupType = targetGroupType;
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
@@ -2303,20 +2292,6 @@ namespace dss {
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, _targetGroup);
   }
 
-  void Device::setDeviceBinaryInputTargetType(uint8_t _inputIndex, GroupType targetType)
-  {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
-      throw ItemNotFoundException("Invalid binary input index");
-    }
-    uint8_t val = (static_cast<int>(m_binaryInputs[_inputIndex]->m_inputId) & 0xf) << 4;
-    if (_inputIndex == m_binaryInputs.size()) {
-      val |= 0x80;
-    }
-    val |= static_cast<int>(m_binaryInputs[_inputIndex]->m_targetGroupType) & 0x3;
-    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
-  }
-
   BinaryInputType Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     if (_inputIndex > m_binaryInputs.size()) {
@@ -2334,7 +2309,6 @@ namespace dss {
     if (_inputIndex == m_binaryInputs.size()) {
       val |= 0x80;
     }
-    val |= static_cast<int>(m_binaryInputs[_inputIndex]->m_targetGroupType) & 0x3;
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
   }
 
@@ -2387,11 +2361,6 @@ namespace dss {
   void Device::setBinaryInputTargetId(uint8_t index, uint8_t targetGroupId) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     getBinaryInput(index)->setTargetId(targetGroupId);
-  }
-
-  void Device::setBinaryInputTargetType(uint8_t index, GroupType targetGroupType) {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    getBinaryInput(index)->setTargetType(targetGroupType);
   }
 
   void Device::setBinaryInputId(uint8_t index, BinaryInputId inputId) {
@@ -2528,8 +2497,6 @@ namespace dss {
       if (m_pPropertyNode != NULL) {
         std::string bpath = std::string("binaryInput") + intToString(binaryInputIndex);
         PropertyNodePtr entry = binaryInputNode->createProperty(bpath);
-        entry->createProperty("targetGroupType")
-                ->linkToProxy(PropertyProxyReference<int, GroupType>(binaryInput->m_targetGroupType));
         entry->createProperty("targetGroupId")
                 ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_targetGroupId));
         entry->createProperty("inputType")

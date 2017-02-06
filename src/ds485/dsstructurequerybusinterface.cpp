@@ -390,16 +390,14 @@ namespace dss {
         }
 
         for (int i = 0; i < numBinaryinputs; i++) {
-          uint8_t TargetGroupType;
           uint8_t TargetGroup;
           uint8_t InputType;
           uint8_t InputID;
           ret = DeviceBinaryInput_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,
-                                               &TargetGroupType, &TargetGroup,
+                                               NULL, &TargetGroup,
                                                &InputType, &InputID);
           DSBusInterface::checkResultCode(ret);
           DeviceBinaryInputSpec_t binaryInput;
-          binaryInput.TargetGroupType = static_cast<GroupType>(TargetGroupType);
           binaryInput.TargetGroup = TargetGroup;
           binaryInput.InputType = static_cast<BinaryInputType>(InputType);
           binaryInput.InputID = static_cast<BinaryInputId>(InputID);

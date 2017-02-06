@@ -326,13 +326,6 @@ namespace dss {
   const int ColorIDBlack = 8;
   const int ColorIDWhite = 9;
 
-  // TODO(someday): Remove this type and variables that use it altogether?
-  // https://git.digitalstrom.org/brano/dss-mainline/commit/d17f16eb550c0cb32c910372f8d137ba32338a68#note_35767
-  enum class GroupType {
-    Standard = 0, // (from dsm-api doc) 0 = Standard Groups
-    End = 5 // exclusive upper bound
-  };
-
   // Group ID"s
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
@@ -359,7 +352,6 @@ namespace dss {
   const int GroupIDControlTemperature = 48;
   const int GroupIDControlGroupMax = 55;
   const int GroupIDMax = 63;
-  // TODO: verify that this ranges are valid
   const int GroupIDGlobalAppMin = 64;
   const int GroupIDGlobalAppDsMin = 64;
   const int GroupIDGlobalAppDsVentilation = 64;

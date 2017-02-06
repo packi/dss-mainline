@@ -626,14 +626,10 @@ void SystemState::undoscene() {
   }
 }
 
-void SystemState::stateBinaryInputGeneric(State &_state,
-                                          GroupType targetGroupType,
-                                          int targetGroupId) {
+void SystemState::stateBinaryInputGeneric(State &_state, int targetGroupId) {
   try {
     std::string stateName = _state.getName();
-    auto&& nodePath = "/scripts/system_state/" + stateName + "." +
-        intToString(static_cast<int>(targetGroupType)) + "." +
-        intToString(targetGroupId);
+    auto&& nodePath = "/scripts/system_state/" + stateName + "." + intToString(targetGroupId);
     PropertyNodePtr pNode = DSS::getInstance()->getPropertySystem().getProperty(nodePath);
     if (pNode == NULL) {
       pNode = DSS::getInstance()->getPropertySystem().createProperty(nodePath);
@@ -704,8 +700,7 @@ void SystemState::stateBinaryinput() {
       statename = formatZoneName(StateName::Motion, pDev->getZoneID());
     }
     boost::shared_ptr<State> state = getOrRegisterState(statename);
-    stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-                            devInput->m_targetGroupId);
+    stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
   }
 
   // presence
@@ -717,8 +712,7 @@ void SystemState::stateBinaryinput() {
       statename = formatZoneName(StateName::Presence, pDev->getZoneID());
     }
     boost::shared_ptr<State> state = getOrRegisterState(statename);
-    stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-                            devInput->m_targetGroupId);
+    stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
   }
 
   // smoke detector
@@ -742,11 +736,9 @@ void SystemState::stateBinaryinput() {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
       statename = formatAppartmentStateName(StateName::Wind, devInput->m_targetGroupId);
       state = getOrRegisterState(statename);
-      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-                              devInput->m_targetGroupId);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
     } else if (lookupState(state, StateName::Wind)) {
-      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-                              devInput->m_targetGroupId);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
     }
   }
 
@@ -757,11 +749,9 @@ void SystemState::stateBinaryinput() {
     if (devInput->m_targetGroupId >= GroupIDAppUserMin) {
       statename = formatAppartmentStateName(StateName::Rain, devInput->m_targetGroupId);
       state = getOrRegisterState(statename);
-      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-                              devInput->m_targetGroupId);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
     } else if (lookupState(state, StateName::Rain)) {
-      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-                              devInput->m_targetGroupId);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
     }
   }
 
@@ -782,8 +772,7 @@ void SystemState::stateBinaryinput() {
   if (devInput->m_inputType == BinaryInputType::FrostDetector) {
     boost::shared_ptr<State> state;
     if (lookupState(state, StateName::Frost)) {
-      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-          devInput->m_targetGroupId);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
     }
   }
 
@@ -791,8 +780,7 @@ void SystemState::stateBinaryinput() {
   if (devInput->m_inputType == BinaryInputType::HeatingSystem) {
     boost::shared_ptr<State> state;
     if (lookupState(state, StateName::HeatingSystem)) {
-      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-          devInput->m_targetGroupId);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
     }
   }
 
@@ -800,8 +788,7 @@ void SystemState::stateBinaryinput() {
   if (devInput->m_inputType == BinaryInputType::HeatingSystemMode) {
     boost::shared_ptr<State> state;
     if (lookupState(state, StateName::HeatingSystemMode)) {
-      stateBinaryInputGeneric(*state, devInput->m_targetGroupType,
-          devInput->m_targetGroupId);
+      stateBinaryInputGeneric(*state, devInput->m_targetGroupId);
     }
   }
 
