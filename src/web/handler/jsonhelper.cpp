@@ -188,6 +188,14 @@ namespace dss {
     }
     _json.add("sensorDataValid", sensorFlag);
 
+    _json.startArray("outputChannels");
+    for (int i = 0; i < _device.getDevice()->getOutputChannelCount(); i++) {
+      _json.startObject();
+      _json.add("channelType", _device.getDevice()->getOutputChannel(i));
+      _json.endObject();
+    }
+    _json.endArray();
+
     // check if this is a "main" device, if yes render dSUIDs of all
     // partner devices
     _json.startArray("pairedDevices");

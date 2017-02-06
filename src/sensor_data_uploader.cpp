@@ -387,16 +387,21 @@ void SensorDataUploadMsHubPlugin::handleEvent(Event& _event,
                _event.getName() == EventName::UndoScene) {
       if (_event.getRaiseLocation() == erlGroup) {
         boost::shared_ptr<const Group> pGroup = _event.getRaisedAtGroup();
-        if (pGroup->getID() != GroupIDControlTemperature) {
-          // ignore
-          return;
-        }
-        if (_event.hasPropertySet("sceneID")) {
-          // limited set of allowed operation modes on the temperature control group
-          int sceneID = strToInt(_event.getPropertyByName("sceneID"));
-          if (sceneID < 0 || sceneID > 15) {
+        switch (pGroup->getID()) {
+          case GroupIDVentilation:
+          case GroupIDGlobalAppDsVentilation:
+            break;
+          case GroupIDControlTemperature:
+            if (_event.hasPropertySet("sceneID")) {
+              // limited set of allowed operation modes on the temperature control group
+              int sceneID = strToInt(_event.getPropertyByName("sceneID"));
+              if (sceneID < 0 || sceneID > 15) {
+                return;
+              }
+            }
+            break;
+          default:
             return;
-          }
         }
         m_log->append(_event.getptr(), highPrio);
       }
