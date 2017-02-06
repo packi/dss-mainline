@@ -276,13 +276,12 @@ static void client_callback(AvahiClient *c, AvahiClientState state, AVAHI_GCC_UN
   }
 
   void BonjourHandler::execute() {
-    group = NULL;
-    simple_poll = NULL;
-
     DSS::getInstance()->getSecurity().loginAsSystemUser(
         "Bonjour needs system rights");
 
 #ifdef USE_AVAHI
+    group = NULL;
+    simple_poll = NULL;
     serverPort = DSS::getInstance()->getPropertySystem().getIntValue(
         "/config/subsystems/WebServer/announcedport");
 
