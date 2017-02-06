@@ -2276,7 +2276,7 @@ namespace dss {
 
   void Device::setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType inputType) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
+    if (_inputIndex >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     lock.unlock();
@@ -2286,7 +2286,7 @@ namespace dss {
   void Device::setDeviceBinaryInputTargetId(uint8_t _inputIndex, uint8_t _targetGroup)
   {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
+    if (_inputIndex >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, _targetGroup);
@@ -2294,7 +2294,7 @@ namespace dss {
 
   BinaryInputType Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
+    if (_inputIndex >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     return m_binaryInputs[_inputIndex]->m_inputType;
@@ -2302,11 +2302,11 @@ namespace dss {
 
   void Device::setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId id) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
+    if (_inputIndex >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     uint8_t val = (static_cast<int>(id) & 0xf) << 4;
-    if (_inputIndex == m_binaryInputs.size()) {
+    if (_inputIndex == m_binaryInputs.size() - 1) {
       val |= 0x80;
     }
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
