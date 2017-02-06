@@ -29,27 +29,35 @@ class Status;
 ///
 /// Methods `add`, `update` and `remove` take `const State& state`,
 /// but the coupling is very weak. State object is accessed only inside the called method.
+///
+/// TODO(someday): StatusBit is bad name. StatusField would be more appropriate.
+/// StatusFields should be template by an enum type,
+/// there may be more than 2 valid options for one StatusField.
 class StatusBit : private boost::noncopyable {
 public:
-  StatusBit(Status& status, StatusBitType type, const std::string& name);
+  StatusBit(Status& status, StatusFieldType type, const std::string& name);
   ~StatusBit();
 
   Status& getStatus() { return m_status; }
   const std::string getName() const { return m_state->getName(); }
-  StatusBitType getType() const { return m_type; }
+  StatusFieldType getType() const { return m_type; }
 
   void addSubState(const State& subState);
   void updateSubState(const State& subState);
   void removeSubState(const State& subState);
 
+  /// Sets status field value.
+  /// The value is lost on first event from any substate
+  void setValue(StatusFieldValue value);
 private:
   __DECL_LOG_CHANNEL__;
   Status& m_status;
-  StatusBitType m_type;
+  StatusFieldType m_type;
   boost::shared_ptr<State> m_state; // State uses shared_from_this
   struct SubStateItem;
   std::vector<SubStateItem> m_subStateItems;
 
+  void setValueImpl(StatusFieldValue value);
   void update();
 };
 

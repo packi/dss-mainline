@@ -25,7 +25,7 @@
 #endif
 #include "group.h"
 
-#include <ds/str.h>
+#include <ds/log.h>
 
 #include "zone.h"
 #include "scenehelper.h"
@@ -345,7 +345,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     }
   }
 
-  StatusBit& Group::getStatusBit(StatusBitType type) {
+  StatusBit& Group::getStatusBit(StatusFieldType type) {
     if (!m_status) {
       // Lazy created to avoid periodic broadcast of status current values
       // for empty Statuses over dsm-api.
@@ -364,6 +364,17 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     m_status->insertBit(type, std::move(bit));
     return bitRef;
   }
+
+  void Group::setStatusField(const std::string& fieldName, const std::string& valueName) {
+    auto field = statusFieldTypeFromName(fieldName);
+    DS_REQUIRE(field, "Unknown", fieldName);
+    auto value = statusFieldValueFromName(valueName);
+    DS_REQUIRE(value, "Unknown", valueName);
+    //TODO(someday): move DS_REQUIRE to parse functions
+
+    getStatusBit(*field).setValue(*value);
+  }
+
 
   boost::mutex Group::m_SceneNameMutex;
 

@@ -149,7 +149,10 @@ namespace dss {
     void sensorInvalid(SensorType _type);
 
     /// Get group StatusBit instance for given status type
-    StatusBit& getStatusBit(StatusBitType statusBitType);
+    StatusBit& getStatusBit(StatusFieldType statusFieldType);
+
+    /// Creates Status object if it does not exists and calls StatusBit::setValue.
+    void setStatusField(const std::string& field, const std::string& value);
 
     void addConnectedDevice();
     void removeConnectedDevice();

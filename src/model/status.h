@@ -40,8 +40,8 @@ public:
   Group& getGroup() { return m_group; }
   const Group& getGroup() const { return m_group; }
 
-  StatusBit* tryGetBit(StatusBitType statusType);
-  void insertBit(StatusBitType statusType, std::unique_ptr<StatusBit> state);
+  StatusBit* tryGetBit(StatusFieldType statusType);
+  void insertBit(StatusFieldType statusType, std::unique_ptr<StatusBit> state);
   unsigned int getValue() const { return m_valueBitset.to_ulong(); }
 
   static boost::chrono::seconds PUSH_SENSOR_PERIOD;
@@ -50,11 +50,11 @@ private:
   __DECL_LOG_CHANNEL__;
   Group& m_group;
   ds::asio::Timer m_periodicPushTimer;
-  std::bitset<STATUS_BIT_TYPE_MAX + 1> m_valueBitset;
-  boost::container::map<StatusBitType, std::unique_ptr<StatusBit>> m_bits;
+  std::bitset<SENSOR_VALUE_BIT_MAX + 1> m_valueBitset;
+  boost::container::map<StatusFieldType, std::unique_ptr<StatusBit>> m_bits;
 
   friend class StatusBit;
-  void setBitValue(StatusBitType type, bool value);
+  void setBitValue(StatusFieldType type, bool value);
   void push();
   void asyncPeriodicPush();
 };

@@ -40,11 +40,11 @@ struct StatusBit::SubStateItem {
   bool operator==(const State& subState) { return m_ptr == &subState; }
 };
 
-StatusBit::StatusBit(Status& status, StatusBitType type, const std::string& name)
+StatusBit::StatusBit(Status& status, StatusFieldType type, const std::string& name)
     : m_status(status), m_type(type),
     m_state(boost::make_shared<State>(StateType_Service, name)) {
   log(std::string("StatusBit this:") + getName(), lsInfo);
-  DS_REQUIRE(static_cast<std::size_t>(type) <= STATUS_BIT_TYPE_MAX);
+  DS_REQUIRE(static_cast<std::size_t>(type) <= SENSOR_VALUE_BIT_MAX);
 }
 
 StatusBit::~StatusBit() = default;
@@ -80,24 +80,51 @@ void StatusBit::removeSubState(const State& subState) {
   update();
 }
 
+void StatusBit::setValue(StatusFieldValue value) {
+  log(ds::str("setValue this:", getName()," value:", value), lsNotice);
+  setValueImpl(value);
+}
+
+namespace {
+eState statusFieldValueToState(StatusFieldValue value) {
+  switch(value) {
+    case StatusFieldValue::INACTIVE: return State_Inactive;
+    case StatusFieldValue::ACTIVE: return State_Active;
+  }
+  return State_Inactive;
+}
+} // namespace
+
+void StatusBit::setValueImpl(StatusFieldValue value) {
+  log(ds::str("setValueImpl this:", getName()," value:", value), lsDebug);
+  m_state->setState(coSystem, statusFieldValueToState(value));
+  m_status.setBitValue(m_type, [&] {
+    switch(value) {
+      case StatusFieldValue::INACTIVE: return 0;
+      case StatusFieldValue::ACTIVE: return 1;
+    }
+    return 1;
+  }());
+}
+
 void StatusBit::update() {
   // Requirements: The composed state is:
   // * `active` if at least one sub state is `active`
   // * `inactive` otherwise
-  int groupValue = State_Inactive;
+  StatusFieldValue value = StatusFieldValue::INACTIVE;
   foreach (auto&& x, m_subStateItems) {
     log(std::string("update this:") + getName() + " state:" + x.m_name + " value:" + intToString(x.m_value), lsDebug);
     if (x.m_value == State_Active) {
-      groupValue = State_Active;
+      value = StatusFieldValue::ACTIVE;
     }
   }
-  auto oldGroupValue = m_state->getState();
-  if (oldGroupValue == groupValue) {
+  auto&& oldStateValue = m_state->getState();
+  auto&& stateValue = statusFieldValueToState(value);
+  if (oldStateValue == stateValue) {
     return;
   }
-  log(std::string("update this:") + getName() + " groupValue:" + intToString(groupValue), lsNotice);
-  m_state->setState(coSystem, groupValue);
-  m_status.setBitValue(m_type, groupValue == State_Active);
+  log(ds::str("update this:", getName(), " composed value:", value), lsNotice);
+  setValueImpl(value);
 }
 
 } // namespace dss

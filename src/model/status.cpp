@@ -45,7 +45,7 @@ Status::Status(Group& group)
 
 Status::~Status() = default;
 
-StatusBit* Status::tryGetBit(StatusBitType statusType) {
+StatusBit* Status::tryGetBit(StatusFieldType statusType) {
   auto&& it = m_bits.find(statusType);
   if (it != m_bits.end()) {
     return it->second.get();
@@ -53,11 +53,11 @@ StatusBit* Status::tryGetBit(StatusBitType statusType) {
   return DS_NULLPTR;
 }
 
-void Status::insertBit(StatusBitType statusType, std::unique_ptr<StatusBit> state) {
+void Status::insertBit(StatusFieldType statusType, std::unique_ptr<StatusBit> state) {
   m_bits[statusType] = std::move(state);
 }
 
-void Status::setBitValue(StatusBitType type, bool bitValue) {
+void Status::setBitValue(StatusFieldType type, bool bitValue) {
   auto&& bit = static_cast<int>(type);
   if (m_valueBitset.test(bit) == bitValue) {
     return;
