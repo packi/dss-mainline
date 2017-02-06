@@ -720,7 +720,6 @@ namespace dss {
               for (size_t i = 0; i < binaryInputs.size(); i++) {
                 auto&& input = binaryInputs.at(i);
                 json.startObject();
-                json.add("targetGroupType", input->m_targetGroupType);
                 json.add("targetGroup", input->m_targetGroupId);
                 json.add("inputType", input->m_inputType);
                 json.add("inputId", input->m_inputId);

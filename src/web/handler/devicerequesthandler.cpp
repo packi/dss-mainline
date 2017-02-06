@@ -1089,7 +1089,6 @@ namespace dss {
         json.add("inputIndex", (*it)->m_inputIndex);
         json.add("inputId", (*it)->m_inputId);
         json.add("inputType", (*it)->m_inputType);
-        json.add("targetType", (*it)->m_targetGroupType);
         json.add("targetGroup", (*it)->m_targetGroupId);
         json.endObject();
       }
@@ -1111,16 +1110,11 @@ namespace dss {
       if (index < 0) {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
       }
-      int gtype = strToIntDef(_request.getParameter("groupType"), -1);
-      if (gtype < 0 || gtype >= static_cast<int>(GroupType::End)) {
-        return JSONWriter::failure("Invalid or missing parameter 'groupType'");
-      }
       int gid = strToIntDef(_request.getParameter("groupId"), -1);
       if (gid < 0 || gid > GroupIDGlobalAppMax) {
         return JSONWriter::failure("Invalid or missing parameter 'groupId'");
       }
       pDevice->setDeviceBinaryInputTargetId(index, gid);
-      pDevice->setDeviceBinaryInputTargetType(index, static_cast<GroupType>(gtype));
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputId") {
       int index = strToIntDef(_request.getParameter("index"), -1);

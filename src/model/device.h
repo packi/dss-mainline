@@ -167,7 +167,6 @@ namespace dss {
     int m_inputIndex;        // input line index
     BinaryInputType m_inputType; // type of input signal
     BinaryInputId m_inputId;           // target Id, like ButtonId
-    GroupType m_targetGroupType;   // type of target group: standard, user, apartment
     int m_targetGroupId;     // index of target group, 0..63
 
     DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index);
@@ -175,7 +174,6 @@ namespace dss {
 
     const State& getState() const { return *m_state; }
     void setTargetId(uint8_t group);
-    void setTargetType(GroupType type);
     void setInputId(BinaryInputId inputId);
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
@@ -450,7 +448,6 @@ namespace dss {
     /** Binary input devices */
     void setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId _targetId);
     void setDeviceBinaryInputTargetId(uint8_t _inputIndex, uint8_t _targetGroup);
-    void setDeviceBinaryInputTargetType(uint8_t _inputIndex, GroupType targetType);
     void setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType _inputType);
     BinaryInputType getDeviceBinaryInputType(uint8_t _inputIndex);
     /** AKM2xx timeout settings */
@@ -752,7 +749,6 @@ namespace dss {
     const std::vector<boost::shared_ptr<DeviceBinaryInput> >& getBinaryInputs() const;
     const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
     void setBinaryInputTargetId(uint8_t _index, uint8_t targetGroup);
-    void setBinaryInputTargetType(uint8_t _index, GroupType targetGroupType);
     void setBinaryInputId(uint8_t _index, BinaryInputId _inputId);
     void setBinaryInputType(uint8_t _index, BinaryInputType _inputType);
     void clearBinaryInputs();

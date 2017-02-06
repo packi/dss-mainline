@@ -156,10 +156,9 @@ namespace dss {
     _json.startArray("binaryInputs");
     for (auto&& it = binaryInputs.begin(); it != binaryInputs.end(); ++it) {
       _json.startObject();
-      _json.add("targetGroupType", (*it)->m_targetGroupType);
       _json.add("targetGroup", (*it)->m_targetGroupId);
-      _json.add("inputType", (*it)->m_inputType);
-      _json.add("inputId", (*it)->m_inputId);
+      _json.add("inputType", static_cast<int>((*it)->m_inputType));
+      _json.add("inputId", static_cast<int>((*it)->m_inputId));
       _json.add("state", (*it)->getState().getState());
       _json.endObject();
     }

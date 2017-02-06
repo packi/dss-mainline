@@ -1987,7 +1987,6 @@ namespace dss {
             break;
           case 2:
             device->setBinaryInputId(inputIndex, static_cast<BinaryInputId>(_value >> 4));
-            device->setBinaryInputTargetType(inputIndex, static_cast<GroupType>(_value & 0x03));
             break;
           }
         }
