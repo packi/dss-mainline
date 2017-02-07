@@ -35,7 +35,7 @@ namespace dss {
 
   class Zone;
   class Status;
-  class StatusBit;
+  class StatusField;
 
   /** Represents a predefined group */
   class Group : public DeviceContainer,
@@ -56,7 +56,7 @@ namespace dss {
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
     int m_connectedDevices;
-    std::unique_ptr<Status> m_status; // lazy created in getStatusBit
+    std::unique_ptr<Status> m_status; // lazy created in getStatusField
 
     // getter and setter for property proxy
     int getApplicationTypeInt() const { return static_cast<int>(getApplicationType()); }
@@ -148,10 +148,10 @@ namespace dss {
     void sensorPush(const dsuid_t& _sourceID, SensorType _type, double _value);
     void sensorInvalid(SensorType _type);
 
-    /// Get group StatusBit instance for given status type
-    StatusBit& getStatusBit(StatusFieldType statusFieldType);
+    /// Get group StatusField instance for given status type
+    StatusField& getStatusField(StatusFieldType statusFieldType);
 
-    /// Creates Status object if it does not exists and calls StatusBit::setValue.
+    /// Creates Status object if it does not exists and calls StatusField::setValue.
     void setStatusField(const std::string& field, const std::string& value);
 
     void addConnectedDevice();

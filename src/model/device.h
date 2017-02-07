@@ -180,14 +180,14 @@ namespace dss {
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
 
-    void updateStatusBitHandle();
+    void updateStatusFieldHandle();
   private:
     __DECL_LOG_CHANNEL__;
     Device& m_device;
     std::string m_name;
     boost::shared_ptr<State> m_state;
-    class StatusBitHandle;
-    std::unique_ptr<StatusBitHandle> m_statusBitHandle;
+    class StatusFieldHandle;
+    std::unique_ptr<StatusFieldHandle> m_statusFieldHandle;
   };
 
   typedef struct {

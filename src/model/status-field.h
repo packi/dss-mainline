@@ -30,13 +30,13 @@ class Status;
 /// Methods `add`, `update` and `remove` take `const State& state`,
 /// but the coupling is very weak. State object is accessed only inside the called method.
 ///
-/// TODO(someday): StatusBit is bad name. StatusField would be more appropriate.
+/// TODO(someday): StatusField is bad name. StatusField would be more appropriate.
 /// StatusFields should be template by an enum type,
 /// there may be more than 2 valid options for one StatusField.
-class StatusBit : private boost::noncopyable {
+class StatusField : private boost::noncopyable {
 public:
-  StatusBit(Status& status, StatusFieldType type, const std::string& name);
-  ~StatusBit();
+  StatusField(Status& status, StatusFieldType type, const std::string& name);
+  ~StatusField();
 
   Status& getStatus() { return m_status; }
   const std::string getName() const { return m_state->getName(); }

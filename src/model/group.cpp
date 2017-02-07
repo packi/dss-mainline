@@ -35,7 +35,7 @@
 #include "src/propertysystem.h"
 
 #include "src/model/modelconst.h"
-#include "status-bit.h"
+#include "status-field.h"
 #include "status.h"
 
 namespace dss {
@@ -345,7 +345,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     }
   }
 
-  StatusBit& Group::getStatusBit(StatusFieldType type) {
+  StatusField& Group::getStatusField(StatusFieldType type) {
     if (!m_status) {
       // Lazy created to avoid periodic broadcast of status current values
       // for empty Statuses over dsm-api.
@@ -354,12 +354,12 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       // But we also save some memory this way as most groups don't have Status.
       m_status.reset(new Status(*this));
     }
-    if (StatusBit* bit = m_status->tryGetBit(type)) {
+    if (StatusField* bit = m_status->tryGetBit(type)) {
       return *bit;
     }
     auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
     log(ds::str("New status bit name:", name), lsNotice);
-    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(*m_status, type, std::move(name)));
+    auto&& bit = std::unique_ptr<StatusField>(new StatusField(*m_status, type, std::move(name)));
     auto&& bitRef = *bit;
     m_status->insertBit(type, std::move(bit));
     return bitRef;
@@ -372,7 +372,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     DS_REQUIRE(value, "Unknown", valueName);
     //TODO(someday): move DS_REQUIRE to parse functions
 
-    getStatusBit(*field).setValue(*value);
+    getStatusField(*field).setValue(*value);
   }
 
 
