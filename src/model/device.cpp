@@ -793,19 +793,6 @@ namespace dss {
     }
   } // setDeviceActiveGroup
 
-  void Device::setDeviceButtonConfig() {
-    if (m_ButtonGroupMembership < 16) {
-      // In case the button group is in 0-15 range just set the LTNUMGROUP register (bank 3, offset 1)
-      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, ((m_ButtonGroupMembership & 0xf) << 4) | (m_ButtonID & 0xf));
-    } else {
-      // In case the button group is greater than 0-15 then the 4-bit field in LTNUMGROUP register (bank 3, offset 1) is
-      // replaced by the PBGROUP (bank 3, offset 0x1d) register.
-      // In case of a "0" value in LTNUMGRP group bits the value should be taken from PBGROUP instead
-      setDeviceConfig(CfgClassFunction, CfgFunction_PbGroup, m_ButtonGroupMembership);
-      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, m_ButtonID & 0xf);
-    }
-  }
-
   void Device::setDeviceJokerGroup(uint8_t _groupId) {
     if (!isDefaultGroup(_groupId) && !isGlobalAppDsGroup(_groupId)) {
       throw std::runtime_error("Invalid joker group value");
