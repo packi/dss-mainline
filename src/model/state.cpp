@@ -370,10 +370,6 @@ namespace dss {
     }
   }
 
-  void State::setValueRange(const ValueRange_t &_values) {
-    m_values = _values;
-  }
-
   unsigned int State::getValueRangeSize() const {
     return (!m_values.empty()) ? m_values.size() : (State_Unknown + 1);
   }

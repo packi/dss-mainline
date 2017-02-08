@@ -28,6 +28,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/smart_ptr.hpp>
+#include <boost/optional.hpp>
 
 #include "ds485types.h"
 
@@ -117,6 +118,26 @@ namespace dss {
     void setState(const callOrigin_t _origin, const int _state);
     void setState(const callOrigin_t _origin, const std::string& _state);
 
+    /// Set state to `static_cast<int>(value) + 1`
+    ///
+    /// Value 0 is reserved for "invalid"
+    ///
+    /// TODO(someday): make State (sub)class template by T to make this method type safe
+    template <class T, class = typename std::enable_if<std::is_enum<T>::value>::type>
+    void setState(T value) {
+         setState(coSystem, static_cast<int>(value) + 1);
+    }
+
+    /// Get state as enum T. 0 is mapped to boost::none, other values are static casted to T by -1
+    template <class T, class = typename std::enable_if<std::is_enum<T>::value>::type>
+    boost::optional<T> getState() const {
+      auto&& x = getState();
+      if (x == 0) {
+        return boost::none;
+      }
+      return static_cast<T>(x - 1);
+    }
+
     const std::string& getName() const { return m_name; }
     void setName(const std::string& _name) { m_name = _name; }
 
@@ -125,7 +146,7 @@ namespace dss {
     bool hasPersistentData();
 
     typedef std::vector<std::string> ValueRange_t;
-    void setValueRange(const ValueRange_t& _values);
+    void setValueRange(ValueRange_t values) { m_values = std::move(values); }
     unsigned int getValueRangeSize() const;
 
     eStateType getType() const { return m_type; }

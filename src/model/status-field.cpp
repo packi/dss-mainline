@@ -52,7 +52,14 @@ StatusField::StatusField(Status& status, StatusFieldType type)
     : m_status(status), m_type(type),
     m_state(boost::make_shared<State>(StateType_Service, makeName(status, type))) {
   DS_REQUIRE(static_cast<std::size_t>(type) <= SENSOR_VALUE_BIT_MAX);
-  m_state->setState(coSystem, State_Inactive); // default value when persistent state is missing
+  m_state->setValueRange([] {
+    State::ValueRange_t out;
+    out.push_back("unknown");
+    out.push_back("inactive");
+    out.push_back("active");
+    return out;
+  }());
+  m_state->setState(StatusFieldValue::INACTIVE); // default value without persistent state
   m_state->setPersistence(true);
   log(ds::str("StatusField this:", getName(), " value:", getValue()), lsNotice);
   // TODO(someday): it may be better to store the state next to other group properties in apartment.xml
@@ -63,7 +70,7 @@ StatusField::~StatusField() = default;
 
 StatusSensorBitset StatusField::getValueAsBitset() const {
   StatusSensorBitset out;
-  out.set(static_cast<int>(m_type), m_state->getState() == State_Active ? 1 : 0);
+  out.set(static_cast<int>(m_type), getValue() == StatusFieldValue::ACTIVE ? 1 : 0);
   return out;
 }
 
@@ -104,19 +111,12 @@ void StatusField::setValueAndPush(StatusFieldValue value) {
 }
 
 StatusFieldValue StatusField::getValue() const {
-  return m_state->getState() == State_Active ? StatusFieldValue::ACTIVE : StatusFieldValue::INACTIVE;
+  return m_state->getState<StatusFieldValue>().value_or(StatusFieldValue::INACTIVE);
 }
 
 void StatusField::setValueAndPushImpl(StatusFieldValue value) {
   log(ds::str("setValueImpl this:", getName()," value:", value), lsDebug);
-  auto stateValue = [&] {
-    switch(value) {
-      case StatusFieldValue::INACTIVE: return State_Inactive;
-      case StatusFieldValue::ACTIVE: return State_Active;
-    }
-    return State_Inactive;
-  }();
-  m_state->setState(coSystem, stateValue);
+  m_state->setState(value);
   m_status.push();
 }
 
