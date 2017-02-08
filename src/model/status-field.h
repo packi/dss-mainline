@@ -60,7 +60,7 @@ public:
   StatusFieldValue getValue() const;
 
   /// Get value as bits \ref SensorType::Status value
-  StatusSensorBitset getValusAsBitset() const;
+  StatusSensorBitset getValueAsBitset() const;
 
 private:
   __DECL_LOG_CHANNEL__;

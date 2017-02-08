@@ -61,7 +61,7 @@ private:
   StatusField m_serviceField;
 
   friend class StatusField;
-  void asyncPushLoop(ds::asio::Timer::Duration delay);
+  void asyncPushLoopRestart(ds::asio::Timer::Duration delay);
 };
 
 std::ostream& operator<<(std::ostream &, const Status &);

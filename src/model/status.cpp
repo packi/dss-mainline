@@ -46,7 +46,7 @@ Status::Status(Group& group)
   // to spread the value to new devices.
   // It makes no sense to push immediately,
   // we are likely to even not have dsm-api connection now.
-  asyncPushLoop(PUSH_PERIOD);
+  asyncPushLoopRestart(PUSH_PERIOD);
 }
 
 Status::~Status() = default;
@@ -61,19 +61,19 @@ StatusField& Status::getField(StatusFieldType type) {
 
 StatusSensorBitset Status::getValueAsBitset() const {
   StatusSensorBitset out;
-  out |= m_malfunctionField.getValusAsBitset();
-  out |= m_serviceField.getValusAsBitset();
+  out |= m_malfunctionField.getValueAsBitset();
+  out |= m_serviceField.getValueAsBitset();
   return out;
 }
 
 void Status::push() {
   log(ds::str("push ", *this), lsInfo);
   // moderate push calls
-  asyncPushLoop(boost::chrono::seconds(1));
+  asyncPushLoopRestart(boost::chrono::seconds(1));
 }
 
-void Status::asyncPushLoop(ds::asio::Timer::Duration delay) {
-  log(ds::str("asyncPushLoop ", *this), lsDebug);
+void Status::asyncPushLoopRestart(ds::asio::Timer::Duration delay) {
+  log(ds::str("asyncPushLoopRestart ", *this), lsDebug);
 
   m_periodicPushTimer.randomlyExpiresFromNowPercentDown(delay, 25, [this] {
     try {
@@ -83,7 +83,7 @@ void Status::asyncPushLoop(ds::asio::Timer::Duration delay) {
     } catch (std::exception &e) {
       log(ds::str("push failed what:", e.what()), lsError);
     }
-    asyncPushLoop(PUSH_PERIOD); // async loop
+    asyncPushLoopRestart(PUSH_PERIOD); // async loop
   });
 }
 

@@ -61,7 +61,7 @@ StatusField::StatusField(Status& status, StatusFieldType type)
 
 StatusField::~StatusField() = default;
 
-StatusSensorBitset StatusField::getValusAsBitset() const {
+StatusSensorBitset StatusField::getValueAsBitset() const {
   StatusSensorBitset out;
   out.set(static_cast<int>(m_type), m_state->getState() == State_Active ? 1 : 0);
   return out;

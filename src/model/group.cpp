@@ -90,6 +90,9 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       if (m_ApplicationType == ApplicationType::ApartmentVentilation && !m_status) {
         m_status.reset(new Status(*this));
       }
+      if (m_ApplicationType != ApplicationType::ApartmentVentilation && m_status) {
+        m_status.reset();
+      }
     }
 
     if (getZoneID() == 0) {
