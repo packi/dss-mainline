@@ -42,17 +42,17 @@ namespace dss {
     splitIntoMethodAndClass(_request);
   }
 
-  boost::optional<std::string> RestfulRequest::tryGetParameter(const std::string& parameter) const {
+  boost::optional<std::string> RestfulRequest::tryGetParameter(const std::string& name) const {
     size_t end, offset;
     std::string tmp;
 
     // we added leading "&" upon init
-    offset = m_queryString.find("&" + parameter + "=");
+    offset = m_queryString.find("&" + name + "=");
     if (offset == std::string::npos) {
       return boost::none;
     }
 
-    offset += parameter.length() + 2;
+    offset += name.length() + 2;
     end = m_queryString.find('&', offset);
     tmp = (end == std::string::npos) ?
       m_queryString.substr(offset) :
@@ -61,15 +61,15 @@ namespace dss {
     return urlDecode(tmp);
   }
 
-  std::string RestfulRequest::getRequiredParameter(const std::string& parameter) const {
-    if (auto x = tryGetParameter(parameter)) {
+  std::string RestfulRequest::getRequiredParameter(const std::string& name) const {
+    if (auto x = tryGetParameter(name)) {
       return *x;
     }
-    DS_FAIL_REQUIRE("Missing", parameter);
+    DS_FAIL_REQUIRE("Missing parameter", name);
   }
 
-  std::string RestfulRequest::getParameter(const std::string& parameter) const {
-    if (auto x = tryGetParameter(parameter)) {
+  std::string RestfulRequest::getParameter(const std::string& name) const {
+    if (auto x = tryGetParameter(name)) {
       return *x;
     }
     return std::string();
