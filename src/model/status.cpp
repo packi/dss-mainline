@@ -39,7 +39,7 @@ boost::chrono::seconds Status::PUSH_PERIOD = boost::chrono::minutes(90);
 
 Status::Status(Group& group)
     : m_group(group)
-    , m_periodicPushTimer(group.getApartment().getDss().getIoService())
+    , m_periodicPushTimer(group.getApartment().getDss()->getIoService())
     , m_malfunctionField(*this, StatusFieldType::MALFUNCTION)
     , m_serviceField(*this, StatusFieldType::SERVICE) {
   // Start periodic push loop to recover from broadcast failures,

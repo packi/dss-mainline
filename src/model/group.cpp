@@ -81,9 +81,15 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
     }
 
-    if (m_ApplicationType == ApplicationType::ApartmentVentilation && !m_status) {
-      // Status is supported only for AV groups for now.
-      m_status.reset(new Status(*this));
+    // Status is supported only for apartment ventilation groups for now.
+    if (getApartment().getDss()) {
+        // TODO(someday): Status object requires IoService instance from DSS instance.
+        // But most tests do not provice DSS instance now.
+        // It is arguably bad idea to require full DSS instance to get IoService instance.
+        // ModelMaintenance::initialize has similar workaround.
+      if (m_ApplicationType == ApplicationType::ApartmentVentilation && !m_status) {
+        m_status.reset(new Status(*this));
+      }
     }
 
     if (getZoneID() == 0) {
