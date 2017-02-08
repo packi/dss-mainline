@@ -385,7 +385,6 @@ namespace dss {
     void setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex, uint16_t _value);
     void setDeviceButtonID(uint8_t _buttonId);
     void setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup);
-    void setDeviceButtonConfig();
     void setDeviceJokerGroup(uint8_t _groupId);
     void setDeviceOutputMode(uint8_t _modeId);
     void setDeviceButtonInputMode(uint8_t _modeId);

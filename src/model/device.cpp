@@ -764,7 +764,8 @@ namespace dss {
 
   void Device::setDeviceButtonID(uint8_t _buttonId) {
     setButtonID(_buttonId);
-    setDeviceButtonConfig();
+    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
+        ((m_ButtonGroupMembership & 0xf) << 4) | (m_ButtonID & 0xf));
   } // setDeviceButtonId
 
   void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
@@ -772,36 +773,25 @@ namespace dss {
       m_pPropertyNode->checkWriteAccess();
     }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
-      m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this,
-                                                                        _buttonActiveGroup);
-      if (_buttonActiveGroup >= GroupIDAppUserMin &&
-          _buttonActiveGroup <= GroupIDAppUserMax &&
-          ((m_ButtonID < ButtonId_Zone) || (m_ButtonID >= ButtonId_Area1_Extended))) {
+      /* re-configure area or device button mode for groups other then lights and shades */
+      bool isAreaButton =
+          ((m_ButtonID >= ButtonId_Area1) && (m_ButtonID <= ButtonId_Area4)) ||
+          ((m_ButtonID >= ButtonId_Area1_Extended) && (m_ButtonID <= ButtonId_Area4_Extended));
+      if (isAreaButton &&
+          ((_buttonActiveGroup < GroupIDYellow) || (_buttonActiveGroup > GroupIDGray))) {
         setDeviceButtonID(ButtonId_Zone);
       }
+      /* tell dsm to change button active group */
+      m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
       /* refresh device information for correct active group */
       if ((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged,
-                                                    m_DSMeterDSID);
+        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged, m_DSMeterDSID);
         pEvent->addParameter(m_ShortAddress);
         sleep(3); // #8900: make sure all settings were really saved
         m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
       }
     }
   } // setDeviceActiveGroup
-
-  void Device::setDeviceButtonConfig() {
-    if (m_ButtonGroupMembership < 16) {
-      // In case the button group is in 0-15 range just set the LTNUMGROUP register (bank 3, offset 1)
-      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, ((m_ButtonGroupMembership & 0xf) << 4) | (m_ButtonID & 0xf));
-    } else {
-      // In case the button group is greater than 0-15 then the 4-bit field in LTNUMGROUP register (bank 3, offset 1) is
-      // replaced by the PBGROUP (bank 3, offset 0x1d) register.
-      // In case of a "0" value in LTNUMGRP group bits the value should be taken from PBGROUP instead
-      setDeviceConfig(CfgClassFunction, CfgFunction_PbGroup, m_ButtonGroupMembership);
-      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, m_ButtonID & 0xf);
-    }
-  }
 
   void Device::setDeviceJokerGroup(uint8_t _groupId) {
     if (!isDefaultGroup(_groupId) && !isGlobalAppDsGroup(_groupId)) {
@@ -828,11 +818,18 @@ namespace dss {
       }
     }
 
+    // assign device to new group
     addToGroup(_groupId);
-    // propagate target group value to device
-    setButtonGroupMembership(_groupId);
-    setDeviceButtonConfig();
-
+    // set button target group
+    if (getButtonInputCount() > 0) {
+      setButtonGroupMembership(_groupId);
+      setDeviceButtonActiveGroup(_groupId);
+    }
+    // set binary input to target group
+    if (getBinaryInputCount() == 1) {
+      setDeviceBinaryInputTargetId(0, _groupId);
+      setBinaryInputTargetId(0, _groupId);
+    }
     updateIconPath();
   } // setDeviceJokerGroup
 
