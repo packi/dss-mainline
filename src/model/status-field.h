@@ -25,30 +25,43 @@
 namespace dss {
 class Status;
 
-/// Composed status bit that is active when any substate is active (`or` function).
+//TODO(someday): move to shared locate and rename to `StatusSensorBitset`?
+typedef std::bitset<SENSOR_VALUE_BIT_MAX + 1> StatusSensorBitset;
+
+/// Status field that is active when any substate is active (`or` function).
+/// Removing the last substate does not clear the status field,
+/// but the last value persistently stays.
+///
+/// Status fields are combined into \ref Status.
 ///
 /// Methods `add`, `update` and `remove` take `const State& state`,
 /// but the coupling is very weak. State object is accessed only inside the called method.
 ///
-/// TODO(someday): StatusField is bad name. StatusField would be more appropriate.
-/// StatusFields should be template by an enum type,
+/// TODO(someday): StatusFields should be template by an enum type,
 /// there may be more than 2 valid options for one StatusField.
 class StatusField : private boost::noncopyable {
 public:
-  StatusField(Status& status, StatusFieldType type, const std::string& name);
+  StatusField(Status& status, StatusFieldType type);
   ~StatusField();
 
   Status& getStatus() { return m_status; }
   const std::string getName() const { return m_state->getName(); }
+  std::bitset<SENSOR_VALUE_BIT_MAX + 1> m_valueBitset;
   StatusFieldType getType() const { return m_type; }
 
   void addSubState(const State& subState);
   void updateSubState(const State& subState);
   void removeSubState(const State& subState);
 
-  /// Sets status field value.
+  /// Sets status field value and push it as SensorType::Status.
+  /// The value is pushed immediately regardless on whether the value change or not.
   /// The value is lost on first event from any substate
-  void setValue(StatusFieldValue value);
+  void setValueAndPush(StatusFieldValue value);
+  StatusFieldValue getValue() const;
+
+  /// Get value as bits \ref SensorType::Status value
+  StatusSensorBitset getValusAsBitset() const;
+
 private:
   __DECL_LOG_CHANNEL__;
   Status& m_status;
@@ -57,7 +70,7 @@ private:
   struct SubStateItem;
   std::vector<SubStateItem> m_subStateItems;
 
-  void setValueImpl(StatusFieldValue value);
+  void setValueAndPushImpl(StatusFieldValue value);
   void update();
 };
 

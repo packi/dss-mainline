@@ -23,11 +23,11 @@
 #include <ds/asio/timer.h>
 #include "logger.h"
 #include "modelconst.h"
+#include "status-field.h"
 
 namespace dss {
 
 class Group;
-class StatusField;
 
 /// Status with each value bit managed by StatusField.
 /// Status value is propagated as sensor value to parent group
@@ -40,23 +40,28 @@ public:
   Group& getGroup() { return m_group; }
   const Group& getGroup() const { return m_group; }
 
-  StatusField* tryGetBit(StatusFieldType statusType);
-  void insertBit(StatusFieldType statusType, std::unique_ptr<StatusField> state);
-  unsigned int getValue() const { return m_valueBitset.to_ulong(); }
+  StatusField& getMalfunctionField() { return m_malfunctionField; }
+  StatusField& getServiceField() { return m_serviceField; }
+  StatusField& getField(StatusFieldType type);
 
-  static boost::chrono::seconds PUSH_SENSOR_PERIOD;
+  /// Get all fields composed together into status sensor bitset
+  StatusSensorBitset getValueAsBitset() const;
+
+  /// Push current state as \ref SensorType::Status value
+  void push();
+
+  static boost::chrono::seconds PUSH_PERIOD;
 
 private:
   __DECL_LOG_CHANNEL__;
   Group& m_group;
   ds::asio::Timer m_periodicPushTimer;
   std::bitset<SENSOR_VALUE_BIT_MAX + 1> m_valueBitset;
-  boost::container::map<StatusFieldType, std::unique_ptr<StatusField>> m_bits;
+  StatusField m_malfunctionField;
+  StatusField m_serviceField;
 
   friend class StatusField;
-  void setBitValue(StatusFieldType type, bool value);
-  void push();
-  void asyncPeriodicPush();
+  void asyncPushLoop(ds::asio::Timer::Duration delay);
 };
 
 std::ostream& operator<<(std::ostream &, const Status &);

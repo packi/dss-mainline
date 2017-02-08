@@ -81,6 +81,11 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
     }
 
+    if (m_ApplicationType == ApplicationType::ApartmentVentilation && !m_status) {
+      // Status is supported only for AV groups for now.
+      m_status.reset(new Status(*this));
+    }
+
     if (getZoneID() == 0) {
       return;
     }
@@ -344,37 +349,6 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       }
     }
   }
-
-  StatusField& Group::getStatusField(StatusFieldType type) {
-    if (!m_status) {
-      // Lazy created to avoid periodic broadcast of status current values
-      // for empty Statuses over dsm-api.
-      //
-      // It is possible to move this functionality to Status class.
-      // But we also save some memory this way as most groups don't have Status.
-      m_status.reset(new Status(*this));
-    }
-    if (StatusField* bit = m_status->tryGetBit(type)) {
-      return *bit;
-    }
-    auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
-    log(ds::str("New status bit name:", name), lsNotice);
-    auto&& bit = std::unique_ptr<StatusField>(new StatusField(*m_status, type, std::move(name)));
-    auto&& bitRef = *bit;
-    m_status->insertBit(type, std::move(bit));
-    return bitRef;
-  }
-
-  void Group::setStatusField(const std::string& fieldName, const std::string& valueName) {
-    auto field = statusFieldTypeFromName(fieldName);
-    DS_REQUIRE(field, "Unknown", fieldName);
-    auto value = statusFieldValueFromName(valueName);
-    DS_REQUIRE(value, "Unknown", valueName);
-    //TODO(someday): move DS_REQUIRE to parse functions
-
-    getStatusField(*field).setValue(*value);
-  }
-
 
   boost::mutex Group::m_SceneNameMutex;
 

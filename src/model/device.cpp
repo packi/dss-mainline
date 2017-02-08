@@ -228,7 +228,13 @@ namespace dss {
     if (m_targetGroupId != 0) {
       if (auto type = statusFieldTypeForBinaryInputType(m_inputType)) {
         if ((targetGroup = m_device.tryGetGroup(m_targetGroupId).lock())) {
-          statusField = &targetGroup->getStatusField(*type);
+          if (auto&& status = targetGroup->getStatus()) {
+            statusField = &status->getField(*type);
+          } else {
+            log(ds::str("updateStatusFieldHandle Group does not support status. this:", m_name,
+                " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId), lsWarning);
+            // some groups do not support status
+          }
         }
       }
     }

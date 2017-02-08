@@ -37,6 +37,7 @@
 #include "src/model/scenehelper.h"
 #include "src/model/set.h"
 #include "src/model/zone.h"
+#include "src/model/status.h"
 #include "src/stringconverter.h"
 #include "src/structuremanipulator.h"
 #include "util.h"
@@ -588,8 +589,21 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
 
 std::string ZoneRequestHandler::setStatusField(
         boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& request) {
-  DS_REQUIRE(pGroup != 0, "Missing required groupID parameter");
-  pGroup->setStatusField(request.getRequiredParameter("field"), request.getRequiredParameter("value"));
+  DS_REQUIRE(pGroup != 0, "Missing required groupID parameter.");
+  auto&& status = pGroup->getStatus();
+  DS_REQUIRE(status, "Group ", *pGroup, " does not support status.");
+
+  auto&& fieldParameter = request.getRequiredParameter("field");
+  auto&& fieldType = statusFieldTypeFromName(fieldParameter);
+  DS_REQUIRE(fieldType, "Unknown", fieldParameter);
+  auto&& field = status->getField(*fieldType);
+
+  auto&& valueParameter = request.getRequiredParameter("value");
+  auto&& value = statusFieldValueFromName(valueParameter);
+  DS_REQUIRE(value, "Unknown", valueParameter);
+
+  field.setValueAndPush(*value);
+
   return JSONWriter::success();
 }
 

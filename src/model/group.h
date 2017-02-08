@@ -56,7 +56,7 @@ namespace dss {
     typedef std::map<uint8_t, std::string> m_SceneNames_t;
     static boost::mutex m_SceneNameMutex;
     int m_connectedDevices;
-    std::unique_ptr<Status> m_status; // lazy created in getStatusField
+    std::unique_ptr<Status> m_status; // set only for groups supporting Status.
 
     // getter and setter for property proxy
     int getApplicationTypeInt() const { return static_cast<int>(getApplicationType()); }
@@ -148,11 +148,11 @@ namespace dss {
     void sensorPush(const dsuid_t& _sourceID, SensorType _type, double _value);
     void sensorInvalid(SensorType _type);
 
-    /// Get group StatusField instance for given status type
-    StatusField& getStatusField(StatusFieldType statusFieldType);
-
-    /// Creates Status object if it does not exists and calls StatusField::setValue.
-    void setStatusField(const std::string& field, const std::string& value);
+    /// Get status object for the group. nullptr if the group does not support status.
+    ///
+    /// TODO(someday): return ds::Result<Status&> to make it explicit that nullptr means failure
+    /// and to provide exception for callers that want it.
+    Status* getStatus() { return m_status.get(); }
 
     void addConnectedDevice();
     void removeConnectedDevice();
