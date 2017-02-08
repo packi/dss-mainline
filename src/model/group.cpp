@@ -359,6 +359,20 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     }
   }
 
+  void Group::setStatusField(const std::string& fieldName, const std::string& valueName) {
+    auto&& status = getStatus();
+    DS_REQUIRE(status, "Group ", *this, " does not support status.");
+
+    auto&& fieldType = statusFieldTypeFromName(fieldName);
+    DS_REQUIRE(fieldType, "Unknown", fieldName);
+
+    auto&& value = statusFieldValueFromName(valueName);
+    DS_REQUIRE(value, "Unknown", valueName);
+
+    auto&& field = status->getField(*fieldType);
+    field.setValueAndPush(*value);
+  }
+
   boost::mutex Group::m_SceneNameMutex;
 
   void Group::addConnectedDevice() {

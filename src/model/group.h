@@ -154,6 +154,10 @@ namespace dss {
     /// and to provide exception for callers that want it.
     Status* getStatus() { return m_status.get(); }
 
+    /// Convenient scripting support method calling `getStatus()->getField(field).setValueAndPush(value)`.
+    /// Throws on any error.
+    void setStatusField(const std::string& field, const std::string& value);
+
     void addConnectedDevice();
     void removeConnectedDevice();
     bool hasConnectedDevices() { return (m_connectedDevices > 0); }

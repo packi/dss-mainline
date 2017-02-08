@@ -32,6 +32,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <digitalSTROM/dsuid.h>
+#include <ds/log.h>
 
 #include "src/dss.h"
 #include "src/logger.h"
@@ -4590,6 +4591,27 @@ namespace dss {
     return JS_FALSE;
   } // zone_addDevice
 
+  // setStatusField(int groupID, string field, string value)
+  JSBool zone_setStatusField(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      DS_REQUIRE(ext, "Model.zone_setGroupConfiguration: ext of wrong type");
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      DS_REQUIRE(argc >= 3);
+      auto&& groupId = ctx->convertTo<int>(JS_ARGV(cx, vp)[0]);
+      auto&& group = pZone->getGroup(groupId);
+      DS_REQUIRE(group, "Failed to find group", groupId);
+      group->setStatusField(ctx->convertTo<std::string>(JS_ARGV(cx, vp)[1]),
+          ctx->convertTo<std::string>(JS_ARGV(cx, vp)[2]));
+      return JS_TRUE;
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    }
+    return JS_FALSE;
+  }
+
   JSBool zone_getGroupConfiguration(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -4751,6 +4773,7 @@ namespace dss {
     JS_FS("getAssignedSensor", zone_getAssignedSensor, 1, 0),
     JS_FS("addStateSensor", zone_addStateSensor, 3, 0),
     JS_FS("addDevice", zone_addDevice, 1, 0),
+    JS_FS("setStatusField", zone_setStatusField, 3, 0),
     JS_FS("getGroupConfiguration", zone_getGroupConfiguration, 1, 0),
     JS_FS("setGroupConfiguration", zone_setGroupConfiguration, 1, 0),
     JS_FS_END
