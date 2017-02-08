@@ -43,7 +43,9 @@ struct StatusField::SubStateItem {
 
 static std::string makeName(Status& status, StatusFieldType type) {
   auto&& group = status.getGroup();
-  return ds::str("zone.", group.getZoneID(), ".group.", group.getID(), ".status.", static_cast<int>(type));
+  auto typeName = statusFieldTypeName(type);
+  DS_REQUIRE(typeName, "Unknow status field type.", type);
+  return ds::str("zone.", group.getZoneID(), ".group.", group.getID(), ".status.", *typeName);
 }
 
 StatusField::StatusField(Status& status, StatusFieldType type)
