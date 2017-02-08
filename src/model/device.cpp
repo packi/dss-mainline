@@ -2619,8 +2619,7 @@ namespace dss {
       if (m_pPropertyNode != NULL) {
         std::string bpath = std::string("outputChannel") + intToString(m_outputChannelCount);
         PropertyNodePtr entry = outputChannelNode->createProperty(bpath);
-        entry->createProperty("channelID")
-                ->linkToProxy(PropertyProxyReference<int>(m_outputChannels[m_outputChannelCount]));
+        entry->createProperty("channelID")->setIntegerValue(m_outputChannels[m_outputChannelCount]);
       }
 
       m_outputChannelCount ++;
