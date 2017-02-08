@@ -56,6 +56,7 @@ StatusField& Status::getField(StatusFieldType type) {
     case StatusFieldType::MALFUNCTION: return m_malfunctionField;
     case StatusFieldType::SERVICE: return m_serviceField;
   }
+  DS_FAIL_REQUIRE("Unknow status field type.", type);
 };
 
 StatusSensorBitset Status::getValueAsBitset() const {
