@@ -59,7 +59,6 @@ StatusField::StatusField(Status& status, StatusFieldType type)
     out.push_back("inactive");
     return out;
   }());
-  m_state->setState(StatusFieldValue::INACTIVE); // default value without persistent state
   m_state->setPersistence(true);
   log(ds::str("StatusField this:", getName(), " value:", getValue()), lsNotice);
   // TODO(someday): it may be better to store the state next to other group properties in apartment.xml
