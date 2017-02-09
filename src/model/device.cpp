@@ -1735,7 +1735,9 @@ namespace dss {
     if ((subclass == 0x04) && ((funcmodule & 0x3) > 1)) {
       return true;
     }
-
+    if ((subclass == 0x07) && ((funcmodule & 0x3) > 1)) {
+      return true;
+    }
     return false;
   }
 
@@ -1746,7 +1748,9 @@ namespace dss {
     if ((subclass == 0x04) && ((funcmodule & 0x3) > 0)) {
       return true;
     }
-
+    if ((subclass == 0x07) && ((funcmodule & 0x3) > 0)) {
+      return true;
+    }
     return false;
   }
 
@@ -2888,13 +2892,15 @@ namespace dss {
                (getDeviceNumber() == 204)) {
       deviceCount = 2;
     } else if ((m_FunctionID & 0xffc0) == 0x1000) {
+      // Legacy R100 stuff, subclass 0
       switch (m_FunctionID & 0x7) {
         case 0: deviceCount = 1; break;
         case 1: deviceCount = 2; break;
         case 2: deviceCount = 4; break;
         case 7: deviceCount = 1; break;
       }
-    } else if ((m_FunctionID & 0x0fc0) == 0x0100) {
+    } else if (((m_FunctionID & 0x0fc0) == 0x0100) || ((m_FunctionID & 0x0fc0) == 0x01c0)) {
+      // subclasses 4 or 7
       switch (m_FunctionID & 0x3) {
         case 0: deviceCount = 1; break;
         case 1: deviceCount = 1; break;
