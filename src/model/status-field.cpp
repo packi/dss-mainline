@@ -55,8 +55,8 @@ StatusField::StatusField(Status& status, StatusFieldType type)
   m_state->setValueRange([] {
     State::ValueRange_t out;
     out.push_back("unknown");
-    out.push_back("inactive");
     out.push_back("active");
+    out.push_back("inactive");
     return out;
   }());
   m_state->setState(StatusFieldValue::INACTIVE); // default value without persistent state

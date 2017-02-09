@@ -212,9 +212,15 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, StatusFieldType x);
 
   /// Status field values used in high level API
+  ///
+  /// The int values are choosen so that they are compatible
+  /// with \ref eState::State_Active, \ref eState::State_Inactive
+  /// inside \ref State class.
+  /// It is unfortunate that ACTIVE has value 0, but compatibility
+  /// of persistent state within \ref State is worth it.
   enum class StatusFieldValue {
-    INACTIVE = 0,
-    ACTIVE = 1,
+    ACTIVE = 0,
+    INACTIVE = 1,
   };
   boost::optional<const char*> statusFieldValueName(StatusFieldValue x);
   boost::optional<StatusFieldValue> statusFieldValueFromName(const std::string& x);
