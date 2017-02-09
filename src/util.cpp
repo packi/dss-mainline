@@ -78,8 +78,6 @@ namespace dss {
             "Forced configuration update in global application group " + intToString(pGlobalApp->getID()), lsInfo);
 
         try {
-          _interface->createGroup(0, pGlobalApp->getID(), pGlobalApp->getApplicationType(),
-              pGlobalApp->getApplicationConfiguration(), pGlobalApp->getName());
           _interface->groupSetApplication(
               0, pGlobalApp->getID(), pGlobalApp->getApplicationType(), pGlobalApp->getApplicationConfiguration());
 

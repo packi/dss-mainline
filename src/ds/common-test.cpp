@@ -25,6 +25,8 @@ namespace {
 class Base {
 public:
     virtual void virtualFoo();
+
+    static int staticWarnUnusedResult() DS_WARN_UNUSED_RESULT { return 0; }
 };
 
 class Child : public Base {
@@ -38,6 +40,10 @@ TEST_CASE("DS_STATIC_ASSERT", TAGS) {
 
 TEST_CASE("DS_NULLPTR", TAGS) {
     CHECK((void *) 0 == DS_NULLPTR);
+}
+
+TEST_CASE("DS_WARN_UNUSED_RESULT", TAGS) {
+    auto x = Base::staticWarnUnusedResult();
 }
 
 } // namespace

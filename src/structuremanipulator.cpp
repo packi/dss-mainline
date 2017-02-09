@@ -692,12 +692,14 @@ namespace dss {
     m_Interface.addToGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
 
     // Devices that have a configurable standard group, group bitmask is adjusted by the dSM,
-    if (isDefaultGroup(_group->getID()) && ((_device->getFunctionID() & Fid_105_Mask_VariableStandardGroup) > 0)) {
+    if ((isDefaultGroup(_group->getID()) || isGlobalAppDsGroup(_group->getID()))
+        && ((_device->getFunctionID() & Fid_105_Mask_VariableStandardGroup) > 0)) {
       _device->resetGroups();
     }
     _device->addToGroup(_group->getID());
 
-    if (isAppUserGroup(_group->getID())) {
+    // inputs of "simple" devices automatically follow into the new group
+    {
       if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) && (_device->getBinaryInputCount() == 1)) {
         /* AKM with single input, set active group to last group */
         _device->setDeviceBinaryInputTargetId(0, _group->getID());

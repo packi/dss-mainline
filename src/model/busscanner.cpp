@@ -426,7 +426,7 @@ namespace dss {
       case 2: inputCount = 4; break;
       case 7: inputCount = 0; break;
       }
-    } else if((_spec.FunctionID & 0x0fc0) == 0x0100) {
+    } else if(((_spec.FunctionID & 0x0fc0) == 0x0100) || ((_spec.FunctionID & 0x0fc0) == 0x01c0)) {
       switch(_spec.FunctionID & 0x3) {
       case 0: inputCount = 0; break;
       case 1: inputCount = 1; break;
@@ -462,7 +462,6 @@ namespace dss {
 
     if ((dev->getDeviceType() == DEVICE_TYPE_AKM) &&
         (dev->getBinaryInputCount() > 0) &&
-        (dev->getBinaryInput(0)->m_targetGroupType == GroupType::Standard) &&
         (!dev->isInGroup(dev->getBinaryInput(0)->m_targetGroupId))) {
       /* group is only added in dSS datamodel, not on the dSM and device */
       dev->addToGroup(dev->getBinaryInput(0)->m_targetGroupId);

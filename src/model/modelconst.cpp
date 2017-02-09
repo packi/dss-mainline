@@ -261,13 +261,61 @@ namespace dss {
     return stream;
   }
 
-  std::ostream& operator<<(std::ostream& stream, StatusBitType x) {
+  boost::optional<const char*> statusFieldTypeName(StatusFieldType x) {
+    switch (x) {
+      case StatusFieldType::MALFUNCTION:
+        return "malfunction";
+      case StatusFieldType::SERVICE:
+        return "service";
+    }
+    return boost::none;
+  }
+
+  boost::optional<StatusFieldType> statusFieldTypeFromName(const std::string& x) {
+    if (x == "malfunction") {
+      return StatusFieldType::MALFUNCTION;
+    } else if (x == "service") {
+      return StatusFieldType::SERVICE;
+    }
+    return boost::none;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, StatusFieldType x) {
     return [&]()-> std::ostream& {
-      switch (x) {
-        case StatusBitType::MALFUNCTION: return stream << "malfunction";
-        case StatusBitType::SERVICE: return stream << "service";
+      if (auto&& name = statusFieldTypeName(x)) {
+        return stream << *name;
+      } else {
+        return stream << "unknown";
       }
-      return stream << "unknown";
+    }() << '(' << static_cast<int>(x) << ')';
+  }
+
+  boost::optional<const char*> statusFieldValueName(StatusFieldValue x) {
+    switch (x) {
+      case StatusFieldValue::INACTIVE:
+        return "inactive";
+      case StatusFieldValue::ACTIVE:
+        return "active";
+    }
+    return boost::none;
+  }
+
+  boost::optional<StatusFieldValue> statusFieldValueFromName(const std::string& x) {
+    if (x == "inactive") {
+      return StatusFieldValue::INACTIVE;
+    } else if (x == "active") {
+      return StatusFieldValue::ACTIVE;
+    }
+    return boost::none;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, StatusFieldValue x) {
+    return [&]()-> std::ostream& {
+      if (auto&& name = statusFieldValueName(x)) {
+        return stream << *name;
+      } else {
+        return stream << "unknown";
+      }
     }() << '(' << static_cast<int>(x) << ')';
   }
 
@@ -302,7 +350,7 @@ namespace dss {
     }() << '(' << static_cast<int>(x) << ')';
   }
 
-  boost::optional<StatusBitType> statusBitTypeForBinaryInputType(BinaryInputType x) {
+  boost::optional<StatusFieldType> statusFieldTypeForBinaryInputType(BinaryInputType x) {
     switch (x) {
       case BinaryInputType::Presence:
       case BinaryInputType::RoomBrightness:
@@ -327,9 +375,9 @@ namespace dss {
       case BinaryInputType::PowerUp:
         return boost::none;
       case BinaryInputType::Malfunction:
-        return StatusBitType::MALFUNCTION;
+        return StatusFieldType::MALFUNCTION;
       case BinaryInputType::Service:
-        return StatusBitType::SERVICE;
+        return StatusFieldType::SERVICE;
     }
     return boost::none;
   }
@@ -474,6 +522,8 @@ namespace dss {
         return "ftwdisplaysettings";
       case ModelFeatureId::ftwbacklighttimeout:
         return "ftwbacklighttimeout";
+      case ModelFeatureId::ventconfig:
+        return "ventconfig";
     }
     return boost::none;
   }
@@ -573,6 +623,8 @@ namespace dss {
       return ModelFeatureId::ftwdisplaysettings;
     } else if (x == "ftwbacklighttimeout") {
       return ModelFeatureId::ftwbacklighttimeout;
+    } else if (x == "ventconfig") {
+      return ModelFeatureId::ventconfig;
     }
 
     return boost::none;

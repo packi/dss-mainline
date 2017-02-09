@@ -19,19 +19,20 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "status-bit.h"
+#include "status-field.h"
 
 #include "ds/log.h"
 
 #include "base.h"
 #include "foreach.h"
 #include "status.h"
+#include "group.h"
 
 namespace dss {
 
-__DEFINE_LOG_CHANNEL__(StatusBit, lsNotice);
+__DEFINE_LOG_CHANNEL__(StatusField, lsNotice);
 
-struct StatusBit::SubStateItem {
+struct StatusField::SubStateItem {
   const void* m_ptr;
   std::string m_name;
   eState m_value;
@@ -40,16 +41,39 @@ struct StatusBit::SubStateItem {
   bool operator==(const State& subState) { return m_ptr == &subState; }
 };
 
-StatusBit::StatusBit(Status& status, StatusBitType type, const std::string& name)
-    : m_status(status), m_type(type),
-    m_state(boost::make_shared<State>(StateType_Service, name)) {
-  log(std::string("StatusBit this:") + getName(), lsInfo);
-  DS_REQUIRE(static_cast<std::size_t>(type) <= STATUS_BIT_TYPE_MAX);
+static std::string makeName(Status& status, StatusFieldType type) {
+  auto&& group = status.getGroup();
+  auto typeName = statusFieldTypeName(type);
+  DS_REQUIRE(typeName, "Unknow status field type.", type);
+  return ds::str("zone.", group.getZoneID(), ".group.", group.getID(), ".status.", *typeName);
 }
 
-StatusBit::~StatusBit() = default;
+StatusField::StatusField(Status& status, StatusFieldType type)
+    : m_status(status), m_type(type),
+    m_state(boost::make_shared<State>(StateType_Service, makeName(status, type))) {
+  DS_REQUIRE(static_cast<std::size_t>(type) <= SENSOR_VALUE_BIT_MAX);
+  m_state->setValueRange([] {
+    State::ValueRange_t out;
+    out.push_back("unknown");
+    out.push_back("active");
+    out.push_back("inactive");
+    return out;
+  }());
+  m_state->setPersistence(true);
+  log(ds::str("StatusField this:", getName(), " value:", getValue()), lsNotice);
+  // TODO(someday): it may be better to store the state next to other group properties in apartment.xml
+  // Using state persistence has the problem that the persistent state is not deleted when group is deleted.
+}
 
-void StatusBit::addSubState(const State& subState) {
+StatusField::~StatusField() = default;
+
+StatusSensorBitset StatusField::getValueAsBitset() const {
+  StatusSensorBitset out;
+  out.set(static_cast<int>(m_type), getValue() == StatusFieldValue::ACTIVE ? 1 : 0);
+  return out;
+}
+
+void StatusField::addSubState(const State& subState) {
   auto&& value = subState.getState();
   log(std::string("addSubState this:") + getName() + " state:" + subState.getName() + " value:" + intToString(value),
       lsNotice);
@@ -59,7 +83,7 @@ void StatusBit::addSubState(const State& subState) {
   update();
 }
 
-void StatusBit::updateSubState(const State& subState) {
+void StatusField::updateSubState(const State& subState) {
   auto&& value = static_cast<eState>(subState.getState());
   auto&& it = std::find(m_subStateItems.begin(), m_subStateItems.end(), subState);
   DS_REQUIRE(it != m_subStateItems.end());
@@ -72,7 +96,7 @@ void StatusBit::updateSubState(const State& subState) {
   update();
 }
 
-void StatusBit::removeSubState(const State& subState) {
+void StatusField::removeSubState(const State& subState) {
   log(std::string("removeSubState this:") + getName() + " state:" + subState.getName(), lsNotice);
   auto&& it = std::find(m_subStateItems.begin(), m_subStateItems.end(), subState);
   DS_REQUIRE(it != m_subStateItems.end());
@@ -80,24 +104,37 @@ void StatusBit::removeSubState(const State& subState) {
   update();
 }
 
-void StatusBit::update() {
+void StatusField::setValueAndPush(StatusFieldValue value) {
+  log(ds::str("setValue this:", getName()," value:", value), lsNotice);
+  setValueAndPushImpl(value);
+}
+
+StatusFieldValue StatusField::getValue() const {
+  return m_state->getState<StatusFieldValue>().value_or(StatusFieldValue::INACTIVE);
+}
+
+void StatusField::setValueAndPushImpl(StatusFieldValue value) {
+  log(ds::str("setValueImpl this:", getName()," value:", value), lsDebug);
+  m_state->setState(value);
+  m_status.push();
+}
+
+void StatusField::update() {
   // Requirements: The composed state is:
   // * `active` if at least one sub state is `active`
   // * `inactive` otherwise
-  int groupValue = State_Inactive;
+  StatusFieldValue value = StatusFieldValue::INACTIVE;
   foreach (auto&& x, m_subStateItems) {
     log(std::string("update this:") + getName() + " state:" + x.m_name + " value:" + intToString(x.m_value), lsDebug);
     if (x.m_value == State_Active) {
-      groupValue = State_Active;
+      value = StatusFieldValue::ACTIVE;
     }
   }
-  auto oldGroupValue = m_state->getState();
-  if (oldGroupValue == groupValue) {
+  if (getValue() == value) {
     return;
   }
-  log(std::string("update this:") + getName() + " groupValue:" + intToString(groupValue), lsNotice);
-  m_state->setState(coSystem, groupValue);
-  m_status.setBitValue(m_type, groupValue == State_Active);
+  log(ds::str("update this:", getName(), " composed value:", value), lsNotice);
+  setValueAndPushImpl(value);
 }
 
 } // namespace dss

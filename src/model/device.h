@@ -143,6 +143,11 @@ namespace dss {
   } DeviceValvePwmSpec_t;
 
   typedef struct {
+    uint8_t pwmValue;
+    uint8_t pwmPriorityMode;
+  } DeviceValvePwmStateSpec_t;
+
+  typedef struct {
     bool ctrlClipMinZero;
     bool ctrlClipMinLower;
     bool ctrlClipMaxHigher;
@@ -162,7 +167,6 @@ namespace dss {
     int m_inputIndex;        // input line index
     BinaryInputType m_inputType; // type of input signal
     BinaryInputId m_inputId;           // target Id, like ButtonId
-    GroupType m_targetGroupType;   // type of target group: standard, user, apartment
     int m_targetGroupId;     // index of target group, 0..63
 
     DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index);
@@ -170,19 +174,18 @@ namespace dss {
 
     const State& getState() const { return *m_state; }
     void setTargetId(uint8_t group);
-    void setTargetType(GroupType type);
     void setInputId(BinaryInputId inputId);
     void setInputType(BinaryInputType inputType);
     void handleEvent(BinaryInputState inputState);
 
-    void updateStatusBitHandle();
+    void updateStatusFieldHandle();
   private:
     __DECL_LOG_CHANNEL__;
     Device& m_device;
     std::string m_name;
     boost::shared_ptr<State> m_state;
-    class StatusBitHandle;
-    std::unique_ptr<StatusBitHandle> m_statusBitHandle;
+    class StatusFieldHandle;
+    std::unique_ptr<StatusFieldHandle> m_statusFieldHandle;
   };
 
   typedef struct {
@@ -382,7 +385,6 @@ namespace dss {
     void setDeviceConfig16(uint8_t _configClass, uint8_t _configIndex, uint16_t _value);
     void setDeviceButtonID(uint8_t _buttonId);
     void setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup);
-    void setDeviceButtonConfig();
     void setDeviceJokerGroup(uint8_t _groupId);
     void setDeviceOutputMode(uint8_t _modeId);
     void setDeviceButtonInputMode(uint8_t _modeId);
@@ -438,13 +440,13 @@ namespace dss {
     void getDeviceValveTimer(DeviceValveTimerSpec_t& _config);
     void setDeviceValvePwm(DeviceValvePwmSpec_t _config);
     void getDeviceValvePwm(DeviceValvePwmSpec_t& _config);
+    void getDeviceValvePwmState(DeviceValvePwmStateSpec_t& _config);
     void setDeviceValveControl(DeviceValveControlSpec_t _config);
     void getDeviceValveControl(DeviceValveControlSpec_t& _config);
 
     /** Binary input devices */
     void setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId _targetId);
     void setDeviceBinaryInputTargetId(uint8_t _inputIndex, uint8_t _targetGroup);
-    void setDeviceBinaryInputTargetType(uint8_t _inputIndex, GroupType targetType);
     void setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType _inputType);
     BinaryInputType getDeviceBinaryInputType(uint8_t _inputIndex);
     /** AKM2xx timeout settings */
@@ -746,7 +748,6 @@ namespace dss {
     const std::vector<boost::shared_ptr<DeviceBinaryInput> >& getBinaryInputs() const;
     const boost::shared_ptr<DeviceBinaryInput> getBinaryInput(uint8_t _inputIndex) const;
     void setBinaryInputTargetId(uint8_t _index, uint8_t targetGroup);
-    void setBinaryInputTargetType(uint8_t _index, GroupType targetGroupType);
     void setBinaryInputId(uint8_t _index, BinaryInputId _inputId);
     void setBinaryInputType(uint8_t _index, BinaryInputType _inputType);
     void clearBinaryInputs();
@@ -837,35 +838,6 @@ namespace dss {
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
 
-  class DeviceBank3_BL {
-  public:
-    DeviceBank3_BL(boost::shared_ptr<Device> device);
-
-    void setValveProtectionTimer(uint16_t timeout);
-    uint16_t getValveProtectionTimer();
-    void setEmergencySetPoint(int8_t set_point);
-    int8_t getEmergencySetPoint();
-    void setEmergencyTimer(int16_t timeout);
-    uint16_t getEmergencyTimer();
-
-    void setPwmPeriod(uint16_t pwmPeriod);
-    uint16_t getPwmPeriod();
-    void setPwmMinX(int8_t set_point);
-    int8_t getPwmMinX();
-    void setPwmMaxX(int8_t set_point);
-    int8_t getPwmMaxX();
-    void setPwmMinY(int8_t set_point);
-    int8_t getPwmMinY();
-    void setPwmMaxY(int8_t set_point);
-    int8_t getPwmMaxY();
-    void setPwmConfig(uint8_t config);
-    uint8_t getPwmConfig();
-    void setPwmOffset(int8_t config);
-    int8_t getPwmOffset();
-
-  private:
-    boost::shared_ptr<Device> m_device;
-  };
 } // namespace dss
 
 #endif // DEVICE_H

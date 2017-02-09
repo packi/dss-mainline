@@ -424,12 +424,7 @@ namespace dss {
         returnCode = 403;
         log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
         emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);;
-      } catch(std::runtime_error& e) {
-        result = JSONWriter::failure(e.what());
-        returnCode = 500;
-        log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
-        emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
-      } catch(std::invalid_argument& e) {
+      } catch(const std::exception& e) {
         result = JSONWriter::failure(e.what());
         returnCode = 500;
         log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);

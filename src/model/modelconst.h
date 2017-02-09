@@ -160,7 +160,6 @@ namespace dss {
   const uint8_t SensorFunction_Generic11 = 11;
 
   enum class SensorType {
-    Status = 0, ///< Status sensor value. Value bits are defined by \re StatusBitType
     ActivePower = 4,
     OutputCurrent = 5,
     ElectricMeter = 6,
@@ -181,6 +180,7 @@ namespace dss {
     SoundPressureLevel = 25,
     RoomTemperatureSetpoint = 50,
     RoomTemperatureControlVariable = 51,
+    Status = 60, ///< Status sensor value. Value bits are defined by \re StatusFieldType
     Reserved1 = 61,
     Reserved2 = 62,
     OutputCurrent16A = 64,
@@ -197,14 +197,35 @@ namespace dss {
   std::string sensorTypeName(SensorType _sensorType);
   std::ostream& operator<<(std::ostream& stream, SensorType type);
 
-  /// Status types. Constant value represent bit number of SensorType::Status value.
-  enum class StatusBitType : std::size_t {
+  /// Maximal sensor value bit.
+  static constexpr std::size_t SENSOR_VALUE_BIT_MAX = 11;
+
+  /// Status field types used in high level API
+  ///
+  /// The enum values are used also as bit on ds bus as bit indexes in SensorType::Status value.
+  enum class StatusFieldType {
     MALFUNCTION = 0,
     SERVICE = 1,
   };
-  /// Maximal StatusBitType value. Restriction imposed by SensorValue range.
-  static constexpr std::size_t STATUS_BIT_TYPE_MAX = 11;
-  std::ostream& operator<<(std::ostream& stream, StatusBitType type);
+  boost::optional<const char*> statusFieldTypeName(StatusFieldType x);
+  boost::optional<StatusFieldType> statusFieldTypeFromName(const std::string& x);
+  std::ostream& operator<<(std::ostream& stream, StatusFieldType x);
+
+  /// Status field values used in high level API
+  ///
+  /// The int values are choosen so that they are compatible
+  /// with \ref eState::State_Active, \ref eState::State_Inactive
+  /// inside \ref State class.
+  /// It is unfortunate that ACTIVE has value 0, but compatibility
+  /// of persistent state within \ref State is worth it.
+  enum class StatusFieldValue {
+    ACTIVE = 0,
+    INACTIVE = 1,
+  };
+  boost::optional<const char*> statusFieldValueName(StatusFieldValue x);
+  boost::optional<StatusFieldValue> statusFieldValueFromName(const std::string& x);
+  std::ostream& operator<<(std::ostream& stream, StatusFieldValue x);
+
 
   enum class BinaryInputType {
     Presence = 1,
@@ -232,7 +253,7 @@ namespace dss {
     Service = 23,
   };
   std::ostream& operator<<(std::ostream& stream, BinaryInputType type);
-  boost::optional<StatusBitType> statusBitTypeForBinaryInputType(BinaryInputType type);
+  boost::optional<StatusFieldType> statusFieldTypeForBinaryInputType(BinaryInputType type);
 
   enum class ApplicationType {
     None = 0,
@@ -326,13 +347,6 @@ namespace dss {
   const int ColorIDBlack = 8;
   const int ColorIDWhite = 9;
 
-  // TODO(someday): Remove this type and variables that use it altogether?
-  // https://git.digitalstrom.org/brano/dss-mainline/commit/d17f16eb550c0cb32c910372f8d137ba32338a68#note_35767
-  enum class GroupType {
-    Standard = 0, // (from dsm-api doc) 0 = Standard Groups
-    End = 5 // exclusive upper bound
-  };
-
   // Group ID"s
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
@@ -359,7 +373,6 @@ namespace dss {
   const int GroupIDControlTemperature = 48;
   const int GroupIDControlGroupMax = 55;
   const int GroupIDMax = 63;
-  // TODO: verify that this ranges are valid
   const int GroupIDGlobalAppMin = 64;
   const int GroupIDGlobalAppDsMin = 64;
   const int GroupIDGlobalAppDsVentilation = 64;
@@ -535,7 +548,8 @@ namespace dss {
     apartmentapplication = 43,
     ftwtempcontrolventilationselect = 44,
     ftwdisplaysettings = 45,
-    ftwbacklighttimeout = 46
+    ftwbacklighttimeout = 46,
+    ventconfig = 47
   };
 
   boost::optional<const char*> modelFeatureName(ModelFeatureId x);

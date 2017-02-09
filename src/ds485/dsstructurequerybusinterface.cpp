@@ -375,7 +375,8 @@ namespace dss {
 
   void DSStructureQueryBusInterface::updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
     _spec.binaryInputsValid = false;
-    if ((((_spec.FunctionID >> 6) & 0x3F) == 0x04) && ((_spec.FunctionID & 0x0008) > 0)) {
+    uint8_t subClass = ((_spec.FunctionID >> 6) & 0x3F);
+    if (((subClass == 0x04 || subClass == 0x07)) && ((_spec.FunctionID & 0x0008) > 0)) {
       try {
         _spec.binaryInputs.clear();
 
@@ -389,16 +390,14 @@ namespace dss {
         }
 
         for (int i = 0; i < numBinaryinputs; i++) {
-          uint8_t TargetGroupType;
           uint8_t TargetGroup;
           uint8_t InputType;
           uint8_t InputID;
           ret = DeviceBinaryInput_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,
-                                               &TargetGroupType, &TargetGroup,
+                                               NULL, &TargetGroup,
                                                &InputType, &InputID);
           DSBusInterface::checkResultCode(ret);
           DeviceBinaryInputSpec_t binaryInput;
-          binaryInput.TargetGroupType = static_cast<GroupType>(TargetGroupType);
           binaryInput.TargetGroup = TargetGroup;
           binaryInput.InputType = static_cast<BinaryInputType>(InputType);
           binaryInput.InputID = static_cast<BinaryInputId>(InputID);

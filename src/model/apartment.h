@@ -144,7 +144,7 @@ typedef struct {
     virtual ~Apartment();
 
     boost::recursive_mutex& getMutex() const { return m_mutex; }
-    DSS& getDss() { return *m_dss; }
+    DSS* getDss() { return m_dss; }
 
     /** Returns a set containing all devices of the set */
     virtual Set getDevices() const;

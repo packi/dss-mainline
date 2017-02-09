@@ -56,7 +56,7 @@
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
 #include "src/protobufjson.h"
-#include "status-bit.h"
+#include "status-field.h"
 #include "status.h"
 #include "src/model-features.h"
 
@@ -67,24 +67,24 @@ namespace dss {
 
   __DEFINE_LOG_CHANNEL__(DeviceBinaryInput, lsNotice);
 
-  // RAII class to handling stream to StatusBit
-  // We capture only weak reference to StatusBit to avaid crashes
-  // if this object is not notified soon enough that StatusBit was deleted.
-  class DeviceBinaryInput::StatusBitHandle: boost::noncopyable {
+  // RAII class to handling stream to StatusField
+  // We capture only weak reference to StatusField to avaid crashes
+  // if this object is not notified soon enough that StatusField was deleted.
+  class DeviceBinaryInput::StatusFieldHandle: boost::noncopyable {
   public:
-    StatusBitHandle(DeviceBinaryInput& parent, StatusBit& statusBit)
+    StatusFieldHandle(DeviceBinaryInput& parent, StatusField& statusField)
         : m_parent(parent),
-        m_weakPtr(boost::shared_ptr<StatusBit>(statusBit.getStatus().getGroup().sharedFromThis(), &statusBit)) {
-      statusBit.addSubState(*m_parent.m_state);
+        m_weakPtr(boost::shared_ptr<StatusField>(statusField.getStatus().getGroup().sharedFromThis(), &statusField)) {
+      statusField.addSubState(*m_parent.m_state);
     }
 
-    ~StatusBitHandle() {
+    ~StatusFieldHandle() {
       if (auto&& ptr = m_weakPtr.lock()) {
         ptr->removeSubState(*m_parent.m_state);
       }
     }
 
-    StatusBit* getPtr() {
+    StatusField* getPtr() {
       if (auto&& ptr = m_weakPtr.lock()) {
         return ptr.get();
       }
@@ -92,31 +92,29 @@ namespace dss {
     }
 
     void update() {
-      log(std::string("StatusBitHandle::update this:") + m_parent.m_name, lsDebug);
+      log(std::string("StatusFieldHandle::update this:") + m_parent.m_name, lsDebug);
       if (auto&& ptr = m_weakPtr.lock()) {
         ptr->updateSubState(*m_parent.m_state);
       } else {
         // We should have been deleted at this point
-        log(ds::str("Referenced StatusBit instance was deleted"), lsError);
+        log(ds::str("Referenced StatusField instance was deleted"), lsError);
       }
     }
   private:
     DeviceBinaryInput& m_parent;
-    boost::weak_ptr<StatusBit> m_weakPtr;
+    boost::weak_ptr<StatusField> m_weakPtr;
   };
 
   DeviceBinaryInput::DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index)
       : m_inputIndex(index)
       , m_inputType(spec.InputType)
       , m_inputId(spec.InputID)
-      , m_targetGroupType(spec.TargetGroupType)
       , m_targetGroupId(spec.TargetGroup)
       , m_device(device)
       , m_name(m_device.getName() + "/" + intToString(index)) {
     log(std::string("DeviceBinaryInput this:") + m_name
         + " inputType:" + intToString(static_cast<int>(m_inputType))
         + " inputId:" + intToString(static_cast<int>(m_inputId))
-        + " targetGroupType:" + intToString(static_cast<int>(m_targetGroupType))
         + " targetGroupId:" + intToString(m_targetGroupId), lsInfo);
     m_state = boost::make_shared<State>(device.sharedFromThis(), index);
 
@@ -137,7 +135,7 @@ namespace dss {
       m_state = device.getApartment().getNonScriptState(m_state->getName());
     }
 
-    updateStatusBitHandle();
+    updateStatusFieldHandle();
   }
 
   DeviceBinaryInput::~DeviceBinaryInput() {
@@ -156,16 +154,7 @@ namespace dss {
     log(std::string("setTarget this:") + m_name
         + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
-    updateStatusBitHandle();
-  }
-
-  void DeviceBinaryInput::setTargetType(GroupType targetGroupType) {
-    if (m_targetGroupType == targetGroupType) {
-      return;
-    }
-    log(std::string("setTarget this:") + m_name
-        + " targetGroupType:" + intToString(static_cast<int>(targetGroupType)), lsInfo);
-    m_targetGroupType = targetGroupType;
+    updateStatusFieldHandle();
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
@@ -216,38 +205,44 @@ namespace dss {
     } catch (const std::exception& e) {
       log(std::string("handleEvent: what:")+ e.what(), lsWarning);
     }
-    if (m_statusBitHandle) {
-      m_statusBitHandle->update();
+    if (m_statusFieldHandle) {
+      m_statusFieldHandle->update();
     }
   }
 
-  void DeviceBinaryInput::updateStatusBitHandle() {
+  void DeviceBinaryInput::updateStatusFieldHandle() {
     // find status object within target group
     boost::shared_ptr<Group> targetGroup;
-    StatusBit* statusBit = DS_NULLPTR;
+    StatusField* statusField = DS_NULLPTR;
     if (m_targetGroupId != 0) {
-      if (auto type = statusBitTypeForBinaryInputType(m_inputType)) {
+      if (auto type = statusFieldTypeForBinaryInputType(m_inputType)) {
         if ((targetGroup = m_device.tryGetGroup(m_targetGroupId).lock())) {
-          statusBit = &targetGroup->getStatusBit(*type);
+          if (auto&& status = targetGroup->getStatus()) {
+            statusField = &status->getField(*type);
+          } else {
+            log(ds::str("updateStatusFieldHandle Group does not support status. this:", m_name,
+                " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId), lsWarning);
+            // some groups do not support status
+          }
         }
       }
     }
-    auto oldStatusBit = m_statusBitHandle ? m_statusBitHandle->getPtr() : (StatusBit*) DS_NULLPTR;
-    if (oldStatusBit == statusBit) {
+    auto oldStatusField = m_statusFieldHandle ? m_statusFieldHandle->getPtr() : (StatusField*) DS_NULLPTR;
+    if (oldStatusField == statusField) {
       return;
     }
 
-    m_statusBitHandle.reset();
-    if (!statusBit) {
-      log(ds::str("updateStatusBitHandle this:", m_name,
+    m_statusFieldHandle.reset();
+    if (!statusField) {
+      log(ds::str("updateStatusFieldHandle this:", m_name,
           " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
-          " statusBit:nullptr"), lsInfo);
+          " statusField:nullptr"), lsInfo);
       return;
     }
-    log(ds::str("updateStatusBitHandle this:", m_name,
+    log(ds::str("updateStatusFieldHandle this:", m_name,
         " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
-        " type:",  statusBit->getType(), " name:", statusBit->getName()), lsInfo);
-    m_statusBitHandle.reset(new StatusBitHandle(*this, *statusBit));
+        " type:",  statusField->getType(), " name:", statusField->getName()), lsInfo);
+    m_statusFieldHandle.reset(new StatusFieldHandle(*this, *statusField));
   }
 
   //================================================== Device
@@ -775,7 +770,8 @@ namespace dss {
 
   void Device::setDeviceButtonID(uint8_t _buttonId) {
     setButtonID(_buttonId);
-    setDeviceButtonConfig();
+    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
+        ((m_ButtonGroupMembership & 0xf) << 4) | (m_ButtonID & 0xf));
   } // setDeviceButtonId
 
   void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
@@ -783,36 +779,25 @@ namespace dss {
       m_pPropertyNode->checkWriteAccess();
     }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
-      m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this,
-                                                                        _buttonActiveGroup);
-      if (_buttonActiveGroup >= GroupIDAppUserMin &&
-          _buttonActiveGroup <= GroupIDAppUserMax &&
-          ((m_ButtonID < ButtonId_Zone) || (m_ButtonID >= ButtonId_Area1_Extended))) {
+      /* re-configure area or device button mode for groups other then lights and shades */
+      bool isAreaButton =
+          ((m_ButtonID >= ButtonId_Area1) && (m_ButtonID <= ButtonId_Area4)) ||
+          ((m_ButtonID >= ButtonId_Area1_Extended) && (m_ButtonID <= ButtonId_Area4_Extended));
+      if (isAreaButton &&
+          ((_buttonActiveGroup < GroupIDYellow) || (_buttonActiveGroup > GroupIDGray))) {
         setDeviceButtonID(ButtonId_Zone);
       }
+      /* tell dsm to change button active group */
+      m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
       /* refresh device information for correct active group */
       if ((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged,
-                                                    m_DSMeterDSID);
+        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged, m_DSMeterDSID);
         pEvent->addParameter(m_ShortAddress);
         sleep(3); // #8900: make sure all settings were really saved
         m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
       }
     }
   } // setDeviceActiveGroup
-
-  void Device::setDeviceButtonConfig() {
-    if (m_ButtonGroupMembership < 16) {
-      // In case the button group is in 0-15 range just set the LTNUMGROUP register (bank 3, offset 1)
-      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, ((m_ButtonGroupMembership & 0xf) << 4) | (m_ButtonID & 0xf));
-    } else {
-      // In case the button group is greater than 0-15 then the 4-bit field in LTNUMGROUP register (bank 3, offset 1) is
-      // replaced by the PBGROUP (bank 3, offset 0x1d) register.
-      // In case of a "0" value in LTNUMGRP group bits the value should be taken from PBGROUP instead
-      setDeviceConfig(CfgClassFunction, CfgFunction_PbGroup, m_ButtonGroupMembership);
-      setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, m_ButtonID & 0xf);
-    }
-  }
 
   void Device::setDeviceJokerGroup(uint8_t _groupId) {
     if (!isDefaultGroup(_groupId) && !isGlobalAppDsGroup(_groupId)) {
@@ -824,6 +809,14 @@ namespace dss {
         removeFromGroup(g);
       }
     }
+
+    // remove from control groups
+    for (int g = GroupIDControlGroupMin; g <= GroupIDControlGroupMax; g++) {
+      if (isInGroup(g)) {
+        removeFromGroup(g);
+      }
+    }
+
     // remove also from GA groups
     for (int g = GroupIDGlobalAppMin; g <= GroupIDGlobalAppMax; g++) {
       if (isInGroup(g)) {
@@ -831,11 +824,18 @@ namespace dss {
       }
     }
 
+    // assign device to new group
     addToGroup(_groupId);
-    // propagate target group value to device
-    setButtonGroupMembership(_groupId);
-    setDeviceButtonConfig();
-
+    // set button target group
+    if (getButtonInputCount() > 0) {
+      setButtonGroupMembership(_groupId);
+      setDeviceButtonActiveGroup(_groupId);
+    }
+    // set binary input to target group
+    if (getBinaryInputCount() == 1) {
+      setDeviceBinaryInputTargetId(0, _groupId);
+      setBinaryInputTargetId(0, _groupId);
+    }
     updateIconPath();
   } // setDeviceJokerGroup
 
@@ -1073,7 +1073,7 @@ namespace dss {
 
   /** Configure climate actuator */
   void Device::setDeviceValveTimer(DeviceValveTimerSpec_t _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     setDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue, _config.emergencyControlValue);
@@ -1082,7 +1082,7 @@ namespace dss {
   } // setDeviceValveTimer
 
   void Device::getDeviceValveTimer(DeviceValveTimerSpec_t& _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     _config.emergencyControlValue = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue);
@@ -1091,7 +1091,7 @@ namespace dss {
   } // getDeviceValveTimer
 
   void Device::setDeviceValvePwm(DeviceValvePwmSpec_t _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod, _config.pwmPeriod);
@@ -1103,21 +1103,30 @@ namespace dss {
   } // setDeviceValvePwm
 
   void Device::getDeviceValvePwm(DeviceValvePwmSpec_t& _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     _config.pwmPeriod = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
-    uint16_t value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinX);
+    uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinX);
     _config.pwmMinX = value & 0xff; // CfgFunction_Valve_PwmMinX
     _config.pwmMaxX = (value >> 8) & 0xff; // CfgFunction_Valve_PwmMaxX
-    value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY);
+    value = getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmMinY);
     _config.pwmMinY = value & 0xff; // CfgFunction_Valve_PwmMinY
     _config.pwmMaxY = (value >> 8) & 0xff; // CfgFunction_Valve_PwmMaxY
     _config.pwmOffset = static_cast<int8_t>(getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset));
   } // getDeviceValvePwm
 
+  void Device::getDeviceValvePwmState(DeviceValvePwmStateSpec_t& _config) {
+    if (!isValveDevice()) {
+      throw DSSException("Not a climate device");
+    }
+    uint16_t value = getDeviceConfigWord(CfgClassRuntime, CfgRuntime_Valve_PwmValue);
+    _config.pwmValue = value & 0xff;
+    _config.pwmPriorityMode = (value >> 8) & 0xff;
+  } // getDeviceValvePwmState
+
   void Device::setDeviceValveControl(DeviceValveControlSpec_t _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     uint8_t value = _config.ctrlRawValue;
@@ -1130,7 +1139,7 @@ namespace dss {
   }
 
   void Device::getDeviceValveControl(DeviceValveControlSpec_t& _config) {
-    if (getDeviceClass() != DEVICE_CLASS_BL) {
+    if (!isValveDevice()) {
       throw DSSException("Not a climate device");
     }
     uint8_t value = getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig);
@@ -1350,7 +1359,7 @@ namespace dss {
     // Binary input status bit handles depend on zoneId by call to `tryGetGroup`.
     // TODO(someday): refactor to some kind of observer pattern?
     foreach (auto&& binaryInput, m_binaryInputs) {
-      binaryInput->updateStatusBitHandle();
+      binaryInput->updateStatusFieldHandle();
     }
   } // setZoneID
 
@@ -1726,7 +1735,9 @@ namespace dss {
     if ((subclass == 0x04) && ((funcmodule & 0x3) > 1)) {
       return true;
     }
-
+    if ((subclass == 0x07) && ((funcmodule & 0x3) > 1)) {
+      return true;
+    }
     return false;
   }
 
@@ -1737,7 +1748,9 @@ namespace dss {
     if ((subclass == 0x04) && ((funcmodule & 0x3) > 0)) {
       return true;
     }
-
+    if ((subclass == 0x07) && ((funcmodule & 0x3) > 0)) {
+      return true;
+    }
     return false;
   }
 
@@ -2247,7 +2260,8 @@ namespace dss {
   }
 
   bool Device::isValveDevice() const {
-    return (hasOutput() && (getDeviceClass() == DEVICE_CLASS_BL));
+    return (hasOutput() && ((getDeviceClass() == DEVICE_CLASS_BL) ||
+                               ((getDeviceType() == DEVICE_TYPE_UMR) && (getRevisionID() >= 0x0383))));
   }
 
   DeviceValveType_t Device::getValveType () const {
@@ -2269,7 +2283,7 @@ namespace dss {
 
   void Device::setDeviceBinaryInputType(uint8_t _inputIndex, BinaryInputType inputType) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
+    if (_inputIndex >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     lock.unlock();
@@ -2279,29 +2293,15 @@ namespace dss {
   void Device::setDeviceBinaryInputTargetId(uint8_t _inputIndex, uint8_t _targetGroup)
   {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
+    if (_inputIndex >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 0, _targetGroup);
   }
 
-  void Device::setDeviceBinaryInputTargetType(uint8_t _inputIndex, GroupType targetType)
-  {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
-      throw ItemNotFoundException("Invalid binary input index");
-    }
-    uint8_t val = (static_cast<int>(m_binaryInputs[_inputIndex]->m_inputId) & 0xf) << 4;
-    if (_inputIndex == m_binaryInputs.size()) {
-      val |= 0x80;
-    }
-    val |= static_cast<int>(m_binaryInputs[_inputIndex]->m_targetGroupType) & 0x3;
-    setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
-  }
-
   BinaryInputType Device::getDeviceBinaryInputType(uint8_t _inputIndex) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
+    if (_inputIndex >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     return m_binaryInputs[_inputIndex]->m_inputType;
@@ -2309,14 +2309,13 @@ namespace dss {
 
   void Device::setDeviceBinaryInputId(uint8_t _inputIndex, BinaryInputId id) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (_inputIndex > m_binaryInputs.size()) {
+    if (_inputIndex >= m_binaryInputs.size()) {
       throw ItemNotFoundException("Invalid binary input index");
     }
     uint8_t val = (static_cast<int>(id) & 0xf) << 4;
-    if (_inputIndex == m_binaryInputs.size()) {
+    if (_inputIndex == m_binaryInputs.size() - 1) {
       val |= 0x80;
     }
-    val |= static_cast<int>(m_binaryInputs[_inputIndex]->m_targetGroupType) & 0x3;
     setDeviceConfig(CfgClassDevice, 0x40 + 3 * _inputIndex + 2, val);
   }
 
@@ -2369,11 +2368,6 @@ namespace dss {
   void Device::setBinaryInputTargetId(uint8_t index, uint8_t targetGroupId) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     getBinaryInput(index)->setTargetId(targetGroupId);
-  }
-
-  void Device::setBinaryInputTargetType(uint8_t index, GroupType targetGroupType) {
-    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    getBinaryInput(index)->setTargetType(targetGroupType);
   }
 
   void Device::setBinaryInputId(uint8_t index, BinaryInputId inputId) {
@@ -2510,8 +2504,6 @@ namespace dss {
       if (m_pPropertyNode != NULL) {
         std::string bpath = std::string("binaryInput") + intToString(binaryInputIndex);
         PropertyNodePtr entry = binaryInputNode->createProperty(bpath);
-        entry->createProperty("targetGroupType")
-                ->linkToProxy(PropertyProxyReference<int, GroupType>(binaryInput->m_targetGroupType));
         entry->createProperty("targetGroupId")
                 ->linkToProxy(PropertyProxyReference<int>(binaryInput->m_targetGroupId));
         entry->createProperty("inputType")
@@ -2634,8 +2626,7 @@ namespace dss {
       if (m_pPropertyNode != NULL) {
         std::string bpath = std::string("outputChannel") + intToString(m_outputChannelCount);
         PropertyNodePtr entry = outputChannelNode->createProperty(bpath);
-        entry->createProperty("channelID")
-                ->linkToProxy(PropertyProxyReference<int>(m_outputChannels[m_outputChannelCount]));
+        entry->createProperty("channelID")->setIntegerValue(m_outputChannels[m_outputChannelCount]);
       }
 
       m_outputChannelCount ++;
@@ -2887,87 +2878,6 @@ namespace dss {
     return false;
   }
 
-  DeviceBank3_BL::DeviceBank3_BL(boost::shared_ptr<Device> device)
-    : m_device(device) {
-      if (m_device->getDeviceClass() != DEVICE_CLASS_BL) {
-        throw std::runtime_error("Device is not heating device");
-      }
-  }
-
-  void DeviceBank3_BL::setValveProtectionTimer(uint16_t valveProtectionTimer) {
-    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_ProtectionTimer,
-                                valveProtectionTimer);
-  }
-  uint16_t DeviceBank3_BL::getValveProtectionTimer() {
-    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_ProtectionTimer);
-  }
-  void DeviceBank3_BL::setEmergencySetPoint(int8_t emergency_sp) {
-    // implicit conversion int8_t to uint8_t
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue,
-                              emergency_sp);
-  }
-  int8_t DeviceBank3_BL::getEmergencySetPoint() {
-    // implicit conversion uint8_t to int8_t
-    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_EmergencyValue);
-  }
-  void DeviceBank3_BL::setEmergencyTimer(int16_t emergency_tmr) {
-    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_EmergencyTimer,
-                                emergency_tmr);
-  }
-  uint16_t DeviceBank3_BL::getEmergencyTimer() {
-    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_EmergencyTimer);
-  }
-
-  void DeviceBank3_BL::setPwmPeriod(uint16_t pwmPeriod) {
-    m_device->setDeviceConfig16(CfgClassFunction, CfgFunction_Valve_PwmPeriod,
-                                pwmPeriod);
-  }
-  uint16_t DeviceBank3_BL::getPwmPeriod() {
-    return m_device->getDeviceConfigWord(CfgClassFunction, CfgFunction_Valve_PwmPeriod);
-  }
-  void DeviceBank3_BL::setPwmMinX(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinX,
-                              set_point);
-  }
-  int8_t DeviceBank3_BL::getPwmMinX() {
-    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinX);
-  }
-  void DeviceBank3_BL::setPwmMaxX(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxX,
-                              set_point);
-  }
-  int8_t DeviceBank3_BL::getPwmMaxX() {
-    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxX);
-  }
-  void DeviceBank3_BL::setPwmMinY(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY,
-                              set_point);
-  }
-  int8_t DeviceBank3_BL::getPwmMinY() {
-    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMinY);
-  }
-  void DeviceBank3_BL::setPwmMaxY(int8_t set_point) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY,
-                              set_point);
-  }
-  int8_t DeviceBank3_BL::getPwmMaxY() {
-    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmMaxY);
-  }
-  void DeviceBank3_BL::setPwmConfig(uint8_t config) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig,
-                              config);
-  }
-  uint8_t DeviceBank3_BL::getPwmConfig() {
-    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmConfig);
-  }
-  void DeviceBank3_BL::setPwmOffset(int8_t config) {
-    m_device->setDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset,
-                              config);
-  }
-  int8_t DeviceBank3_BL::getPwmOffset() {
-    return m_device->getDeviceConfig(CfgClassFunction, CfgFunction_Valve_PwmOffset);
-  }
-
   int Device::multiDeviceIndex() const {
     uint8_t deviceCount = 1;
     uint8_t deviceIndex = 0;
@@ -2982,13 +2892,15 @@ namespace dss {
                (getDeviceNumber() == 204)) {
       deviceCount = 2;
     } else if ((m_FunctionID & 0xffc0) == 0x1000) {
+      // Legacy R100 stuff, subclass 0
       switch (m_FunctionID & 0x7) {
         case 0: deviceCount = 1; break;
         case 1: deviceCount = 2; break;
         case 2: deviceCount = 4; break;
         case 7: deviceCount = 1; break;
       }
-    } else if ((m_FunctionID & 0x0fc0) == 0x0100) {
+    } else if (((m_FunctionID & 0x0fc0) == 0x0100) || ((m_FunctionID & 0x0fc0) == 0x01c0)) {
+      // subclasses 4 or 7
       switch (m_FunctionID & 0x3) {
         case 0: deviceCount = 1; break;
         case 1: deviceCount = 1; break;

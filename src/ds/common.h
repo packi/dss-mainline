@@ -31,3 +31,5 @@
 
 /// Macro expanding to `,`. Useful to pass comma to macro without starting next argument
 #define DS_COMMA ,
+
+#define DS_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
