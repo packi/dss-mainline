@@ -26,7 +26,7 @@
 
 #include "base.h"
 #include "foreach.h"
-#include "status-bit.h"
+#include "status-field.h"
 #include "group.h"
 #include "apartment.h"
 #include "dss.h"
@@ -35,56 +35,55 @@ namespace dss {
 
 __DEFINE_LOG_CHANNEL__(Status, lsNotice);
 
-boost::chrono::seconds Status::PUSH_SENSOR_PERIOD = boost::chrono::minutes(90);
+boost::chrono::seconds Status::PUSH_PERIOD = boost::chrono::minutes(90);
 
 Status::Status(Group& group)
     : m_group(group)
-    , m_periodicPushTimer(group.getApartment().getDss().getIoService()) {
-  asyncPeriodicPush();
+    , m_periodicPushTimer(group.getApartment().getDss()->getIoService())
+    , m_malfunctionField(*this, StatusFieldType::MALFUNCTION)
+    , m_serviceField(*this, StatusFieldType::SERVICE) {
+  // Start periodic push loop to recover from broadcast failures,
+  // to spread the value to new devices.
+  // It makes no sense to push immediately,
+  // we are likely to even not have dsm-api connection now.
+  asyncPushLoopRestart(PUSH_PERIOD);
 }
 
 Status::~Status() = default;
 
-StatusBit* Status::tryGetBit(StatusBitType statusType) {
-  auto&& it = m_bits.find(statusType);
-  if (it != m_bits.end()) {
-    return it->second.get();
+StatusField& Status::getField(StatusFieldType type) {
+  switch (type) {
+    case StatusFieldType::MALFUNCTION: return m_malfunctionField;
+    case StatusFieldType::SERVICE: return m_serviceField;
   }
-  return DS_NULLPTR;
-}
+  DS_FAIL_REQUIRE("Unknow status field type.", type);
+};
 
-void Status::insertBit(StatusBitType statusType, std::unique_ptr<StatusBit> state) {
-  m_bits[statusType] = std::move(state);
-}
-
-void Status::setBitValue(StatusBitType type, bool bitValue) {
-  auto&& bit = static_cast<int>(type);
-  if (m_valueBitset.test(bit) == bitValue) {
-    return;
-  }
-  log(ds::str("setBitValue type:", type, " bitValue:", bitValue), lsInfo);
-  m_valueBitset.set(bit, bitValue);
-  auto&& value = getValue();
-  log(ds::str("this:", m_group.getName(), " changed value:", value), lsNotice);
-  push();
+StatusSensorBitset Status::getValueAsBitset() const {
+  StatusSensorBitset out;
+  out |= m_malfunctionField.getValueAsBitset();
+  out |= m_serviceField.getValueAsBitset();
+  return out;
 }
 
 void Status::push() {
-  try {
-    auto&& value = getValue();
-    log(ds::str("pushSensor ", *this, " value:", value), lsNotice);
-    m_group.pushSensor(coSystem, SAC_UNKNOWN, DSUID_NULL, SensorType::Status, value, "");
-  } catch (std::exception &e) {
-    log(ds::str("setBitValue pushSensor failed what:", e.what()), lsError);
-  }
+  log(ds::str("push ", *this), lsInfo);
+  // moderate push calls
+  asyncPushLoopRestart(boost::chrono::seconds(1));
 }
 
-void Status::asyncPeriodicPush() {
-  log(ds::str("asyncPeriodicPush ", *this), lsDebug);
+void Status::asyncPushLoopRestart(ds::asio::Timer::Duration delay) {
+  log(ds::str("asyncPushLoopRestart ", *this), lsDebug);
 
-  m_periodicPushTimer.randomlyExpiresFromNowPercentDown(PUSH_SENSOR_PERIOD, 25, [this] {
-      push();
-      asyncPeriodicPush(); // async loop
+  m_periodicPushTimer.randomlyExpiresFromNowPercentDown(delay, 25, [this] {
+    try {
+      auto&& value = getValueAsBitset().to_ulong();
+      log(ds::str("push ", *this, " value:", value), lsNotice);
+      m_group.pushSensor(coSystem, SAC_UNKNOWN, DSUID_NULL, SensorType::Status, value, "");
+    } catch (std::exception &e) {
+      log(ds::str("push failed what:", e.what()), lsError);
+    }
+    asyncPushLoopRestart(PUSH_PERIOD); // async loop
   });
 }
 

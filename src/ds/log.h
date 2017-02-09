@@ -71,7 +71,7 @@ constexpr const char *trimArg(const char *x) {
     return (x[0] != '"') ? x : "";
 }
 
-#define DS_LOG_ARG(x) , " ", ::ds::log::trimArg(#x ":"), x
+#define DS_LOG_ARG(x) , ::ds::log::trimArg(#x ":"), x, " "
 
 // * `DS_REQUIRE(condition)`:  Check external input and preconditions
 // e.g. to validate parameters passed from a caller.
@@ -84,11 +84,14 @@ constexpr const char *trimArg(const char *x) {
 //
 #define DS_REQUIRE(condition, ...) \
     if (DS_LIKELY(condition)) {} else \
-        throw std::runtime_error(ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ', #condition \
-            DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__)))
+        throw std::runtime_error(ds::str( \
+            "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
+            "condition:", #condition, " " \
+            __FILE__, ':', __LINE__ ))
 #define DS_FAIL_REQUIRE(...) \
-    throw std::runtime_error(ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ' \
-        DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__)))
+    throw std::runtime_error(ds::str( \
+        "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
+        __FILE__, ':', __LINE__))
 
 // Assert the `condition` is true.
 // This macro should be used to check for bugs in the surrounding code (broken invariant, ...)
@@ -99,16 +102,17 @@ constexpr const char *trimArg(const char *x) {
 // DS_FAIL_ASSERT("Invalid", m_state);
 //
 #define DS_ASSERT(condition, ...) \
-    if (DS_LIKELY(condition)) {} else { \
-        ::ds::log::_private::assert_(ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ', #condition \
-            DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
-    }
+    if (DS_LIKELY(condition)) {} else \
+        ::ds::log::_private::assert_(ds::str( \
+            "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
+            "condition:", #condition, " " \
+            , __FILE__, ':', __LINE__ ))
+
 #define DS_FAIL_ASSERT(...) \
-    if (false) {} else { \
-        std::cerr << ds::str(__FILE__, ':', __LINE__, '/', __FUNCTION__, ' ' \
-            DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
-        abort(); \
-    }
+    if (false) {} else \
+        ::ds::log::_private::assert_(ds::str( \
+        "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
+        , __FILE__, ':', __LINE__))
 
 namespace _private {
 //assert is macro, so we cannot reuse its name here

@@ -27,6 +27,7 @@
 #include "zonerequesthandler.h"
 
 #include <digitalSTROM/dsuid.h>
+#include <ds/log.h>
 
 #include "src/foreach.h"
 #include "src/model/apartment.h"
@@ -36,6 +37,7 @@
 #include "src/model/scenehelper.h"
 #include "src/model/set.h"
 #include "src/model/zone.h"
+#include "src/model/status.h"
 #include "src/stringconverter.h"
 #include "src/structuremanipulator.h"
 #include "util.h"
@@ -585,6 +587,14 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
   return json.successJSON();
 }
 
+std::string ZoneRequestHandler::setStatusField(
+        boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& request) {
+  DS_REQUIRE(pGroup != 0, "Missing required groupID parameter.");
+  pGroup->setStatusField(request.getRequiredParameter("field"), request.getRequiredParameter("value"));
+  return JSONWriter::success();
+}
+
+
 std::string ZoneRequestHandler::setSensorSource(
         boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
   if (pZone->getID() == 0) {
@@ -815,6 +825,8 @@ WebServerResponse ZoneRequestHandler::jsonHandleRequest(
         return setTemperatureControlState(pZone, pGroup, _request);
       } else if (_request.getMethod() == "getTemperatureControlInternals") {
         return getTemperatureControlInternals(pZone, pGroup, _request);
+      } else if (_request.getMethod() == "setStatusField") {
+        return setStatusField(pZone, pGroup, _request);
       } else if (_request.getMethod() == "setSensorSource") {
         return setSensorSource(pZone, pGroup, _request);
       } else if (_request.getMethod() == "clearSensorSource") {

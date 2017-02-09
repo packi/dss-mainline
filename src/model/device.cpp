@@ -56,7 +56,7 @@
 #include "src/vdc-element-reader.h"
 #include "src/vdc-connection.h"
 #include "src/protobufjson.h"
-#include "status-bit.h"
+#include "status-field.h"
 #include "status.h"
 #include "src/model-features.h"
 
@@ -67,24 +67,24 @@ namespace dss {
 
   __DEFINE_LOG_CHANNEL__(DeviceBinaryInput, lsNotice);
 
-  // RAII class to handling stream to StatusBit
-  // We capture only weak reference to StatusBit to avaid crashes
-  // if this object is not notified soon enough that StatusBit was deleted.
-  class DeviceBinaryInput::StatusBitHandle: boost::noncopyable {
+  // RAII class to handling stream to StatusField
+  // We capture only weak reference to StatusField to avaid crashes
+  // if this object is not notified soon enough that StatusField was deleted.
+  class DeviceBinaryInput::StatusFieldHandle: boost::noncopyable {
   public:
-    StatusBitHandle(DeviceBinaryInput& parent, StatusBit& statusBit)
+    StatusFieldHandle(DeviceBinaryInput& parent, StatusField& statusField)
         : m_parent(parent),
-        m_weakPtr(boost::shared_ptr<StatusBit>(statusBit.getStatus().getGroup().sharedFromThis(), &statusBit)) {
-      statusBit.addSubState(*m_parent.m_state);
+        m_weakPtr(boost::shared_ptr<StatusField>(statusField.getStatus().getGroup().sharedFromThis(), &statusField)) {
+      statusField.addSubState(*m_parent.m_state);
     }
 
-    ~StatusBitHandle() {
+    ~StatusFieldHandle() {
       if (auto&& ptr = m_weakPtr.lock()) {
         ptr->removeSubState(*m_parent.m_state);
       }
     }
 
-    StatusBit* getPtr() {
+    StatusField* getPtr() {
       if (auto&& ptr = m_weakPtr.lock()) {
         return ptr.get();
       }
@@ -92,17 +92,17 @@ namespace dss {
     }
 
     void update() {
-      log(std::string("StatusBitHandle::update this:") + m_parent.m_name, lsDebug);
+      log(std::string("StatusFieldHandle::update this:") + m_parent.m_name, lsDebug);
       if (auto&& ptr = m_weakPtr.lock()) {
         ptr->updateSubState(*m_parent.m_state);
       } else {
         // We should have been deleted at this point
-        log(ds::str("Referenced StatusBit instance was deleted"), lsError);
+        log(ds::str("Referenced StatusField instance was deleted"), lsError);
       }
     }
   private:
     DeviceBinaryInput& m_parent;
-    boost::weak_ptr<StatusBit> m_weakPtr;
+    boost::weak_ptr<StatusField> m_weakPtr;
   };
 
   DeviceBinaryInput::DeviceBinaryInput(Device& device, const DeviceBinaryInputSpec_t& spec, int index)
@@ -135,7 +135,7 @@ namespace dss {
       m_state = device.getApartment().getNonScriptState(m_state->getName());
     }
 
-    updateStatusBitHandle();
+    updateStatusFieldHandle();
   }
 
   DeviceBinaryInput::~DeviceBinaryInput() {
@@ -154,7 +154,7 @@ namespace dss {
     log(std::string("setTarget this:") + m_name
         + " targetGroupId:" + intToString(targetGroupId), lsInfo);
     m_targetGroupId = targetGroupId;
-    updateStatusBitHandle();
+    updateStatusFieldHandle();
   }
 
   void DeviceBinaryInput::setInputId(BinaryInputId inputId) {
@@ -205,38 +205,44 @@ namespace dss {
     } catch (const std::exception& e) {
       log(std::string("handleEvent: what:")+ e.what(), lsWarning);
     }
-    if (m_statusBitHandle) {
-      m_statusBitHandle->update();
+    if (m_statusFieldHandle) {
+      m_statusFieldHandle->update();
     }
   }
 
-  void DeviceBinaryInput::updateStatusBitHandle() {
+  void DeviceBinaryInput::updateStatusFieldHandle() {
     // find status object within target group
     boost::shared_ptr<Group> targetGroup;
-    StatusBit* statusBit = DS_NULLPTR;
+    StatusField* statusField = DS_NULLPTR;
     if (m_targetGroupId != 0) {
-      if (auto type = statusBitTypeForBinaryInputType(m_inputType)) {
+      if (auto type = statusFieldTypeForBinaryInputType(m_inputType)) {
         if ((targetGroup = m_device.tryGetGroup(m_targetGroupId).lock())) {
-          statusBit = &targetGroup->getStatusBit(*type);
+          if (auto&& status = targetGroup->getStatus()) {
+            statusField = &status->getField(*type);
+          } else {
+            log(ds::str("updateStatusFieldHandle Group does not support status. this:", m_name,
+                " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId), lsWarning);
+            // some groups do not support status
+          }
         }
       }
     }
-    auto oldStatusBit = m_statusBitHandle ? m_statusBitHandle->getPtr() : (StatusBit*) DS_NULLPTR;
-    if (oldStatusBit == statusBit) {
+    auto oldStatusField = m_statusFieldHandle ? m_statusFieldHandle->getPtr() : (StatusField*) DS_NULLPTR;
+    if (oldStatusField == statusField) {
       return;
     }
 
-    m_statusBitHandle.reset();
-    if (!statusBit) {
-      log(ds::str("updateStatusBitHandle this:", m_name,
+    m_statusFieldHandle.reset();
+    if (!statusField) {
+      log(ds::str("updateStatusFieldHandle this:", m_name,
           " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
-          " statusBit:nullptr"), lsInfo);
+          " statusField:nullptr"), lsInfo);
       return;
     }
-    log(ds::str("updateStatusBitHandle this:", m_name,
+    log(ds::str("updateStatusFieldHandle this:", m_name,
         " m_inputType:", m_inputType, " m_targetGroupId:", m_targetGroupId,
-        " type:",  statusBit->getType(), " name:", statusBit->getName()), lsInfo);
-    m_statusBitHandle.reset(new StatusBitHandle(*this, *statusBit));
+        " type:",  statusField->getType(), " name:", statusField->getName()), lsInfo);
+    m_statusFieldHandle.reset(new StatusFieldHandle(*this, *statusField));
   }
 
   //================================================== Device
@@ -1353,7 +1359,7 @@ namespace dss {
     // Binary input status bit handles depend on zoneId by call to `tryGetGroup`.
     // TODO(someday): refactor to some kind of observer pattern?
     foreach (auto&& binaryInput, m_binaryInputs) {
-      binaryInput->updateStatusBitHandle();
+      binaryInput->updateStatusFieldHandle();
     }
   } // setZoneID
 

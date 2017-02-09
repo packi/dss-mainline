@@ -25,7 +25,7 @@
 #endif
 #include "group.h"
 
-#include <ds/str.h>
+#include <ds/log.h>
 
 #include "zone.h"
 #include "scenehelper.h"
@@ -35,7 +35,7 @@
 #include "src/propertysystem.h"
 
 #include "src/model/modelconst.h"
-#include "status-bit.h"
+#include "status-field.h"
 #include "status.h"
 
 namespace dss {
@@ -79,6 +79,20 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode, getLastCalledScene()));
     } else {
       m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
+    }
+
+    // Status is supported only for apartment ventilation groups for now.
+    if (getApartment().getDss()) {
+        // TODO(someday): Status object requires IoService instance from DSS instance.
+        // But most tests do not provice DSS instance now.
+        // It is arguably bad idea to require full DSS instance to get IoService instance.
+        // ModelMaintenance::initialize has similar workaround.
+      if (m_ApplicationType == ApplicationType::ApartmentVentilation && !m_status) {
+        m_status.reset(new Status(*this));
+      }
+      if (m_ApplicationType != ApplicationType::ApartmentVentilation && m_status) {
+        m_status.reset();
+      }
     }
 
     if (getZoneID() == 0) {
@@ -345,24 +359,18 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     }
   }
 
-  StatusBit& Group::getStatusBit(StatusBitType type) {
-    if (!m_status) {
-      // Lazy created to avoid periodic broadcast of status current values
-      // for empty Statuses over dsm-api.
-      //
-      // It is possible to move this functionality to Status class.
-      // But we also save some memory this way as most groups don't have Status.
-      m_status.reset(new Status(*this));
-    }
-    if (StatusBit* bit = m_status->tryGetBit(type)) {
-      return *bit;
-    }
-    auto&& name = ds::str("zone.", getZoneID(), ".group.", getID(), ".status.", static_cast<int>(type));
-    log(ds::str("New status bit name:", name), lsNotice);
-    auto&& bit = std::unique_ptr<StatusBit>(new StatusBit(*m_status, type, std::move(name)));
-    auto&& bitRef = *bit;
-    m_status->insertBit(type, std::move(bit));
-    return bitRef;
+  void Group::setStatusField(const std::string& fieldName, const std::string& valueName) {
+    auto&& status = getStatus();
+    DS_REQUIRE(status, "Group ", *this, " does not support status.");
+
+    auto&& fieldType = statusFieldTypeFromName(fieldName);
+    DS_REQUIRE(fieldType, "Unknown", fieldName);
+
+    auto&& value = statusFieldValueFromName(valueName);
+    DS_REQUIRE(value, "Unknown", valueName);
+
+    auto&& field = status->getField(*fieldType);
+    field.setValueAndPush(*value);
   }
 
   boost::mutex Group::m_SceneNameMutex;
