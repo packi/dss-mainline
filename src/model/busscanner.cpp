@@ -352,15 +352,25 @@ namespace dss {
   } // scanDeviceOnBus
 
   bool BusScanner::initializeDeviceFromSpec(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec) {
-    log("InitializeDevice: DSID:        " + dsuid2str(_spec.DSID));
-    log("InitializeDevice: DSM-DSID:    " + dsuid2str(_dsMeter->getDSID()));
-    log("InitializeDevice: Address:     " + intToString(_spec.ShortAddress) +
+    log("InitializeDevice: DSID:       " + dsuid2str(_spec.DSID));
+    log("InitializeDevice: DSM-DSID:   " + dsuid2str(_dsMeter->getDSID()));
+    log("InitializeDevice: Address:    " + intToString(_spec.ShortAddress) +
         ", Active: " + intToString(_spec.ActiveState));
     log("InitializeDevice: Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
         ", Product-ID: " + unsignedLongIntToHexString(_spec.ProductID) +
         ", Revision-ID: " + unsignedLongIntToHexString(_spec.revisionId) +
         ", Vendor-ID: " + unsignedLongIntToHexString(_spec.VendorID)
         );
+    std::stringstream gr;
+    gr << "[";
+    std::copy(_spec.Groups.begin(), _spec.Groups.end(), std::ostream_iterator<int>(gr, ","));
+    gr << "]";
+    log("InitializeDevice: Groups:     " + gr.str());
+    log("InitializeDevice: ActiveGr:   " + intToString(_spec.activeGroup));
+    log("InitializeDevice: DefaultGr:  " + intToString(_spec.defaultGroup));
+    log("InitializeDevice: Button ID:  " + intToString(_spec.buttonID));
+    log("InitializeDevice: Button GroupMember: " + intToString(_spec.buttonGroupMembership));
+    log("InitializeDevice: Button ActiveGroup: " + intToString(_spec.buttonActiveGroup));
 
     boost::shared_ptr<Device> dev;
     try {
