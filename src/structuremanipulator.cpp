@@ -767,16 +767,15 @@ namespace dss {
     }
   } // deviceRemoveFromGroups
 
-  bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device,
-                                           boost::shared_ptr<Group> newGroup) {
+  bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device, int groupId) {
     bool modified = false;
     int oldGroupId = device->getJokerGroup();
-    if (oldGroupId != newGroup->getID()) {
-      device->setDeviceJokerGroup(newGroup->getID());
+    if (oldGroupId != groupId) {
+      device->setDeviceJokerGroup(groupId);
       modified = true;
 
       if ((oldGroupId == ColorIDBlack) &&
-          (newGroup->getID() != ColorIDBlack) &&
+          (groupId != ColorIDBlack) &&
           device->hasInput() &&
           (device->getButtonInputMode() != DEV_PARAM_BUTTONINPUT_STANDARD)) {
         device->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
@@ -784,14 +783,14 @@ namespace dss {
       }
     }
 
-    /* check if device is also in a colored user group */
-    boost::shared_ptr<Zone> pZone = m_Apartment.getZone(newGroup->getZoneID());
+    /* check if device is also in a cluster of different application type */
+    boost::shared_ptr<Zone> pZone = m_Apartment.getZone(0);
     for (int g = GroupIDAppUserMin; g <= GroupIDAppUserMax; g++) {
       if (!device->isInGroup(g)) {
         continue;
       }
       boost::shared_ptr<Group> itGroup = pZone->getGroup(g);
-      if (static_cast<int>(itGroup->getApplicationType()) == newGroup->getID()) {
+      if (static_cast<int>(itGroup->getApplicationType()) == groupId) {
         continue;
       }
       deviceRemoveFromGroup(device, itGroup);
