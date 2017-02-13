@@ -789,13 +789,6 @@ namespace dss {
       }
       /* tell dsm to change button active group */
       m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
-      /* refresh device information for correct active group */
-      if ((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-        ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged, m_DSMeterDSID);
-        pEvent->addParameter(m_ShortAddress);
-        sleep(3); // #8900: make sure all settings were really saved
-        m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
-      }
     }
   } // setDeviceActiveGroup
 
@@ -820,6 +813,13 @@ namespace dss {
 
       setDeviceButtonActiveGroup(groupId);
     }
+
+    // force refresh device information (-> busscanner readout) to update active group
+    if ((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged, m_DSMeterDSID);
+      pEvent->addParameter(m_ShortAddress);
+      sleep(3); // #8900: make sure all settings were really saved
+      m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
     }
 
     updateIconPath();
