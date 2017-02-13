@@ -789,6 +789,7 @@ namespace dss {
       }
       /* tell dsm to change button active group */
       m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
+      m_ButtonActiveGroup = _buttonActiveGroup;
     }
   } // setDeviceActiveGroup
 
