@@ -78,7 +78,7 @@ namespace dss {
         return false;
       }
       // bus member type can be read. We have to retry for interesting bus devices.
-      if (busMemberIsDSMeter(_dsMeter->getBusMemberType())) {
+      if (busMemberIsLogicDSM(_dsMeter->getBusMemberType())) {
         // for known bus device types retry the readout
         return false;
       }
@@ -114,11 +114,11 @@ namespace dss {
 
     // update powerline jumble state
     uint8_t state = DSM_STATE_UNKNOWN;
-    if (busMemberIsdSM(_dsMeter->getBusMemberType())) {
+    if (busMemberIsHardwareDSM(_dsMeter->getBusMemberType())) {
       if (getMeterState(_dsMeter, &state)) {
         _dsMeter->setState(state);
       }
-    } else if (busMemberIsDSMeter(_dsMeter->getBusMemberType())) {
+    } else if (busMemberIsLogicDSM(_dsMeter->getBusMemberType())) {
       _dsMeter->setState(DSM_STATE_IDLE);
     } else if (!_dsMeter->isSynchonized()) {
       log("scanDSMeter: dSMeter is not yet synchronized. Meter: " + 

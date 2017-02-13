@@ -217,7 +217,7 @@ namespace dss {
   int MeterMaintenance::getNumValiddSMeters() const {
     int cntReadOutMeters = 0;
     foreach(boost::shared_ptr<DSMeter> pDSMeter,  m_pApartment->getDSMeters()) {
-      if (busMemberIsDSMeter(pDSMeter->getBusMemberType()) &&
+      if (busMemberIsLogicDSM(pDSMeter->getBusMemberType()) &&
           pDSMeter->isPresent() &&
           pDSMeter->isValid()) {
         ++cntReadOutMeters;
@@ -234,7 +234,7 @@ namespace dss {
         // call for all bus participants (vdc, dsm,..)
         dsMeterReady(pDSMeter->getDSID());
         // only for non virtual devices
-        if (busMemberIsDSMeter(pDSMeter->getBusMemberType())) {
+        if (busMemberIsLogicDSM(pDSMeter->getBusMemberType())) {
           hadToUpdate = true;
           break;
         }
@@ -307,7 +307,7 @@ namespace dss {
       foreach (DSMeterSpec_t spec, vecMeterSpec) {
         log("getdSMBusMemberCount Device: " + dsuid2str(spec.DSID) + 
             " Device Type: " + intToString(spec.DeviceType), lsDebug);
-        if (busMemberIsDSMeter(spec.DeviceType)) {
+        if (busMemberIsLogicDSM(spec.DeviceType)) {
           // ignore dSMx with older api version
           if (spec.APIVersion >= 0x300) {
             ++busMemberCount;
@@ -612,12 +612,12 @@ namespace dss {
             scanner.synchronizeDSMeterData(dsMeter, spec);
 
             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
-            if (dsMeter->isPresent() && !busMemberIsDSMeter(dsMeter->getBusMemberType())) {
+            if (dsMeter->isPresent() && !busMemberIsLogicDSM(dsMeter->getBusMemberType())) {
               m_pApartment->removeDSMeter(spec.DSID);
               log ("removing uninteresting Bus Device: " + dsuid2str(dsMeter->getDSID()) + ", type:" + intToString(dsMeter->getBusMemberType()));
             }
           } catch(ItemNotFoundException& e) {
-            if (!busMemberIsDSMeter(spec.DeviceType)) {
+            if (!busMemberIsLogicDSM(spec.DeviceType)) {
               // recover old dSM11 fw < 1.8.3
               if (!DsmApiIsdSM(spec.DSID)) {
                 log ("ignore dS485 Bus Device: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);

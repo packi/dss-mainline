@@ -66,8 +66,9 @@ namespace dss {
     std::string m_name;       // state name
   } CircuitPowerState_t;
 
-  bool busMemberIsDSMeter(BusMemberDevice_t type);
-  bool busMemberIsdSM(BusMemberDevice_t type);
+  bool busMemberIsAnyDSM(BusMemberDevice_t type);
+  bool busMemberIsLogicDSM(BusMemberDevice_t type);
+  bool busMemberIsHardwareDSM(BusMemberDevice_t type);
   bool busMemberTypeIsValid(BusMemberDevice_t type);
 
   /** Represents a DSMeter */

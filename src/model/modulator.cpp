@@ -40,7 +40,18 @@
 
 namespace dss {
 
-  bool busMemberIsDSMeter(BusMemberDevice_t type)
+  bool busMemberIsAnyDSM(BusMemberDevice_t type)
+  {
+    if ((type == BusMember_dSM11) ||
+        (type == BusMember_dSM12) ||
+        (type == BusMember_vDSM) ||
+        (type == BusMember_vDC)) {
+      return true;
+    }
+    return false;
+  }
+
+  bool busMemberIsLogicDSM(BusMemberDevice_t type)
   {
     if ((type == BusMember_dSM11) ||
         (type == BusMember_dSM12) ||
@@ -50,7 +61,7 @@ namespace dss {
     return false;
   }
 
-  bool busMemberIsdSM(BusMemberDevice_t type)
+  bool busMemberIsHardwareDSM(BusMemberDevice_t type)
   {
     if ((type == BusMember_dSM11) ||
         (type == BusMember_dSM12)) {
