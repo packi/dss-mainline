@@ -1307,7 +1307,7 @@ namespace dss {
 
       // dsMeters
       ofs << doIndent(indent) << "<dsMeters>" << std::endl;
-      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_Apartment.getDSMeters()) {
+      foreach(boost::shared_ptr<DSMeter> pDSMeter, m_Apartment.getDSMetersAll()) {
         dsMeterToXML(pDSMeter, ofs, indent + 1);
       }
       ofs << doIndent(indent) << "</dsMeters>" << std::endl;

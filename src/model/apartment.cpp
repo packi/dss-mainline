@@ -239,9 +239,22 @@ namespace dss {
 
   std::vector<boost::shared_ptr<DSMeter> > Apartment::getDSMeters() {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    std::vector<boost::shared_ptr<DSMeter> > result = m_DSMeters;
+    std::vector<boost::shared_ptr<DSMeter> > result;
+    foreach(boost::shared_ptr<DSMeter> dsMeter, m_DSMeters) {
+      // TODO(someday): remove the filter and move this logic to ui - use HasDevices?
+      // we should not return vDSMs as they are not currently filtered in ui
+      if (dsMeter->getBusMemberType() != BusMember_vDSM) {
+        result.push_back(dsMeter);
+      }
+    }
     return result;
   } // getDSMeters
+
+  std::vector<boost::shared_ptr<DSMeter> > Apartment::getDSMetersAll() {
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
+    std::vector<boost::shared_ptr<DSMeter> > result = m_DSMeters;
+    return result;
+  } // getAllDSMeters
 
   // Group queries
   boost::shared_ptr<Group> Apartment::getGroup(const std::string& _name) {

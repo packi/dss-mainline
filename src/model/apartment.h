@@ -167,8 +167,10 @@ typedef struct {
     boost::shared_ptr<DSMeter> getDSMeter(const std::string& _modName);
     /** Returns a DSMeter by DSID  */
     boost::shared_ptr<DSMeter> getDSMeterByDSID(const dsuid_t _dsid);
-    /** Returns a vector of all dsMeters */
+    /** Returns a vector of dsMeters without vDSMs */
     std::vector<boost::shared_ptr<DSMeter> > getDSMeters();
+    /** Returns a vector of all dsMeters */
+    std::vector<boost::shared_ptr<DSMeter> > getDSMetersAll();
 
     /** Returns a Group by name */
     boost::shared_ptr<Group> getGroup(const std::string& _name);

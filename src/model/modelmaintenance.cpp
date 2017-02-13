@@ -612,12 +612,12 @@ namespace dss {
             scanner.synchronizeDSMeterData(dsMeter, spec);
 
             log ("dS485 Bus Device known: " + dsuid2str(spec.DSID) + ", type:" + intToString(spec.DeviceType));
-            if (dsMeter->isPresent() && !busMemberIsLogicDSM(dsMeter->getBusMemberType())) {
+            if (dsMeter->isPresent() && !busMemberIsAnyDSM(dsMeter->getBusMemberType())) {
               m_pApartment->removeDSMeter(spec.DSID);
               log ("removing uninteresting Bus Device: " + dsuid2str(dsMeter->getDSID()) + ", type:" + intToString(dsMeter->getBusMemberType()));
             }
           } catch(ItemNotFoundException& e) {
-            if (!busMemberIsLogicDSM(spec.DeviceType)) {
+            if (!busMemberIsAnyDSM(spec.DeviceType)) {
               // recover old dSM11 fw < 1.8.3
               if (!DsmApiIsdSM(spec.DSID)) {
                 log ("ignore dS485 Bus Device: " + dsuid2str(spec.DSID)  + ", type: " + intToString(spec.DeviceType), lsWarning);
