@@ -683,6 +683,8 @@ namespace dss {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
+    assert(_device.get() != NULL);
+    assert(_group.get() != NULL);
 
     boost::shared_ptr<Cluster> cluster = boost::dynamic_pointer_cast<Cluster> (_group);
     if (cluster && cluster->isConfigurationLocked()) {
@@ -725,6 +727,8 @@ namespace dss {
     if(m_Apartment.getPropertyNode() != NULL) {
       m_Apartment.getPropertyNode()->checkWriteAccess();
     }
+    assert(_device.get() != NULL);
+    assert(_group.get() != NULL);
 
     boost::shared_ptr<Cluster> cluster = boost::dynamic_pointer_cast<Cluster> (_group);
     if (cluster && cluster->isConfigurationLocked()) {
@@ -769,18 +773,43 @@ namespace dss {
 
   bool StructureManipulator::setJokerGroup(boost::shared_ptr<Device> device, int groupId) {
     bool modified = false;
-    int oldGroupId = device->getJokerGroup();
+
+    int oldGroupId = device->getActiveGroup();
+    if (oldGroupId == GroupIDNotApplicable) {
+      oldGroupId = device->getJokerGroup();
+    }
+
     if (oldGroupId != groupId) {
-      device->setDeviceJokerGroup(groupId);
       modified = true;
 
-      if ((oldGroupId == ColorIDBlack) &&
-          (groupId != ColorIDBlack) &&
-          device->hasInput() &&
-          (device->getButtonInputMode() != DEV_PARAM_BUTTONINPUT_STANDARD)) {
-        device->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
-        device->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+      // for standard groups force that only one group is active
+      for (int g = GroupIDYellow; g <= GroupIDStandardMax; g++) {
+        if (g == groupId || GroupIDBlack == g) {
+          continue;
+        }
+        if (device->isInGroup(g)) {
+          deviceRemoveFromGroup(device, m_Apartment.getZone(device->getZoneID())->getGroup(g));
+        }
       }
+      // remove from control groups
+      for (int g = GroupIDControlGroupMin; g <= GroupIDControlGroupMax; g++) {
+        if (device->isInGroup(g)) {
+          deviceRemoveFromGroup(device, m_Apartment.getZone(device->getZoneID())->getGroup(g));
+        }
+      }
+      // remove also from GA groups
+      for (int g = GroupIDGlobalAppMin; g <= GroupIDGlobalAppMax; g++) {
+        if (device->isInGroup(g)) {
+          deviceRemoveFromGroup(device, m_Apartment.getZone(0)->getGroup(g));
+        }
+      }
+      // assign to new "standard" group
+      if (groupId >= GroupIDGlobalAppMin) {
+        deviceAddToGroup(device, m_Apartment.getZone(0)->getGroup(groupId));
+      } else {
+        deviceAddToGroup(device, m_Apartment.getZone(device->getZoneID())->getGroup(groupId));
+      }
+      device->setDeviceJokerGroup(groupId);
     }
 
     /* check if device is also in a cluster of different application type */

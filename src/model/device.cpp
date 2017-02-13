@@ -799,43 +799,29 @@ namespace dss {
     }
   } // setDeviceActiveGroup
 
-  void Device::setDeviceJokerGroup(uint8_t _groupId) {
-    if (!isDefaultGroup(_groupId) && !isGlobalAppDsGroup(_groupId)) {
+  void Device::setDeviceJokerGroup(uint8_t groupId) {
+    if (!isDefaultGroup(groupId) && !isGlobalAppDsGroup(groupId)) {
       throw std::runtime_error("Invalid joker group value");
     }
-    // for standard groups force that only one group is active
-    for (int g = GroupIDYellow; g <= GroupIDStandardMax; g++) {
-      if (isInGroup(g)) {
-        removeFromGroup(g);
-      }
-    }
-
-    // remove from control groups
-    for (int g = GroupIDControlGroupMin; g <= GroupIDControlGroupMax; g++) {
-      if (isInGroup(g)) {
-        removeFromGroup(g);
-      }
-    }
-
-    // remove also from GA groups
-    for (int g = GroupIDGlobalAppMin; g <= GroupIDGlobalAppMax; g++) {
-      if (isInGroup(g)) {
-        removeFromGroup(g);
-      }
-    }
+    int oldGroupId = m_ActiveGroup;
 
     // assign device to new group
-    addToGroup(_groupId);
-    // set button target group
-    if (getButtonInputCount() > 0) {
-      setButtonGroupMembership(_groupId);
-      setDeviceButtonActiveGroup(_groupId);
+    addToGroup(groupId);
+
+    // check button target group
+    if (getButtonInputCount() > 0 && groupId != m_ButtonActiveGroup) {
+
+      // change from joker to a color -> reset button input to standard (for UMR???)
+      if ((oldGroupId == ColorIDBlack) && (groupId != ColorIDBlack) &&
+          hasInput() && (getButtonInputMode() != DEV_PARAM_BUTTONINPUT_STANDARD)) {
+        setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+        setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+      }
+
+      setDeviceButtonActiveGroup(groupId);
     }
-    // set binary input to target group
-    if (getBinaryInputCount() == 1) {
-      setDeviceBinaryInputTargetId(0, _groupId);
-      setBinaryInputTargetId(0, _groupId);
     }
+
     updateIconPath();
   } // setDeviceJokerGroup
 

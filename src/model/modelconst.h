@@ -380,6 +380,7 @@ namespace dss {
   const int GroupIDGlobalAppUserMin = 188;
   const int GroupIDGlobalAppUserMax = 249;
   const int GroupIDGlobalAppMax = 249;
+  const int GroupIDNotApplicable = 255;
 
   inline bool isDefaultGroup(int groupId) {
     return ((groupId >= GroupIDYellow && groupId <= GroupIDStandardMax)) ||
