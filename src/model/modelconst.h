@@ -203,6 +203,7 @@ namespace dss {
   /// Status field types used in high level API
   ///
   /// The enum values are used also as bit on ds bus as bit indexes in SensorType::Status value.
+  /// Definition available in ds-basics.pdf
   enum class StatusFieldType {
     MALFUNCTION = 1,
     SERVICE = 2,
