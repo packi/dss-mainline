@@ -818,8 +818,8 @@ namespace dss {
     if ((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
       ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etDeviceChanged, m_DSMeterDSID);
       pEvent->addParameter(m_ShortAddress);
-      sleep(3); // #8900: make sure all settings were really saved
       m_pApartment->getModelMaintenance()->addModelEvent(pEvent);
+      sleep(3); // #8900: make sure all settings were really saved
     }
 
     updateIconPath();
