@@ -643,11 +643,10 @@ namespace dss {
         }
       }
 
-      if ((pDevice->getJokerGroup() > 0) &&
-          (pPartnerDevice->getJokerGroup() > 0) &&
-          (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup())) {
+      if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
+          (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
         if (m_pStructureBusInterface != NULL) {
-          pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
+          manipulator.setJokerGroup(pPartnerDevice, pDevice->getJokerGroup());
         }
       }
       return json.successJSON();
@@ -745,11 +744,10 @@ namespace dss {
           // #3450 - remove slave devices from clusters
           manipulator.deviceRemoveFromGroups(pPartnerDevice);
 
-          if ((pDevice->getJokerGroup() > 0) &&
-              (pPartnerDevice->getJokerGroup() > 0) &&
-              (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup())) {
+          if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
+              (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
             if (m_pStructureBusInterface != NULL) {
-              pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
+              manipulator.setJokerGroup(pPartnerDevice, pDevice->getActiveGroup());
             }
           }
         } else {
