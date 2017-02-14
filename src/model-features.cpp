@@ -20,6 +20,7 @@
 
 */
 
+#include "model-features.h"
 #ifdef HAVE_CONFIG_H
   #include "config.h"
 #endif
@@ -31,7 +32,6 @@
 
 #include "base.h"
 #include "model/modelconst.h"
-#include "model-features.h"
 
 #define ARRAY_END(mf) (mf + ARRAY_SIZE(mf))
 

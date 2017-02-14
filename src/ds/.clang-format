@@ -3,6 +3,7 @@ Language:        Cpp
 BasedOnStyle: Google
 AccessModifierOffset : -4
 AlignAfterOpenBracket: false
+AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 ColumnLimit:     120

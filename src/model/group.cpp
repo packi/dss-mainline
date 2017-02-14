@@ -116,7 +116,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
         m_pApartment->allocateState(state);
       } catch (ItemDuplicateException& ex) {} // we only care that it exists
     }
-  } // getID
+  }
 
   int Group::getColor() const {
     return getApplicationTypeColor(m_ApplicationType);
