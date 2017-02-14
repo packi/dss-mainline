@@ -124,7 +124,7 @@ namespace dss {
     }
     result.DeviceType = static_cast<BusMemberDevice_t>(devType);
 
-    if (!busMemberIsDSMeter(result.DeviceType)) {
+    if (!busMemberIsLogicDSM(result.DeviceType)) {
       Logger::getInstance()->log("DSStructureQueryBusInterface::"
                                  "getDSMeterSpec: ignore bus member " + dsuid2str(_dsMeterID) +
                                  " with bus member type " + intToString(devType), lsInfo);
