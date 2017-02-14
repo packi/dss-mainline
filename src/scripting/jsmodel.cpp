@@ -2658,8 +2658,6 @@ namespace dss {
           return JS_FALSE;
         }
 
-        boost::shared_ptr<Group> group = DSS::getInstance()->getApartment().getZone(0)->getGroup(newGroupId);
-
         StructureManipulator manipulator(
             *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
             *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
@@ -2668,7 +2666,7 @@ namespace dss {
 
         jsrefcount ref = JS_SuspendRequest(cx);
         try {
-          manipulator.setJokerGroup(pDev, group);
+          manipulator.setJokerGroup(pDev, newGroupId);
           if (pDev->is2WayMaster()) {
             dsuid_t next;
             dsuid_get_next_dsuid(pDev->getDSID(), &next);
@@ -2681,7 +2679,7 @@ namespace dss {
               return JS_FALSE;
             }
 
-            manipulator.setJokerGroup(pPartnerDevice, group);
+            manipulator.setJokerGroup(pPartnerDevice, newGroupId);
           }
           JS_ResumeRequest(cx, ref);
           return JS_TRUE;

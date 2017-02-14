@@ -53,11 +53,7 @@ void VdcDbFetcher::asyncLoop() {
     return;
   }
   assert(m_period.count() != 0);
-  m_timer.expires_from_now(m_period);
-  m_timer.async_wait([=](const error_code &e) {
-    if (e) {
-      return; // aborted
-    }
+  m_timer.expiresFromNow(m_period, [this] {
     asyncLoop();
   });
 

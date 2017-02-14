@@ -94,8 +94,7 @@ namespace dss {
     /**
      * @ret device moved
      */
-    bool setJokerGroup(boost::shared_ptr<Device> device,
-                       boost::shared_ptr<Group> pGroup);
+    bool setJokerGroup(boost::shared_ptr<Device> device, int groupId);
 
     void setProperty(boost::shared_ptr<DSMeter> _dsMeter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties);
     vdcapi::Message getProperty(boost::shared_ptr<DSMeter> _dsMeter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);

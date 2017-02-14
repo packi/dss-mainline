@@ -129,11 +129,7 @@ void VdcToken::asyncLoop() {
     log("Token is valid.", lsDebug);
     timeout = m_expirePeriod / 10;
   }
-  m_timer.expires_from_now(timeout);
-  m_timer.async_wait([=](const error_code &e) {
-    if (e) {
-      return; // aborted
-    }
+  m_timer.expiresFromNow(timeout, [this] {
     asyncLoop();
   });
 }

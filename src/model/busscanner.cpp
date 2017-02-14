@@ -78,7 +78,7 @@ namespace dss {
         return false;
       }
       // bus member type can be read. We have to retry for interesting bus devices.
-      if (busMemberIsDSMeter(_dsMeter->getBusMemberType())) {
+      if (busMemberIsLogicDSM(_dsMeter->getBusMemberType())) {
         // for known bus device types retry the readout
         return false;
       }
@@ -114,11 +114,11 @@ namespace dss {
 
     // update powerline jumble state
     uint8_t state = DSM_STATE_UNKNOWN;
-    if (busMemberIsdSM(_dsMeter->getBusMemberType())) {
+    if (busMemberIsHardwareDSM(_dsMeter->getBusMemberType())) {
       if (getMeterState(_dsMeter, &state)) {
         _dsMeter->setState(state);
       }
-    } else if (busMemberIsDSMeter(_dsMeter->getBusMemberType())) {
+    } else if (busMemberIsLogicDSM(_dsMeter->getBusMemberType())) {
       _dsMeter->setState(DSM_STATE_IDLE);
     } else if (!_dsMeter->isSynchonized()) {
       log("scanDSMeter: dSMeter is not yet synchronized. Meter: " + 
@@ -352,15 +352,25 @@ namespace dss {
   } // scanDeviceOnBus
 
   bool BusScanner::initializeDeviceFromSpec(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec) {
-    log("InitializeDevice: DSID:        " + dsuid2str(_spec.DSID));
-    log("InitializeDevice: DSM-DSID:    " + dsuid2str(_dsMeter->getDSID()));
-    log("InitializeDevice: Address:     " + intToString(_spec.ShortAddress) +
+    log("InitializeDevice: DSID:       " + dsuid2str(_spec.DSID));
+    log("InitializeDevice: DSM-DSID:   " + dsuid2str(_dsMeter->getDSID()));
+    log("InitializeDevice: Address:    " + intToString(_spec.ShortAddress) +
         ", Active: " + intToString(_spec.ActiveState));
     log("InitializeDevice: Function-ID: " + unsignedLongIntToHexString(_spec.FunctionID) +
         ", Product-ID: " + unsignedLongIntToHexString(_spec.ProductID) +
         ", Revision-ID: " + unsignedLongIntToHexString(_spec.revisionId) +
         ", Vendor-ID: " + unsignedLongIntToHexString(_spec.VendorID)
         );
+    std::stringstream gr;
+    gr << "[";
+    std::copy(_spec.Groups.begin(), _spec.Groups.end(), std::ostream_iterator<int>(gr, ","));
+    gr << "]";
+    log("InitializeDevice: Groups:     " + gr.str());
+    log("InitializeDevice: ActiveGr:   " + intToString(_spec.activeGroup));
+    log("InitializeDevice: DefaultGr:  " + intToString(_spec.defaultGroup));
+    log("InitializeDevice: Button ID:  " + intToString(_spec.buttonID));
+    log("InitializeDevice: Button GroupMember: " + intToString(_spec.buttonGroupMembership));
+    log("InitializeDevice: Button ActiveGroup: " + intToString(_spec.buttonActiveGroup));
 
     boost::shared_ptr<Device> dev;
     try {

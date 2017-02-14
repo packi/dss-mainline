@@ -389,12 +389,11 @@ namespace dss {
       }
 
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
-      boost::shared_ptr<Group> group = m_Apartment.getZone(0)->getGroup(newGroupId);
       StructureManipulator manipulator(*m_pStructureBusInterface,
                                        *m_pStructureQueryBusInterface,
                                        m_Apartment);
 
-      if (manipulator.setJokerGroup(pDevice, group)) {
+      if (manipulator.setJokerGroup(pDevice, newGroupId)) {
         modifiedDevices.push_back(pDevice);
       }
 
@@ -409,7 +408,7 @@ namespace dss {
                          dsuid2str(next) + "'");
         }
 
-        manipulator.setJokerGroup(pPartnerDevice, group);
+        manipulator.setJokerGroup(pPartnerDevice, newGroupId);
       }
 
       JSONWriter json;
@@ -644,11 +643,10 @@ namespace dss {
         }
       }
 
-      if ((pDevice->getJokerGroup() > 0) &&
-          (pPartnerDevice->getJokerGroup() > 0) &&
-          (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup())) {
+      if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
+          (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
         if (m_pStructureBusInterface != NULL) {
-          pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
+          manipulator.setJokerGroup(pPartnerDevice, pDevice->getJokerGroup());
         }
       }
       return json.successJSON();
@@ -746,11 +744,10 @@ namespace dss {
           // #3450 - remove slave devices from clusters
           manipulator.deviceRemoveFromGroups(pPartnerDevice);
 
-          if ((pDevice->getJokerGroup() > 0) &&
-              (pPartnerDevice->getJokerGroup() > 0) &&
-              (pDevice->getJokerGroup() != pPartnerDevice->getJokerGroup())) {
+          if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
+              (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
             if (m_pStructureBusInterface != NULL) {
-              pPartnerDevice->setDeviceJokerGroup(pDevice->getJokerGroup());
+              manipulator.setJokerGroup(pPartnerDevice, pDevice->getActiveGroup());
             }
           }
         } else {

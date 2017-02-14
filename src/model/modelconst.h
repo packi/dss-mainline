@@ -203,9 +203,10 @@ namespace dss {
   /// Status field types used in high level API
   ///
   /// The enum values are used also as bit on ds bus as bit indexes in SensorType::Status value.
+  /// Definition available in ds-basics.pdf
   enum class StatusFieldType {
-    MALFUNCTION = 0,
-    SERVICE = 1,
+    MALFUNCTION = 1,
+    SERVICE = 2,
   };
   boost::optional<const char*> statusFieldTypeName(StatusFieldType x);
   boost::optional<StatusFieldType> statusFieldTypeFromName(const std::string& x);
@@ -380,6 +381,7 @@ namespace dss {
   const int GroupIDGlobalAppUserMin = 188;
   const int GroupIDGlobalAppUserMax = 249;
   const int GroupIDGlobalAppMax = 249;
+  const int GroupIDNotApplicable = 255;
 
   inline bool isDefaultGroup(int groupId) {
     return ((groupId >= GroupIDYellow && groupId <= GroupIDStandardMax)) ||
