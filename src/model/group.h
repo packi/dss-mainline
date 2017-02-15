@@ -98,6 +98,8 @@ namespace dss {
       return m_pApplicationBehavior->deserializeConfiguration(jsonConfiguration);
     }
 
+    std::vector<int> getAvailableScenes() { return m_pApplicationBehavior->getAvailableScenes(); }
+
     /** returns true if the group is configured and usable */
     bool isValid() const;
     void setIsValid(const bool _value) { m_IsValid = _value; }
