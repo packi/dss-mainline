@@ -69,7 +69,7 @@ namespace dss {
                                 DSS::getInstance()->getApartment().getZones();
     for (size_t i = 0; i < zones.size(); i++) {
       boost::shared_ptr<Zone> zone = zones.at(i);
-      if ((zone == NULL) || (zone->getID() == 0)) {
+      if (zone == NULL) {
         continue;
       }
 
@@ -79,22 +79,34 @@ namespace dss {
       json.startArray("groups");
 
       std::vector<boost::shared_ptr<Group> > groups = zone->getGroups();
-
       for (size_t g = 0; g < groups.size(); g++) {
         boost::shared_ptr<Group> group = groups.at(g);
-        if ((group->getID() == 0) || (group->getID() == 8) ||
-            (group->getID() == 6) || (group->getID() == 7)) {
-          continue;
+        if (group->getID() == GroupIDBroadcast) {
+            continue;
+        }
+        if (zone->getID() == 0) {
+          if (group->getID() < GroupIDGlobalAppMin) {
+            continue;
+          }
+        } else {
+          if ((group->getID() == GroupIDBlack) || (group->getID() == GroupIDRed) || (group->getID() == GroupIDGreen)) {
+            continue;
+          }
         }
 
+        bool hasRelevantDevices = false;
         Set devices = group->getDevices();
         for (int d = 0; d < devices.length(); d++) {
           boost::shared_ptr<Device> device = devices.get(d).getDevice();
-          if ((device->isPresent() == true) && (device->getOutputMode() != 0)) {
-            json.add(group->getID());
+          if ((device->hasOutput() && (device->getOutputMode() != 0)) || device->getHasActions()) {
+            hasRelevantDevices = true;
             break;
           }
         } // devices loop
+
+        if (hasRelevantDevices || group->hasConnectedDevices()) {
+          json.add(group->getID());
+        }
       } // groups loop
       json.endArray();
       json.endObject();
