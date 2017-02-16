@@ -1952,9 +1952,12 @@ namespace dss {
 
       m_iconPath += "_" + getColorString(deviceClass);
 
-      int jockerGroup = getJokerGroup();
-      if (jockerGroup > 0) {
-        m_iconPath += "_" + getColorString(jockerGroup);
+      int jokerGroupId = getJokerGroup();
+      if (jokerGroupId > 0) {
+        // static_cast to ApplicationType works for all currently valid (zone, apartment) groupIds
+        auto&& jokerApplicationType = static_cast<ApplicationType>(jokerGroupId);
+        auto&& jokerColor = getApplicationTypeColor(jokerApplicationType);
+        m_iconPath += "_" + getColorString(jokerColor);
       }
 
       m_iconPath += ".png";
