@@ -806,7 +806,7 @@ namespace dss {
     if (getButtonInputCount() > 0 && groupId != m_ButtonActiveGroup) {
 
       // change from joker to a color -> reset button input to standard (for UMR???)
-      if ((oldGroupId == ColorIDBlack) && (groupId != ColorIDBlack) &&
+      if ((oldGroupId == GroupIDBlack) && (groupId != GroupIDBlack) &&
           hasInput() && (getButtonInputMode() != DEV_PARAM_BUTTONINPUT_STANDARD)) {
         setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
         setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
