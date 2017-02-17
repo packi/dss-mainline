@@ -791,7 +791,7 @@ namespace dss {
       m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
       m_ButtonActiveGroup = _buttonActiveGroup;
     }
-  } // setDeviceActiveGroup
+  } // setDeviceButtonActiveGroup
 
   void Device::setDeviceJokerGroup(uint8_t groupId) {
     if (!isDefaultGroup(groupId) && !isGlobalAppDsGroup(groupId)) {
