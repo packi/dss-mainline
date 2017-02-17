@@ -36,6 +36,10 @@
 
 #include <digitalSTROM/dsuid.h>
 
+std::ostream& operator<<(std::ostream& stream, const dsuid_t &x) {
+    return stream << strdsuid(&x);
+}
+
 namespace dss {
 
 std::string dsuid2str(dsuid_t dsuid)

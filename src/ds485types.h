@@ -28,6 +28,8 @@
 #include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 
+std::ostream& operator<<(std::ostream& stream, const dsuid_t &x);
+
 namespace dss {
   /** Bus id of a device */
   typedef uint16_t devid_t;
