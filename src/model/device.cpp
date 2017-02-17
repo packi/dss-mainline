@@ -2065,29 +2065,14 @@ namespace dss {
   }
 
   int Device::getJokerGroup() const {
-    bool joker = false;
-
     DeviceClasses_t devCls = this->getDeviceClass();
     if (devCls != DEVICE_CLASS_SW) {
       return -1;
     }
 
-    // TODO: is this valid? "Joker group" of device will be first standard group <= 8?
-    for (int g = 1; g <= (int)DEVICE_CLASS_SW; g++) {
-      if (isInGroup(g)) {
-        if (g < (int)DEVICE_CLASS_SW) {
-          return g;
-        } else if (g == (int)DEVICE_CLASS_SW) {
-          joker = true;
-        }
-      }
-    }
-
-    if (joker == true) {
-      return (int)DEVICE_CLASS_SW;
-    }
-
-    return -1;
+    // TODO(someday): this may not be correct for (user) apartment groups
+    // without their own application type.
+    return m_ActiveGroup != GroupIDNotApplicable ? m_ActiveGroup : DEVICE_CLASS_SW;
   }
 
   void Device::setOemInfo(const unsigned long long _eanNumber,
