@@ -1663,7 +1663,10 @@ namespace dss {
       if ((multiDeviceIndex() == 2) && (getDeviceType() == DEVICE_TYPE_UMR)) {
         ret = ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
                (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH)   ||
-               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_2STEPS) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_3STEPS) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_PARALLEL)) &&
                IsEvenDsuid(m_DSID); // even dSID
       } else if (hasInput()) {
         ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
@@ -1693,7 +1696,10 @@ namespace dss {
       if ((getDeviceType() == DEVICE_TYPE_UMR) && (multiDeviceIndex() == 3)) {
         ret = ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
                (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH)   ||
-               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_2STEPS) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_3STEPS) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_PARALLEL)) &&
                (!IsEvenDsuid(m_DSID)); // odd dSID
       } else if (hasInput()) {
         // Only devices of type SDS, TKM and UMR can be paired.
