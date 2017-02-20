@@ -34,7 +34,6 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include <boost/flyweight.hpp>
-#include <boost/atomic.hpp>
 
 #include "src/logger.h"
 #include "expatparser.h"
@@ -431,7 +430,6 @@ namespace dss {
     uint8_t m_Flags;                              /*  1  1 */
     /* vtable */                                  /*  4  8 */
 
-    static boost::atomic<int> sm_NodeCounter;
     static std::vector<PropertyNodePtr> sm_EmptyChildNodes;
 
   private:
@@ -452,7 +450,7 @@ namespace dss {
     PropertyNode(const char* _name, int _index = 0);
     ~PropertyNode();
 
-    static int getNodeCount() { return sm_NodeCounter; }
+    static int getNodeCount();
 
     /** Returns the name of the property. */
     const std::string& getName() const {

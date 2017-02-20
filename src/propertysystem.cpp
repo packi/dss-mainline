@@ -38,6 +38,7 @@
 #include <cstring>
 #include <fstream>
 #include <boost/make_shared.hpp>
+#include <boost/atomic.hpp>
 #include <ds/log.h>
 
 #include "src/base.h"
@@ -201,8 +202,11 @@ namespace dss {
 
   __DEFINE_LOG_CHANNEL__(PropertyNode, lsInfo);
 
-  boost::atomic<int> PropertyNode::sm_NodeCounter;
+  static boost::atomic<int> sm_NodeCounter;
+
   std::vector<PropertyNodePtr> PropertyNode::sm_EmptyChildNodes;
+
+  int PropertyNode::getNodeCount() { return sm_NodeCounter; }
 
   PropertyNode::PropertyNode(const char* _name, int _index)
     : m_Name(_name),
