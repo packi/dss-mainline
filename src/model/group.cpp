@@ -88,10 +88,9 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
         // It is arguably bad idea to require full DSS instance to get IoService instance.
         // ModelMaintenance::initialize has similar workaround.
       if (m_ApplicationType == ApplicationType::ApartmentVentilation && !m_status) {
+        // Lazy initialization. Once the status is created, it can never be deleted.
+        // Device objects capture references to it.
         m_status.reset(new Status(*this));
-      }
-      if (m_ApplicationType != ApplicationType::ApartmentVentilation && m_status) {
-        m_status.reset();
       }
     }
 
@@ -268,7 +267,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     if (getZoneID() == 0) {
       return State_Unknown;
     }
-   
+
     // only publish states for light
     if (m_GroupID == GroupIDYellow) {
       try {
