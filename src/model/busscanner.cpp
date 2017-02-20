@@ -121,7 +121,7 @@ namespace dss {
     } else if (busMemberIsLogicDSM(_dsMeter->getBusMemberType())) {
       _dsMeter->setState(DSM_STATE_IDLE);
     } else if (!_dsMeter->isSynchonized()) {
-      log("scanDSMeter: dSMeter is not yet synchronized. Meter: " + 
+      log("scanDSMeter: dSMeter is not yet synchronized. Meter: " +
         dsuid2str(_dsMeter->getDSID()), lsWarning);
       return false;
     }
@@ -1000,7 +1000,7 @@ namespace dss {
             // disable controller ONLY on dsMeter.
             // keep configuration! Do not touch zone configuration!
             try {
-              StructureModifyingBusInterface& modifyingItf = 
+              StructureModifyingBusInterface& modifyingItf =
                 *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface());
               modifyingItf.synchronizeZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID(), disableConfig);
             } catch (std::runtime_error &err) {
