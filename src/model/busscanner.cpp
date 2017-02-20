@@ -99,7 +99,7 @@ namespace dss {
         ", ds Meter Type " + intToString(_dsMeter->getBusMemberType()), lsInfo);
 
     if (applyMeterSpec(_dsMeter)) {
-      if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x300)) {
+      if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x303)) {
         log("scanDSMeter: dSMeter is incompatible", lsWarning);
         _dsMeter->setDatamodelHash(hash.Hash);
         _dsMeter->setDatamodelModificationcount(hash.ModificationCount);
@@ -412,18 +412,6 @@ namespace dss {
     dev->setShortAddress(_spec.ShortAddress);
     dev->setDSMeter(_dsMeter);
     dev->setZoneID(_zone->getID());
-
-    auto dsmApiVersion = _dsMeter->getApiVersion();
-    if (dsmApiVersion < 0x303) {
-      log(ds::str("scanDeviceOnBus: dSMeter ", _dsMeter->getDSID(), " is incompatible. dsmApiVersion:", dsmApiVersion),
-          lsError);
-      // TODO(someday): Refuse the device? We have more and more code
-      // that depends on these 2 fiels and we rely on dsm to provide them/
-
-      _spec.activeGroup = 0;
-      _spec.defaultGroup = 0;
-    }
-
     dev->setPartiallyFromSpec(_spec);
     // TODO(someday): move more setters into setSpec
 
