@@ -1367,16 +1367,16 @@ namespace dss {
 
 
   PropertyParserProxy::PropertyParserProxy() : PropertyParser() {}
-  
+
   void PropertyParserProxy::elementStartCb(const char *_name,
                                            const char **_attrs) {
     elementStart(_name, _attrs);
   }
-  
+
   void PropertyParserProxy::elementEndCb(const char *_name) {
     elementEnd(_name);
   }
- 
+
   void PropertyParserProxy::characterDataCb(const XML_Char *_s, int _len) {
     characterData(_s, _len);
   }
@@ -1384,7 +1384,7 @@ namespace dss {
   void PropertyParserProxy::reset(PropertyNodePtr _node, bool _ignoreVersion) {
     reinitMembers(_node, _ignoreVersion);
   }
-  
+
   //=============================================== PropertyListener
 
   PropertyListener::~PropertyListener() {
