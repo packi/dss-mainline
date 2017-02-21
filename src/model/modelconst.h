@@ -263,6 +263,7 @@ namespace dss {
     Heating = 3,
     Audio = 4,
     Video = 5,
+    Joker = 8,
     Cooling = 9,
     Ventilation = 10,
     Window = 11,
