@@ -744,10 +744,13 @@ namespace dss {
       /* AKM with single input, active on removed group */
       _device->setDeviceBinaryInputTargetId(0, GroupIDBlack);
       _device->setBinaryInputTargetId(0, GroupIDBlack);
-    } else if (_group->getID() == _device->getButtonActiveGroup()) {
-      /* device has no output, button is active on removed group */
-      _device->setDeviceButtonActiveGroup(BUTTON_ACTIVE_GROUP_RESET);
     }
+
+    if (_group->getID() == _device->getButtonActiveGroup()) {
+      /* device has button that is active on removed group */
+      _device->setDeviceButtonActiveGroup(_device->getActiveGroup());
+    }
+
     {
       DeviceReference ref(_device, &m_Apartment);
       boost::shared_ptr<DeviceReference> pDevRef = boost::make_shared<DeviceReference>(ref);
