@@ -709,7 +709,10 @@ namespace dss {
           // hide 4th dsid
           if ((value == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
               (value == OUTPUT_MODE_BIPOLAR_SWITCH) ||
-              (value == OUTPUT_MODE_THREE_STAGE_SWITCH)) {
+              (value == OUTPUT_MODE_THREE_STAGE_SWITCH) ||
+              (value == OUTPUT_MODE_TEMPCONTROL_2OUT_2STEPS) ||
+              (value == OUTPUT_MODE_TEMPCONTROL_2OUT_3STEPS) ||
+              (value == OUTPUT_MODE_TEMPCONTROL_2OUT_PARALLEL)) {
             if (wasSlave == false) {
               action = "remove";
             }
@@ -729,25 +732,28 @@ namespace dss {
           json.add("device");
           toJSON(dr, json);
 
-          StructureManipulator manipulator(*m_pStructureBusInterface,
-                                           *m_pStructureQueryBusInterface,
-                                            m_Apartment);
+          // if the devices are connected move second device to proper zone and group
+          if (pPartnerDevice->is2WaySlave()) {
+            StructureManipulator manipulator(*m_pStructureBusInterface,
+                                             *m_pStructureQueryBusInterface,
+                                              m_Apartment);
 
-          if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
-            if (m_pStructureBusInterface != NULL) {
-              boost::shared_ptr<Zone> zone = m_Apartment.getZone(
-                                                        pDevice->getZoneID());
-              manipulator.addDeviceToZone(pPartnerDevice, zone);
+            if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
+              if (m_pStructureBusInterface != NULL) {
+                boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                          pDevice->getZoneID());
+                manipulator.addDeviceToZone(pPartnerDevice, zone);
+              }
             }
-          }
 
-          // #3450 - remove slave devices from clusters
-          manipulator.deviceRemoveFromGroups(pPartnerDevice);
+            // #3450 - remove slave devices from clusters
+            manipulator.deviceRemoveFromGroups(pPartnerDevice);
 
-          if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
-              (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
-            if (m_pStructureBusInterface != NULL) {
-              manipulator.setJokerGroup(pPartnerDevice, pDevice->getActiveGroup());
+            if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
+                (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
+              if (m_pStructureBusInterface != NULL) {
+                manipulator.setJokerGroup(pPartnerDevice, pDevice->getActiveGroup());
+              }
             }
           }
         } else {

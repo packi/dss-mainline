@@ -791,7 +791,7 @@ namespace dss {
       m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
       m_ButtonActiveGroup = _buttonActiveGroup;
     }
-  } // setDeviceActiveGroup
+  } // setDeviceButtonActiveGroup
 
   void Device::setDeviceJokerGroup(uint8_t groupId) {
     if (!isDefaultGroup(groupId) && !isGlobalAppDsGroup(groupId)) {
@@ -806,7 +806,7 @@ namespace dss {
     if (getButtonInputCount() > 0 && groupId != m_ButtonActiveGroup) {
 
       // change from joker to a color -> reset button input to standard (for UMR???)
-      if ((oldGroupId == ColorIDBlack) && (groupId != ColorIDBlack) &&
+      if ((oldGroupId == GroupIDBlack) && (groupId != GroupIDBlack) &&
           hasInput() && (getButtonInputMode() != DEV_PARAM_BUTTONINPUT_STANDARD)) {
         setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
         setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
@@ -1663,7 +1663,10 @@ namespace dss {
       if ((multiDeviceIndex() == 2) && (getDeviceType() == DEVICE_TYPE_UMR)) {
         ret = ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
                (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH)   ||
-               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_2STEPS) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_3STEPS) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_PARALLEL)) &&
                IsEvenDsuid(m_DSID); // even dSID
       } else if (hasInput()) {
         ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
@@ -1693,7 +1696,10 @@ namespace dss {
       if ((getDeviceType() == DEVICE_TYPE_UMR) && (multiDeviceIndex() == 3)) {
         ret = ((m_OutputMode == OUTPUT_MODE_TWO_STAGE_SWITCH) ||
                (m_OutputMode == OUTPUT_MODE_BIPOLAR_SWITCH)   ||
-               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH)) &&
+               (m_OutputMode == OUTPUT_MODE_THREE_STAGE_SWITCH) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_2STEPS) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_3STEPS) ||
+               (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_PARALLEL)) &&
                (!IsEvenDsuid(m_DSID)); // odd dSID
       } else if (hasInput()) {
         // Only devices of type SDS, TKM and UMR can be paired.
@@ -1952,9 +1958,12 @@ namespace dss {
 
       m_iconPath += "_" + getColorString(deviceClass);
 
-      int jockerGroup = getJokerGroup();
-      if (jockerGroup > 0) {
-        m_iconPath += "_" + getColorString(jockerGroup);
+      int jokerGroupId = getJokerGroup();
+      if (jokerGroupId > 0) {
+        // static_cast to ApplicationType works for all currently valid (zone, apartment) groupIds
+        auto&& jokerApplicationType = static_cast<ApplicationType>(jokerGroupId);
+        auto&& jokerColor = getApplicationTypeColor(jokerApplicationType);
+        m_iconPath += "_" + getColorString(jokerColor);
       }
 
       m_iconPath += ".png";
@@ -2062,29 +2071,14 @@ namespace dss {
   }
 
   int Device::getJokerGroup() const {
-    bool joker = false;
-
     DeviceClasses_t devCls = this->getDeviceClass();
     if (devCls != DEVICE_CLASS_SW) {
       return -1;
     }
 
-    // TODO: is this valid? "Joker group" of device will be first standard group <= 8?
-    for (int g = 1; g <= (int)DEVICE_CLASS_SW; g++) {
-      if (isInGroup(g)) {
-        if (g < (int)DEVICE_CLASS_SW) {
-          return g;
-        } else if (g == (int)DEVICE_CLASS_SW) {
-          joker = true;
-        }
-      }
-    }
-
-    if (joker == true) {
-      return (int)DEVICE_CLASS_SW;
-    }
-
-    return -1;
+    // TODO(someday): this may not be correct for (user) apartment groups
+    // without their own application type.
+    return m_ActiveGroup != GroupIDNotApplicable ? m_ActiveGroup : DEVICE_CLASS_SW;
   }
 
   void Device::setOemInfo(const unsigned long long _eanNumber,

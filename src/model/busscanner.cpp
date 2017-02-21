@@ -413,7 +413,13 @@ namespace dss {
     dev->setDSMeter(_dsMeter);
     dev->setZoneID(_zone->getID());
 
-    if (_dsMeter->getApiVersion() < 0x303) {
+    auto dsmApiVersion = _dsMeter->getApiVersion();
+    if (dsmApiVersion < 0x303) {
+      log(ds::str("scanDeviceOnBus: dSMeter ", _dsMeter->getDSID(), " is incompatible. dsmApiVersion:", dsmApiVersion),
+          lsError);
+      // TODO(someday): Refuse the device? We have more and more code
+      // that depends on these 2 fiels and we rely on dsm to provide them/
+
       _spec.activeGroup = 0;
       _spec.defaultGroup = 0;
     }
