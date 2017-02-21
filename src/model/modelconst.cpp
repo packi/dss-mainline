@@ -391,6 +391,7 @@ namespace dss {
         case ApplicationType::Heating: return stream << "heating";
         case ApplicationType::Audio: return stream << "audio";
         case ApplicationType::Video: return stream << "video";
+        case ApplicationType::Joker: return stream << "joker";
         case ApplicationType::Cooling: return stream << "cooling";
         case ApplicationType::Ventilation: return stream << "ventilation";
         case ApplicationType::Window: return stream << "window";
@@ -420,6 +421,8 @@ namespace dss {
         return ColorIDCyan;
       case ApplicationType::Video:
         return ColorIDViolet;
+      case ApplicationType::Joker:
+        return ColorIDBlack;
       case ApplicationType::None:
         return 0;
     }
