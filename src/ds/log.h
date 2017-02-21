@@ -82,6 +82,7 @@ constexpr const char *trimArg(const char *x) {
 // DS_REQUIRE(value >= 0, "Value cannot be negative.", value);
 // DS_FAIL_REQUIRE("Unknown", value);
 //
+#ifdef _DEBUG
 #define DS_REQUIRE(condition, ...) \
     if (DS_LIKELY(condition)) {} else \
         throw std::runtime_error(ds::str( \
@@ -92,7 +93,16 @@ constexpr const char *trimArg(const char *x) {
     throw std::runtime_error(ds::str( \
         "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
         __FILE__, ':', __LINE__))
-
+#else
+#define DS_REQUIRE(condition, ...) \
+    if (DS_LIKELY(condition)) {} else \
+        throw std::runtime_error(ds::str( \
+            "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
+            "condition:", #condition))
+#define DS_FAIL_REQUIRE(...) \
+    throw std::runtime_error(ds::str( \
+        "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__)))
+#endif
 // Assert the `condition` is true.
 // This macro should be used to check for bugs in the surrounding code (broken invariant, ...)
 // and its dependencies, but NOT to check for invalid input.
