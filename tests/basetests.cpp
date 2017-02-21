@@ -321,11 +321,24 @@ BOOST_AUTO_TEST_CASE(testCarCdrPath) {
   BOOST_CHECK_EQUAL(carCdrPath(path), "toe");
   BOOST_CHECK_EQUAL(carCdrPath(path), "");
 
+  path = "/foo/bar/baz";
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "foo");
+  BOOST_CHECK_EQUAL(path, "bar/baz");
+
+  path = "//foo//bar";
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "foo");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "");
+  BOOST_CHECK_EQUAL(carCdrPath(path), "bar");
+
   path = "";
   BOOST_CHECK_EQUAL(carCdrPath(path), "");
 
   path = "/";
   BOOST_CHECK_EQUAL(carCdrPath(path), "");
+  BOOST_CHECK_EQUAL(path, "");
 
   path = "last";
   BOOST_CHECK_EQUAL(carCdrPath(path), "last");

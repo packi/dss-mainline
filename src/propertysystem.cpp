@@ -38,6 +38,7 @@
 #include <cstring>
 #include <fstream>
 #include <boost/make_shared.hpp>
+#include <ds/log.h>
 
 #include "src/base.h"
 #include "src/foreach.h"
@@ -375,7 +376,6 @@ namespace dss {
 
       std::string head, tail = _propPath;
       head = carCdrPath(tail);
-      assert(!head.empty());
 
       PropertyNodePtr child = getPropertyByName(head);
       if (child == NULL) {
@@ -849,17 +849,18 @@ namespace dss {
 
       std::string nextOne, tail = _propPath;
       nextOne = carCdrPath(tail);
-      assert(!nextOne.empty());
 
       PropertyNodePtr nextNode = getPropertyByName(nextOne);
       if (nextNode == NULL) {
-        if (nextOne[nextOne.length() - 1] == '+') {
+        if (!nextOne.empty() && nextOne[nextOne.length() - 1] == '+') {
           nextOne.erase(nextOne.length() - 1, 1);
         }
         int index = getAndRemoveIndexFromPropertyName(nextOne);
         if (index == 0) {
           index = count(nextOne) + 1;
         }
+
+        DS_REQUIRE(!nextOne.empty(), "Cannot create property with empty name.", _propPath);
         nextNode = boost::make_shared<PropertyNode>(nextOne.c_str(), index);
         addChild(nextNode);
       }
