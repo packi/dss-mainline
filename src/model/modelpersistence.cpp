@@ -1126,10 +1126,13 @@ namespace dss {
           if (!_pGroup->getAssociatedSet().empty()) {
             addElementSimple(_ofs, _indent + 1, "associatedSet", _pGroup->getAssociatedSet());
           }
+        }
 
+        if (!sceneTagWritten) {
           sceneTagWritten = true;
           _ofs << doIndent(_indent + 1) << "<scenes>" << std::endl;
         }
+
         _ofs << doIndent(_indent + 2) << "<scene id=\"" << intToString(iScene) << "\">" << std::endl;
         _ofs << doIndent(_indent + 3) << "<name>" << XMLStringEscape(name) << "</name>" << std::endl;
         _ofs << doIndent(_indent + 2) << "</scene>" << std::endl;
