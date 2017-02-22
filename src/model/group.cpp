@@ -69,6 +69,17 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   } // isValid
 
   void Group::setApplicationType(ApplicationType applicationType) {
+    // check if we already have proper application type set
+    if (m_ApplicationType == applicationType) {
+      return;
+    }
+
+    // disallow changing for default groups
+    if ((isDefaultGroup(getID()) || (isGlobalAppDsGroup(getID()))) && (m_ApplicationType != ApplicationType::None)) {
+      log(ds::str("Group::setApplicationType: trying to set application type:", applicationType, " for default groupId:", getID()), lsError);
+      return;
+    }
+
     m_ApplicationType = applicationType;
 
     // remove potential entries from current object

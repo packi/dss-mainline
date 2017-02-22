@@ -124,7 +124,7 @@ namespace dss {
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDBlack, _zone));
     grp->setName("black");
-    grp->setApplicationType(ApplicationType::None);
+    grp->setApplicationType(ApplicationType::Joker);
     grp->setIsValid(true);
     _zone->addGroup(grp);
     grp.reset(new Group(GroupIDCooling, _zone));
