@@ -173,6 +173,7 @@ namespace dss {
     log(std::string("setInputType this:") + m_name
         + " inputType:" + intToString(static_cast<int>(inputType)), lsInfo);
     m_inputType = inputType;
+    updateStatusFieldHandle();
   }
 
   void DeviceBinaryInput::handleEvent(BinaryInputState inputState) {
@@ -216,7 +217,8 @@ namespace dss {
     StatusField* statusField = DS_NULLPTR;
     if (m_targetGroupId != 0) {
       if (auto type = statusFieldTypeForBinaryInputType(m_inputType)) {
-        if ((targetGroup = m_device.tryGetGroup(m_targetGroupId).lock())) {
+        // TODO(soon): status sensor fixed to apartment groups for now --> zone 0
+        if ((targetGroup = m_device.getApartment().getZone(0)->tryGetGroup(m_targetGroupId).lock())) {
           if (auto&& status = targetGroup->getStatus()) {
             statusField = &status->getField(*type);
           } else {
