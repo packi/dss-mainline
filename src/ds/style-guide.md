@@ -74,6 +74,30 @@ that the header is independent.
 Unit tests are placed in the same directory as the code being tested in "-test.cpp".
 Unit tests placed in seperate directory force a lot of jumping around directory structure.
 
+#### Enums
+
+Avoid `default:` case in `switch` for enum type to enable compiler warning
+when an enum option is missing.
+
+Enum variables are effectively just ints and may hold value that is not matching
+any declared enum option. Always handle these unknown values
+(Lazy Input Validation).
+
+````c++
+    Enum Vehicle { CAR, TRAIN };
+
+    std::string vehicleName(Vehicle x) {
+        switch (x) {
+            case Vehicle::CAR:
+                return "car";
+            case Vehicle::TRAIN: {
+                return "train";
+            }
+        }
+        return ds::str("unkown(", static_cast<int>(x), ")");
+    }
+````
+
 ## Formating rules
 
 ## Naming
