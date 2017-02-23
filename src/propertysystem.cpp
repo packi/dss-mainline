@@ -38,6 +38,7 @@
 #include <cstring>
 #include <fstream>
 #include <boost/make_shared.hpp>
+#include <boost/atomic.hpp>
 #include <ds/log.h>
 
 #include "src/base.h"
@@ -201,8 +202,11 @@ namespace dss {
 
   __DEFINE_LOG_CHANNEL__(PropertyNode, lsInfo);
 
-  boost::atomic<int> PropertyNode::sm_NodeCounter;
+  static boost::atomic<int> sm_NodeCounter;
+
   std::vector<PropertyNodePtr> PropertyNode::sm_EmptyChildNodes;
+
+  int PropertyNode::getNodeCount() { return sm_NodeCounter; }
 
   PropertyNode::PropertyNode(const char* _name, int _index)
     : m_Name(_name),
@@ -1367,16 +1371,16 @@ namespace dss {
 
 
   PropertyParserProxy::PropertyParserProxy() : PropertyParser() {}
-  
+
   void PropertyParserProxy::elementStartCb(const char *_name,
                                            const char **_attrs) {
     elementStart(_name, _attrs);
   }
-  
+
   void PropertyParserProxy::elementEndCb(const char *_name) {
     elementEnd(_name);
   }
- 
+
   void PropertyParserProxy::characterDataCb(const XML_Char *_s, int _len) {
     characterData(_s, _len);
   }
@@ -1384,7 +1388,7 @@ namespace dss {
   void PropertyParserProxy::reset(PropertyNodePtr _node, bool _ignoreVersion) {
     reinitMembers(_node, _ignoreVersion);
   }
-  
+
   //=============================================== PropertyListener
 
   PropertyListener::~PropertyListener() {
