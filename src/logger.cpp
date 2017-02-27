@@ -30,7 +30,6 @@
 #include "foreach.h"
 #include "datetools.h"
 
-#include <cassert>
 #include <iostream>
 #include <boost/make_shared.hpp>
 #include <boost/thread/mutex.hpp>
@@ -102,7 +101,6 @@ namespace dss {
     if(m_Instance == NULL) {
       m_Instance = new Logger();
     }
-    assert(m_Instance != NULL);
     return m_Instance;
   } // getInstance
 
