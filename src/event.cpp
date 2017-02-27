@@ -50,6 +50,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <web/webserver.h>
+#include "propertysystem_common_paths.h"
 
 using std::set;
 

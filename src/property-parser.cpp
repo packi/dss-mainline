@@ -30,6 +30,8 @@
 
 #include "property-parser.h"
 
+#include <boost/thread/recursive_mutex.hpp>
+
 #include "src/base.h"
 
 namespace dss {

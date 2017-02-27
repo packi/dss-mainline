@@ -39,6 +39,7 @@
 #include <fstream>
 #include <boost/make_shared.hpp>
 #include <boost/atomic.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <ds/log.h>
 
 #include "src/base.h"

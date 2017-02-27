@@ -25,18 +25,18 @@
 #ifndef NEUROPROPERTYSYSTEM_H
 #define NEUROPROPERTYSYSTEM_H
 
-#include <stdexcept>
 #include <vector>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/thread/recursive_mutex.hpp>
 #include <boost/flyweight.hpp>
 
 #include "src/logger.h"
-#include "dssfwd.h"
-#include "propertysystem_common_paths.h"
+
+namespace boost {
+class recursive_mutex;
+} // namespace boost
 
 namespace dss {
 

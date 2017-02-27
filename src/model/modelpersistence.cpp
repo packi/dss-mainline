@@ -46,6 +46,7 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/model/modelconst.h"
+#include "propertysystem_common_paths.h"
 
 namespace dss {
 

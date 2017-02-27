@@ -29,6 +29,7 @@ along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
+#include "dssfwd.h"
 
 namespace dss {
 
