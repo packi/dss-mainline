@@ -37,6 +37,7 @@
 #include "src/util.h"
 #include "src/backtrace.h"
 #include "src/propertysystem.h"
+#include "src/property-parser.h"
 #include "src/ds485types.h"
 #include "src/model/apartment.h"
 #include "src/model/device.h"

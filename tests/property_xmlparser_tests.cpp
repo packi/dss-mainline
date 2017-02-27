@@ -31,6 +31,7 @@
 #include "src/base.h"
 #include "src/expatparser.h"
 #include "src/propertysystem.h"
+#include "src/property-parser.h"
 
 #include "tests/util/dss_instance_fixture.h"
 

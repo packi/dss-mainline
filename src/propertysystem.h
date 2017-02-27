@@ -35,7 +35,6 @@
 #include <boost/flyweight.hpp>
 
 #include "src/logger.h"
-#include "expatparser.h"
 #include "dssfwd.h"
 #include "propertysystem_common_paths.h"
 
@@ -137,40 +136,6 @@ namespace dss {
     bool setStringValue(const std::string& _propPath, const std::string& _value,
                         bool _mayCreate = true, bool _mayOverwrite = true);
   }; //  PropertySystem
-
-  class PropertyParser : public ExpatParser
-  {
-  public:
-    PropertyParser();
-    bool loadFromXML(const std::string& _fileName, PropertyNodePtr _node,
-                     bool _ignoreVersion = false);
-
-  private:
-    int m_level;
-    bool m_ignoreVersion;
-    bool m_expectValue;
-    bool m_ignore;
-    aValueType m_currentValueType;
-    std::vector<PropertyNodePtr> m_nodes;
-    PropertyNodePtr m_currentNode;
-    std::string m_temporaryValue;
-
-  protected:
-    void reinitMembers(PropertyNodePtr _node, bool ignoreVersion = false);
-    virtual void elementStart(const char *_name, const char **_attrs);
-    virtual void elementEnd(const char *_name);
-    virtual void characterData(const XML_Char *_s, int _len);
-  };
-
-  class PropertyParserProxy : public PropertyParser
-  {
-  public:
-    PropertyParserProxy();
-    void reset(PropertyNodePtr _node, bool ignoreVersion = false);
-    void elementStartCb(const char *_name, const char **_attrs);
-    void elementEndCb(const char *_name);
-    void characterDataCb(const XML_Char *_s, int _len);
-  };
 
   /** Abstract base class for property proxies.
    * A property-proxy can be linked to a property node. By

@@ -33,6 +33,7 @@
 #include "src/event/event_fields.h"
 #include "src/subscription.h"
 #include "src/propertysystem.h"
+#include "src/property-parser.h"
 #include "src/setbuilder.h"
 #include "src/model/apartment.h"
 #include "src/model/modelmaintenance.h"
