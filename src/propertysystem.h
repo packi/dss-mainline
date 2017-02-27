@@ -27,7 +27,6 @@
 
 #include <stdexcept>
 #include <vector>
-#include <stack>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
@@ -152,11 +151,10 @@ namespace dss {
     bool m_expectValue;
     bool m_ignore;
     aValueType m_currentValueType;
-    std::stack<PropertyNodePtr> m_nodes;
+    std::vector<PropertyNodePtr> m_nodes;
     PropertyNodePtr m_currentNode;
     std::string m_temporaryValue;
 
-    void clearStack();
   protected:
     void reinitMembers(PropertyNodePtr _node, bool ignoreVersion = false);
     virtual void elementStart(const char *_name, const char **_attrs);

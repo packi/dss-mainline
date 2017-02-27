@@ -1195,7 +1195,7 @@ namespace dss {
         // we're not pushing the interim nodes that may have been created above
         // because the XML does not know anything about the weirdo-property
         // tree structure
-        m_nodes.push(m_currentNode);
+        m_nodes.push_back(m_currentNode);
         m_currentNode = node;
       } else if (strcmp(_name, "value") == 0)  { // we encountered a value tag
         if (m_currentValueType == vTypeNone) {
@@ -1255,8 +1255,8 @@ namespace dss {
       // handle position in the document, we only put property nodes into the
       // stack
       if (strcmp(_name, "property") == 0) {
-        m_currentNode = m_nodes.top();
-        m_nodes.pop();
+        m_currentNode = m_nodes.back();
+        m_nodes.pop_back();
         m_currentValueType = vTypeNone;
       } else if (strcmp(_name, "value") == 0) {
         switch (m_currentValueType) {
@@ -1332,13 +1332,6 @@ namespace dss {
     }
   }
 
-  void PropertyParser::clearStack()
-  {
-    while (!m_nodes.empty()) {
-      m_nodes.pop();
-    }
-  }
-
   void PropertyParser::reinitMembers(PropertyNodePtr _node,
                                      bool _ignoreVersion) {
     // the propety parser class instance can be reused, so we will reset
@@ -1350,9 +1343,9 @@ namespace dss {
     m_currentValueType = vTypeNone;
     m_currentNode = _node;
     m_temporaryValue.clear();
-    clearStack();
+    m_nodes.clear();
 
-    m_nodes.push(_node);
+    m_nodes.push_back(_node);
     m_currentNode = _node;
   }
 
@@ -1365,7 +1358,7 @@ namespace dss {
     reinitMembers(_node, _ignoreVersion);
 
     bool ret = parseFile(_fileName);
-    clearStack();
+    m_nodes.clear();
     return ret;
   } // loadFromXML
 
