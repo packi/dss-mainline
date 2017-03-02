@@ -270,6 +270,7 @@ namespace dss {
     Recirculation = 12,
     ControlTemperature = 48,
     ApartmentVentilation = 64,
+    ApartmentRecirculation = 69,
   };
 
   std::ostream& operator<<(std::ostream& stream, ApplicationType type);
@@ -378,6 +379,7 @@ namespace dss {
   const int GroupIDGlobalAppMin = 64;
   const int GroupIDGlobalAppDsMin = 64;
   const int GroupIDGlobalAppDsVentilation = 64;
+  const int GroupIDGlobalAppDsRecirculation = 69;
   const int GroupIDGlobalAppDsMax = 187;
   const int GroupIDGlobalAppUserMin = 188;
   const int GroupIDGlobalAppUserMax = 249;

@@ -100,6 +100,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     case ApplicationType::Cooling:
     case ApplicationType::Window:
     case ApplicationType::Recirculation:
+    case ApplicationType::ApartmentRecirculation:
     case ApplicationType::ControlTemperature:
       m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
       break;
