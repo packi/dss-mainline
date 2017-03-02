@@ -24,9 +24,14 @@
 // prediction.
 #define DS_LIKELY(condition) __builtin_expect(bool(condition), true)
 #define DS_UNLIKELY(condition) __builtin_expect(bool(condition), false)
+#define DS_NORETURN __attribute__((noreturn))
+
 #else
+
 #define DS_LIKELY(condition) (bool(condition))
 #define DS_UNLIKELY(condition) (bool(condition))
+#define DS_NORETURN
+
 #endif
 
 /// Macro expanding to `,`. Useful to pass comma to macro without starting next argument

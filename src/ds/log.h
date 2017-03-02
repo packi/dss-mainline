@@ -119,10 +119,10 @@ namespace _private {
 /// Trim file for logging purporses.
 std::string trimFile(std::string file);
 
-/// Assert with given message
+/// Assert (abort or throw) with given message.
 ///
 /// assert is macro, so we cannot reuse its name here
-void assert_(const std::string &message);
+DS_NORETURN void assert_(const std::string &message);
 } // namespace _private
 
 } // namespace log
