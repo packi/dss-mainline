@@ -88,6 +88,8 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     switch (applicationType) {
     case ApplicationType::Ventilation:
     case ApplicationType::ApartmentVentilation:
+    case ApplicationType::Recirculation:
+    case ApplicationType::ApartmentRecirculation:
       m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode, getLastCalledScene()));
       break;
     case ApplicationType::None:
@@ -99,8 +101,6 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     case ApplicationType::Joker:
     case ApplicationType::Cooling:
     case ApplicationType::Window:
-    case ApplicationType::Recirculation:
-    case ApplicationType::ApartmentRecirculation:
     case ApplicationType::ControlTemperature:
       m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
       break;
