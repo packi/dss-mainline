@@ -198,6 +198,21 @@ namespace dss {
   SystemEventActionExecute::~SystemEventActionExecute() {
   }
 
+  std::string SystemEventActionExecute::getActionName(PropertyNodePtr _actionNode) {
+      std::string action_name;
+      PropertyNode *parent1 = _actionNode->getParentNode();
+      if (parent1 != NULL) {
+          PropertyNode *parent2 = parent1->getParentNode();
+          if (parent2 != NULL) {
+              PropertyNodePtr name = parent2->getPropertyByName("name");
+              if (name != NULL) {
+                  action_name = name->getAsString();
+              }
+          }
+      }
+      return action_name;
+  }
+
   void SystemEventActionExecute::executeZoneScene(PropertyNodePtr _actionNode) {
     try {
       int zoneId;

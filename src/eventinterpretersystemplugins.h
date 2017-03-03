@@ -111,6 +111,7 @@ namespace dss {
       std::string m_delay;
       std::string m_path;
 
+      std::string getActionName(PropertyNodePtr _actionNode);
       boost::shared_ptr<Device> getDeviceFromNode(PropertyNodePtr _actionNode);
       void executeZoneScene(PropertyNodePtr _actionNode);
       void executeZoneUndoScene(PropertyNodePtr _actionNode);
