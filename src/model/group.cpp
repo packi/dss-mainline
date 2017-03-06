@@ -232,16 +232,14 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     }
     if (m_GroupID == GroupIDYellow) {
       try {
-        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
-                                               intToString(getZoneID()) +
-                                                                ".light");
+        DS_ASSERT(m_ApplicationType == ApplicationType::Lights);
+        auto state = m_pApartment->getNonScriptState(State::makeGroupName(*this));
         state->setState(_origin, _on == true ? State_Active : State_Inactive);
       } catch (ItemNotFoundException& ex) {} // should never happen
     } else if (m_GroupID == GroupIDHeating) {
       try {
-        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
-                                               intToString(getZoneID()) +
-                                                                ".heating");
+        DS_ASSERT(m_ApplicationType == ApplicationType::Heating);
+        auto state = m_pApartment->getNonScriptState(State::makeGroupName(*this));
         state->setState(_origin, _on == true ? State_Active : State_Inactive);
       } catch (ItemNotFoundException& ex) {} // should never happen
     }
@@ -255,9 +253,8 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       SceneHelper::SceneOnState isOn = SceneHelper::isOnScene(m_GroupID, _sceneId);
       if (isOn != SceneHelper::DontCare) {
         try {
-          boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
-                                                 intToString(getZoneID()) +
-                                                                ".light");
+          DS_ASSERT(m_ApplicationType == ApplicationType::Lights);
+          auto state = m_pApartment->getNonScriptState(State::makeGroupName(*this));
           state->setState(_origin, isOn == SceneHelper::True ? State_Active : State_Inactive);
         } catch (ItemNotFoundException& ex) {} // should never happen
       }
@@ -265,9 +262,8 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       SceneHelper::SceneOnState isOn = SceneHelper::isOnScene(m_GroupID, _sceneId);
       if (isOn != SceneHelper::DontCare) {
         try {
-          boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
-                                                 intToString(getZoneID()) +
-                                                                ".heating");
+          DS_ASSERT(m_ApplicationType == ApplicationType::Heating);
+          auto state = m_pApartment->getNonScriptState(State::makeGroupName(*this));
           state->setState(_origin, isOn == SceneHelper::True ? State_Active : State_Inactive);
         } catch (ItemNotFoundException& ex) {} // should never happen
       }
@@ -282,16 +278,14 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     // only publish states for light
     if (m_GroupID == GroupIDYellow) {
       try {
-        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
-                                               intToString(getZoneID()) +
-                                                                ".light");
+        DS_ASSERT(m_ApplicationType == ApplicationType::Lights);
+        auto state = m_pApartment->getNonScriptState(State::makeGroupName(*this));
         return static_cast<eState>(state->getState());
       } catch (ItemNotFoundException& ex) {} // should never happen
     } else if (m_GroupID == GroupIDHeating) {
       try {
-        boost::shared_ptr<State> state = m_pApartment->getNonScriptState("zone." +
-                                               intToString(getZoneID()) +
-                                                                ".heating");
+        DS_ASSERT(m_ApplicationType == ApplicationType::Heating);
+        auto state = m_pApartment->getNonScriptState(State::makeGroupName(*this));
         return static_cast<eState>(state->getState());
       } catch (ItemNotFoundException& ex) {} // should never happen
     }
