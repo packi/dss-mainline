@@ -552,10 +552,9 @@ namespace dss {
         typeName + " [" + intToString(sensorType) + "];" +
         sensorValueFloat + " [" + sensorValue + "];" +
         zoneName + ";" + groupName + ";" + origName + ";");
-    }
+  }
 
-    void SystemEventLog::logStateChange(
-      boost::shared_ptr<ScriptLogger> _logger,
+  void SystemEventLog::logStateChange(boost::shared_ptr<ScriptLogger> _logger,
       boost::shared_ptr<const State> _st,
       const std::string& _statename, const std::string& _state, const std::string& _value,
       const std::string& _origin_device_id, const callOrigin_t _callOrigin) {
