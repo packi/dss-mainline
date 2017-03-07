@@ -45,6 +45,7 @@
 #include "src/stringconverter.h"
 #include "util.h"
 #include "unix/systeminfo.h"
+#include "propertysystem_common_paths.h"
 
 namespace dss {
 

@@ -46,6 +46,7 @@
 #include <math.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <src/messages/vdcapi.pb.h>
 
 
 namespace dss {

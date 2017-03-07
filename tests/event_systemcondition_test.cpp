@@ -30,6 +30,7 @@
 #include "src/dss.h"
 #include "src/event.h"
 #include "src/propertysystem.h"
+#include "src/property-parser.h"
 #include "src/systemcondition.h"
 
 #include "tests/util/dss_instance_fixture.h"

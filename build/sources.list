@@ -123,6 +123,8 @@ libdsscore_a_SOURCES =  \
 	../src/model/zone.h \
 	../src/monitor_tasks.cpp \
 	../src/monitor_tasks.h \
+	../src/property-parser.cpp \
+	../src/property-parser.h \
 	../src/propertyquery.cpp \
 	../src/propertyquery.h \
 	../src/propertysystem.cpp \

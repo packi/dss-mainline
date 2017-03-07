@@ -28,7 +28,10 @@
 #include <vector>
 #include <inttypes.h>
 #include <boost/shared_ptr.hpp>
-#include <src/messages/vdcapi.pb.h>
+
+namespace vdcapi {
+class PropertyValue;
+} // namespace vdcapi
 
 namespace dss {
 

@@ -23,7 +23,6 @@
 #ifndef DS485GROUPSCENECONST_H_
 #define DS485GROUPSCENECONST_H_
 
-#include <stdint.h>
 #include <string>
 #include <boost/optional.hpp>
 

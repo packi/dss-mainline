@@ -18,6 +18,7 @@
 #include "model/group.h"
 #include "webservice_api.h"
 #include "web/webrequests.h"
+#include "propertysystem_common_paths.h"
 
 
 namespace dss {

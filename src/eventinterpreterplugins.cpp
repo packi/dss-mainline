@@ -74,6 +74,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <json.h>
+#include "propertysystem_common_paths.h"
 
 namespace dss {
 
