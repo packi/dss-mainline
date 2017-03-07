@@ -405,23 +405,32 @@ std::string SystemState::getData(int *zoneId, int *groupId, int *sceneId,
     originDSUID = m_properties.get(ef_originDSUID);
   }
 
-  if (((m_evtRaiseLocation == erlGroup) ||
-       (m_evtRaiseLocation == erlApartment)) && (m_raisedAtGroup != NULL)) {
-      *zoneId = m_raisedAtGroup->getZoneID();
-      *groupId = m_raisedAtGroup->getID();
-  } else if ((m_evtRaiseLocation == erlState) && (m_raisedAtState != NULL)) {
-    if (m_raisedAtState->getType() == StateType_Device) {
-      boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
-      *zoneId = device->getZoneID();
-      originDSUID = dsuid2str(device->getDSID());
-    } else if (m_raisedAtState->getType() == StateType_Group) {
-      boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
-      *zoneId = group->getZoneID();
-      *groupId = group->getID();
-    }
-  } else if ((m_evtRaiseLocation == erlDevice) &&
-             (m_raisedAtDevice != NULL)) {
-    originDSUID = dsuid2str(m_raisedAtDevice->getDSID());
+  switch (m_evtRaiseLocation) {
+    case erlGroup:
+    case erlApartment:
+      if (m_raisedAtGroup != NULL) {
+        *zoneId = m_raisedAtGroup->getZoneID();
+        *groupId = m_raisedAtGroup->getID();
+      }
+      break;
+    case  erlState:
+      if (m_raisedAtState != NULL) {
+        if (m_raisedAtState->getType() == StateType_Device) {
+          boost::shared_ptr<Device> device = m_raisedAtState->getProviderDevice();
+          *zoneId = device->getZoneID();
+          originDSUID = dsuid2str(device->getDSID());
+        } else if (m_raisedAtState->getType() == StateType_Group) {
+          boost::shared_ptr<Group> group = m_raisedAtState->getProviderGroup();
+          *zoneId = group->getZoneID();
+          *groupId = group->getID();
+        }
+      }
+      break;
+    case erlDevice:
+      if (m_raisedAtDevice != NULL) {
+        originDSUID = dsuid2str(m_raisedAtDevice->getDSID());
+      }
+      break;
   }
 
   return originDSUID;
