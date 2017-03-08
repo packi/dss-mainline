@@ -28,7 +28,7 @@
 
 #include "devicecontainer.h"
 #include "addressablemodelitem.h"
-#include "state.h"
+#include "stateconst.h"
 #include "src/businterface.h"
 
 namespace dss {
