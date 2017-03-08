@@ -697,7 +697,7 @@ void SystemState::stateBinaryinput() {
     return;
   }
 
-  uint8_t inputIndex = (uint8_t)iiNode->getIntegerValue();
+  uint8_t inputIndex = static_cast<uint8_t>(iiNode->getIntegerValue());
   auto&& devInput = pDev->getBinaryInput(inputIndex);
 
   if (devInput->m_inputId != BinaryInputId::APP_MODE) {
