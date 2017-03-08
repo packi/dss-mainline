@@ -116,7 +116,7 @@ namespace dss {
         + " inputType:" + intToString(static_cast<int>(m_inputType))
         + " inputId:" + intToString(static_cast<int>(m_inputId))
         + " targetGroupId:" + intToString(m_targetGroupId), lsInfo);
-    m_state = boost::make_shared<State>(device.sharedFromThis(), index);
+    m_state = boost::make_shared<BinaryInputState>(device.sharedFromThis(), index);
 
     // assignCustomBinaryInputValues
     if (m_inputType == BinaryInputType::WindowTilt) {

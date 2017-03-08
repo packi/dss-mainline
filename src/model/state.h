@@ -44,7 +44,7 @@ namespace dss {
   class State : public boost::noncopyable,
                 public boost::enable_shared_from_this<State> {
 
-  private:
+  protected:
     PropertyNodePtr m_pPropertyNode;
     std::string m_name;
     StatePersistency m_persistency;
@@ -71,16 +71,19 @@ namespace dss {
     /** Custom values for a state */
     std::vector<std::string> m_values;
 
-  private:
+  protected:
     void save();
     void load();
     std::string getStorageName();
+
+    /// used by derived classes to construct base class
+    /// note it will not load persistent date or publish state to property tree
+    State(const std::string& name, eStateType type, eState initState, StatePersistency persistency);
 
   public:
     /** Constructs a state. */
     State(const std::string& _name);
     State(eStateType _type, const std::string& _name, const std::string& _identifier = std::string());
-    State(boost::shared_ptr<Device> _device, int _inputIndex);
     State(boost::shared_ptr<Device> _device, const std::string& stateName);
     static std::string makeGroupName(const Group& group);
     State(boost::shared_ptr<Group> _group, const std::string& name);
@@ -155,6 +158,13 @@ namespace dss {
     void setOriginDeviceDSUID(const dsuid_t _dsuid);
     std::string getOriginDeviceDSUIDString() const { return dsuid2str(m_originDeviceDSUID); }
   }; // State
+
+  class BinaryInputState : public State {
+    std::string makeName(const dsuid_t &dsuid, int inputIndex);
+  public:
+    BinaryInputState(boost::shared_ptr<Device> device, int inputIndex);
+    ~BinaryInputState();
+  };
 
   /** Represents a class for Device sensor value state.*/
   class StateSensor : public State {

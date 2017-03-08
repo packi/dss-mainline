@@ -48,6 +48,17 @@ namespace dss {
 
   const std::string State::INVALID("invalid");
 
+  State::State(const std::string& name, eStateType type, eState initState, StatePersistency persistency)
+    : m_name(name),
+      m_persistency(persistency),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
+      m_state(initState),
+      m_type(type)
+  {
+    // common base class; no load/publishToPropertyTree until fully initialized
+  }
+
   State::State(const std::string& _name)
     : m_name(_name),
       m_persistency(StatePersistency::volatile_),
@@ -75,19 +86,23 @@ namespace dss {
     publishToPropertyTree();
   }
 
-  State::State(boost::shared_ptr<Device> _device, int _inputIndex) :
-      m_name("dev." + dsuid2str(_device->getDSID()) + "." + intToString(_inputIndex)),
-      m_persistency(StatePersistency::persistent),
-      m_callOrigin(coUnknown),
-      m_originDeviceDSUID(DSUID_NULL),
-      m_state(State_Invalid),
-      m_type(StateType_Device),
-      m_providerDev(_device),
-      m_providerDevInput(_inputIndex)
+  std::string BinaryInputState::makeName(const dsuid_t &dsuid, int inputIndex) {
+    return "dev." + dsuid2str(dsuid) + "." + intToString(inputIndex);
+  }
+
+  BinaryInputState::BinaryInputState(boost::shared_ptr<Device> device, int inputIndex) :
+    State(makeName(device->getDSID(), inputIndex),
+          StateType_Device,
+          State_Invalid,
+          StatePersistency::persistent)
   {
+    m_providerDev = device,
+    m_providerDevInput = inputIndex;
     load();
     publishToPropertyTree();
   }
+
+  BinaryInputState::~BinaryInputState() = default;
 
   State::State(boost::shared_ptr<Device> _device, const std::string& stateName) :
       m_name("dev." + dsuid2str(_device->getDSID()) + "." + stateName),
