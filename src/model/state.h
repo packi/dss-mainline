@@ -30,16 +30,11 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/optional.hpp>
 
+#include "dssfwd.h"
 #include "ds485types.h"
 #include "stateconst.h"
 
 namespace dss {
-  class Device;
-  class Group;
-  class Zone;
-  class DSMeter;
-
-
   /** Represents a common class for Device, Service and Apartment states.*/
   class State : public boost::noncopyable,
                 public boost::enable_shared_from_this<State> {
