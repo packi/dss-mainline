@@ -31,6 +31,7 @@
 #include <boost/optional.hpp>
 
 #include "ds485types.h"
+#include "stateconst.h"
 
 namespace dss {
   class Device;
@@ -38,31 +39,6 @@ namespace dss {
   class Zone;
   class DSMeter;
 
-  typedef enum {
-    State_Invalid = 0,
-    State_Active = 1,
-    State_Inactive = 2,
-    State_Unknown = 3,
-  } eState;
-
-  typedef enum {
-    StateWH_Invalid = 0,
-    StateWH_Closed = 1,
-    StateWH_Open = 2,
-    StateWH_Tilted = 3,
-    StateWH_Unknown = 4,
-  } eStateWindowHandle;
-
-  typedef enum {
-    StateType_Apartment = 0,
-    StateType_Device = 1,
-    StateType_Service = 2,
-    StateType_Group = 3,
-    StateType_Script = 4,
-    StateType_SensorZone = 5,
-    StateType_SensorDevice = 6,
-    StateType_Circuit = 7,
-  } eStateType;
 
   /** Represents a common class for Device, Service and Apartment states.*/
   class State : public boost::noncopyable,
