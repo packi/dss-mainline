@@ -30,21 +30,6 @@ SystemEvent::SystemEvent() : Task() {
 SystemEvent::~SystemEvent() {
 }
 
-std::string SystemEvent::getActionName(PropertyNodePtr _actionNode) {
-  std::string action_name;
-  PropertyNode *parent1 = _actionNode->getParentNode();
-  if (parent1 != NULL) {
-    PropertyNode *parent2 = parent1->getParentNode();
-    if (parent2 != NULL) {
-      PropertyNodePtr name = parent2->getPropertyByName("name");
-      if (name != NULL) {
-        action_name = name->getAsString();
-      }
-    }
-  }
-  return action_name;
-}
-
 bool SystemEvent::setup(Event& _event) {
   m_properties = _event.getProperties();
   return true;

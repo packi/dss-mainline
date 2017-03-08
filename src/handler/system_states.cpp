@@ -208,12 +208,12 @@ void SystemState::bootstrap() {
 
   state = registerState(StateName::HeatingSystem, true);
   if (!state->hasPersistentData()) {
-    state->setState(coSystemStartup, "active");
+    state->setState(coSystemStartup, State_Active);
   }
 
   state = registerState(StateName::HeatingSystemMode, true);
   if (!state->hasPersistentData()) {
-    state->setState(coSystemStartup, "active"); // heating
+    state->setState(coSystemStartup, State_Active); // heating
   }
 
   state = registerState(StateName::HeatingModeControl, true);
