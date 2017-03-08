@@ -18,9 +18,15 @@
 */
 #pragma once
 
+#include <bitset>
+#include <vector>
+
 #include <boost/optional.hpp>
-#include <logger.h>
-#include "state.h"
+
+#include "dssfwd.h"
+#include "logger.h"
+#include "model/modelconst.h"
+#include "model/stateconst.h"
 
 namespace dss {
 class Status;
@@ -45,7 +51,7 @@ public:
   ~StatusField();
 
   Status& getStatus() { return m_status; }
-  const std::string getName() const { return m_state->getName(); }
+  const std::string getName() const;
   std::bitset<SENSOR_VALUE_BIT_MAX + 1> m_valueBitset;
   StatusFieldType getType() const { return m_type; }
 
