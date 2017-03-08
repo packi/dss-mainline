@@ -635,6 +635,10 @@ void SystemState::undoscene() {
   }
 }
 
+/// logical or combination of multiple binary inputs
+/// if one of AKM input is high(=2) combined output is on
+/// if all are low(=1) combined output is off
+/// e.g. multiple presence detectors
 void SystemState::stateBinaryInputGeneric(State &_state, int targetGroupId) {
   try {
     std::string stateName = _state.getName();
