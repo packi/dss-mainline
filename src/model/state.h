@@ -35,6 +35,11 @@
 #include "modelconst.h"
 
 namespace dss {
+  enum class StatePersistency {
+    volatile_ = 0,
+    persistent = 1,
+  };
+
   /** Represents a common class for Device, Service and Apartment states.*/
   class State : public boost::noncopyable,
                 public boost::enable_shared_from_this<State> {
@@ -42,7 +47,7 @@ namespace dss {
   private:
     PropertyNodePtr m_pPropertyNode;
     std::string m_name;
-    bool m_IsPersistent;
+    StatePersistency m_persistency;
     callOrigin_t m_callOrigin;
     dsuid_t m_originDeviceDSUID;
 
