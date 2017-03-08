@@ -24,11 +24,10 @@
   #include "config.h"
 #endif
 
-//#include <algorithm>
-
 #include "staterequesthandler.h"
 
 #include "src/model/apartment.h"
+#include "src/model/state.h"
 #include "jsonhelper.h"
 
 namespace dss {

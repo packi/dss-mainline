@@ -25,6 +25,14 @@
 #define BOOST_TEST_IGNORE_NON_ZERO_CHILD_CODE
 #include <boost/test/unit_test.hpp>
 
+#include <memory>
+
+#include <boost/make_shared.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/filesystem.hpp>
+
+#include <rrd.h>
+
 #include "src/scripting/jsmodel.h"
 #include "src/scripting/jsevent.h"
 #include "src/scripting/jsmetering.h"
@@ -40,12 +48,6 @@
 #include "src/metering/metering.h"
 
 #include "util/dss_instance_fixture.h"
-
-#include <rrd.h>
-
-#include <boost/scoped_ptr.hpp>
-#include <boost/filesystem.hpp>
-#include <memory>
 
 using namespace std;
 using namespace dss;

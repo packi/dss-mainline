@@ -32,6 +32,7 @@
 
 #include "src/model/modelconst.h"
 #include "src/model/set.h"
+#include "src/model/state.h"
 
 namespace dss {
 

@@ -23,6 +23,7 @@
 #include "vdc-connection.h"
 
 #include <iostream>
+#include <boost/make_shared.hpp>
 
 #include "base.h"
 #include "util.h"

@@ -28,6 +28,7 @@
 
 #include <stdexcept>
 #include <boost/ref.hpp>
+#include <boost/make_shared.hpp>
 #include <ds/str.h>
 
 #include "src/foreach.h"
