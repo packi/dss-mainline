@@ -32,8 +32,6 @@
 namespace dss {
 
   class Apartment;
-  class StructureModifyingBusInterface;
-  class StructureQueryBusInterface;
   class DSMeter;
   class Device;
   class Zone;

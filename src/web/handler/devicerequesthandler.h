@@ -30,6 +30,8 @@
 #include <string>
 
 #include "deviceinterfacerequesthandler.h"
+#include "src/structuremanipulator.h"
+
 namespace dss {
 
   class Device;
@@ -57,8 +59,7 @@ namespace dss {
 
   private:
     Apartment& m_Apartment;
-    StructureModifyingBusInterface* m_pStructureBusInterface;
-    StructureQueryBusInterface* m_pStructureQueryBusInterface;
+    StructureManipulator m_manipulator;
     static boost::recursive_mutex m_LTMODEMutex;
   }; // DeviceRequestHandler
 
