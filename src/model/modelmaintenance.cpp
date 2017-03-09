@@ -2380,8 +2380,6 @@ namespace dss {
 
         unsigned value = _pPayload->payload[0];
 
-        // sent by the heating system, indicates type of energy delivered into rooms
-        // arg0: {Off=0, Heat=1, Cold=2, Auto=3}
         if (value > 3) {
           log(std::string("generic heating mode: invalid value: " + intToString(value)), lsInfo);
           break;
@@ -2391,7 +2389,7 @@ namespace dss {
           break;
         }
 
-        raiseEvent(createGenericSignalHeatingModeSwitch(value, _origin));
+        raiseEvent(createGenericSignalHeatingModeSwitch(static_cast<HeatingModeSwitchValue>(value), _origin));
       }
       break;
 

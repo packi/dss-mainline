@@ -501,14 +501,12 @@ boost::shared_ptr<Event>
 }
 
 boost::shared_ptr<Event>
-  createGenericSignalHeatingModeSwitch(const uint8_t &_value, callOrigin_t _origin) {
+  createGenericSignalHeatingModeSwitch(HeatingModeSwitchValue value, callOrigin_t _origin) {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::HeatingModeSwitch);
 
-  // value: {Off=0, Heat=1, Cold=2, Auto=3}
-  assert(_value <= 3);
   assert(validOrigin(_origin));
-  event->setProperty("value", intToString(_value));
+  event->setProperty("value", intToString(static_cast<int>(value)));
   event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }

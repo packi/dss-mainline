@@ -127,8 +127,16 @@ boost::shared_ptr<Event>
 boost::shared_ptr<Event>
   createGenericSignalFrostProtection(const uint8_t &_value, callOrigin_t _origin);
 
+
+enum class HeatingModeSwitchValue {
+  off = 0,
+  heating = 1,
+  cooling = 2,
+  auto_ = 3
+};
+
 boost::shared_ptr<Event>
-  createGenericSignalHeatingModeSwitch(const uint8_t &_value, callOrigin_t _origin);
+  createGenericSignalHeatingModeSwitch(HeatingModeSwitchValue value, callOrigin_t _origin);
 
 boost::shared_ptr<Event>
   createGenericSignalBuildingService(const uint8_t &_value, callOrigin_t _origin);
