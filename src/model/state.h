@@ -32,7 +32,7 @@
 
 #include "dssfwd.h"
 #include "ds485types.h"
-#include "stateconst.h"
+#include "modelconst.h"
 
 namespace dss {
   /** Represents a common class for Device, Service and Apartment states.*/

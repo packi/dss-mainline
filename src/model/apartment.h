@@ -35,9 +35,9 @@
 #include "dssfwd.h"
 #include "devicecontainer.h"
 #include "src/subsystem.h"
-#include "src/model/stateconst.h"
 #include "src/datetools.h"
 #include "src/model/device.h"
+#include "src/model/modelconst.h"
 
 namespace dss {
   class PropertyNode;

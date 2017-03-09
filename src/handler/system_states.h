@@ -22,7 +22,7 @@
 
 #include "event.h"
 #include "handler/system_handlers.h"
-#include "model/stateconst.h"
+#include "model/modelconst.h"
 #include "model/deviceinterface.h"
 
 namespace dss {

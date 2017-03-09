@@ -26,7 +26,6 @@
 #include "dssfwd.h"
 #include "logger.h"
 #include "model/modelconst.h"
-#include "model/stateconst.h"
 
 namespace dss {
 class Status;
