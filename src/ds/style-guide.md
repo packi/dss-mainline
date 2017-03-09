@@ -113,9 +113,7 @@ any declared enum option. Always handle these unknown values
 * Member struct  are prefixed with `m_` TODO(soon): OR NOT?
 * Static globally visible variables are prefixed with `g_` (but avoided as much as possible)
 * Static member and static local variables are prefixed with `s_`
-* Setters start with `set`, getters start with `get`.
-    Use `get` prefix even for `bool` type properties to keep
-    consistency with code generated from capnp IDL.
+* Setters start with `set`, getters start with `get` or `is`
 * Avoid abbreviation, do not delete letters within word
 * Capitalize acronyms as single words. `startRpc()`, `class Rpc`
 * Trivial functions should be inlined. Constructors and destructors for non - POD types are usually NOT trivial.
