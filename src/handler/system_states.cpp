@@ -966,8 +966,8 @@ void SystemState::run() {
       getOrRegisterState(StateName::BuildingService)->setState(coDsmApi, value);
 
     }
-  } catch(ItemNotFoundException& ex) {
-    Logger::getInstance()->log("SystemState::run: item not found data model error", lsInfo);
+  } catch (std::runtime_error &ex) {
+    Logger::getInstance()->log("failed to process event:" + m_evtName + " " + ex.what(), lsWarning);
   }
 }
 
