@@ -152,6 +152,7 @@ we need to align on one version.
 
 * Indents are 4 spaces
 * Never use tabs
+* Namespaces do not indent
 * Maximum line length is 120 characters
 * Indent a continuation line 2x indent = 8 spaces
 * Place a space between a keyword and an open parenthesis, e.g.: `if (foo)`
