@@ -74,6 +74,7 @@
 #include "sqlite3_wrapper.h"
 #include "web/webserver.h"
 #include "propertysystem_common_paths.h"
+#include "comm-channel.h"
 
 namespace dss {
 

@@ -52,6 +52,7 @@
 #include "util.h"
 #include "jsonhelper.h"
 #include "vdc-info.h"
+#include "comm-channel.h"
 
 namespace dss {
 
