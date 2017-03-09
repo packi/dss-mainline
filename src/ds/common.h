@@ -4,12 +4,14 @@
   #if __GNUC__ <5 && ! __clang__
     // OE_CORE version
     #define DS_OVERRIDE
+    #define DS_FINAL
     #define DS_NULLPTR 0
   #endif
 #endif
 #ifndef DS_OVERRIDE
     // C++11 capable version
     #define DS_OVERRIDE override
+    #define DS_FINAL final
     #define DS_NULLPTR nullptr
 #endif
 
