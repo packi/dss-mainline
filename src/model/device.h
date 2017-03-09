@@ -181,7 +181,7 @@ namespace dss {
     void setTargetId(uint8_t group);
     void setInputId(BinaryInputId inputId);
     void setInputType(BinaryInputType inputType);
-    void handleEvent(BinaryInputState inputState);
+    void handleEvent(BinaryInputStateValue inputState);
 
     void updateStatusFieldHandle();
   private:
@@ -829,7 +829,7 @@ namespace dss {
     bool isMainDevice() const;
     dsuid_t getMainDeviceDSUID() const;
 
-    void handleBinaryInputEvent(const int index, BinaryInputState state);
+    void handleBinaryInputEvent(const int index, BinaryInputStateValue state);
 
     /// Calls (invokes) device specific action.
     void callAction(const std::string& actionId, const vdcapi::PropertyElement& params);

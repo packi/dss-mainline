@@ -1026,7 +1026,7 @@ namespace dss {
       } else {
         onBinaryInputEvent(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1),
             static_cast<BinaryInputType>(event->getParameter(2)),
-            static_cast<BinaryInputState>(event->getParameter(3)));
+            static_cast<BinaryInputStateValue>(event->getParameter(3)));
       }
       break;
     case ModelEvent::etDeviceSensorValue:
@@ -2032,7 +2032,7 @@ namespace dss {
   } // onSensorEvent
 
   void ModelMaintenance::onBinaryInputEvent(dsuid_t _meterID,
-      const devid_t _deviceID, const int& _eventIndex, BinaryInputType _eventType, BinaryInputState _state) {
+      const devid_t _deviceID, const int& _eventIndex, BinaryInputType _eventType, BinaryInputStateValue _state) {
     try {
       boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
       DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
@@ -2086,7 +2086,7 @@ namespace dss {
           auto&& state = binaryInput->getState();
           int oldState = state.getState();
           auto binaryInputState =
-              (_sensorValue & (1 << index)) ? BinaryInputState::Active : BinaryInputState::Inactive;
+              (_sensorValue & (1 << index)) ? BinaryInputStateValue::Active : BinaryInputStateValue::Inactive;
           pDev->handleBinaryInputEvent(index, binaryInputState);
           int newState = state.getState();
           if (newState != oldState) {

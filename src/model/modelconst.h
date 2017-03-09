@@ -274,12 +274,12 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, ApplicationType type);
   int getApplicationTypeColor(ApplicationType type);
 
-  enum class BinaryInputState {
+  enum class BinaryInputStateValue {
     Inactive = 0,
     Active = 1,
     Unknown = -1
   };
-  // BinaryInputState enum for BinaryInputIDWindowTilt binary input type (vdc only)
+  // BinaryInputStateValue enum for BinaryInputIDWindowTilt binary input type (vdc only)
   enum class BinaryInputWindowHandleState {
     Closed = 0,
     Open = 1,
