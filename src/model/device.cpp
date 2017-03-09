@@ -811,7 +811,6 @@ namespace dss {
       if ((oldGroupId == GroupIDBlack) && (groupId != GroupIDBlack) &&
           hasInput() && (getButtonInputMode() != ButtonInputMode::STANDARD)) {
         setDeviceButtonInputMode(ButtonInputMode::STANDARD);
-        setButtonInputMode(ButtonInputMode::STANDARD);
       }
 
       setDeviceButtonActiveGroup(groupId);
@@ -834,6 +833,7 @@ namespace dss {
 
   void Device::setDeviceButtonInputMode(ButtonInputMode mode) {
     setDeviceConfig(CfgClassFunction, CfgFunction_LTMode, static_cast<uint8_t>(mode));
+    setButtonInputMode(mode);
   } // setDeviceButtonInputMode
 
   void Device::setProgMode(uint8_t _modeId) {

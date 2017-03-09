@@ -497,18 +497,10 @@ namespace dss {
                   ButtonInputMode::TWO_WAY_DW_WITH_INPUT2);
           pPartnerDevice->setDeviceButtonInputMode(
                   ButtonInputMode::TWO_WAY_UP_WITH_INPUT1);
-          pDevice->setButtonInputMode(
-                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT2);
-          pPartnerDevice->setButtonInputMode(
-                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT1);
         } else {
           pDevice->setDeviceButtonInputMode(
                   ButtonInputMode::TWO_WAY_DW_WITH_INPUT4);
           pPartnerDevice->setDeviceButtonInputMode(
-                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT3);
-          pDevice->setButtonInputMode(
-                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT4);
-          pPartnerDevice->setButtonInputMode(
                   ButtonInputMode::TWO_WAY_UP_WITH_INPUT3);
         }
       } else if (value == BUTTONINPUT_2WAY_UP) {
@@ -517,18 +509,10 @@ namespace dss {
                   ButtonInputMode::TWO_WAY_UP_WITH_INPUT2);
           pPartnerDevice->setDeviceButtonInputMode(
                   ButtonInputMode::TWO_WAY_DW_WITH_INPUT1);
-          pDevice->setButtonInputMode(
-                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT2);
-          pPartnerDevice->setButtonInputMode(
-                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT1);
         } else {
           pDevice->setDeviceButtonInputMode(
                   ButtonInputMode::TWO_WAY_UP_WITH_INPUT4);
           pPartnerDevice->setDeviceButtonInputMode(
-                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT3);
-          pDevice->setButtonInputMode(
-                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT4);
-          pPartnerDevice->setButtonInputMode(
                   ButtonInputMode::TWO_WAY_DW_WITH_INPUT3);
         }
       } else if (value == BUTTONINPUT_1WAY) {
@@ -537,22 +521,14 @@ namespace dss {
           pPartnerDevice->setDeviceButtonInputMode(
                                           ButtonInputMode::STANDARD);
         }
-        pDevice->setButtonInputMode(ButtonInputMode::STANDARD);
-        pPartnerDevice->setButtonInputMode(ButtonInputMode::STANDARD);
       } else if (value == BUTTONINPUT_2WAY) {
         pDevice->setDeviceButtonInputMode(ButtonInputMode::TWO_WAY);
         pPartnerDevice->setDeviceButtonInputMode(
                                       ButtonInputMode::SDS_SLAVE_M1_M2);
-        pDevice->setButtonInputMode(ButtonInputMode::TWO_WAY);
-        pPartnerDevice->setButtonInputMode(
-                                        ButtonInputMode::SDS_SLAVE_M1_M2);
       } else if (value == BUTTONINPUT_1WAY_COMBINED) {
         pDevice->setDeviceButtonInputMode(ButtonInputMode::ONE_WAY);
         pPartnerDevice->setDeviceButtonInputMode(
                                       ButtonInputMode::SDS_SLAVE_M1_M2);
-        pDevice->setButtonInputMode(ButtonInputMode::ONE_WAY);
-        pPartnerDevice->setButtonInputMode(
-                                        ButtonInputMode::SDS_SLAVE_M1_M2);
       } else {
         return JSONWriter::failure("Invalid mode specified");
       }
