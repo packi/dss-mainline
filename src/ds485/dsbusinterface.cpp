@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 #include <digitalSTROM/dsm-api-v2/dsm-api-const.h>
 #include <digitalSTROM/ds485-client-interface.h>
