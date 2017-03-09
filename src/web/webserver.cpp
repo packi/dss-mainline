@@ -303,8 +303,8 @@ namespace dss {
     m_Handlers[kHandlerDevice] =
       new DeviceRequestHandler(
         getDSS().getApartment(),
-        getDSS().getBusInterface().getStructureModifyingBusInterface(),
-        getDSS().getBusInterface().getStructureQueryBusInterface());
+        *getDSS().getBusInterface().getStructureModifyingBusInterface(),
+        *getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),
             getDSS().getBusInterface().getStructureModifyingBusInterface(),

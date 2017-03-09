@@ -63,11 +63,11 @@ namespace dss {
   //=========================================== DeviceRequestHandler
 
   DeviceRequestHandler::DeviceRequestHandler(Apartment& _apartment,
-                                             StructureModifyingBusInterface* _pStructureBusInterface,
-                                             StructureQueryBusInterface* _pStructureQueryBusInterface)
+                                             StructureModifyingBusInterface &modify,
+                                             StructureQueryBusInterface &query)
   : m_Apartment(_apartment),
-    m_pStructureBusInterface(_pStructureBusInterface),
-    m_pStructureQueryBusInterface(_pStructureQueryBusInterface)
+    m_pStructureBusInterface(&modify),
+    m_pStructureQueryBusInterface(&query)
   { }
 
   class DeviceNotFoundException : public std::runtime_error {
