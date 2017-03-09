@@ -36,6 +36,7 @@
 #include <string.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/thread/mutex.hpp>
 

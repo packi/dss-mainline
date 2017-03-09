@@ -32,22 +32,19 @@
 #include <regex.h>
 #include <set>
 
+#include "dssfwd.h"
 #include "devicecontainer.h"
 #include "src/subsystem.h"
-#include "src/model/state.h"
 #include "src/datetools.h"
 #include "src/model/device.h"
+#include "src/model/modelconst.h"
 
 namespace dss {
   class PropertyNode;
   typedef boost::shared_ptr<PropertyNode> PropertyNodePtr;
-  class Zone;
   class DSMeter;
-  class Group;
   class Cluster;
-  class Event;
   class ModelMaintenance;
-  class PropertySystem;
   class BusInterface;
   class Metering;
   class DeviceBusInterface;

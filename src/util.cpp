@@ -25,6 +25,7 @@
   #include "config.h"
 #endif
 
+#include <boost/make_shared.hpp>
 
 #include "dss.h"
 #include "util.h"

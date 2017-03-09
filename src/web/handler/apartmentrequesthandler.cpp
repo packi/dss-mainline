@@ -44,6 +44,7 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/model/set.h"
+#include "src/model/state.h"
 #include "src/model/modelmaintenance.h"
 #include "src/stringconverter.h"
 #include "src/model-features.h"

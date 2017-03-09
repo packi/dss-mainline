@@ -25,7 +25,9 @@
 
 namespace dss {
   class Apartment;
+  class Device;
   class DeviceReference;
+  class DSMeter;
   class Event;
   class EventInterpreter;
   class EventInterpreterPlugin;

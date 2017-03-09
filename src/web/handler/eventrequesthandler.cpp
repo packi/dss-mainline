@@ -27,6 +27,8 @@
 
 #include "eventrequesthandler.h"
 
+#include <boost/make_shared.hpp>
+
 #include "src/base.h"
 
 #include "src/eventcollector.h"
@@ -39,6 +41,7 @@
 #include "src/model/group.h"
 #include "src/model/device.h"
 #include "src/model/modulator.h"
+#include "src/model/state.h"
 
 namespace dss {
 

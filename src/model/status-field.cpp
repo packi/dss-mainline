@@ -25,6 +25,7 @@
 
 #include "base.h"
 #include "foreach.h"
+#include "state.h"
 #include "status.h"
 #include "group.h"
 
@@ -135,6 +136,10 @@ void StatusField::update() {
   }
   log(ds::str("update this:", getName(), " composed value:", value), lsNotice);
   setValueAndPushImpl(value);
+}
+
+const std::string StatusField::getName() const {
+  return m_state->getName();
 }
 
 } // namespace dss

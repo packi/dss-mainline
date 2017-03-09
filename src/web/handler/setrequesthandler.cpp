@@ -27,6 +27,8 @@
 
 #include "setrequesthandler.h"
 
+#include <boost/make_shared.hpp>
+
 #include "src/model/apartment.h"
 #include "src/model/set.h"
 

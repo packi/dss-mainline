@@ -16,6 +16,7 @@
 #include "propertysystem.h"
 #include "model/devicereference.h"
 #include "model/group.h"
+#include "model/state.h"
 #include "webservice_api.h"
 #include "web/webrequests.h"
 #include "propertysystem_common_paths.h"

@@ -16,6 +16,7 @@
 #include "http_client.h"
 #include "model/apartment.h"
 #include "model/devicereference.h"
+#include "model/state.h"
 #include "model/zone.h"
 #include "src/propertysystem.h"
 #include "src/dss.h"
