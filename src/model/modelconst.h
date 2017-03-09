@@ -586,5 +586,12 @@ namespace dss {
     StateType_SensorDevice = 6,
     StateType_Circuit = 7,
   } eStateType;
+
+  enum class HeatingModeSwitchValue {
+    off = 0,
+    heating = 1,
+    cooling = 2,
+    auto_ = 3
+  };
 } // namespace dss
 #endif

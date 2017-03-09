@@ -25,6 +25,7 @@
 #include <boost/shared_ptr.hpp>
 #include <digitalSTROM/dsuid.h>
 
+#include "model/modelconst.h"
 #include "model/data_types.h"
 #include "model/deviceinterface.h"
 #include "model/zone.h"
@@ -126,14 +127,6 @@ boost::shared_ptr<Event>
 
 boost::shared_ptr<Event>
   createGenericSignalFrostProtection(const uint8_t &_value, callOrigin_t _origin);
-
-
-enum class HeatingModeSwitchValue {
-  off = 0,
-  heating = 1,
-  cooling = 2,
-  auto_ = 3
-};
 
 boost::shared_ptr<Event>
   createGenericSignalHeatingModeSwitch(HeatingModeSwitchValue value, callOrigin_t _origin);
