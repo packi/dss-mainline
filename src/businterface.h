@@ -117,7 +117,7 @@ namespace dss {
     bool Locked;
     uint8_t ActiveState;
     uint8_t OutputMode;
-    uint8_t LTMode;
+    ButtonInputMode LTMode;
     std::vector<int> Groups;
     dsuid_t DSID;
     uint8_t buttonID;

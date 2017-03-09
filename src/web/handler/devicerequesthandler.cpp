@@ -516,78 +516,78 @@ namespace dss {
         if (pDevice->getButtonInputIndex() == 0) {
           if (m_pStructureBusInterface != NULL) {
             pDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2);
+                    ButtonInputMode::TWO_WAY_DW_WITH_INPUT2);
             pPartnerDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1);
+                    ButtonInputMode::TWO_WAY_UP_WITH_INPUT1);
           }
           pDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2);
+                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT2);
           pPartnerDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1);
+                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT1);
         } else {
           if (m_pStructureBusInterface != NULL) {
             pDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4);
+                    ButtonInputMode::TWO_WAY_DW_WITH_INPUT4);
             pPartnerDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3);
+                    ButtonInputMode::TWO_WAY_UP_WITH_INPUT3);
           }
           pDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4);
+                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT4);
           pPartnerDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3);
+                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT3);
         }
       } else if (value == BUTTONINPUT_2WAY_UP) {
         if (pDevice->getButtonInputIndex() == 0) {
           if (m_pStructureBusInterface != NULL) {
             pDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2);
+                    ButtonInputMode::TWO_WAY_UP_WITH_INPUT2);
             pPartnerDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1);
+                    ButtonInputMode::TWO_WAY_DW_WITH_INPUT1);
           }
           pDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2);
+                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT2);
           pPartnerDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1);
+                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT1);
         } else {
           if (m_pStructureBusInterface != NULL) {
             pDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4);
+                    ButtonInputMode::TWO_WAY_UP_WITH_INPUT4);
             pPartnerDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3);
+                    ButtonInputMode::TWO_WAY_DW_WITH_INPUT3);
           }
           pDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4);
+                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT4);
           pPartnerDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3);
+                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT3);
         }
       } else if (value == BUTTONINPUT_1WAY) {
         if (m_pStructureBusInterface != NULL) {
-          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+          pDevice->setDeviceButtonInputMode(ButtonInputMode::STANDARD);
           if (pPartnerDevice->is2WaySlave()) {
             pPartnerDevice->setDeviceButtonInputMode(
-                                            DEV_PARAM_BUTTONINPUT_STANDARD);
+                                            ButtonInputMode::STANDARD);
           }
         }
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
-        pPartnerDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+        pDevice->setButtonInputMode(ButtonInputMode::STANDARD);
+        pPartnerDevice->setButtonInputMode(ButtonInputMode::STANDARD);
       } else if (value == BUTTONINPUT_2WAY) {
         if (m_pStructureBusInterface != NULL) {
-          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_2WAY);
+          pDevice->setDeviceButtonInputMode(ButtonInputMode::TWO_WAY);
           pPartnerDevice->setDeviceButtonInputMode(
-                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+                                        ButtonInputMode::SDS_SLAVE_M1_M2);
         }
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_2WAY);
+        pDevice->setButtonInputMode(ButtonInputMode::TWO_WAY);
         pPartnerDevice->setButtonInputMode(
-                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+                                        ButtonInputMode::SDS_SLAVE_M1_M2);
       } else if (value == BUTTONINPUT_1WAY_COMBINED) {
         if (m_pStructureBusInterface != NULL) {
-          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_1WAY);
+          pDevice->setDeviceButtonInputMode(ButtonInputMode::ONE_WAY);
           pPartnerDevice->setDeviceButtonInputMode(
-                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+                                        ButtonInputMode::SDS_SLAVE_M1_M2);
         }
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_1WAY);
+        pDevice->setButtonInputMode(ButtonInputMode::ONE_WAY);
         pPartnerDevice->setButtonInputMode(
-                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+                                        ButtonInputMode::SDS_SLAVE_M1_M2);
       } else {
         return JSONWriter::failure("Invalid mode specified");
       }
@@ -1170,21 +1170,21 @@ namespace dss {
       }
 
       if (mode == BUTTONINPUT_AKM_STANDARD) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_STANDARD);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_STANDARD);
       } else if (mode == BUTTONINPUT_AKM_INVERTED) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_INVERTED);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_INVERTED);
       } else if (mode == BUTTONINPUT_AKM_ON_RISING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_ON_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_ON_FALLING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_ON_FALLING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_OFF_RISING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_OFF_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_OFF_FALLING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_OFF_FALLING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_RISING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_FALLING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_FALLING_EDGE);
       } else {
         return JSONWriter::failure("Unsupported mode: " + mode);
       }

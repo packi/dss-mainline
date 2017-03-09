@@ -276,7 +276,7 @@ namespace dss {
     m_IsValid(false),
     m_IsLockedInDSM(false),
     m_OutputMode(0),
-    m_ButtonInputMode(0),
+    m_ButtonInputMode(ButtonInputMode::STANDARD),
     m_ButtonInputIndex(0),
     m_ButtonInputCount(0),
     m_ButtonSetsLocalPriority(false),
@@ -526,7 +526,7 @@ namespace dss {
     m_pPropertyNode->createProperty("button/id")
       ->linkToProxy(PropertyProxyReference<int>(m_ButtonID, false));
     m_pPropertyNode->createProperty("button/inputMode")
-      ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputMode, false));
+      ->linkToProxy(PropertyProxyReference<int, ButtonInputMode>(m_ButtonInputMode, false));
     m_pPropertyNode->createProperty("button/inputIndex")
       ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputIndex, false));
     m_pPropertyNode->createProperty("button/inputCount")
@@ -809,9 +809,9 @@ namespace dss {
 
       // change from joker to a color -> reset button input to standard (for UMR???)
       if ((oldGroupId == GroupIDBlack) && (groupId != GroupIDBlack) &&
-          hasInput() && (getButtonInputMode() != DEV_PARAM_BUTTONINPUT_STANDARD)) {
-        setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
-        setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
+          hasInput() && (getButtonInputMode() != ButtonInputMode::STANDARD)) {
+        setDeviceButtonInputMode(ButtonInputMode::STANDARD);
+        setButtonInputMode(ButtonInputMode::STANDARD);
       }
 
       setDeviceButtonActiveGroup(groupId);
@@ -832,8 +832,8 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_Mode, _modeId);
   } // setDeviceOutputMode
 
-  void Device::setDeviceButtonInputMode(uint8_t _modeId) {
-    setDeviceConfig(CfgClassFunction, CfgFunction_LTMode, _modeId);
+  void Device::setDeviceButtonInputMode(ButtonInputMode mode) {
+    setDeviceConfig(CfgClassFunction, CfgFunction_LTMode, static_cast<uint8_t>(mode));
   } // setDeviceButtonInputMode
 
   void Device::setProgMode(uint8_t _modeId) {
@@ -1623,11 +1623,11 @@ namespace dss {
     saveScene(coSystem, areaOnScene, "");
   }
 
-  void Device::setButtonInputMode(const uint8_t _value) {
+  void Device::setButtonInputMode(ButtonInputMode mode) {
     bool wasSlave = is2WaySlave();
 
-    m_ButtonInputMode = _value;
-    m_AKMInputProperty = getAKMButtonInputString(_value);
+    m_ButtonInputMode = mode;
+    m_AKMInputProperty = getAKMButtonInputString(mode);
     if (is2WaySlave() && !wasSlave) {
       removeFromPropertyTree();
     } else if (wasSlave && !is2WaySlave()) {
@@ -1671,12 +1671,12 @@ namespace dss {
                (m_OutputMode == OUTPUT_MODE_TEMPCONTROL_2OUT_PARALLEL)) &&
                IsEvenDsuid(m_DSID); // even dSID
       } else if (hasInput()) {
-        ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2) ||
-               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4) ||
-               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2) ||
-               (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4) ||
-               (((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY) ||
-                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_1WAY)) &&
+        ret = ((m_ButtonInputMode == ButtonInputMode::TWO_WAY_DW_WITH_INPUT2) ||
+               (m_ButtonInputMode == ButtonInputMode::TWO_WAY_DW_WITH_INPUT4) ||
+               (m_ButtonInputMode == ButtonInputMode::TWO_WAY_UP_WITH_INPUT2) ||
+               (m_ButtonInputMode == ButtonInputMode::TWO_WAY_UP_WITH_INPUT4) ||
+               (((m_ButtonInputMode == ButtonInputMode::TWO_WAY) ||
+                 (m_ButtonInputMode == ButtonInputMode::ONE_WAY)) &&
                 IsEvenDsuid(m_DSID))); // even dSID
       }
     } catch (std::runtime_error &err) {
@@ -1708,11 +1708,11 @@ namespace dss {
         if ((getDeviceType() == DEVICE_TYPE_SDS) ||
             (getDeviceType() == DEVICE_TYPE_TKM) ||
             (getDeviceType() == DEVICE_TYPE_UMR)) {
-          ret = ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1) ||
-                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3) ||
-                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1) ||
-                 (m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3) ||
-                 ((m_ButtonInputMode == DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2) &&
+          ret = ((m_ButtonInputMode == ButtonInputMode::TWO_WAY_DW_WITH_INPUT1) ||
+                 (m_ButtonInputMode == ButtonInputMode::TWO_WAY_DW_WITH_INPUT3) ||
+                 (m_ButtonInputMode == ButtonInputMode::TWO_WAY_UP_WITH_INPUT1) ||
+                 (m_ButtonInputMode == ButtonInputMode::TWO_WAY_UP_WITH_INPUT3) ||
+                 ((m_ButtonInputMode == ButtonInputMode::SDS_SLAVE_M1_M2) &&
                  !IsEvenDsuid(m_DSID))); // odd dSID
         }
       }
@@ -2320,23 +2320,23 @@ namespace dss {
     _offDelay = getDeviceConfigWord(CfgClassFunction, CfgFunction_LTTimeoutOff) * 100;
   }
 
-  std::string Device::getAKMButtonInputString(const int _mode) {
-    switch (_mode) {
-      case DEV_PARAM_BUTTONINPUT_AKM_STANDARD:
+  std::string Device::getAKMButtonInputString(ButtonInputMode mode) {
+    switch (mode) {
+      case ButtonInputMode::AKM_STANDARD:
         return BUTTONINPUT_AKM_STANDARD;
-      case DEV_PARAM_BUTTONINPUT_AKM_INVERTED:
+      case ButtonInputMode::AKM_INVERTED:
         return BUTTONINPUT_AKM_INVERTED;
-      case DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE:
+      case ButtonInputMode::AKM_ON_RISING_EDGE:
         return BUTTONINPUT_AKM_ON_RISING_EDGE;
-      case DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE:
+      case ButtonInputMode::AKM_ON_FALLING_EDGE:
         return BUTTONINPUT_AKM_ON_FALLING_EDGE;
-      case DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE:
+      case ButtonInputMode::AKM_OFF_RISING_EDGE:
         return BUTTONINPUT_AKM_OFF_RISING_EDGE;
-      case DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE:
+      case ButtonInputMode::AKM_OFF_FALLING_EDGE:
         return BUTTONINPUT_AKM_OFF_FALLING_EDGE;
-      case DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE:
+      case ButtonInputMode::AKM_RISING_EDGE:
         return BUTTONINPUT_AKM_RISING_EDGE;
-      case DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE:
+      case ButtonInputMode::AKM_FALLING_EDGE:
         return BUTTONINPUT_AKM_FALLING_EDGE;
       default:
         break;
