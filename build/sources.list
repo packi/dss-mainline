@@ -50,6 +50,8 @@ libdsscore_a_SOURCES =  \
 	../src/expatparser.cpp \
 	../src/expatparser.h \
 	../src/foreach.h \
+	../src/handler/event-logger.cpp \
+	../src/handler/event-logger.h \
 	../src/handler/system_handlers.cpp \
 	../src/handler/system_handlers.h \
 	../src/handler/system_states.cpp \
@@ -123,6 +125,8 @@ libdsscore_a_SOURCES =  \
 	../src/model/zone.h \
 	../src/monitor_tasks.cpp \
 	../src/monitor_tasks.h \
+	../src/property-parser.cpp \
+	../src/property-parser.h \
 	../src/propertyquery.cpp \
 	../src/propertyquery.h \
 	../src/propertysystem.cpp \

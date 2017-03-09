@@ -33,13 +33,16 @@ class Child : public Base {
     virtual void virtualFoo() DS_OVERRIDE;
 };
 
-TEST_CASE("DS_STATIC_ASSERT", TAGS) {
-    DS_STATIC_ASSERT(true, "");
-    DS_STATIC_ASSERT(std::is_base_of<Base DS_COMMA Child>::value, "`Base` must be base of `Child`");
-}
-
 TEST_CASE("DS_NULLPTR", TAGS) {
     CHECK((void *) 0 == DS_NULLPTR);
+}
+
+DS_NORETURN void noReturn() {
+    throw std::runtime_error("error");
+}
+
+TEST_CASE("DS_NORETURN", TAGS) {
+    CHECK_THROWS(noReturn());
 }
 
 TEST_CASE("DS_WARN_UNUSED_RESULT", TAGS) {

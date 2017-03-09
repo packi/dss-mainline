@@ -28,6 +28,7 @@
 
 #include "src/propertysystem.h"
 #include "util/dss_instance_fixture.h"
+#include "propertysystem_common_paths.h"
 
 using namespace dss;
 

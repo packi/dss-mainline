@@ -89,6 +89,7 @@
 #include "model-features.h"
 #include "vdc-db-fetcher.h"
 #include "vdc-token.h"
+#include "propertysystem_common_paths.h"
 
 namespace dss {
 

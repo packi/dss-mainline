@@ -25,6 +25,7 @@
 #include "src/web/webrequests.h"
 #include "messages/vdcapi.pb.h"
 #include "tests/util/dss_instance_fixture.h"
+#include "propertysystem_common_paths.h"
 
 using namespace dss;
 

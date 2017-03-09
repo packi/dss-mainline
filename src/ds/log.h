@@ -54,10 +54,11 @@
 #define DS_MFE_19(_call, x, ...) _call(x) DS_MFE_18(_call, __VA_ARGS__)
 #define DS_MFE_20(_call, x, ...) _call(x) DS_MFE_19(_call, __VA_ARGS__)
 
-#define DS_MACRO_FOR_EACH(x, ...)                                                                              \
-    DS_GET_NTH_ARG("ignored", ##__VA_ARGS__, DS_MFE_20, DS_MFE_19, DS_MFE_18, DS_MFE_17, DS_MFE_16, DS_MFE_15, \
-            DS_MFE_14, DS_MFE_13, DS_MFE_12, DS_MFE_11, DS_MFE_10, DS_MFE_9, DS_MFE_8, DS_MFE_7, DS_MFE_6,     \
-            DS_MFE_5, DS_MFE_4, DS_MFE_3, DS_MFE_2, DS_MFE_1, DS_MFE_0) (x, ##__VA_ARGS__)
+#define DS_MACRO_FOR_EACH(x, ...)                                                                                    \
+    DS_GET_NTH_ARG("ignored", ##__VA_ARGS__, DS_MFE_20, DS_MFE_19, DS_MFE_18, DS_MFE_17, DS_MFE_16, DS_MFE_15,       \
+            DS_MFE_14, DS_MFE_13, DS_MFE_12, DS_MFE_11, DS_MFE_10, DS_MFE_9, DS_MFE_8, DS_MFE_7, DS_MFE_6, DS_MFE_5, \
+            DS_MFE_4, DS_MFE_3, DS_MFE_2, DS_MFE_1, DS_MFE_0)                                                        \
+    (x, ##__VA_ARGS__)
 
 namespace ds {
 namespace log {
@@ -72,6 +73,7 @@ constexpr const char *trimArg(const char *x) {
 }
 
 #define DS_LOG_ARG(x) , ::ds::log::trimArg(#x ":"), x, " "
+#define DS_LOG_FILE_CONTEXT "file:", ::ds::log::_private::trimFile(__FILE__), ':', __LINE__
 
 // * `DS_REQUIRE(condition)`:  Check external input and preconditions
 // e.g. to validate parameters passed from a caller.
@@ -82,27 +84,17 @@ constexpr const char *trimArg(const char *x) {
 // DS_REQUIRE(value >= 0, "Value cannot be negative.", value);
 // DS_FAIL_REQUIRE("Unknown", value);
 //
-#ifdef _DEBUG
-#define DS_REQUIRE(condition, ...) \
-    if (DS_LIKELY(condition)) {} else \
-        throw std::runtime_error(ds::str( \
-            "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
-            "condition:", #condition, " " \
-            __FILE__, ':', __LINE__ ))
+#define DS_REQUIRE(condition, ...)                                                                          \
+    do {                                                                                                    \
+        if (DS_LIKELY(condition)) {                                                                         \
+        } else {                                                                                            \
+            throw std::runtime_error(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), "condition:", \
+                    #condition, " ", DS_LOG_FILE_CONTEXT));                                                 \
+        }                                                                                                   \
+    } while (0)
 #define DS_FAIL_REQUIRE(...) \
-    throw std::runtime_error(ds::str( \
-        "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
-        __FILE__, ':', __LINE__))
-#else
-#define DS_REQUIRE(condition, ...) \
-    if (DS_LIKELY(condition)) {} else \
-        throw std::runtime_error(ds::str( \
-            "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
-            "condition:", #condition))
-#define DS_FAIL_REQUIRE(...) \
-    throw std::runtime_error(ds::str( \
-        "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__)))
-#endif
+    throw std::runtime_error(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), DS_LOG_FILE_CONTEXT))
+
 // Assert the `condition` is true.
 // This macro should be used to check for bugs in the surrounding code (broken invariant, ...)
 // and its dependencies, but NOT to check for invalid input.
@@ -111,24 +103,27 @@ constexpr const char *trimArg(const char *x) {
 // DS_ASSERT(m_state == State::CONNECTED, m_state);
 // DS_FAIL_ASSERT("Invalid", m_state);
 //
-#define DS_ASSERT(condition, ...) \
-    if (DS_LIKELY(condition)) {} else \
-        ::ds::log::_private::assert_(ds::str( \
-            "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
-            "condition:", #condition, " " \
-            , __FILE__, ':', __LINE__ ))
+#define DS_ASSERT(condition, ...)                                                                               \
+    do {                                                                                                        \
+        if (DS_LIKELY(condition)) {                                                                             \
+        } else {                                                                                                \
+            ::ds::log::_private::assert_(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), "condition:", \
+                    #condition, " ", DS_LOG_FILE_CONTEXT));                                                     \
+        }                                                                                                       \
+    } while (0)
 
 #define DS_FAIL_ASSERT(...) \
-    if (false) {} else \
-        ::ds::log::_private::assert_(ds::str( \
-        "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
-        , __FILE__, ':', __LINE__))
+    ::ds::log::_private::assert_(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), DS_LOG_FILE_CONTEXT))
 
 namespace _private {
-//assert is macro, so we cannot reuse its name here
-void assert_(const std::string& message);
+/// Trim file for logging purporses.
+std::string trimFile(std::string file);
+
+/// Assert (abort or throw) with given message.
+///
+/// assert is macro, so we cannot reuse its name here
+DS_NORETURN void assert_(const std::string &message);
 } // namespace _private
 
 } // namespace log
 } // namespace ds
-

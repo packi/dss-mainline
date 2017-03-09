@@ -37,6 +37,7 @@
 #include "src/util.h"
 #include "src/backtrace.h"
 #include "src/propertysystem.h"
+#include "src/property-parser.h"
 #include "src/ds485types.h"
 #include "src/model/apartment.h"
 #include "src/model/device.h"
@@ -45,6 +46,7 @@
 #include "src/model/group.h"
 #include "src/model/cluster.h"
 #include "src/model/modelconst.h"
+#include "propertysystem_common_paths.h"
 
 namespace dss {
 

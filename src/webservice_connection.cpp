@@ -34,6 +34,7 @@
 #include "propertysystem.h"
 #include "webservice_api.h"
 #include <boost/make_shared.hpp>
+#include "propertysystem_common_paths.h"
 
 namespace dss {
 

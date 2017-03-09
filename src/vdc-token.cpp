@@ -27,6 +27,7 @@
 #include "sessionmanager.h"
 #include "webservice_api.h"
 #include "security/security.h"
+#include "propertysystem_common_paths.h"
 
 typedef boost::system::error_code error_code;
 

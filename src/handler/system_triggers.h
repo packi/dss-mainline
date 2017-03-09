@@ -21,6 +21,8 @@
 
 #include <string>
 
+#include "system_handlers.h"
+
 namespace dss {
 
   /**
@@ -44,4 +46,72 @@ namespace dss {
   extern const std::string  ptn_action_reschedule;
   extern const std::string  ptn_action_ts;  //< runtime
   extern const std::string  ptn_action_eventid; //< runtime, already scheduled event
+
+  class SystemTrigger : public SystemEvent {
+    public:
+      SystemTrigger();
+      virtual ~SystemTrigger();
+      virtual void run();
+      virtual bool setup(Event& _event);
+
+    protected:
+      std::string m_evtName;
+      bool m_evtSrcIsGroup;
+      bool m_evtSrcIsDevice;
+      int m_evtSrcZone;
+      int m_evtSrcGroup;
+      dsuid_t m_evtSrcDSID;
+
+      /**
+       * checkTrigger() - visit the subtree, each child is a trigger
+       * @_triggerProp - node with known structure containing parameters
+       * @return true if match, false otherwise
+       */
+      bool checkTrigger(PropertyNodePtr _triggerProp);
+
+      /**
+       * checkTriggerNode() - inspect single trigger node
+       * @_triggerProp - node with known structure
+       * @return true if match, false otherwise
+       */
+      bool checkTriggerNode(PropertyNodePtr _triggerProp);
+
+      /* subclasses of trigger type */
+      bool checkSceneZone(PropertyNodePtr _triggerProp);
+      bool checkUndoSceneZone(PropertyNodePtr _triggerProp);
+      bool checkDeviceScene(PropertyNodePtr _triggerProp);
+      bool checkDeviceSensor(PropertyNodePtr _triggerProp);
+      bool checkDeviceBinaryInput(PropertyNodePtr _triggerProp);
+      bool checkDevice(PropertyNodePtr _tiggerProp);
+      bool checkDirectDeviceAction(PropertyNodePtr _triggerProp);
+      bool checkDeviceNamedAction(PropertyNodePtr _triggerProp);
+      bool checkDeviceNamedEvent(PropertyNodePtr _triggerProp);
+      bool checkHighlevel(PropertyNodePtr _triggerProp);
+      bool checkState(PropertyNodePtr _triggerProp);
+      bool checkSensorValue(PropertyNodePtr _triggerProp);
+      bool checkEvent(PropertyNodePtr _triggerProp);
+
+      /**
+       * damping() - aggregate triggers do not raise an action each time
+       * @_dampProp property subtree with timeout/last_execution arguments
+       * @return true if event shall be damped, false if no damping is applied
+       */
+      bool damping(PropertyNodePtr _dampProp);
+
+      /**
+       * rescheduleAction() - reschedule event if trigger fired again (optional)
+       * @_triggerNode - node in global lookup table (/usr/triggers)
+       * @_triggerParamNode - node with complete trigger parameters
+       * @return true if event was rescheduled
+       */
+      bool rescheduleAction(PropertyNodePtr _triggerNode, PropertyNodePtr _triggerParamNode);
+
+      /**
+       * relayTrigger() - If a trigger matches this will raise an event
+       * @_triggerNode - node in global lookup table (/usr/triggers)
+       * @_triggerParamNode - node with complete trigger parameters
+       */
+      void relayTrigger(PropertyNodePtr _triggerNode, PropertyNodePtr _triggerParamNode);
+  };
+
 }

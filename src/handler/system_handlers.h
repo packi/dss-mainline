@@ -30,7 +30,6 @@ namespace dss {
       virtual ~SystemEvent();
       virtual void run() = 0;
       virtual bool setup(Event& _event);
-      std::string getActionName(PropertyNodePtr _actionNode);
     protected:
       Properties m_properties;
   };
