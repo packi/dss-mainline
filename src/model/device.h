@@ -338,6 +338,12 @@ namespace dss {
     void updateModelFeatures();
     void republishModelFeaturesToPropertyTree();
 
+    // These methods are intended to use only from model maintenance classes.
+    // Methods starting with setDevice are for public use.
+    friend class BusScanner;
+    friend class ModelMaintenance;
+    void setButtonInputMode(ButtonInputMode mode);
+
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -620,7 +626,6 @@ namespace dss {
     int getButtonID() const { return m_ButtonID; }
     uint8_t getOutputMode() const { return m_OutputMode; }
     void setOutputMode(const uint8_t _value);
-    void setButtonInputMode(ButtonInputMode mode);
     ButtonInputMode getButtonInputMode() const { return m_ButtonInputMode; }
     void setButtonInputIndex(const uint8_t _value) { m_ButtonInputIndex = _value; }
     uint8_t getButtonInputIndex() const { return m_ButtonInputIndex; }
