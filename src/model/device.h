@@ -519,9 +519,6 @@ namespace dss {
     int getGroupsCount() const;
     /** Returns the vector of groups the device is in */
     const std::vector<int>& getGroupIds() const { return m_groupIds; }
-    /** Retuturns group to which the joker is configured or -1 if device is not
-        a joker */
-    int getJokerGroup() const;
     /** Returns the zoneID that this device group is in. */
     int getGroupZoneID(int groupID) const;
     /// Returns zone local group or global group

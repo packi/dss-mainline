@@ -1960,10 +1960,9 @@ namespace dss {
 
       m_iconPath += "_" + getColorString(deviceClass);
 
-      int jokerGroupId = getJokerGroup();
-      if (jokerGroupId > 0) {
+      if (getDeviceClass() == DEVICE_CLASS_SW) {
         // static_cast to ApplicationType works for all currently valid (zone, apartment) groupIds
-        auto&& jokerApplicationType = static_cast<ApplicationType>(jokerGroupId);
+        auto&& jokerApplicationType = static_cast<ApplicationType>(m_ActiveGroup);
         auto&& jokerColor = getApplicationTypeColor(jokerApplicationType);
         m_iconPath += "_" + getColorString(jokerColor);
       }
@@ -2070,17 +2069,6 @@ namespace dss {
     }
 
     return features;
-  }
-
-  int Device::getJokerGroup() const {
-    DeviceClasses_t devCls = this->getDeviceClass();
-    if (devCls != DEVICE_CLASS_SW) {
-      return -1;
-    }
-
-    // TODO(someday): this may not be correct for (user) apartment groups
-    // without their own application type.
-    return m_ActiveGroup != GroupIDNotApplicable ? m_ActiveGroup : DEVICE_CLASS_SW;
   }
 
   void Device::setOemInfo(const unsigned long long _eanNumber,
