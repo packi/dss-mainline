@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/foreach.hpp>
 #include <boost/noncopyable.hpp>
 #include <utility>
 
@@ -11,6 +12,7 @@ namespace ds {
 #define DS_OVERRIDE
 #define DS_FINAL
 #define DS_NULLPTR 0
+#define DS_CONSTEXPR
 
 // gcc 4.5 does not support explicit default constructor and default move asignment
 // We want explicit copy constructor mainly to catch unintended copies.
@@ -24,6 +26,7 @@ namespace ds {
 #define DS_OVERRIDE override
 #define DS_FINAL final
 #define DS_NULLPTR nullptr
+#define DS_CONSTEXPR constexpr
 
 // Add explicit copy constructor and move constructor, move assignment
 // We want explicit copy constructor mainly to catch unintended copies.

@@ -10,6 +10,8 @@ libds_a_SOURCES = \
         ../src/ds/common.h \
         ../src/ds/cstddef.cpp \
         ../src/ds/cstddef.h \
+        ../src/ds/enum.cpp \
+        ../src/ds/enum.h \
         ../src/ds/log.cpp \
         ../src/ds/log.h \
         ../src/ds/random.cpp \
@@ -36,6 +38,7 @@ DS_TESTS += ds-tests
 ds_tests_SOURCES = \
         ../src/ds/collection-test.cpp \
         ../src/ds/common-test.cpp \
+        ../src/ds/enum-test.cpp \
         ../src/ds/log-test.cpp \
         ../src/ds/str-test.cpp \
         ../src/ds/random-test.cpp
