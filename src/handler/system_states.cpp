@@ -26,6 +26,7 @@
 #include "base.h"
 #include "dss.h"
 #include "event/event_fields.h"
+#include "event/event_create.h"
 #include "foreach.h"
 #include "logger.h"
 #include "model/zone.h"
@@ -815,22 +816,21 @@ void SystemState::stateBinaryinput() {
     if (lookupState(heating, StateName::HeatingSystem) &&
         lookupState(heating_mode, StateName::HeatingSystemMode))
     {
-      std::string value; // value: {Off=0, Heat=1, Cold=2, Auto=3}
+      // abuse auto as an invalid value
+      HeatingModeSwitchValue value = HeatingModeSwitchValue::auto_;
+
       if (heating->getState() == State_Inactive) {
-        value = "0";
+        value = HeatingModeSwitchValue::off;
       } else if (heating->getState() == State_Active) {
         if (heating_mode->getState() == State_Active) {
-          value = "1";
+          value = HeatingModeSwitchValue::heating;
         } else if (heating_mode->getState() == State_Inactive) {
-          value = "2";
+          value = HeatingModeSwitchValue::cooling;
         }
       }
 
-      if (!value.empty()) {
-        boost::shared_ptr<Event> event;
-        event = boost::make_shared<Event>(EventName::HeatingModeSwitch);
-        event->setProperty("value", value);
-        event->setProperty(ef_callOrigin, intToString(coSystemBinaryInput));
+      if (value != HeatingModeSwitchValue::auto_) {
+        auto event = createGenericSignalHeatingModeSwitch(value, coSystemBinaryInput);
         DSS::getInstance()->getEventQueue().pushEvent(event);
       }
     }
