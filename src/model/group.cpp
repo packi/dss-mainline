@@ -85,11 +85,25 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     // remove potential entries from current object
     m_pApplicationBehavior.reset(NULL);
 
-    if ((applicationType == ApplicationType::Ventilation) ||
-        (applicationType == ApplicationType::ApartmentVentilation)) {
+    switch (applicationType) {
+    case ApplicationType::Ventilation:
+    case ApplicationType::ApartmentVentilation:
+    case ApplicationType::Recirculation:
+    case ApplicationType::ApartmentRecirculation:
       m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode, getLastCalledScene()));
-    } else {
+      break;
+    case ApplicationType::None:
+    case ApplicationType::Lights:
+    case ApplicationType::Blinds:
+    case ApplicationType::Heating:
+    case ApplicationType::Audio:
+    case ApplicationType::Video:
+    case ApplicationType::Joker:
+    case ApplicationType::Cooling:
+    case ApplicationType::Window:
+    case ApplicationType::ControlTemperature:
       m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
+      break;
     }
 
     // Status is supported only for apartment ventilation groups for now.

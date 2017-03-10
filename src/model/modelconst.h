@@ -255,6 +255,7 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, BinaryInputType type);
   boost::optional<StatusFieldType> statusFieldTypeForBinaryInputType(BinaryInputType type);
 
+  // Classify device behaviour, define meaning for scene calls, button state-machines, etc
   enum class ApplicationType {
     None = 0,
     Lights = 1,
@@ -269,6 +270,7 @@ namespace dss {
     Recirculation = 12,
     ControlTemperature = 48,
     ApartmentVentilation = 64,
+    ApartmentRecirculation = 69,
   };
 
   std::ostream& operator<<(std::ostream& stream, ApplicationType type);
@@ -348,7 +350,7 @@ namespace dss {
   const int ColorIDBlack = 8;
   const int ColorIDWhite = 9;
 
-  // Group ID"s
+  // Group ID"s, used for addressing
   const int GroupIDBroadcast = 0;
   const int GroupIDYellow = 1;
   const int GroupIDGray = 2;
@@ -377,6 +379,7 @@ namespace dss {
   const int GroupIDGlobalAppMin = 64;
   const int GroupIDGlobalAppDsMin = 64;
   const int GroupIDGlobalAppDsVentilation = 64;
+  const int GroupIDGlobalAppDsRecirculation = 69;
   const int GroupIDGlobalAppDsMax = 187;
   const int GroupIDGlobalAppUserMin = 188;
   const int GroupIDGlobalAppUserMax = 249;

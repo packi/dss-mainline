@@ -381,6 +381,12 @@ namespace dss {
         group->setApplicationType(ApplicationType::ApartmentVentilation);
         group->setIsValid(true);  // TODO(soon): this may not be needed for AV (maybe it is only valid when devices are present)
         result->addGroup(group);
+
+        group.reset(new Group(GroupIDGlobalAppDsRecirculation, result));
+        group->setName("apartmentRecirculation");
+        group->setApplicationType(ApplicationType::ApartmentRecirculation);
+        group->setIsValid(true);  // TODO(soon): this may not be needed for AV (maybe it is only valid when devices are present)
+        result->addGroup(group);
       }
     } else {
       result->publishToPropertyTree();
