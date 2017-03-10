@@ -479,7 +479,7 @@ namespace dss {
       }
 
       if ((pDevice->getDeviceClass() == DEVICE_CLASS_SW) &&
-          (pDevice->getJokerGroup() == GroupIDBlack) &&
+          (pDevice->getActiveGroup() == GroupIDBlack) &&
           (value != BUTTONINPUT_1WAY)) {
         return JSONWriter::failure("Joker devices must be set to a specific group for button pairing");
       }
@@ -579,7 +579,7 @@ namespace dss {
 
       if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
           (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
-        m_manipulator.setJokerGroup(pPartnerDevice, pDevice->getJokerGroup());
+        m_manipulator.setJokerGroup(pPartnerDevice, pDevice->getActiveGroup());
       }
       return json.successJSON();
     } else if (_request.getMethod() == "setButtonActiveGroup") {
