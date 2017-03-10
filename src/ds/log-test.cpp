@@ -62,7 +62,25 @@ TEST_CASE("DS_ASSERT", TAGS) {
 TEST_CASE("DS_FAIL_ASSERT", TAGS) {
     SECTION("compiles") {
         if (0) {
-            DS_FAIL_ASSERT();
+            // TODO(someday): error with g++ (Ubuntu 5.4.0-6ubuntu1~16.04.4) 5.4.0 20160609
+            // In file included from ../../build/../src/ds/log-test.cpp:19:0:
+            // ../../build/../src/ds/log-test.cpp: In function ‘void ____C_A_T_C_H____T_E_S_T____62()’:
+            // ../../build/../src/ds/log.h:75:54: error: expected primary-expression before ‘,’ token
+            //  #define DS_LOG_ARG(x) , ::ds::log::trimArg(#x ":"), x, " "
+            //                                                       ^
+            // ../../build/../src/ds/log.h:36:28: note: in expansion of macro ‘DS_LOG_ARG’
+            //  #define DS_MFE_1(_call, x) _call(x)
+            //                             ^
+            // ../../build/../src/ds/log.h:31:5: note: in expansion of macro ‘DS_MFE_1’
+            //      N
+            //      ^
+            // ../../build/../src/ds/log.h:116:45: note: in expansion of macro ‘DS_MACRO_FOR_EACH’
+            //      ::ds::log::_private::assert_(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), DS_LOG_FILE_CONTEXT))
+            //                                              ^
+            // ../../build/../src/ds/log-test.cpp:65:13: note: in expansion of macro ‘DS_FAIL_ASSERT’
+            //
+            // DS_FAIL_ASSERT();
+
             DS_FAIL_ASSERT("hi");
         }
     }
