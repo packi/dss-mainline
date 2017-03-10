@@ -945,20 +945,16 @@ void SystemState::run() {
       getOrRegisterState(StateName::Frost)->setState(coDsmApi, value);
 
     } else if (m_evtName == EventName::HeatingModeSwitch) {
-      boost::shared_ptr<State> state;
-      state = getOrRegisterState(StateName::HeatingModeControl);
-      unsigned int value = strToUInt(m_properties.get("value"));
-      assert(value < state->getValueRangeSize());
-
+      auto state = getOrRegisterState(StateName::HeatingModeControl);
+      auto value = static_cast<HeatingModeSwitchValue>(strToUInt(m_properties.get("value")));
       callOrigin_t origin = coDsmApi;
-
       if (m_properties.has("callOrigin")) {
         std::string s = m_properties.get("callOrigin");
         if (!s.empty()) {
           origin = (callOrigin_t)strToInt(s);
         }
       }
-      state->setState(origin, value);
+      state->setState(origin, static_cast<int>(value));
 
     } else if (m_evtName == EventName::BuildingService) {
       unsigned int value = strToInt(m_properties.get("value"));
