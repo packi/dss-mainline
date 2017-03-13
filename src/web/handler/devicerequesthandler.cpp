@@ -1049,6 +1049,21 @@ namespace dss {
         return JSONWriter::failure("This device does not support AKM properties");
       }
 
+      JSONWriter json;
+      // Partner device cannot be / stay in slave button mode when master
+      // device is configured to sensor.
+      // It would be hardware misconfiguration.
+      if (pDevice->is2WayMaster()) {
+        auto&& pPartnerDevice = pDevice->getPartnerDevice();
+        if (pPartnerDevice->is2WaySlave()) {
+          pPartnerDevice->setDeviceButtonInputMode(ButtonInputMode::STANDARD);
+
+          json.add("action", "add");
+          json.add("device");
+          toJSON(DeviceReference(pPartnerDevice, &m_Apartment), json);
+        }
+      }
+
       if (mode == BUTTONINPUT_AKM_STANDARD) {
         pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_STANDARD);
       } else if (mode == BUTTONINPUT_AKM_INVERTED) {
@@ -1068,7 +1083,8 @@ namespace dss {
       } else {
         return JSONWriter::failure("Unsupported mode: " + mode);
       }
-      return JSONWriter::success();
+
+      return json.successJSON();
     } else if (_request.getMethod() == "getSensorValue") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
