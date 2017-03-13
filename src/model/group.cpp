@@ -82,9 +82,6 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
 
     m_ApplicationType = applicationType;
 
-    // remove potential entries from current object
-    m_pApplicationBehavior.reset(NULL);
-
     switch (applicationType) {
     case ApplicationType::Ventilation:
     case ApplicationType::ApartmentVentilation:
