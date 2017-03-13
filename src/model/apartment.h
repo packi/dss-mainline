@@ -146,7 +146,9 @@ typedef struct {
     /** Returns a set containing all devices of the set */
     virtual Set getDevices() const;
 
-    /** Returns a reference to the device with the DSID \a _dsid */
+    /// Returns a reference to the device with the DSID \a _dsid, nullptr if not found.
+    boost::shared_ptr<Device> tryGetDeviceByDSID(const dsuid_t _dsid) const;
+    /// Returns a reference to the device with the DSID \a _dsid, throws if not found
     boost::shared_ptr<Device> getDeviceByDSID(const dsuid_t _dsid) const;
     /** Returns a reference to the device with the name \a _name*/
     boost::shared_ptr<Device> getDeviceByName(const std::string& _name);

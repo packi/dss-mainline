@@ -234,17 +234,10 @@ namespace dss {
         m_manipulator.deviceSetName(pDevice, st.convert(name));
 
         if (pDevice->is2WayMaster()) {
-          dsuid_t next;
-          dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-          try {
-            boost::shared_ptr<Device> pPartnerDevice;
-            pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-            if (pPartnerDevice->getName().empty()) {
-              pPartnerDevice->setName(st.convert(name));;
-              m_manipulator.deviceSetName(pPartnerDevice, st.convert(name));
-            }
-          } catch(std::runtime_error& e) {
-            return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+          auto pPartnerDevice = pDevice->getPartnerDevice();
+          if (pPartnerDevice->getName().empty()) {
+            pPartnerDevice->setName(st.convert(name));
+            m_manipulator.deviceSetName(pPartnerDevice, st.convert(name));
           }
         }
         return JSONWriter::success();
@@ -381,16 +374,7 @@ namespace dss {
       }
 
       if (pDevice->is2WayMaster()) {
-        dsuid_t next;
-        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-        boost::shared_ptr<Device> pPartnerDevice;
-        try {
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-        } catch(ItemNotFoundException& e) {
-          return JSONWriter::failure("Could not find partner device with dsid '" +
-                         dsuid2str(next) + "'");
-        }
-
+        auto pPartnerDevice = pDevice->getPartnerDevice();
         m_manipulator.setJokerGroup(pPartnerDevice, newGroupId);
       }
 
@@ -450,15 +434,8 @@ namespace dss {
           return JSONWriter::success();
         }
 
-        dsuid_t next;
-        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-        try {
-          boost::shared_ptr<Device> pPartnerDevice;
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-          pPartnerDevice->setDeviceButtonID(value);
-        } catch(ItemNotFoundException& e) {
-          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-        }
+        auto pPartnerDevice = pDevice->getPartnerDevice();
+        pPartnerDevice->setDeviceButtonID(value);
       }
       return JSONWriter::success();
     } else if (_request.getMethod() == "setButtonInputMode") {
@@ -484,11 +461,7 @@ namespace dss {
         return JSONWriter::failure("Joker devices must be set to a specific group for button pairing");
       }
 
-      dsuid_t next;
-      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-      boost::shared_ptr<Device> pPartnerDevice;
-      pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
-
+      auto pPartnerDevice = pDevice->getPartnerDevice();
       bool wasSlave = pPartnerDevice->is2WaySlave();
 
       if (value == BUTTONINPUT_2WAY_DOWN) {
@@ -596,15 +569,8 @@ namespace dss {
           return JSONWriter::success();
         }
 
-        dsuid_t next;
-        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-        try {
-          boost::shared_ptr<Device> pPartnerDevice;
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-          pPartnerDevice->setDeviceButtonActiveGroup(value);
-        } catch(ItemNotFoundException& e) {
-          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-        }
+        auto pPartnerDevice = pDevice->getPartnerDevice();
+        pPartnerDevice->setDeviceButtonActiveGroup(value);
       }
       return JSONWriter::success();
     } else if (_request.getMethod() == "setOutputMode") {
@@ -626,16 +592,7 @@ namespace dss {
           return json.successJSON();
         }
 
-        dsuid_t next;
-        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-        boost::shared_ptr<Device> pPartnerDevice;
-
-        try {
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
-        } catch(ItemNotFoundException& e) {
-          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-        }
-
+        auto pPartnerDevice = pDevice->getPartnerDevice();
         bool wasSlave = pPartnerDevice->is2WaySlave();
         if (pDevice->multiDeviceIndex() == 2) {
           // hide 4th dsid
@@ -2107,16 +2064,7 @@ namespace dss {
       JSONWriter json;
       std::string action = "none";
 
-      dsuid_t next;
-      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-      boost::shared_ptr<Device> pPartnerDevice;
-
-      try {
-        pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
-      } catch(ItemNotFoundException& e) {
-        return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-      }
-
+      auto pPartnerDevice = pDevice->getPartnerDevice();
       bool targetVisibility = false; // only "temperaturecontrol"
       bool currentVisibility = pPartnerDevice->isVisible();
 
@@ -2160,17 +2108,7 @@ namespace dss {
       }
 
       JSONWriter json;
-
-      dsuid_t next;
-      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-      boost::shared_ptr<Device> pPartnerDevice;
-
-      try {
-        pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
-      } catch(ItemNotFoundException& e) {
-        return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-      }
-
+      auto pPartnerDevice = pDevice->getPartnerDevice();
       std::string mode = "temperaturecontrol";
 
       if (pPartnerDevice->isVisible()) {

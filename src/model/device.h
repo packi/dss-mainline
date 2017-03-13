@@ -379,6 +379,9 @@ namespace dss {
     void setDeviceButtonInputMode(ButtonInputMode mode);
     void setProgMode(uint8_t _modeId);
 
+    boost::shared_ptr<Device> tryGetPartnerDevice() const;
+    boost::shared_ptr<Device> getPartnerDevice() const;
+
     void increaseDeviceOutputChannelValue(uint8_t _channel);
     void decreaseDeviceOutputChannelValue(uint8_t _channel);
     void stopDeviceOutputChannelValue(uint8_t _channel);

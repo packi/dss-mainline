@@ -154,15 +154,23 @@ namespace dss {
     _zone->addGroup(grp);
   } // addDefaultGroupsToZone
 
-  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) const {
+  boost::shared_ptr<Device> Apartment::tryGetDeviceByDSID(const dsuid_t dsid) const {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      if (dev->getDSID() == _dsid) {
+      if (dev->getDSID() == dsid) {
         return dev;
       }
     }
-    throw ItemNotFoundException(dsuid2str(_dsid));
-  } // getDeviceByShortAddress const
+    return DS_NULLPTR;
+  }
+
+  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t dsid) const {
+    auto device = tryGetDeviceByDSID(dsid);
+    if (!device) {
+      throw ItemNotFoundException(dsuid2str(dsid));
+    }
+    return device;
+  }
 
   boost::shared_ptr<Device> Apartment::getDeviceByName(const std::string& _name) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);

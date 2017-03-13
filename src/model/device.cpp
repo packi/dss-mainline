@@ -34,7 +34,7 @@
 
 #include <digitalSTROM/dsuid.h>
 #include <digitalSTROM/dsm-api-v2/dsm-api.h>
-#include <ds/str.h>
+#include <ds/log.h>
 
 #include "src/businterface.h"
 #include "src/propertysystem.h"
@@ -844,6 +844,18 @@ namespace dss {
       m_pApartment->getDeviceBusInterface()->setDeviceProgMode(*this, _modeId);
     }
   } // setProgMode
+
+  boost::shared_ptr<Device> Device::tryGetPartnerDevice() const {
+    dsuid_t next;
+    dsuid_get_next_dsuid(getDSID(), &next);
+    return getApartment().tryGetDeviceByDSID(next);
+  }
+
+  boost::shared_ptr<Device> Device::getPartnerDevice() const {
+    auto device = tryGetPartnerDevice();
+    DS_REQUIRE(device, "Failed to find partner device.", m_DSID);
+    return device;
+  }
 
  void Device::increaseDeviceOutputChannelValue(uint8_t _channel) {
     if (m_pPropertyNode) {
