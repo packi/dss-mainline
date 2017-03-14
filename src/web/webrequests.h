@@ -163,6 +163,7 @@ namespace dss {
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request,
                                                 boost::shared_ptr<Session> _session, 
                                                 const struct mg_connection* _connection) = 0;
+    virtual ~WebServerRequestHandlerJSON() {}
   protected:
     void log(const std::string& _line, aLogSeverity _severity = lsDebug) {
         Logger::getInstance()->log("RequestHandler: " + _line, _severity);

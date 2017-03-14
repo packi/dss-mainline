@@ -110,8 +110,7 @@ void WebserviceConnectionMsHub::authorizeRequest(HttpRequest& req, bool hasUrlPa
       req.url = req.url + "?" + default_webservice_param;
     }
   } else {
-    log("authentication parameters enabled, but token could not be "
-        "fetched!", lsError);
+    log("authentication parameters enabled, but token could not be fetched!", lsError);
   }
 }
 
@@ -135,19 +134,18 @@ private:
 
 WebserviceConnectionDsHub::WebserviceConnectionDsHub()
   : WebserviceConnection(pp_websvc_dshub_url),
-    m_Converter(pp_websvc_root, pp_dshub_token, pp_websvc_dshub_active)
+    m_Converter(pp_websvc_root, pp_mshub_token, pp_websvc_dshub_active)
 {
 }
 
 void WebserviceConnectionDsHub::authorizeRequest(HttpRequest& req, bool hasUrlParameters)
 {
-  std::string osptoken = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_dshub_token);
+  std::string osptoken = DSS::getInstance()->getPropertySystem().getStringValue(pp_websvc_rc_osptoken);
 
   if (!osptoken.empty()) {
     req.headers["Authorization"] =  "Bearer " + osptoken;
   } else {
-    log("authentication parameters enabled, but token could not be "
-        "fetched!", lsError);
+    log("authentication parameters enabled, but token could not be fetched!", lsError);
   }
 }
 

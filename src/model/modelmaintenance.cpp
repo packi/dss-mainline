@@ -74,6 +74,7 @@
 #include "sqlite3_wrapper.h"
 #include "web/webserver.h"
 #include "propertysystem_common_paths.h"
+#include "comm-channel.h"
 
 namespace dss {
 
@@ -1609,7 +1610,8 @@ namespace dss {
       boost::shared_ptr<DSMeter> mod = m_pApartment->getDSMeterByDSID(_source);
       boost::shared_ptr<Device> dev = mod->getDevices().getByBusID(_deviceID, _source).getDevice();
       // ButtonInputMode Turbo (1) or Switched (2) do not generate multi-tip-sequences
-      if (dev->getButtonInputMode() == 1 || dev->getButtonInputMode() == 2) {
+      if (dev->getButtonInputMode() == ButtonInputMode::TURBO
+          || dev->getButtonInputMode() == ButtonInputMode::SWITCHED) {
         passThrough = true;
       }
     } catch (ItemNotFoundException& ex) {
@@ -1973,7 +1975,7 @@ namespace dss {
         } else if (_configIndex == CfgFunction_PbGroup) {
           device->setButtonGroupMembership(_value);
         } else if (_configIndex == CfgFunction_LTMode) {
-          device->setButtonInputMode(_value);
+          device->setButtonInputMode(static_cast<ButtonInputMode>(_value));
         }
       } else if (_configClass == CfgClassDevice) {
         if(_configIndex >= 0x40 && _configIndex <= 0x40 + 8 * 3) {

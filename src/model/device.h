@@ -39,28 +39,6 @@
 #include "businterface.h"
 #include "modelevent.h"
 
-#define DEV_PARAM_BUTTONINPUT_STANDARD              0
-#define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1   5
-#define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2   6
-#define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3   7
-#define DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4   8
-#define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1   9
-#define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2   10
-#define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3   11
-#define DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4   12
-#define DEV_PARAM_BUTTONINPUT_2WAY                  13
-#define DEV_PARAM_BUTTONINPUT_1WAY                  14
-#define DEV_PARAM_BUTTONINPUT_AKM_STANDARD          16
-#define DEV_PARAM_BUTTONINPUT_AKM_INVERTED          17
-#define DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE    18
-#define DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE   19
-#define DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE   20
-#define DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE  21
-#define DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE       22
-#define DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE      23
-
-#define DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2       0xff
-
 #define BUTTON_ACTIVE_GROUP_RESET    0xff
 
 // pairing JSON strings
@@ -291,7 +269,7 @@ namespace dss {
     bool m_IsLockedInDSM;
 
     uint8_t m_OutputMode;
-    uint8_t m_ButtonInputMode;
+    ButtonInputMode m_ButtonInputMode;
     uint8_t m_ButtonInputIndex;
     uint8_t m_ButtonInputCount;
     bool m_ButtonSetsLocalPriority;
@@ -360,6 +338,12 @@ namespace dss {
     void updateModelFeatures();
     void republishModelFeaturesToPropertyTree();
 
+    // These methods are intended to use only from model maintenance classes.
+    // Methods starting with setDevice are for public use.
+    friend class BusScanner;
+    friend class ModelMaintenance;
+    void setButtonInputMode(ButtonInputMode mode);
+
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -373,7 +357,7 @@ namespace dss {
     bool hasExtendendSceneTable();
     void calculateHWInfo();
     void updateIconPath();
-    std::string getAKMButtonInputString(const int _mode);
+    std::string getAKMButtonInputString(ButtonInputMode mode);
     bool hasBlinkSettings();
 
   public:
@@ -392,8 +376,11 @@ namespace dss {
     void setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup);
     void setDeviceJokerGroup(uint8_t _groupId);
     void setDeviceOutputMode(uint8_t _modeId);
-    void setDeviceButtonInputMode(uint8_t _modeId);
+    void setDeviceButtonInputMode(ButtonInputMode mode);
     void setProgMode(uint8_t _modeId);
+
+    boost::shared_ptr<Device> tryGetPartnerDevice() const;
+    boost::shared_ptr<Device> getPartnerDevice() const;
 
     void increaseDeviceOutputChannelValue(uint8_t _channel);
     void decreaseDeviceOutputChannelValue(uint8_t _channel);
@@ -535,9 +522,6 @@ namespace dss {
     int getGroupsCount() const;
     /** Returns the vector of groups the device is in */
     const std::vector<int>& getGroupIds() const { return m_groupIds; }
-    /** Retuturns group to which the joker is configured or -1 if device is not
-        a joker */
-    int getJokerGroup() const;
     /** Returns the zoneID that this device group is in. */
     int getGroupZoneID(int groupID) const;
     /// Returns zone local group or global group
@@ -642,8 +626,7 @@ namespace dss {
     int getButtonID() const { return m_ButtonID; }
     uint8_t getOutputMode() const { return m_OutputMode; }
     void setOutputMode(const uint8_t _value);
-    void setButtonInputMode(const uint8_t _value);
-    uint8_t getButtonInputMode() const { return m_ButtonInputMode; }
+    ButtonInputMode getButtonInputMode() const { return m_ButtonInputMode; }
     void setButtonInputIndex(const uint8_t _value) { m_ButtonInputIndex = _value; }
     uint8_t getButtonInputIndex() const { return m_ButtonInputIndex; }
     void setButtonInputCount(const uint8_t _value) { m_ButtonInputCount = _value; }

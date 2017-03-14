@@ -154,15 +154,23 @@ namespace dss {
     _zone->addGroup(grp);
   } // addDefaultGroupsToZone
 
-  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t _dsid) const {
+  boost::shared_ptr<Device> Apartment::tryGetDeviceByDSID(const dsuid_t dsid) const {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
     foreach(boost::shared_ptr<Device> dev, m_Devices) {
-      if (dev->getDSID() == _dsid) {
+      if (dev->getDSID() == dsid) {
         return dev;
       }
     }
-    throw ItemNotFoundException(dsuid2str(_dsid));
-  } // getDeviceByShortAddress const
+    return DS_NULLPTR;
+  }
+
+  boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t dsid) const {
+    auto device = tryGetDeviceByDSID(dsid);
+    if (!device) {
+      throw ItemNotFoundException(dsuid2str(dsid));
+    }
+    return device;
+  }
 
   boost::shared_ptr<Device> Apartment::getDeviceByName(const std::string& _name) {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
@@ -379,6 +387,12 @@ namespace dss {
         group.reset(new Group(GroupIDGlobalAppDsVentilation, result));
         group->setName("apartmentVentilation");
         group->setApplicationType(ApplicationType::ApartmentVentilation);
+        group->setIsValid(true);  // TODO(soon): this may not be needed for AV (maybe it is only valid when devices are present)
+        result->addGroup(group);
+
+        group.reset(new Group(GroupIDGlobalAppDsRecirculation, result));
+        group->setName("apartmentRecirculation");
+        group->setApplicationType(ApplicationType::ApartmentRecirculation);
         group->setIsValid(true);  // TODO(soon): this may not be needed for AV (maybe it is only valid when devices are present)
         result->addGroup(group);
       }

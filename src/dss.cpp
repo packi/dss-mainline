@@ -41,13 +41,14 @@
 #endif
 
 #include <sys/resource.h>
-#include <boost/asio/io_service.hpp>
 #include <thread>
 #include <condition_variable>
 
+#include <boost/asio/io_service.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/finder.hpp>
+#include <boost/make_shared.hpp>
 
 #include <ds/log.h>
 #include <ds/asio/io-service.h>
@@ -90,6 +91,7 @@
 #include "vdc-db-fetcher.h"
 #include "vdc-token.h"
 #include "propertysystem_common_paths.h"
+#include "comm-channel.h"
 
 namespace dss {
 

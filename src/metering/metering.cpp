@@ -40,6 +40,7 @@
 #include <regex.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
 #include "foreach.h"
 
 #include <digitalSTROM/dsuid.h>

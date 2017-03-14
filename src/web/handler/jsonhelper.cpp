@@ -214,6 +214,41 @@ namespace dss {
     _json.endObject();
   } // toJSON(DeviceReference)
 
+  void toJSON(boost::shared_ptr<const DSMeter> _dsMeter, JSONWriter& _json) {
+    _json.startObject();
+    _json.add("name", _dsMeter->getName());
+    dsid_t dsid;
+    if (dsuid_to_dsid(_dsMeter->getDSID(), &dsid)) {
+      _json.add("dsid", dsid2str(dsid));
+    } else {
+      _json.add("dsid", "");
+    }
+    _json.add("dSUID", _dsMeter->getDSID());
+    _json.add("DisplayID", _dsMeter->getDisplayID());
+    _json.add("hwVersion", 0);
+    _json.add("hwVersionString", _dsMeter->getHardwareVersion());
+    _json.add("swVersion", _dsMeter->getSoftwareVersion());
+    _json.add("armSwVersion", _dsMeter->getArmSoftwareVersion());
+    _json.add("dspSwVersion", _dsMeter->getDspSoftwareVersion());
+    _json.add("apiVersion", _dsMeter->getApiVersion());
+    _json.add("hwName", _dsMeter->getHardwareName());
+    _json.add("isPresent", _dsMeter->isPresent());
+    _json.add("isValid", _dsMeter->isValid());
+    _json.add("busMemberType", _dsMeter->getBusMemberType());
+    _json.add("hasDevices", _dsMeter->getCapability_HasDevices());
+    _json.add("hasMetering", _dsMeter->getCapability_HasMetering());
+    _json.add("VdcConfigURL", _dsMeter->getVdcConfigURL());
+    _json.add("VdcModelUID", _dsMeter->getVdcModelUID());
+    _json.add("VdcHardwareGuid", _dsMeter->getVdcHardwareGuid());
+    _json.add("VdcHardwareModelGuid", _dsMeter->getVdcHardwareModelGuid());
+    _json.add("VdcImplementationId", _dsMeter->getVdcImplementationId());
+    _json.add("VdcVendorGuid", _dsMeter->getVdcVendorGuid());
+    _json.add("VdcOemGuid", _dsMeter->getVdcOemGuid());
+    std::bitset<8> flags = _dsMeter->getPropertyFlags();
+    _json.add("ignoreActionsFromNewDevices", flags.test(4));
+    _json.endObject();
+  }
+
   void toJSON(const Set& _set, JSONWriter& _json, bool _showHidden) {
     for(int iDevice = 0; iDevice < _set.length(); iDevice++) {
       const DeviceReference& d = _set.get(iDevice);

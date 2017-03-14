@@ -24,9 +24,11 @@
   #include "config.h"
 #endif
 
-#include <algorithm>
 
 #include "modulator.h"
+
+#include <algorithm>
+#include <boost/make_shared.hpp>
 
 #include <digitalSTROM/dsuid.h>
 
@@ -35,6 +37,7 @@
 #include "src/businterface.h"
 #include "src/propertysystem.h"
 #include "set.h"
+#include "model/state.h"
 #include "apartment.h"
 #include "src/metering/metering.h"
 
@@ -201,6 +204,8 @@ namespace dss {
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareGuid, false));
       m_pPropertyNode->createProperty("HardwareModelGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareModelGuid, false));
+      m_pPropertyNode->createProperty("ImplementationId")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcImplementationId, false));
       m_pPropertyNode->createProperty("VendorGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcVendorGuid, false));
       m_pPropertyNode->createProperty("OemGuid")

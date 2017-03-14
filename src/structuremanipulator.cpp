@@ -28,6 +28,7 @@
 
 #include <stdexcept>
 #include <boost/ref.hpp>
+#include <boost/make_shared.hpp>
 #include <ds/str.h>
 
 #include "src/foreach.h"
@@ -779,7 +780,7 @@ namespace dss {
 
     int oldGroupId = device->getActiveGroup();
     if (oldGroupId == GroupIDNotApplicable) {
-      oldGroupId = device->getJokerGroup();
+      oldGroupId = GroupIDBlack;
     }
 
     if (oldGroupId != groupId) {

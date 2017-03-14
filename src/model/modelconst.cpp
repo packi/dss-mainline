@@ -398,6 +398,7 @@ namespace dss {
         case ApplicationType::Recirculation: return stream << "recirculation";
         case ApplicationType::ControlTemperature: return stream << "controlTemperature";
         case ApplicationType::ApartmentVentilation: return stream << "apartmentVentilation";
+        case ApplicationType::ApartmentRecirculation: return stream << "apartmentRecirculation";
       }
       return stream << "unknown";
     }() << '(' << static_cast<int>(x) << ')';
@@ -416,6 +417,7 @@ namespace dss {
       case ApplicationType::Window:
       case ApplicationType::ControlTemperature:
       case ApplicationType::ApartmentVentilation:
+      case ApplicationType::ApartmentRecirculation:
         return ColorIDBlue;
       case ApplicationType::Audio:
         return ColorIDCyan;

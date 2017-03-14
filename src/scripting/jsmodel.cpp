@@ -62,6 +62,7 @@
 #include "src/protobufjson.h"
 #include "src/stringconverter.h"
 #include "src/vdc-connection.h"
+#include "comm-channel.h"
 
 
 namespace dss {

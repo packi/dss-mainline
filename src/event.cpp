@@ -25,8 +25,15 @@
   #include "config.h"
 #endif
 
-
 #include "event.h"
+
+#include <set>
+#include <iostream>
+#include <sstream>
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/make_shared.hpp>
 
 #include "logger.h"
 #include "dss.h"
@@ -43,12 +50,6 @@
 #include "src/model/modelconst.h"
 #include "src/security/security.h"
 
-#include <set>
-#include <iostream>
-#include <sstream>
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <web/webserver.h>
 #include "propertysystem_common_paths.h"
 

@@ -36,6 +36,7 @@
 #include <string.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -302,8 +303,8 @@ namespace dss {
     m_Handlers[kHandlerDevice] =
       new DeviceRequestHandler(
         getDSS().getApartment(),
-        getDSS().getBusInterface().getStructureModifyingBusInterface(),
-        getDSS().getBusInterface().getStructureQueryBusInterface());
+        *getDSS().getBusInterface().getStructureModifyingBusInterface(),
+        *getDSS().getBusInterface().getStructureQueryBusInterface());
     m_Handlers[kHandlerCircuit] = new CircuitRequestHandler(
             getDSS().getApartment(),
             getDSS().getBusInterface().getStructureModifyingBusInterface(),
@@ -416,18 +417,18 @@ namespace dss {
           // NOTE, this way we might override the trusted login session
           // IGNORE, it doesn't happen and if so, we don't care either
         }
-        log("JSON request returned with 200: " + result.substr(0, 50), lsInfo);
+        log("JSON request returned with 200: " + result.substr(0, 120), lsInfo);
         returnCode = 200;
         emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
       } catch(SecurityException& e) {
         result = JSONWriter::failure(e.what());
         returnCode = 403;
-        log("JSON request returned with 403: " + result.substr(0, 50), lsInfo);
+        log("JSON request returned with 403: " + result.substr(0, 120), lsInfo);
         emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);;
       } catch(const std::exception& e) {
         result = JSONWriter::failure(e.what());
         returnCode = 500;
-        log("JSON request returned with 500: " + result.substr(0, 50), lsInfo);
+        log("JSON request returned with 500: " + result.substr(0, 120), lsInfo);
         emitHTTPJsonPacket(_connection, returnCode, setCookieHeader, result);
       }
     } else {

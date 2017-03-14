@@ -30,6 +30,8 @@
 #include <string>
 
 #include "deviceinterfacerequesthandler.h"
+#include "src/structuremanipulator.h"
+
 namespace dss {
 
   class Device;
@@ -38,9 +40,8 @@ namespace dss {
 
   class DeviceRequestHandler : public DeviceInterfaceRequestHandler {
   public:
-    DeviceRequestHandler(Apartment& _apartment,
-                         StructureModifyingBusInterface* _pStructureBusInterface,
-                         StructureQueryBusInterface* _pStructureQueryBusInterface);
+    DeviceRequestHandler(Apartment& _apartment, StructureModifyingBusInterface &,
+                         StructureQueryBusInterface &);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
 
     // parse string of semicolon separated integers, returns a pair of
@@ -58,8 +59,7 @@ namespace dss {
 
   private:
     Apartment& m_Apartment;
-    StructureModifyingBusInterface* m_pStructureBusInterface;
-    StructureQueryBusInterface* m_pStructureQueryBusInterface;
+    StructureManipulator m_manipulator;
     static boost::recursive_mutex m_LTMODEMutex;
   }; // DeviceRequestHandler
 

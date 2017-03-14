@@ -29,6 +29,7 @@
 
 #include <limits.h>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 #include "foreach.h"
 
 #include <digitalSTROM/dsuid.h>
@@ -42,7 +43,6 @@
 #include "src/model/zone.h"
 #include "src/model/modelconst.h"
 #include "src/vdc-db.h"
-#include "src/structuremanipulator.h"
 #include "src/stringconverter.h"
 #include "src/comm-channel.h"
 #include "src/ds485types.h"
@@ -62,11 +62,10 @@ namespace dss {
   //=========================================== DeviceRequestHandler
 
   DeviceRequestHandler::DeviceRequestHandler(Apartment& _apartment,
-                                             StructureModifyingBusInterface* _pStructureBusInterface,
-                                             StructureQueryBusInterface* _pStructureQueryBusInterface)
+                                             StructureModifyingBusInterface &modify,
+                                             StructureQueryBusInterface &query)
   : m_Apartment(_apartment),
-    m_pStructureBusInterface(_pStructureBusInterface),
-    m_pStructureQueryBusInterface(_pStructureQueryBusInterface)
+    m_manipulator(modify, query, m_Apartment)
   { }
 
   class DeviceNotFoundException : public std::runtime_error {
@@ -232,30 +231,13 @@ namespace dss {
 
         pDevice->setName(st.convert(name));
 
-        if (m_pStructureBusInterface != NULL) {
-          StructureManipulator manipulator(*m_pStructureBusInterface,
-                                           *m_pStructureQueryBusInterface,
-                                           m_Apartment);
-          manipulator.deviceSetName(pDevice, st.convert(name));
-        }
+        m_manipulator.deviceSetName(pDevice, st.convert(name));
 
         if (pDevice->is2WayMaster()) {
-          dsuid_t next;
-          dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-          try {
-            boost::shared_ptr<Device> pPartnerDevice;
-            pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-            if (pPartnerDevice->getName().empty()) {
-              pPartnerDevice->setName(st.convert(name));;
-              if (m_pStructureBusInterface != NULL) {
-                StructureManipulator manipulator(*m_pStructureBusInterface,
-                                                 *m_pStructureQueryBusInterface,
-                                                 m_Apartment);
-                manipulator.deviceSetName(pPartnerDevice, st.convert(name));
-              }
-            }
-          } catch(std::runtime_error& e) {
-            return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
+          auto pPartnerDevice = pDevice->getPartnerDevice();
+          if (pPartnerDevice->getName().empty()) {
+            pPartnerDevice->setName(st.convert(name));
+            m_manipulator.deviceSetName(pPartnerDevice, st.convert(name));
           }
         }
         return JSONWriter::success();
@@ -384,31 +366,16 @@ namespace dss {
       if (!isDefaultGroup(newGroupId) && !isGlobalAppDsGroup(newGroupId)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
       }
-      if (m_pStructureBusInterface == NULL) {
-          return JSONWriter::failure("No handle to bus interface");
-      }
 
       std::vector<boost::shared_ptr<Device> > modifiedDevices;
-      StructureManipulator manipulator(*m_pStructureBusInterface,
-                                       *m_pStructureQueryBusInterface,
-                                       m_Apartment);
 
-      if (manipulator.setJokerGroup(pDevice, newGroupId)) {
+      if (m_manipulator.setJokerGroup(pDevice, newGroupId)) {
         modifiedDevices.push_back(pDevice);
       }
 
       if (pDevice->is2WayMaster()) {
-        dsuid_t next;
-        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-        boost::shared_ptr<Device> pPartnerDevice;
-        try {
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-        } catch(ItemNotFoundException& e) {
-          return JSONWriter::failure("Could not find partner device with dsid '" +
-                         dsuid2str(next) + "'");
-        }
-
-        manipulator.setJokerGroup(pPartnerDevice, newGroupId);
+        auto pPartnerDevice = pDevice->getPartnerDevice();
+        m_manipulator.setJokerGroup(pPartnerDevice, newGroupId);
       }
 
       JSONWriter json;
@@ -444,10 +411,7 @@ namespace dss {
       }
 
       boost::shared_ptr<Group> newGroup = m_Apartment.getZone(pDevice->getZoneID())->getGroup(newGroupId);
-      StructureManipulator manipulator(*m_pStructureBusInterface,
-                                       *m_pStructureQueryBusInterface,
-                                       m_Apartment);
-      manipulator.deviceAddToGroup(pDevice, newGroup);
+      m_manipulator.deviceAddToGroup(pDevice, newGroup);
 
       JSONWriter json;
       json.startArray("devices");
@@ -470,15 +434,8 @@ namespace dss {
           return JSONWriter::success();
         }
 
-        dsuid_t next;
-        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-        try {
-          boost::shared_ptr<Device> pPartnerDevice;
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-          pPartnerDevice->setDeviceButtonID(value);
-        } catch(ItemNotFoundException& e) {
-          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-        }
+        auto pPartnerDevice = pDevice->getPartnerDevice();
+        pPartnerDevice->setDeviceButtonID(value);
       }
       return JSONWriter::success();
     } else if (_request.getMethod() == "setButtonInputMode") {
@@ -499,94 +456,52 @@ namespace dss {
       }
 
       if ((pDevice->getDeviceClass() == DEVICE_CLASS_SW) &&
-          (pDevice->getJokerGroup() == GroupIDBlack) &&
+          (pDevice->getActiveGroup() == GroupIDBlack) &&
           (value != BUTTONINPUT_1WAY)) {
         return JSONWriter::failure("Joker devices must be set to a specific group for button pairing");
       }
 
-      dsuid_t next;
-      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-      boost::shared_ptr<Device> pPartnerDevice;
-      pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
-
+      auto pPartnerDevice = pDevice->getPartnerDevice();
       bool wasSlave = pPartnerDevice->is2WaySlave();
 
       if (value == BUTTONINPUT_2WAY_DOWN) {
         if (pDevice->getButtonInputIndex() == 0) {
-          if (m_pStructureBusInterface != NULL) {
-            pDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2);
-            pPartnerDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1);
-          }
-          pDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT2);
-          pPartnerDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT1);
+          pDevice->setDeviceButtonInputMode(
+                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT2);
+          pPartnerDevice->setDeviceButtonInputMode(
+                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT1);
         } else {
-          if (m_pStructureBusInterface != NULL) {
-            pDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4);
-            pPartnerDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3);
-          }
-          pDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT4);
-          pPartnerDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT3);
+          pDevice->setDeviceButtonInputMode(
+                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT4);
+          pPartnerDevice->setDeviceButtonInputMode(
+                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT3);
         }
       } else if (value == BUTTONINPUT_2WAY_UP) {
         if (pDevice->getButtonInputIndex() == 0) {
-          if (m_pStructureBusInterface != NULL) {
-            pDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2);
-            pPartnerDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1);
-          }
-          pDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT2);
-          pPartnerDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT1);
+          pDevice->setDeviceButtonInputMode(
+                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT2);
+          pPartnerDevice->setDeviceButtonInputMode(
+                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT1);
         } else {
-          if (m_pStructureBusInterface != NULL) {
-            pDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4);
-            pPartnerDevice->setDeviceButtonInputMode(
-                    DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3);
-          }
-          pDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_UP_WITH_INPUT4);
-          pPartnerDevice->setButtonInputMode(
-                  DEV_PARAM_BUTTONINPUT_2WAY_DW_WITH_INPUT3);
+          pDevice->setDeviceButtonInputMode(
+                  ButtonInputMode::TWO_WAY_UP_WITH_INPUT4);
+          pPartnerDevice->setDeviceButtonInputMode(
+                  ButtonInputMode::TWO_WAY_DW_WITH_INPUT3);
         }
       } else if (value == BUTTONINPUT_1WAY) {
-        if (m_pStructureBusInterface != NULL) {
-          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
-          if (pPartnerDevice->is2WaySlave()) {
-            pPartnerDevice->setDeviceButtonInputMode(
-                                            DEV_PARAM_BUTTONINPUT_STANDARD);
-          }
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::STANDARD);
+        if (pPartnerDevice->is2WaySlave()) {
+          pPartnerDevice->setDeviceButtonInputMode(
+                                          ButtonInputMode::STANDARD);
         }
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
-        pPartnerDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_STANDARD);
       } else if (value == BUTTONINPUT_2WAY) {
-        if (m_pStructureBusInterface != NULL) {
-          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_2WAY);
-          pPartnerDevice->setDeviceButtonInputMode(
-                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
-        }
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_2WAY);
-        pPartnerDevice->setButtonInputMode(
-                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::TWO_WAY);
+        pPartnerDevice->setDeviceButtonInputMode(
+                                      ButtonInputMode::SDS_SLAVE_M1_M2);
       } else if (value == BUTTONINPUT_1WAY_COMBINED) {
-        if (m_pStructureBusInterface != NULL) {
-          pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_1WAY);
-          pPartnerDevice->setDeviceButtonInputMode(
-                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
-        }
-        pDevice->setButtonInputMode(DEV_PARAM_BUTTONINPUT_1WAY);
-        pPartnerDevice->setButtonInputMode(
-                                        DEV_PARAM_BUTTONINPUT_SDS_SLAVE_M1_M2);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::ONE_WAY);
+        pPartnerDevice->setDeviceButtonInputMode(
+                                      ButtonInputMode::SDS_SLAVE_M1_M2);
       } else {
         return JSONWriter::failure("Invalid mode specified");
       }
@@ -619,35 +534,24 @@ namespace dss {
         return json.successJSON();
       }
 
-      StructureManipulator manipulator(*m_pStructureBusInterface,
-                                       *m_pStructureQueryBusInterface,
-                                       m_Apartment);
-
       if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
-        if (m_pStructureBusInterface != NULL) {
-          boost::shared_ptr<Zone> zone = m_Apartment.getZone(
-                                                        pDevice->getZoneID());
-          manipulator.addDeviceToZone(pPartnerDevice, zone);
-        }
+        boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                      pDevice->getZoneID());
+        m_manipulator.addDeviceToZone(pPartnerDevice, zone);
       }
 
       // #3450 - remove slave devices from clusters
-      manipulator.deviceRemoveFromGroups(pPartnerDevice);
+      m_manipulator.deviceRemoveFromGroups(pPartnerDevice);
 
       if (features.syncButtonID == true) {
         if (pDevice->getButtonID() != pPartnerDevice->getButtonID()) {
-          if (m_pStructureBusInterface != NULL) {
-            pPartnerDevice->setDeviceButtonID(pDevice->getButtonID());
-          }
-          pPartnerDevice->setButtonID(pDevice->getButtonID());
+          pPartnerDevice->setDeviceButtonID(pDevice->getButtonID());
         }
       }
 
       if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
           (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
-        if (m_pStructureBusInterface != NULL) {
-          manipulator.setJokerGroup(pPartnerDevice, pDevice->getJokerGroup());
-        }
+        m_manipulator.setJokerGroup(pPartnerDevice, pDevice->getActiveGroup());
       }
       return json.successJSON();
     } else if (_request.getMethod() == "setButtonActiveGroup") {
@@ -664,15 +568,8 @@ namespace dss {
           return JSONWriter::success();
         }
 
-        dsuid_t next;
-        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-        try {
-          boost::shared_ptr<Device> pPartnerDevice;
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);
-          pPartnerDevice->setDeviceButtonActiveGroup(value);
-        } catch(ItemNotFoundException& e) {
-          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-        }
+        auto pPartnerDevice = pDevice->getPartnerDevice();
+        pPartnerDevice->setDeviceButtonActiveGroup(value);
       }
       return JSONWriter::success();
     } else if (_request.getMethod() == "setOutputMode") {
@@ -694,16 +591,7 @@ namespace dss {
           return json.successJSON();
         }
 
-        dsuid_t next;
-        dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-        boost::shared_ptr<Device> pPartnerDevice;
-
-        try {
-          pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
-        } catch(ItemNotFoundException& e) {
-          return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-        }
-
+        auto pPartnerDevice = pDevice->getPartnerDevice();
         bool wasSlave = pPartnerDevice->is2WaySlave();
         if (pDevice->multiDeviceIndex() == 2) {
           // hide 4th dsid
@@ -734,26 +622,18 @@ namespace dss {
 
           // if the devices are connected move second device to proper zone and group
           if (pPartnerDevice->is2WaySlave()) {
-            StructureManipulator manipulator(*m_pStructureBusInterface,
-                                             *m_pStructureQueryBusInterface,
-                                              m_Apartment);
-
             if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
-              if (m_pStructureBusInterface != NULL) {
-                boost::shared_ptr<Zone> zone = m_Apartment.getZone(
-                                                          pDevice->getZoneID());
-                manipulator.addDeviceToZone(pPartnerDevice, zone);
-              }
+              boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                        pDevice->getZoneID());
+              m_manipulator.addDeviceToZone(pPartnerDevice, zone);
             }
 
             // #3450 - remove slave devices from clusters
-            manipulator.deviceRemoveFromGroups(pPartnerDevice);
+            m_manipulator.deviceRemoveFromGroups(pPartnerDevice);
 
             if ((pDevice->getActiveGroup() != GroupIDNotApplicable) &&
                 (pDevice->getActiveGroup() != pPartnerDevice->getActiveGroup())) {
-              if (m_pStructureBusInterface != NULL) {
-                manipulator.setJokerGroup(pPartnerDevice, pDevice->getActiveGroup());
-              }
+              m_manipulator.setJokerGroup(pPartnerDevice, pDevice->getActiveGroup());
             }
           }
         } else {
@@ -1168,26 +1048,42 @@ namespace dss {
         return JSONWriter::failure("This device does not support AKM properties");
       }
 
+      JSONWriter json;
+      // Partner device cannot be / stay in slave button mode when master
+      // device is configured to sensor.
+      // It would be hardware misconfiguration.
+      if (pDevice->is2WayMaster()) {
+        auto&& pPartnerDevice = pDevice->getPartnerDevice();
+        if (pPartnerDevice->is2WaySlave()) {
+          pPartnerDevice->setDeviceButtonInputMode(ButtonInputMode::STANDARD);
+
+          json.add("action", "add");
+          json.add("device");
+          toJSON(DeviceReference(pPartnerDevice, &m_Apartment), json);
+        }
+      }
+
       if (mode == BUTTONINPUT_AKM_STANDARD) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_STANDARD);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_STANDARD);
       } else if (mode == BUTTONINPUT_AKM_INVERTED) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_INVERTED);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_INVERTED);
       } else if (mode == BUTTONINPUT_AKM_ON_RISING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_ON_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_ON_FALLING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_ON_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_ON_FALLING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_OFF_RISING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_OFF_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_OFF_FALLING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_OFF_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_OFF_FALLING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_RISING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_RISING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_RISING_EDGE);
       } else if (mode == BUTTONINPUT_AKM_FALLING_EDGE) {
-        pDevice->setDeviceButtonInputMode(DEV_PARAM_BUTTONINPUT_AKM_FALLING_EDGE);
+        pDevice->setDeviceButtonInputMode(ButtonInputMode::AKM_FALLING_EDGE);
       } else {
         return JSONWriter::failure("Unsupported mode: " + mode);
       }
-      return JSONWriter::success();
+
+      return json.successJSON();
     } else if (_request.getMethod() == "getSensorValue") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
       if((id < 0) || (id > 255)) {
@@ -1975,15 +1871,9 @@ namespace dss {
           boost::shared_ptr<Device> main_device;
           try {
             main_device = m_Apartment.getDeviceByDSID(main);
-            if (m_pStructureBusInterface != NULL) {
-              StructureManipulator manipulator(*m_pStructureBusInterface,
-                                               *m_pStructureQueryBusInterface,
-                                                m_Apartment);
-
-              boost::shared_ptr<Zone> zone = m_Apartment.getZone(
-                                                      main_device->getZoneID());
-              manipulator.addDeviceToZone(device, zone);
-            }
+            boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                    main_device->getZoneID());
+            m_manipulator.addDeviceToZone(device, zone);
           } catch (ItemNotFoundException &e) {
             Logger::getInstance()->log("DeviceRequestHandler: could not move paired device into main devices\' zone");
           }
@@ -2189,16 +2079,7 @@ namespace dss {
       JSONWriter json;
       std::string action = "none";
 
-      dsuid_t next;
-      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-      boost::shared_ptr<Device> pPartnerDevice;
-
-      try {
-        pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
-      } catch(ItemNotFoundException& e) {
-        return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-      }
-
+      auto pPartnerDevice = pDevice->getPartnerDevice();
       bool targetVisibility = false; // only "temperaturecontrol"
       bool currentVisibility = pPartnerDevice->isVisible();
 
@@ -2216,21 +2097,15 @@ namespace dss {
         pPartnerDevice->setVisibility(targetVisibility);
 
         if (targetVisibility == true) {
-          StructureManipulator manipulator(*m_pStructureBusInterface,
-                                           *m_pStructureQueryBusInterface,
-                                            m_Apartment);
-
           // follow the same logic with paired devices as everywhere else
           if (pDevice->getZoneID() != pPartnerDevice->getZoneID()) {
-            if (m_pStructureBusInterface != NULL) {
-              boost::shared_ptr<Zone> zone = m_Apartment.getZone(
-                                                        pDevice->getZoneID());
-              manipulator.addDeviceToZone(pPartnerDevice, zone);
-            }
+            boost::shared_ptr<Zone> zone = m_Apartment.getZone(
+                                                      pDevice->getZoneID());
+            m_manipulator.addDeviceToZone(pPartnerDevice, zone);
           }
 
           // #3450 - remove slave devices from clusters
-          manipulator.deviceRemoveFromGroups(pPartnerDevice);
+          m_manipulator.deviceRemoveFromGroups(pPartnerDevice);
         }
       }
 
@@ -2248,17 +2123,7 @@ namespace dss {
       }
 
       JSONWriter json;
-
-      dsuid_t next;
-      dsuid_get_next_dsuid(pDevice->getDSID(), &next);
-      boost::shared_ptr<Device> pPartnerDevice;
-
-      try {
-        pPartnerDevice = m_Apartment.getDeviceByDSID(next);  // may throw ItemNotFoundException
-      } catch(ItemNotFoundException& e) {
-        return JSONWriter::failure("Could not find partner device with dsid '" + dsuid2str(next) + "'");
-      }
-
+      auto pPartnerDevice = pDevice->getPartnerDevice();
       std::string mode = "temperaturecontrol";
 
       if (pPartnerDevice->isVisible()) {

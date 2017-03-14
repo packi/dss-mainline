@@ -40,6 +40,7 @@
 #include "model/zone.h"
 #include "model/group.h"
 #include "model/cluster.h"
+#include "model/state.h"
 #include "scripting/jsmodel.h"
 #include "scripting/jsevent.h"
 #include "scripting/jsmetering.h"

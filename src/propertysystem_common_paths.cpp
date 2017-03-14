@@ -56,7 +56,6 @@ const char *pp_websvc_dshub_url = "/config/webservice-api/dshub/base-url";
 const char *pp_websvc_dshub_token = "/scripts/system-addon-remote-connectivity/dSToken";
 
 const char *pp_websvc_root = "/scripts/system-addon-remote-connectivity";
-const char *pp_dshub_token = "dSToken";
 const char *pp_mshub_token = "OSPToken";
 
 const char *pp_websvc_mshub_active = "/system/mshub/eventlog/active";
