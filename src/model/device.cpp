@@ -809,7 +809,10 @@ namespace dss {
 
       // change from joker to a color -> reset button input to standard (for UMR???)
       if ((oldGroupId == GroupIDBlack) && (groupId != GroupIDBlack) &&
-          hasInput() && (getButtonInputMode() != ButtonInputMode::STANDARD)) {
+          hasInput() && (getButtonInputMode() != ButtonInputMode::STANDARD)
+          // Do not override slave device button input mode
+          // http://redmine.digitalstrom.org/issues/16805
+          && !is2WaySlave()) {
         setDeviceButtonInputMode(ButtonInputMode::STANDARD);
       }
 
