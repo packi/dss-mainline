@@ -34,6 +34,7 @@
 #include "logger.h"
 #include "datetools.h"
 #include "base.h"
+#include "model/modelconst.h"
 
 namespace dss {
 
@@ -299,8 +300,15 @@ bool secondsFromHMS(unsigned *ts, std::string string)
                       testGroupIdNode->getAsString());
 
             if (groupNode != NULL) {
-              PropertyNodePtr lastCalledScene =
-                groupNode->getPropertyByName("lastCalledScene");
+              PropertyNodePtr lastCalledScene;
+              if (testZoneIdNode->getIntegerValue() == 0 &&
+                  testGroupIdNode->getIntegerValue() >= GroupIDGlobalAppDsMin &&
+                  testGroupIdNode->getIntegerValue() <= GroupIDGlobalAppDsMax) {
+                lastCalledScene = groupNode->getPropertyByName("lastCalledBasicScene");
+              } else {
+                lastCalledScene = groupNode->getPropertyByName("lastCalledScene");
+              }
+
               if (lastCalledScene != NULL) {
                 if (lastCalledScene->getAsString() ==
                         testSceneIdNode->getAsString()) {
