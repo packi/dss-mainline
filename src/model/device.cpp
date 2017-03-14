@@ -579,6 +579,10 @@ namespace dss {
     }
 
     publishAliasInZoneGroups();
+    foreach (auto&& g, m_groupIds) {
+      PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
+      gsubnode->createProperty("id")->setIntegerValue(g);
+    }
 
     if (m_DSMeterDSID != DSUID_NULL) {
       setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
@@ -596,8 +600,6 @@ namespace dss {
       if (gnode) {
         gnode->alias(m_pPropertyNode);
       }
-      PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
-      gsubnode->createProperty("id")->setIntegerValue(g);
     }
   }
 
