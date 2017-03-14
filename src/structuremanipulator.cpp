@@ -780,7 +780,7 @@ namespace dss {
 
     int oldGroupId = device->getActiveGroup();
     if (oldGroupId == GroupIDNotApplicable) {
-      oldGroupId = DEVICE_CLASS_SW;
+      oldGroupId = GroupIDBlack;
     }
 
     if (oldGroupId != groupId) {
