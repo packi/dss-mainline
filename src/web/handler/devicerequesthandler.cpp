@@ -546,7 +546,6 @@ namespace dss {
       if (features.syncButtonID == true) {
         if (pDevice->getButtonID() != pPartnerDevice->getButtonID()) {
           pPartnerDevice->setDeviceButtonID(pDevice->getButtonID());
-          pPartnerDevice->setButtonID(pDevice->getButtonID());
         }
       }
 
