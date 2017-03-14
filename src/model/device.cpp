@@ -578,6 +578,16 @@ namespace dss {
       }
     }
 
+    publishAliasInZoneGroups();
+
+    if (m_DSMeterDSID != DSUID_NULL) {
+      setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
+    }
+
+    republishModelFeaturesToPropertyTree();
+  } // publishToPropertyTree
+
+  void Device::publishAliasInZoneGroups() {
     foreach (auto&& g, m_groupIds) {
       std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
                           "/groups/group" + intToString(g) + "/devices/" +
@@ -589,13 +599,7 @@ namespace dss {
       PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
       gsubnode->createProperty("id")->setIntegerValue(g);
     }
-
-    if (m_DSMeterDSID != DSUID_NULL) {
-      setDSMeter(m_pApartment->getDSMeterByDSID(m_DSMeterDSID));
-    }
-
-    republishModelFeaturesToPropertyTree();
-  } // publishToPropertyTree
+  }
 
   bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
@@ -1344,6 +1348,8 @@ namespace dss {
         }
         base->addChild(m_pAliasNode);
       }
+
+      publishAliasInZoneGroups();
     }
     // Binary input status bit handles depend on zoneId by call to `tryGetGroup`.
     // TODO(someday): refactor to some kind of observer pattern?
