@@ -202,7 +202,24 @@ namespace dss {
         std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
         foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
           toJSON(dsMeter, json);
+        }
+        json.endArray();
+        return json.successJSON();
+      } else if(_request.getMethod() == "getVdcs") {
+        JSONWriter json;
+
+        std::string implementationId = _request.getParameter("implementationId");
+        if (implementationId.empty()) {
+          return JSONWriter::failure("Missing parameter 'implementationId'");
+        }
+
+        json.startArray("vdcs");
+        std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
+        foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
+          if (dsMeter->getVdcImplementationId() != implementationId) {
+            continue;
           }
+          toJSON(dsMeter, json);
         }
         json.endArray();
         return json.successJSON();
