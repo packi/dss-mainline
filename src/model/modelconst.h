@@ -481,6 +481,33 @@ namespace dss {
   const uint8_t CfgDevice_SensorParameter = 0x20;
   const uint8_t CfgFSensorEvent_TableSize = 6;
 
+  // Config bank function(3), LTMODE (0x1e)
+  // https://intranet.aizo.net/_layouts/15/start.aspx#/Wiki/Parametersatz.aspx
+  enum class ButtonInputMode : uint8_t {
+    STANDARD = 0,
+    TURBO = 1,
+    SWITCHED = 2,
+    TWO_WAY_DW_WITH_INPUT1 = 5,
+    TWO_WAY_DW_WITH_INPUT2 = 6,
+    TWO_WAY_DW_WITH_INPUT3 = 7,
+    TWO_WAY_DW_WITH_INPUT4 = 8,
+    TWO_WAY_UP_WITH_INPUT1 = 9,
+    TWO_WAY_UP_WITH_INPUT2 = 10,
+    TWO_WAY_UP_WITH_INPUT3 = 11,
+    TWO_WAY_UP_WITH_INPUT4 = 12,
+    TWO_WAY = 13,
+    ONE_WAY = 14,
+    AKM_STANDARD = 16,
+    AKM_INVERTED = 17,
+    AKM_ON_RISING_EDGE = 18,
+    AKM_ON_FALLING_EDGE = 19,
+    AKM_OFF_RISING_EDGE = 20,
+    AKM_OFF_FALLING_EDGE = 21,
+    AKM_RISING_EDGE = 22,
+    AKM_FALLING_EDGE = 23,
+    SDS_SLAVE_M1_M2 = 0xff,
+  };
+
   const uint16_t TBVersion_OemEanConfig = 0x0350;
   const uint16_t TBVersion_OemConfigLock = 0x0357;
 

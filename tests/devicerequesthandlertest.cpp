@@ -34,10 +34,74 @@
 #include "src/model/device.h"
 #include "src/model/zone.h"
 #include "src/propertysystem.h"
+#include "src/messages/vdc-messages.pb.h"
 
 using namespace dss;
 
 BOOST_AUTO_TEST_SUITE(WebDevice)
+
+class NullStructureQueryBusInterface DS_FINAL : public StructureQueryBusInterface {
+public:
+  std::vector<DSMeterSpec_t> getBusMembers() DS_OVERRIDE { return {}; }
+  DSMeterSpec_t getDSMeterSpec(const dsuid_t& _dsMeterID) DS_OVERRIDE { return {}; }
+  std::vector<int> getZones(const dsuid_t& _dsMeterID) DS_OVERRIDE { return {}; }
+  std::vector<DeviceSpec_t> getDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool complete = true) DS_OVERRIDE { return {}; }
+  std::vector<DeviceSpec_t> getInactiveDevicesInZone(const dsuid_t& _dsMeterID, const int _zoneID) DS_OVERRIDE { return {}; }
+  std::vector<GroupSpec_t> getGroups(const dsuid_t& _dsMeterID, const int _zoneID) DS_OVERRIDE { return {}; }
+  std::vector<ClusterSpec_t> getClusters(const dsuid_t& _dsMeterID) DS_OVERRIDE { return {}; }
+  std::vector<CircuitPowerStateSpec_t> getPowerStates(const dsuid_t& _dsMeterID) DS_OVERRIDE { return {}; }
+  std::vector<std::pair<int, int> > getLastCalledScenes(const dsuid_t& _dsMeterID, const int _zoneID) DS_OVERRIDE { return {}; }
+  std::bitset<7> getZoneStates(const dsuid_t& _dsMeterID, const int _zoneID) DS_OVERRIDE { return {}; }
+  bool getEnergyBorder(const dsuid_t& _dsMeterID, int& _lower, int& _upper) DS_OVERRIDE { return false; }
+  DeviceSpec_t deviceGetSpec(devid_t _id, dsuid_t _dsMeterID) DS_OVERRIDE { return {}; }
+  std::string getSceneName(dsuid_t _dsMeterID, boost::shared_ptr<Group> _group, const uint8_t _sceneNumber) DS_OVERRIDE { return {}; }
+  DSMeterHash_t getDSMeterHash(const dsuid_t& _dsMeterID) DS_OVERRIDE { return {}; }
+  void getDSMeterState(const dsuid_t& _dsMeterID, uint8_t *state) DS_OVERRIDE {}
+  ZoneHeatingConfigSpec_t getZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) DS_OVERRIDE { return {}; }
+  ZoneHeatingInternalsSpec_t getZoneHeatingInternals(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) DS_OVERRIDE { return {}; }
+  ZoneHeatingStateSpec_t getZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) DS_OVERRIDE { return {}; }
+  ZoneHeatingOperationModeSpec_t getZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID) DS_OVERRIDE { return {}; }
+  dsuid_t getZoneSensor(const dsuid_t& _meterDSUID, const uint16_t _zoneID, SensorType _sensorType) DS_OVERRIDE { return {}; }
+  void getZoneSensorValue(const dsuid_t& _meterDSUID, const uint16_t _zoneID, SensorType _sensorType, uint16_t *SensorValue, uint32_t *SensorAge) DS_OVERRIDE {}
+  int getDevicesCountInZone(const dsuid_t& _dsMeterID, const int _zoneID, bool _onlyActive = false) DS_OVERRIDE { return 0; }
+  void protobufMessageRequest(const dsuid_t _dSMdSUID, const uint16_t _request_size, const uint8_t *_request, uint16_t *_response_size, uint8_t *_response) DS_OVERRIDE {};
+};
+
+class NullStructureModifyingBusInterface DS_FINAL : public StructureModifyingBusInterface {
+public:
+  void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) DS_OVERRIDE {}
+  void createZone(const dsuid_t& _dsMeterID, const int _zoneID) DS_OVERRIDE {}
+  void removeZone(const dsuid_t& _dsMeterID, const int _zoneID) DS_OVERRIDE {}
+  void addToGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) DS_OVERRIDE {}
+  void removeFromGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) DS_OVERRIDE {}
+  void removeDeviceFromDSMeter(const dsuid_t& _dsMeterID, const int _deviceID) DS_OVERRIDE {}
+  void removeDeviceFromDSMeters(const dsuid_t& _DeviceDSID) DS_OVERRIDE {}
+  void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) DS_OVERRIDE {}
+  void deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name) DS_OVERRIDE {std::cout << "FOOO" << "\n";}
+  void meterSetName(dsuid_t _meterDSID, const std::string& _name) DS_OVERRIDE {}
+  void createGroup(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig, const std::string& _name) DS_OVERRIDE {}
+  void removeGroup(uint16_t _zoneID, uint8_t _groupID) DS_OVERRIDE {}
+  void groupSetApplication(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig) DS_OVERRIDE {}
+  void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) DS_OVERRIDE {}
+  void createCluster(uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig, const std::string& _name) DS_OVERRIDE {}
+  void removeCluster(uint8_t _clusterID) DS_OVERRIDE {}
+  void clusterSetName(uint8_t _clusterID, const std::string& _name) DS_OVERRIDE {}
+  void clusterSetApplication(uint8_t _clusterID, ApplicationType applicationType, uint32_t applicationConfig) DS_OVERRIDE {}
+  void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) DS_OVERRIDE {}
+  void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) DS_OVERRIDE {}
+  void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) DS_OVERRIDE {}
+  void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) DS_OVERRIDE {}
+  void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) DS_OVERRIDE {}
+  void synchronizeZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) DS_OVERRIDE {}
+  void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) DS_OVERRIDE {}
+  void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) DS_OVERRIDE {}
+  void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) DS_OVERRIDE {}
+  void setZoneSensor(const uint16_t _zoneID, SensorType _sensorType, const dsuid_t& _sensorDSUID) DS_OVERRIDE {}
+  void resetZoneSensor(const uint16_t _zoneID, SensorType _sensorType) DS_OVERRIDE {}
+  void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) DS_OVERRIDE {}
+  void setProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties) DS_OVERRIDE {}
+  vdcapi::Message getProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query) DS_OVERRIDE { return {}; }
+};
 
 
 class Fixture : public WebFixture {
@@ -46,7 +110,7 @@ public:
     m_pApartment.reset(new Apartment(NULL));
     m_pPropertySystem.reset(new PropertySystem());
     m_pApartment->setPropertySystem(m_pPropertySystem.get());
-    m_pHandler.reset(new DeviceRequestHandler(*m_pApartment, NULL, NULL));
+    m_pHandler.reset(new DeviceRequestHandler(*m_pApartment, m_modify, m_query));
 
     memset(&m_ValidDSID, 0, 12);
     m_ValidDSID.id[12 - 1] =  1;
@@ -80,6 +144,8 @@ public:
   }
 protected:
   boost::shared_ptr<Apartment> m_pApartment;
+  NullStructureModifyingBusInterface m_modify;
+  NullStructureQueryBusInterface m_query;
   boost::shared_ptr<DeviceRequestHandler> m_pHandler;
   boost::shared_ptr<PropertySystem> m_pPropertySystem;
   dsid_t m_ValidDSID;

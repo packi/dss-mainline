@@ -91,6 +91,7 @@
 #include "vdc-db-fetcher.h"
 #include "vdc-token.h"
 #include "propertysystem_common_paths.h"
+#include "comm-channel.h"
 
 namespace dss {
 

@@ -36,8 +36,6 @@
 #include "bonjour.h"
 #include "logger.h"
 
-#include "comm-channel.h"
-
 namespace ds {
 namespace asio {
   class IoService;
@@ -59,6 +57,7 @@ namespace dss {
   class Watchdog;
   class BusEventSink;
   class WebserviceTreeListener;
+  class CommChannel;
 
   typedef enum {
     ssInvalid,

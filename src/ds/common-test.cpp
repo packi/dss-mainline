@@ -29,7 +29,7 @@ public:
     static int staticWarnUnusedResult() DS_WARN_UNUSED_RESULT { return 0; }
 };
 
-class Child : public Base {
+class Child DS_FINAL : public Base {
     virtual void virtualFoo() DS_OVERRIDE;
 };
 
