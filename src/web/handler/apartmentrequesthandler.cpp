@@ -202,37 +202,25 @@ namespace dss {
         json.startArray("circuits");
         std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
         foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
-          json.startObject();
-          json.add("name", dsMeter->getName());
-          dsid_t dsid;
-          if (dsuid_to_dsid(dsMeter->getDSID(), &dsid)) {
-            json.add("dsid", dsid2str(dsid));
-          } else {
-            json.add("dsid", "");
+          toJSON(dsMeter, json);
+        }
+        json.endArray();
+        return json.successJSON();
+      } else if(_request.getMethod() == "getVdcs") {
+        JSONWriter json;
+
+        std::string implementationId = _request.getParameter("implementationId");
+        if (implementationId.empty()) {
+          return JSONWriter::failure("Missing parameter 'implementationId'");
+        }
+
+        json.startArray("vdcs");
+        std::vector<boost::shared_ptr<DSMeter> > dsMeters = m_Apartment.getDSMeters();
+        foreach(boost::shared_ptr<DSMeter> dsMeter, dsMeters) {
+          if (dsMeter->getVdcImplementationId() != implementationId) {
+            continue;
           }
-          json.add("dSUID", dsMeter->getDSID());
-          json.add("DisplayID", dsMeter->getDisplayID());
-          json.add("hwVersion", 0);
-          json.add("hwVersionString", dsMeter->getHardwareVersion());
-          json.add("swVersion", dsMeter->getSoftwareVersion());
-          json.add("armSwVersion", dsMeter->getArmSoftwareVersion());
-          json.add("dspSwVersion", dsMeter->getDspSoftwareVersion());
-          json.add("apiVersion", dsMeter->getApiVersion());
-          json.add("hwName", dsMeter->getHardwareName());
-          json.add("isPresent", dsMeter->isPresent());
-          json.add("isValid", dsMeter->isValid());
-          json.add("busMemberType", dsMeter->getBusMemberType());
-          json.add("hasDevices", dsMeter->getCapability_HasDevices());
-          json.add("hasMetering", dsMeter->getCapability_HasMetering());
-          json.add("VdcConfigURL", dsMeter->getVdcConfigURL());
-          json.add("VdcModelUID", dsMeter->getVdcModelUID());
-          json.add("VdcHardwareGuid", dsMeter->getVdcHardwareGuid());
-          json.add("VdcHardwareModelGuid", dsMeter->getVdcHardwareModelGuid());
-          json.add("VdcVendorGuid", dsMeter->getVdcVendorGuid());
-          json.add("VdcOemGuid", dsMeter->getVdcOemGuid());
-          std::bitset<8> flags = dsMeter->getPropertyFlags();
-          json.add("ignoreActionsFromNewDevices", flags.test(4));
-          json.endObject();
+          toJSON(dsMeter, json);
         }
         json.endArray();
         return json.successJSON();

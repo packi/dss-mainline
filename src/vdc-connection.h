@@ -74,6 +74,7 @@ namespace dss {
     std::string hardwareVersion;
     std::string hardwareGuid;
     std::string hardwareModelGuid;
+    std::string implementationId;
     std::string modelUID;
     std::string vendorGuid;
     std::string oemGuid;
