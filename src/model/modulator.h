@@ -197,7 +197,7 @@ namespace dss {
     void setBinaryInputEventCount(const unsigned int _value) { m_BinaryInputEventCount.setValue(_value); }
     void incrementBinaryInputEventCount() { m_BinaryInputEventCount.increment(); }
     void setPropertyFlags(std::bitset<8> _flags);
-    std::bitset<8> getPropertyFlags() { return m_dSMPropertyFlags; }
+    std::bitset<8> getPropertyFlags() const { return m_dSMPropertyFlags; }
     /** Returns true if the dsMeter has been read-out completely. */
     bool isInitialized() const { return m_IsInitialized; }
     void setIsInitialized(const bool _value) { m_IsInitialized = _value; }
@@ -219,17 +219,17 @@ namespace dss {
     void setVdcModelUID(const std::string& _value) { m_VdcModelUID = _value; }
     const std::string& getVdcModelUID() const { return m_VdcModelUID; }
     void setVdcHardwareGuid(const std::string& _value ) { m_VdcHardwareGuid = _value; }
-    const std::string& getVdcHardwareGuid() { return m_VdcHardwareGuid; }
+    const std::string& getVdcHardwareGuid() const { return m_VdcHardwareGuid; }
     void setVdcHardwareModelGuid(const std::string& _value ) { m_VdcHardwareModelGuid = _value; }
-    const std::string& getVdcHardwareModelGuid() { return m_VdcHardwareModelGuid; }
+    const std::string& getVdcHardwareModelGuid() const { return m_VdcHardwareModelGuid; }
     void setVdcImplementationId(const std::string& _value ) { m_VdcImplementationId = _value; }
-    const std::string& getVdcImplementationId() { return m_VdcImplementationId; }
+    const std::string& getVdcImplementationId() const { return m_VdcImplementationId; }
     void setVdcVendorGuid(const std::string& _value ) { m_VdcVendorGuid = _value; }
-    const std::string& getVdcVendorGuid() { return m_VdcVendorGuid; }
+    const std::string& getVdcVendorGuid() const { return m_VdcVendorGuid; }
     void setVdcOemGuid(const std::string& _value ) { m_VdcOemGuid = _value; }
-    const std::string& getVdcOemGuid() { return m_VdcOemGuid; }
+    const std::string& getVdcOemGuid() const { return m_VdcOemGuid; }
     void setVdcOemModelGuid(const std::string& _value ) { m_VdcOemModelGuid = _value; }
-    const std::string& getVdcOemModelGuid() { return m_VdcOemModelGuid; }
+    const std::string& getVdcOemModelGuid() const { return m_VdcOemModelGuid; }
 
     int getState() const { return m_dSMState; }
     void setState(uint8_t _state) { m_dSMState = _state; }
