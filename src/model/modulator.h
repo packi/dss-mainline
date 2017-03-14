@@ -113,6 +113,7 @@ namespace dss {
     std::string m_VdcModelUID;
     std::string m_VdcHardwareGuid;
     std::string m_VdcHardwareModelGuid;
+    std::string m_VdcImplementationId;
     std::string m_VdcVendorGuid;
     std::string m_VdcOemGuid;
     std::string m_VdcOemModelGuid;
@@ -221,6 +222,8 @@ namespace dss {
     const std::string& getVdcHardwareGuid() { return m_VdcHardwareGuid; }
     void setVdcHardwareModelGuid(const std::string& _value ) { m_VdcHardwareModelGuid = _value; }
     const std::string& getVdcHardwareModelGuid() { return m_VdcHardwareModelGuid; }
+    void setVdcImplementationId(const std::string& _value ) { m_VdcImplementationId = _value; }
+    const std::string& getVdcImplementationId() { return m_VdcImplementationId; }
     void setVdcVendorGuid(const std::string& _value ) { m_VdcVendorGuid = _value; }
     const std::string& getVdcVendorGuid() { return m_VdcVendorGuid; }
     void setVdcOemGuid(const std::string& _value ) { m_VdcOemGuid = _value; }

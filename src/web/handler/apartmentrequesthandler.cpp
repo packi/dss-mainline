@@ -227,6 +227,7 @@ namespace dss {
           json.add("VdcModelUID", dsMeter->getVdcModelUID());
           json.add("VdcHardwareGuid", dsMeter->getVdcHardwareGuid());
           json.add("VdcHardwareModelGuid", dsMeter->getVdcHardwareModelGuid());
+          json.add("VdcImplementationId", dsMeter->getVdcImplementationId());
           json.add("VdcVendorGuid", dsMeter->getVdcVendorGuid());
           json.add("VdcOemGuid", dsMeter->getVdcOemGuid());
           std::bitset<8> flags = dsMeter->getPropertyFlags();

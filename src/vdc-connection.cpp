@@ -127,6 +127,8 @@ namespace dss {
     el = query.Add();
     el->set_name("hardwareModelGuid");
     el = query.Add();
+    el->set_name("implementationId");
+    el = query.Add();
     el->set_name("modelUID");
     el = query.Add();
     el->set_name("vendorGuid");
@@ -172,6 +174,10 @@ namespace dss {
       } else if (el.name() == "hardwareModelGuid") {
         try {
           ret->hardwareModelGuid = st.convert(val.v_string());
+        } catch (std::exception& e) {}
+      } else if (el.name() == "implementationId") {
+        try {
+          ret->implementationId = st.convert(val.v_string());
         } catch (std::exception& e) {}
       } else if (el.name() == "vendorGuid") {
         try {

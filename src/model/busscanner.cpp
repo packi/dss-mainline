@@ -684,6 +684,7 @@ namespace dss {
               _dsMeter->setVdcConfigURL(props->configURL);
               _dsMeter->setVdcHardwareGuid(props->hardwareGuid);
               _dsMeter->setVdcHardwareModelGuid(props->hardwareModelGuid);
+              _dsMeter->setVdcImplementationId(props->implementationId);
               _dsMeter->setVdcVendorGuid(props->vendorGuid);
               _dsMeter->setVdcOemGuid(props->oemGuid);
               _dsMeter->setVdcOemModelGuid(props->oemModelGuid);
