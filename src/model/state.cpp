@@ -48,9 +48,20 @@ namespace dss {
 
   const std::string State::INVALID("invalid");
 
+  State::State(const std::string& name, eStateType type, eState initState, StatePersistency persistency)
+    : m_name(name),
+      m_persistency(persistency),
+      m_callOrigin(coUnknown),
+      m_originDeviceDSUID(DSUID_NULL),
+      m_state(initState),
+      m_type(type)
+  {
+    // common base class; no load/publishToPropertyTree until fully initialized
+  }
+
   State::State(const std::string& _name)
     : m_name(_name),
-      m_IsPersistent(false),
+      m_persistency(StatePersistency::volatile_),
       m_callOrigin(coUnknown),
       m_originDeviceDSUID(DSUID_NULL),
       m_state(State_Inactive),
@@ -62,7 +73,7 @@ namespace dss {
 
   State::State(eStateType _type, const std::string& _name, const std::string& _identifier)
   : m_name(_name),
-    m_IsPersistent(false),
+    m_persistency(StatePersistency::volatile_),
     m_callOrigin(coUnknown),
     m_originDeviceDSUID(DSUID_NULL),
     m_state(State_Inactive),
@@ -75,23 +86,27 @@ namespace dss {
     publishToPropertyTree();
   }
 
-  State::State(boost::shared_ptr<Device> _device, int _inputIndex) :
-      m_name("dev." + dsuid2str(_device->getDSID()) + "." + intToString(_inputIndex)),
-      m_IsPersistent(true),
-      m_callOrigin(coUnknown),
-      m_originDeviceDSUID(DSUID_NULL),
-      m_state(State_Invalid),
-      m_type(StateType_Device),
-      m_providerDev(_device),
-      m_providerDevInput(_inputIndex)
+  std::string BinaryInputState::makeName(const dsuid_t &dsuid, int inputIndex) {
+    return "dev." + dsuid2str(dsuid) + "." + intToString(inputIndex);
+  }
+
+  BinaryInputState::BinaryInputState(boost::shared_ptr<Device> device, int inputIndex) :
+    State(makeName(device->getDSID(), inputIndex),
+          StateType_Device,
+          State_Invalid,
+          StatePersistency::persistent)
   {
+    m_providerDev = device,
+    m_providerDevInput = inputIndex;
     load();
     publishToPropertyTree();
   }
 
+  BinaryInputState::~BinaryInputState() = default;
+
   State::State(boost::shared_ptr<Device> _device, const std::string& stateName) :
       m_name("dev." + dsuid2str(_device->getDSID()) + "." + stateName),
-      m_IsPersistent(true),
+      m_persistency(StatePersistency::persistent),
       m_callOrigin(coUnknown),
       m_originDeviceDSUID(DSUID_NULL),
       m_state(State_Invalid),
@@ -106,7 +121,7 @@ namespace dss {
 
   State::State(boost::shared_ptr<DSMeter> _meter, int _inputIndex) :
       m_name("dsm." + dsuid2str(_meter->getDSID()) + "." + intToString(_inputIndex)),
-      m_IsPersistent(true),
+      m_persistency(StatePersistency::persistent),
       m_callOrigin(coUnknown),
       m_originDeviceDSUID(DSUID_NULL),
       m_state(State_Invalid),
@@ -138,7 +153,7 @@ namespace dss {
 
   State::State(boost::shared_ptr<Group> _group, const std::string& name) :
     m_name(name),
-    m_IsPersistent(false),
+    m_persistency(StatePersistency::volatile_),
     m_callOrigin(coUnknown),
     m_originDeviceDSUID(DSUID_NULL),
     m_state(State_Unknown),
@@ -287,14 +302,14 @@ namespace dss {
   } // load
 
   bool State::getPersistence() const {
-    return m_IsPersistent;
+    return m_persistency == StatePersistency::persistent;
   } // getPersistence
 
   void State::setPersistence(bool _persistent) {
-    if (!m_IsPersistent && _persistent) {
+    if (m_persistency == StatePersistency::volatile_ && _persistent) {
       load();
     }
-    m_IsPersistent = _persistent;
+    m_persistency = StatePersistency::persistent;
   } // setPersistence
 
   bool State::hasPersistentData() {
@@ -340,7 +355,7 @@ namespace dss {
           ->linkToProxy(PropertyProxyReference<int, callOrigin_t>(m_callOrigin, false));
       }
 
-      if (m_IsPersistent) {
+      if (m_persistency == StatePersistency::persistent) {
         save();
       }
 

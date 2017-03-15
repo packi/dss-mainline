@@ -161,7 +161,7 @@ namespace dss {
         return dev;
       }
     }
-    return DS_NULLPTR;
+    return boost::shared_ptr<Device>();
   }
 
   boost::shared_ptr<Device> Apartment::getDeviceByDSID(const dsuid_t dsid) const {

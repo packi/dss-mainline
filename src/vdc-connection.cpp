@@ -284,7 +284,7 @@ namespace dss {
       {
         VdcElementReader reader = biStateReader["extendedValue"];
         if (reader.isValid()) {
-            binaryInputStates[biStateIndex] = static_cast<BinaryInputState>(reader.getValueAsInt());
+            binaryInputStates[biStateIndex] = static_cast<BinaryInputStateValue>(reader.getValueAsInt());
             continue;
         }
       }
@@ -292,7 +292,7 @@ namespace dss {
         VdcElementReader reader = biStateReader["value"];
         if (reader.isValid()) {
            binaryInputStates[biStateIndex] =
-                reader.getValueAsBool() ? BinaryInputState::Active : BinaryInputState::Inactive;
+                reader.getValueAsBool() ? BinaryInputStateValue::Active : BinaryInputStateValue::Inactive;
            continue;
         }
       }
