@@ -32,10 +32,22 @@ std::string str(Args&&... args);
 
 namespace _private {
 
+template <typename T>
+void strOne(std::ostream& ostream, T&& x) {
+    ostream << std::forward<T>(x);
+}
+// uint8_t and int8_t shall be serialized as numbers, not characters
+inline void strOne(std::ostream& ostream, unsigned char x) {
+    ostream << static_cast<int>(x);
+}
+inline void strOne(std::ostream& ostream, signed char x) {
+    ostream << static_cast<int>(x);
+}
+
 inline void strRecursive(std::ostream&) {}
 template <typename Arg, typename... Args>
 void strRecursive(std::ostream& ostream, Arg&& arg, Args&&... args) {
-    ostream << std::forward<Arg>(arg);
+    strOne(ostream, std::forward<Arg>(arg));
     strRecursive(ostream, std::forward<Args>(args)...);
 }
 
