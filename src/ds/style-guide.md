@@ -90,11 +90,27 @@ any declared enum option. Always handle these unknown values
         switch (x) {
             case Vehicle::CAR:
                 return "car";
-            case Vehicle::TRAIN: {
+            case Vehicle::TRAIN:
                 return "train";
-            }
         }
-        return ds::str("unkown(", static_cast<int>(x), ")");
+        return ds::str("unknown(", static_cast<int>(x), ")");
+    }
+````
+
+Lambdas make this pattern available inside function.
+
+````c++
+    void foo(Vehicle vehicle) {
+        auto&& name = [&] {
+            switch (vehicle) {
+                case Vehicle::CAR:
+                    return "car";
+                case Vehicle::TRAIN:
+                    return "train";
+            }
+            throw std::runtime_error("Invalid vehicle.");
+        }();
+        ...
     }
 ````
 
