@@ -1240,7 +1240,7 @@ namespace dss {
               dsuid2str(dev->getDSID()) + ", state = " + intToString(value), lsDebug);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
             dev->handleBinaryInputEvent(index,
-                ((value >> index) & 1) ? BinaryInputState::Active : BinaryInputState::Inactive);
+                ((value >> index) & 1) ? BinaryInputStateValue::Active : BinaryInputStateValue::Inactive);
           }
           // avoid powerline bus monopolization
           sleep(5);
@@ -1248,7 +1248,7 @@ namespace dss {
           Logger::getInstance()->log("BinaryInputScanner: device " + dsuid2str(dev->getDSID())
               + " did not respond to input state query", lsWarning);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-            dev->handleBinaryInputEvent(index, BinaryInputState::Unknown);
+            dev->handleBinaryInputEvent(index, BinaryInputStateValue::Unknown);
           }
         }
 
@@ -1267,7 +1267,7 @@ namespace dss {
           Logger::getInstance()->log("BinaryInputScanner: VdcDevice " + dsuid2str(dev->getDSID()) +
               " failure: " + e.what(), lsWarning);
           for (int index = 0; index < dev->getBinaryInputCount(); index++) {
-            dev->handleBinaryInputEvent(index, BinaryInputState::Unknown);
+            dev->handleBinaryInputEvent(index, BinaryInputStateValue::Unknown);
           }
         }
       }

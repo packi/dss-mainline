@@ -116,7 +116,7 @@ namespace dss {
         + " inputType:" + intToString(static_cast<int>(m_inputType))
         + " inputId:" + intToString(static_cast<int>(m_inputId))
         + " targetGroupId:" + intToString(m_targetGroupId), lsInfo);
-    m_state = boost::make_shared<State>(device.sharedFromThis(), index);
+    m_state = boost::make_shared<BinaryInputState>(device.sharedFromThis(), index);
 
     // assignCustomBinaryInputValues
     if (m_inputType == BinaryInputType::WindowTilt) {
@@ -176,7 +176,7 @@ namespace dss {
     updateStatusFieldHandle();
   }
 
-  void DeviceBinaryInput::handleEvent(BinaryInputState inputState) {
+  void DeviceBinaryInput::handleEvent(BinaryInputStateValue inputState) {
     log(std::string("handleEvent this:") + m_name
         + " m_inputType:" + intToString(static_cast<int>(m_inputType))
         + " inputState:" + intToString(static_cast<int>(inputState)), lsInfo);
@@ -196,9 +196,9 @@ namespace dss {
         m_state->setState(coSystem,
             [&]() {
               switch (inputState) {
-                case BinaryInputState::Inactive: return State_Inactive;
-                case BinaryInputState::Active: return State_Active;
-                case BinaryInputState::Unknown: return State_Unknown;
+                case BinaryInputStateValue::Inactive: return State_Inactive;
+                case BinaryInputStateValue::Active: return State_Active;
+                case BinaryInputStateValue::Unknown: return State_Unknown;
               };
               return State_Unknown;
             }());
@@ -2464,7 +2464,7 @@ namespace dss {
     }
   }
 
-  void Device::handleBinaryInputEvent(const int index, BinaryInputState inputState) {
+  void Device::handleBinaryInputEvent(const int index, BinaryInputStateValue inputState) {
     getBinaryInput(index)->handleEvent(inputState);
   }
 
