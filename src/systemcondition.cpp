@@ -34,7 +34,6 @@
 #include "logger.h"
 #include "datetools.h"
 #include "base.h"
-#include "model/modelconst.h"
 
 namespace dss {
 
