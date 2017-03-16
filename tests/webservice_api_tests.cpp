@@ -266,12 +266,11 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
   } else if (eventName == EventName::AddonStateChange) {
     pEvent = createStateChangeEvent(createState(StateType_Script), State_Unknown, coTest);
   } else if (eventName == EventName::StateChange) {
-    pEvent = createStateChangeEvent(createState(StateType_Device), State_Unknown, coTest);
+    pEvent = createStateChangeEvent(createState(StateType_Apartment), State_Active, coTest);
   } else if (eventName == EventName::ExecutionDenied) {
     pEvent = createActionDenied("device-scene", "action-node", "unit-test", "testcase");
   } else if (eventName == EventName::HeatingEnabled) {
-    // TODO created by javascript, sync paramter manually
-    pEvent = createHeatingEnabled(1, true, true);
+    pEvent = createHeatingEnabled(true, true);
   } else if (eventName == EventName::HeatingSystemCapability) {
     pEvent = createHeatingSystemCapability(true, true);
   } else if (eventName == EventName::HeatingControllerSetup) {
@@ -313,6 +312,15 @@ boost::shared_ptr<Event> EventFactory::createEvent(const std::string& eventName)
     pEvent = createDeviceEventEvent(createDevRef(), "blub");
   } else if (eventName == EventName::DeviceStateEvent) {
     pEvent = createDeviceStateEvent(createDevRef(), "state", "foo");
+  } else if (eventName == EventName::HighLevelEvent) {
+    pEvent = boost::make_shared<Event>(EventName::HighLevelEvent);
+    pEvent->setProperty("id", "12345678");
+  } else if (eventName == EventName::DeviceButtonClick) {
+    pEvent = boost::make_shared<Event>(EventName::DeviceButtonClick, createDevRef());
+    pEvent->setProperty("buttonClick", "1");
+    pEvent->setProperty("clickType", "4");
+  } else if (eventName == EventName::IdentifyBlink) {
+    pEvent = boost::make_shared<Event>(EventName::IdentifyBlink, createDevRef());
   } else {
     // enable with '-l warning'
     BOOST_CHECK_MESSAGE(pEvent, "Failed to create event <" + eventName + ">");
