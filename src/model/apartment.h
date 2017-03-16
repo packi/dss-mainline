@@ -197,6 +197,9 @@ typedef struct {
                                       const std::string& _identifier,
                                       const std::string& _stateName) const;
 
+    /// Returns the state of any type, with matching identifier and name
+    boost::shared_ptr<State> getState(const std::string& identifier, const std::string& name) const;
+
     void updateSensorStates(const dsuid_t &dsuid, SensorType sensorType, double value, callOrigin_t origin);
     void updateSensorStates(int zoneId, int groupId, SensorType sensorType, double value, callOrigin_t origin);
 

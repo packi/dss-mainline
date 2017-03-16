@@ -30,7 +30,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/ref.hpp>
-#include <boost/thread/thread.hpp>
+#include <ds/log.h>
 
 #include "src/businterface.h"
 #include "src/model/modelconst.h"
@@ -575,6 +575,16 @@ namespace dss {
       }
     }
     throw ItemNotFoundException(_stateName);
+  }
+
+  boost::shared_ptr<State> Apartment::getState(const std::string& identifier, const std::string& name) const {
+    boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
+    foreach(auto&& state, m_States) {
+      if ((state->getProviderService() == identifier) && (state->getName() == name)) {
+        return state;
+      }
+    }
+    DS_FAIL_REQUIRE("State not found", name);
   }
 
   // throws (dynamic_cast relies on consistent sensor names)
