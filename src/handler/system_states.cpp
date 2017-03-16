@@ -817,19 +817,19 @@ void SystemState::stateBinaryinput() {
         lookupState(heating_mode, StateName::HeatingSystemMode))
     {
       // abuse auto as an invalid value
-      HeatingModeSwitchValue value = HeatingModeSwitchValue::auto_;
+      HeatingModeSwitchValue value = HeatingModeSwitchValue::AUTO;
 
       if (heating->getState() == State_Inactive) {
-        value = HeatingModeSwitchValue::off;
+        value = HeatingModeSwitchValue::OFF;
       } else if (heating->getState() == State_Active) {
         if (heating_mode->getState() == State_Active) {
-          value = HeatingModeSwitchValue::heating;
+          value = HeatingModeSwitchValue::HEATING;
         } else if (heating_mode->getState() == State_Inactive) {
-          value = HeatingModeSwitchValue::cooling;
+          value = HeatingModeSwitchValue::COOLING;
         }
       }
 
-      if (value != HeatingModeSwitchValue::auto_) {
+      if (value != HeatingModeSwitchValue::AUTO) {
         auto event = createGenericSignalHeatingModeSwitch(value, coSystemBinaryInput);
         DSS::getInstance()->getEventQueue().pushEvent(event);
       }

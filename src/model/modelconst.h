@@ -588,10 +588,10 @@ namespace dss {
   } eStateType;
 
   enum class HeatingModeSwitchValue {
-    off = 0,
-    heating = 1,
-    cooling = 2,
-    auto_ = 3
+    OFF = 0,
+    HEATING = 1,
+    COOLING = 2,
+    AUTO = 3
   };
 } // namespace dss
 #endif
