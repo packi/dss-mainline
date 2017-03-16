@@ -404,11 +404,6 @@ namespace dss {
     void childRemoved(PropertyNodePtr _child);
     void notifyListeners(void(PropertyListener::*_callback)(PropertyNodePtr, PropertyNodePtr), PropertyNodePtr _node);
 
-    /**
-     * traverse towards root node and return first privileges found
-     * @ret NodePrivileges or NULL if no restrictions implied
-     */
-    NodePrivileges* lookupPrivileges();
   public:
     PropertyNode(const char* _name, int _index = 0);
     ~PropertyNode();
@@ -539,8 +534,6 @@ namespace dss {
 
     NodePrivileges* getPrivileges() { return m_Privileges; }
     void setPrivileges(NodePrivileges* _value) { m_Privileges = _value; }
-
-    void checkWriteAccess();
 
     /** Performs \a _callback for each child node (non-recursive) */
     void foreachChildOf(void(*_callback)(PropertyNode&)) {

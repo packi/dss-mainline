@@ -721,9 +721,6 @@ namespace dss {
   } // fillSensorTable
 
   void Device::setDeviceConfig(uint8_t _configClass, uint8_t _configIndex, uint8_t _value) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() == NULL) {
       throw std::runtime_error("DeviceBusInterface missing");
     }
@@ -750,9 +747,6 @@ namespace dss {
      * -- used to configure lamella time(uint16_t) for KLEMME-GR using
      *  2x setDeviceConfig
      */
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() == NULL) {
       throw std::runtime_error("DeviceBusInterface missing");
     }
@@ -783,9 +777,6 @@ namespace dss {
   } // setDeviceButtonId
 
   void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       /* re-configure area or device button mode for groups other then lights and shades */
       bool isAreaButton =
@@ -846,9 +837,6 @@ namespace dss {
   } // setDeviceButtonInputMode
 
   void Device::setProgMode(uint8_t _modeId) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setDeviceProgMode(*this, _modeId);
     }
@@ -867,27 +855,18 @@ namespace dss {
   }
 
  void Device::increaseDeviceOutputChannelValue(uint8_t _channel) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->increaseDeviceOutputChannelValue(*this, _channel);
     }
   } // increaseDeviceOutputChannelValue
 
   void Device::decreaseDeviceOutputChannelValue(uint8_t _channel) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->decreaseDeviceOutputChannelValue(*this, _channel);
     }
   } // decreaseDeviceOutputChannelValue
 
   void Device::stopDeviceOutputChannelValue(uint8_t _channel) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->stopDeviceOutputChannelValue(*this, _channel);
     }
@@ -902,9 +881,6 @@ namespace dss {
 
   void Device::setDeviceOutputChannelValue(uint8_t _channel, uint8_t _size,
                                    uint16_t _value, bool _applyNow) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setDeviceOutputChannelValue(*this, _channel, _size, _value, _applyNow);
     }
@@ -922,9 +898,6 @@ namespace dss {
                                                 uint8_t _size,
                                                 uint8_t _scene,
                                                 uint16_t _value) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setDeviceOutputChannelSceneValue(*this, _channel, _size, _scene, _value);
     }
@@ -947,9 +920,6 @@ namespace dss {
 
   void Device::setDeviceOutputChannelSceneConfig(uint8_t _scene,
                                                  DeviceSceneSpec_t _config) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       uint16_t mode = _config.dontcare ? 1 : 0;
       mode |= _config.localprio ? 2 : 0;
@@ -1186,18 +1156,12 @@ namespace dss {
   } // getDeviceTransmissionQuality
 
   void Device::setDeviceValue(uint8_t _value) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_pApartment->getDeviceBusInterface() != NULL) {
       m_pApartment->getDeviceBusInterface()->setValue(*this, _value);
     }
   } // setDeviceValue (8)
 
   void Device::setDeviceOutputValue(uint8_t _offset, uint16_t _value) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (_offset & 1) {
       setDeviceConfig(CfgClassRuntime, _offset, _value & 0xff);
     } else {
@@ -1237,9 +1201,6 @@ namespace dss {
   } // getName
 
   void Device::setName(const std::string& _name) {
-    if (m_pPropertyNode) {
-      m_pPropertyNode->checkWriteAccess();
-    }
     if (m_Name != _name) {
       m_Name = _name;
       dirty();

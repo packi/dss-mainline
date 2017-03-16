@@ -54,8 +54,6 @@ void PropertyParser::elementStart(const char *_name, const char **_attrs)
     }
 
     try {
-        m_currentNode->checkWriteAccess();
-
         // if it is the root document we need to perform some checks
         // 0 level node must be called "properties" and must have a version
         // attribute

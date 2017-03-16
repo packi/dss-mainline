@@ -327,7 +327,6 @@ namespace dss {
   }
 
   void PropertyNode::addChild(PropertyNodePtr _childNode) {
-    checkWriteAccess();
     if (m_AliasTarget) {
       m_AliasTarget->addChild(_childNode);
     } else {
@@ -473,7 +472,6 @@ namespace dss {
   } // clearValue
 
   void PropertyNode::setStringValue(const char* _value) {
-    checkWriteAccess();
     if (m_AliasTarget) {
       m_AliasTarget->setStringValue(_value);
     } else {
@@ -500,7 +498,6 @@ namespace dss {
   } // setStringValue
 
   void PropertyNode::setIntegerValue(const int _value) {
-    checkWriteAccess();
     if (m_AliasTarget) {
       m_AliasTarget->setIntegerValue(_value);
     } else {
@@ -521,7 +518,6 @@ namespace dss {
   } // setIntegerValue
 
   void PropertyNode::setUnsignedIntegerValue(const uint32_t _value) {
-    checkWriteAccess();
     if (m_AliasTarget) {
       m_AliasTarget->setUnsignedIntegerValue(_value);
     } else {
@@ -542,7 +538,6 @@ namespace dss {
   } // setUnsignedIntegerValue
 
   void PropertyNode::setBooleanValue(const bool _value) {
-    checkWriteAccess();
     if (m_AliasTarget) {
       m_AliasTarget->setBooleanValue(_value);
     } else {
@@ -563,7 +558,6 @@ namespace dss {
   } // setBooleanValue
 
   void PropertyNode::setFloatingValue(const double _value) {
-    checkWriteAccess();
     if (m_AliasTarget) {
       m_AliasTarget->setFloatingValue(_value);
     } else {
@@ -669,7 +663,6 @@ namespace dss {
   } // getBoolValue
 
   void PropertyNode::alias(PropertyNodePtr _target) {
-    checkWriteAccess();
     if (m_ChildNodes && m_ChildNodes->size() > 0) {
       throw std::runtime_error("Cannot alias node if it has children");
     }
@@ -783,7 +776,6 @@ namespace dss {
   } // getValueType
 
   void PropertyNode::setFlag(Flag _flag, bool _value) {
-    checkWriteAccess();
     int oldFlags = m_Flags;
     _value ? m_Flags |= _flag : m_Flags &= ~_flag;
     if (oldFlags != m_Flags) {
@@ -843,7 +835,6 @@ namespace dss {
   } // removeListener
 
   PropertyNodePtr PropertyNode::createProperty(const std::string& _propPath) {
-    checkWriteAccess();
     if (m_AliasTarget != NULL) {
       return m_AliasTarget->createProperty(_propPath);
     } else {
@@ -967,35 +958,6 @@ namespace dss {
       m_ParentNode->notifyListeners(_callback, _node);
     }
   } // notifyListeners
-
-  void PropertyNode::checkWriteAccess() {
-    NodePrivileges* privileges = lookupPrivileges();
-    if (privileges == NULL) {
-      /* no restrictions implied */
-      return;
-    }
-
-    User* pUser = Security::getCurrentlyLoggedInUser();
-    if (pUser == NULL) {
-      throw SecurityException("Write access denied for unauthenticated user");
-    }
-
-    boost::shared_ptr<Privilege> privilege =
-      privileges->getPrivilegeForRole(pUser->getRole());
-    if (!privilege || !privilege->hasRight(Privilege::Write)) {
-      throw SecurityException("Write access denied for user " + pUser->getName());
-    }
-  } // checkWriteAccess
-
-  NodePrivileges* PropertyNode::lookupPrivileges() {
-    if (m_Privileges != NULL) {
-      return m_Privileges;
-    }
-    if (m_ParentNode != NULL) {
-      return m_ParentNode->lookupPrivileges();
-    }
-    return NULL;
-  }
 
   boost::recursive_mutex PropertyNode::m_GlobalMutex;
 
