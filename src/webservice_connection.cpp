@@ -303,11 +303,25 @@ void URLRequestTask::run()
     return;
   }
 
-  log("URLRequestTask::run(): sending request to " + m_req->url, lsDebug);
+  std::string service = m_req->url;
+  std::string::size_type parameterStart = service.find("?");
+  if (parameterStart != std::string::npos) {
+    service.erase(parameterStart);
+  }
+  log("Sending request: " + service, lsInfo);
 
   code = m_client->request(*m_req, &result);
-  log("URLRequestTask::run(): request to " + m_req->url + " returned with HTTP code " +
-      intToString(code), lsDebug);
+  HttpStatistics stats = m_client->getStats();
+
+  log("Received response:  " + service + ": code=" + intToString(code) +
+      " size=" + intToString(m_req->postdata.size()) +
+      " time=" + doubleToString(stats.totalTime),
+      lsInfo);
+
+  log("Stats: sumUp=" + doubleToString(stats.sumUp) +
+      " sumDown=" + doubleToString(stats.sumDown) +
+      " speedUp=" + doubleToString(stats.speedUp) +
+      " speedDown=" + doubleToString(stats.speedDown), lsDebug);
 
   if (m_cb != NULL) {
     m_cb->result(code, result);
