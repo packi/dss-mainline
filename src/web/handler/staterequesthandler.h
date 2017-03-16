@@ -20,9 +20,9 @@
 
 */
 
-#ifndef STATEREQUESTHANDLER_H_
-#define STATEREQUESTHANDLER_H_
+#pragma once
 
+#include <ds/common.h>
 #include "src/web/webrequests.h"
 
 namespace dss {
@@ -34,11 +34,13 @@ namespace dss {
   class StateRequestHandler : public WebServerRequestHandlerJSON {
   public:
     StateRequestHandler(Apartment& _apartment);
-    virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
+    WebServerResponse jsonHandleRequest(const RestfulRequest& request, boost::shared_ptr<Session> session,
+        const struct mg_connection* connection) DS_OVERRIDE;
+
   private:
     Apartment& m_Apartment;
+
+    std::string set(const RestfulRequest& request);
   }; // StateRequestHandler
 
 } // namespace dss
-
-#endif /* STATEREQUESTHANDLER_H_ */

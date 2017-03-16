@@ -38,12 +38,19 @@ namespace dss {
   : m_Apartment(_apartment)
   { }
 
-  WebServerResponse StateRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
-    std::string errorMessage;
-    if(_request.getMethod() == "set") {
-      std::string addon = _request.getParameter("addon");
-      std::string name = _request.getParameter("name");
-      std::string value = _request.getParameter("value");
+  WebServerResponse StateRequestHandler::jsonHandleRequest(const RestfulRequest& request, boost::shared_ptr<Session> session, const struct mg_connection* connection) {
+    auto&& method = request.getMethod();
+    if(method == "set") {
+      return set(request);
+    } else {
+     throw std::runtime_error("Unhandled function");
+    }
+  }
+
+  std::string StateRequestHandler::set(const RestfulRequest& request) {
+      std::string addon = request.getParameter("addon");
+      std::string name = request.getParameter("name");
+      std::string value = request.getParameter("value");
 
       if (addon.empty()) {
         return JSONWriter::failure("Parameter 'addon' missing");
@@ -69,9 +76,6 @@ namespace dss {
       }
 
       return JSONWriter::success();
-    } else {
-      throw std::runtime_error("Unhandled function");
-    }
-  } // jsonHandleRequest
+  }
 
 } // namespace dss
