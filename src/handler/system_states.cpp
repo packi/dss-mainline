@@ -49,7 +49,6 @@ namespace StateName {
   const std::string BuildingService = "building_service";
   const std::string Fire = "fire";
   const std::string Frost = "frost";
-  const std::string HeatingModeControl = "heating_water_system";
   const std::string Hibernation = "hibernation";
   const std::string Panic = "panic";
   const std::string Motion = "motion";
@@ -59,6 +58,7 @@ namespace StateName {
   const std::string Wind = "wind";
   const std::string HeatingSystem = "heating_system";
   const std::string HeatingSystemMode = "heating_system_mode";
+  const std::string HeatingModeControl = "heating_water_system";
 }
 
 EventInterpreterPluginSystemState::EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter)
