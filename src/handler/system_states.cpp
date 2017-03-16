@@ -962,7 +962,7 @@ void SystemState::run() {
       getOrRegisterState(StateName::BuildingService)->setState(coDsmApi, value);
 
     }
-  } catch (std::runtime_error &ex) {
+  } catch (const std::exception &ex) {
     Logger::getInstance()->log("failed to process event:" + m_evtName + " " + ex.what(), lsWarning);
   }
 }
