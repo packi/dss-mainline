@@ -502,7 +502,7 @@ namespace dss {
       m_pPropertyNode->checkWriteAccess();
     }
     boost::shared_ptr<State> result;
-    foreach(boost::shared_ptr<State> state, m_States) {
+    foreach(auto&& state, m_States) {
       if ((state->getName() == _stateName) && (state->getType() == _type) &&
           (state->getProviderService() == _scriptId)) {
         result = state;
@@ -526,7 +526,7 @@ namespace dss {
       m_pPropertyNode->checkWriteAccess();
     }
     boost::shared_ptr<State> result;
-    foreach(boost::shared_ptr<State> state, m_States) {
+    foreach(auto&& state, m_States) {
       if(state->getName() == _state->getName()) {
         throw ItemDuplicateException("Duplicate state " + _state->getName());
       }
@@ -536,7 +536,7 @@ namespace dss {
 
   boost::shared_ptr<State> Apartment::tryGetState(const eStateType _type, const std::string& _name) const {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    foreach(boost::shared_ptr<State> state, m_States) {
+    foreach(auto&& state, m_States) {
       if ((state->getType() == _type) && (state->getName() == _name)) {
         return state;
       }
@@ -554,7 +554,7 @@ namespace dss {
 
   boost::shared_ptr<State> Apartment::getNonScriptState(const std::string& _stateName) const {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    foreach(boost::shared_ptr<State> state, m_States) {
+    foreach(auto&& state, m_States) {
       if ((state->getType() != StateType_Script) &&
           (state->getName() == _stateName)) {
         return state;
@@ -567,7 +567,7 @@ namespace dss {
                                                const std::string& _identifier,
                                                const std::string& _stateName) const {
     boost::recursive_mutex::scoped_lock scoped_lock(m_mutex);
-    foreach(boost::shared_ptr<State> state, m_States) {
+    foreach(auto&& state, m_States) {
       if ((state->getType() == _type) &&
           (state->getProviderService() == _identifier) &&
           (state->getName() == _stateName)) {
@@ -585,7 +585,7 @@ namespace dss {
     // TODO(someday) SensorState should have a field to identify the input sensor
     std::string prefix("dev." + dsuid2str(dsuid) + ".type" + intToString(static_cast<int>(sensorType)));
 
-    foreach (boost::shared_ptr<State> state, m_States) {
+    foreach (auto&& state, m_States) {
       if (boost::starts_with(state->getName(), prefix)) {
         boost::dynamic_pointer_cast<StateSensor>(state)->newValue(origin, value);
       }
@@ -600,7 +600,7 @@ namespace dss {
     // TODO(someday) SensorState should have a field to identify the input sensor
     std::string prefix("zone.zone" + intToString(zoneId) + ".group" + intToString(groupId) + ".type" + intToString(static_cast<int>(sensorType)));
 
-    foreach (boost::shared_ptr<State> state, m_States) {
+    foreach (auto&& state, m_States) {
       if (boost::starts_with(state->getName(), prefix)) {
         boost::dynamic_pointer_cast<StateSensor>(state)->newValue(origin, value);
       }
