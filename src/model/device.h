@@ -359,6 +359,7 @@ namespace dss {
     void updateIconPath();
     std::string getAKMButtonInputString(ButtonInputMode mode);
     bool hasBlinkSettings();
+    void publishAliasInZoneGroups();
 
   public:
     /** Creates and initializes a device. */
