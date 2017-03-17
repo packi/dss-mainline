@@ -329,6 +329,7 @@ long HttpClient::internalRequest(const std::string& _url, RequestType _type,
   }
   curl_easy_setopt(m_curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
   curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+  curl_easy_setopt(m_curl_handle, CURLOPT_TCP_KEEPALIVE, 1L);
 
   log("perform: " + std::string((_type == POST) ? "POST " : " ") + _url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
@@ -408,6 +409,18 @@ long HttpClient::downloadFile(const std::string &_url, const std::string &_filen
     m_curl_handle = NULL;
   }
   return http_code;
+}
+
+HttpStatistics HttpClient::getStats() {
+  HttpStatistics stats = { 0, };
+  if (NULL != m_curl_handle) {
+    curl_easy_getinfo(m_curl_handle, CURLINFO_TOTAL_TIME, &stats.totalTime);
+    curl_easy_getinfo(m_curl_handle, CURLINFO_SIZE_UPLOAD, &stats.sumUp);
+    curl_easy_getinfo(m_curl_handle, CURLINFO_SIZE_DOWNLOAD, &stats.sumDown);
+    curl_easy_getinfo(m_curl_handle, CURLINFO_SPEED_UPLOAD, &stats.speedUp);
+    curl_easy_getinfo(m_curl_handle, CURLINFO_SPEED_DOWNLOAD, &stats.speedDown);
+  }
+  return stats;
 }
 
 }
