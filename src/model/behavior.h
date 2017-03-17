@@ -49,6 +49,8 @@ public:
   virtual int getNextScene() = 0;
   virtual int getPreviousScene() = 0;
 
+  virtual std::vector<int> getAvailableScenes() = 0;
+
   virtual void publishToPropertyTree() = 0;
   virtual void removeFromPropertyTree() = 0;
 };
@@ -63,6 +65,8 @@ public:
 
   int getNextScene() DS_OVERRIDE;
   int getPreviousScene() DS_OVERRIDE;
+
+  std::vector<int> getAvailableScenes() DS_OVERRIDE;
 
   void publishToPropertyTree() DS_OVERRIDE;
   void removeFromPropertyTree() DS_OVERRIDE;
@@ -86,6 +90,8 @@ public:
 
   int getNextScene() DS_OVERRIDE;
   int getPreviousScene() DS_OVERRIDE;
+
+  std::vector<int> getAvailableScenes() DS_OVERRIDE;
 
   void publishToPropertyTree() DS_OVERRIDE;
   void removeFromPropertyTree() DS_OVERRIDE;

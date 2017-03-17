@@ -43,7 +43,8 @@ Behavior::Behavior(PropertyNodePtr& propertyNode, int currentScene, int configur
 
 Behavior::~Behavior() {}
 
-DefaultBehavior::DefaultBehavior(PropertyNodePtr& propertyNode, int currentScene) : Behavior(propertyNode, currentScene, 0) {}
+DefaultBehavior::DefaultBehavior(PropertyNodePtr& propertyNode, int currentScene)
+    : Behavior(propertyNode, currentScene, 0) {}
 
 DefaultBehavior::~DefaultBehavior() {}
 
@@ -67,6 +68,10 @@ int DefaultBehavior::getNextScene() { return SceneHelper::getNextScene(m_current
 
 int DefaultBehavior::getPreviousScene() { return SceneHelper::getPreviousScene(m_currentScene); }
 
+std::vector<int> DefaultBehavior::getAvailableScenes() {
+  return SceneHelper::getAvailableScenes();
+}
+
 void DefaultBehavior::publishToPropertyTree() {}
 
 void DefaultBehavior::removeFromPropertyTree() {}
@@ -75,7 +80,8 @@ void DefaultBehavior::removeFromPropertyTree() {}
 const std::vector<int> VentilationBehavior::offsetToSceneId = {SceneOff, Scene1, Scene2, Scene3, Scene4, SceneBoost};
 
 // By default the ventilation configuration activates all basic scenes (0 value is active)
-VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode, int currentScene) : Behavior(propertyNode, SceneOff, 0) {
+VentilationBehavior::VentilationBehavior(PropertyNodePtr& propertyNode, int currentScene)
+    : Behavior(propertyNode, SceneOff, 0) {
   // make sure the current scene is valid
   setCurrentScene(currentScene);
   publishToPropertyTree();
@@ -214,14 +220,18 @@ std::vector<int> VentilationBehavior::getActiveBasicScenes() const {
   return ret;
 }
 
+std::vector<int> VentilationBehavior::getAvailableScenes() {
+  return getActiveBasicScenes();
+}
+
 void VentilationBehavior::publishToPropertyTree() {
   if (m_pPropertyNode != NULL) {
     m_pPropertyNode->createProperty("activeBasicScenes")
         ->linkToProxy(PropertyProxyMemberFunction<VentilationBehavior, std::string, false>(
             *this, &VentilationBehavior::getPropertyActiveBasicScenes));
     m_pPropertyNode->createProperty("lastCalledBasicScene")
-        ->linkToProxy(PropertyProxyMemberFunction<VentilationBehavior, int>(
-            *this, &VentilationBehavior::getCurrentScene));
+        ->linkToProxy(
+            PropertyProxyMemberFunction<VentilationBehavior, int>(*this, &VentilationBehavior::getCurrentScene));
   }
 }
 

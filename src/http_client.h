@@ -52,6 +52,12 @@ namespace dss {
     std::string postdata;
   };
 
+  struct HttpStatistics {
+    double totalTime;
+    double sumUp, sumDown;
+    double speedUp, speedDown;
+  };
+
   class HttpClient {
     __DECL_LOG_CHANNEL__
     public:
@@ -79,6 +85,8 @@ namespace dss {
       long downloadFile(const std::string &_url, const std::string &_filename);
 
       /* TODO evtl. URI wrapper easy appending/parsing of query options */
+
+      HttpStatistics getStats();
 
     private:
       long internalRequest(const std::string& _url, RequestType _type,

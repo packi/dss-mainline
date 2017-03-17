@@ -61,8 +61,10 @@ namespace dss {
     static bool isInRange(const int _sceneNumber, const int _zoneNumber);
     static bool isMultiTipSequence(const unsigned int _scene);
     static bool isDimSequence(const unsigned int _scene);
-    static uint64_t getReachableScenesBitmapForButtonID(const int _buttonID);
     static SceneOnState isOnScene(const int _groupID, const unsigned int _scene);
+    static std::string getSceneName(int sceneId, int groupId);
+    static const std::vector<int>& getAvailableScenes();
+    static const std::vector<int>& getReachableScenes(int buttonId, int group);
   }; // SceneHelper
 
 } // namespace dss

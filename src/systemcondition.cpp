@@ -299,8 +299,11 @@ bool secondsFromHMS(unsigned *ts, std::string string)
                       testGroupIdNode->getAsString());
 
             if (groupNode != NULL) {
-              PropertyNodePtr lastCalledScene =
-                groupNode->getPropertyByName("lastCalledScene");
+              PropertyNodePtr lastCalledScene = groupNode->getPropertyByName("lastCalledBasicScene");
+              if (lastCalledScene == NULL) {
+                lastCalledScene = groupNode->getPropertyByName("lastCalledScene");
+              }
+
               if (lastCalledScene != NULL) {
                 if (lastCalledScene->getAsString() ==
                         testSceneIdNode->getAsString()) {

@@ -27,8 +27,9 @@
 
 
 #include "scenehelper.h"
-
+#include "src/ds/str.h"
 #include <cassert>
+#include <map>
 
 namespace dss {
 
@@ -242,63 +243,6 @@ namespace dss {
     return aboveZero && validForZone;
   }
 
-  uint64_t SceneHelper::getReachableScenesBitmapForButtonID(const int _buttonID) {
-    const uint64_t Scene0Bitset = (1uLL << 0);
-    const uint64_t Scene1Bitset = (1uLL << 1);
-    const uint64_t Scene2Bitset = (1uLL << 2);
-    const uint64_t Scene3Bitset = (1uLL << 3);
-    const uint64_t Scene4Bitset = (1uLL << 4);
-    const uint64_t Scene5Bitset = (1uLL << 5);
-    const uint64_t Scene6Bitset = (1uLL << 6);
-    const uint64_t Scene7Bitset = (1uLL << 7);
-    const uint64_t Scene8Bitset = (1uLL << 8);
-    const uint64_t Scene9Bitset = (1uLL << 9);
-    const uint64_t Scene17Bitset = (1uLL << 17);
-    const uint64_t Scene18Bitset = (1uLL << 18);
-    const uint64_t Scene19Bitset = (1uLL << 19);
-    const uint64_t Scene20Bitset = (1uLL << 20);
-    const uint64_t Scene21Bitset = (1uLL << 21);
-    const uint64_t Scene22Bitset = (1uLL << 22);
-    const uint64_t Scene23Bitset = (1uLL << 23);
-    const uint64_t Scene24Bitset = (1uLL << 24);
-    const uint64_t Scene25Bitset = (1uLL << 25);
-    const uint64_t Scene26Bitset = (1uLL << 26);
-    const uint64_t Scene27Bitset = (1uLL << 27);
-    const uint64_t Scene28Bitset = (1uLL << 28);
-    const uint64_t Scene29Bitset = (1uLL << 29);
-    const uint64_t Scene30Bitset = (1uLL << 30);
-    const uint64_t Scene31Bitset = (1uLL << 31);
-    const uint64_t Scene32Bitset = (1uLL << 32);
-    const uint64_t Scene33Bitset = (1uLL << 33);
-    const uint64_t Scene34Bitset = (1uLL << 34);
-    const uint64_t Scene35Bitset = (1uLL << 35);
-    const uint64_t Scene36Bitset = (1uLL << 36);
-    const uint64_t Scene37Bitset = (1uLL << 37);
-    const uint64_t Scene38Bitset = (1uLL << 38);
-    const uint64_t Scene39Bitset = (1uLL << 39);
-
-    const uint64_t reachableZonesPerButtonID[] = {
-      Scene0Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 0
-      Scene0Bitset | Scene1Bitset | Scene6Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 1
-      Scene0Bitset | Scene2Bitset | Scene7Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 2
-      Scene0Bitset | Scene3Bitset | Scene8Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 3
-      Scene0Bitset | Scene4Bitset | Scene9Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 4
-      Scene0Bitset | Scene5Bitset | Scene17Bitset | Scene18Bitset | Scene19Bitset, // 5
-      Scene0Bitset | Scene32Bitset | Scene33Bitset | Scene20Bitset | Scene21Bitset | Scene22Bitset, // 6
-      Scene0Bitset | Scene34Bitset | Scene35Bitset | Scene23Bitset | Scene24Bitset | Scene25Bitset, // 7
-      Scene0Bitset | Scene36Bitset | Scene37Bitset | Scene26Bitset | Scene27Bitset | Scene28Bitset, // 8
-      Scene0Bitset | Scene38Bitset | Scene39Bitset | Scene29Bitset | Scene30Bitset | Scene31Bitset, // 9
-      Scene0Bitset | Scene1Bitset | Scene6Bitset | Scene20Bitset | Scene21Bitset | Scene22Bitset, // 10
-      Scene0Bitset | Scene2Bitset | Scene7Bitset | Scene23Bitset | Scene24Bitset | Scene25Bitset, // 11
-      Scene0Bitset | Scene3Bitset | Scene8Bitset | Scene26Bitset | Scene27Bitset | Scene28Bitset, // 12
-      Scene0Bitset | Scene4Bitset | Scene9Bitset | Scene29Bitset | Scene30Bitset | Scene31Bitset, // 13
-    };
-    if((_buttonID >= 0) && (_buttonID <= 13)) {
-      return reachableZonesPerButtonID[_buttonID];
-    }
-    return 0uLL;
-  } // getReachableScenesBitmapForButtonID
-
   SceneHelper::SceneOnState SceneHelper::isOnScene(const int _groupID, const unsigned int _scene) {
     // assume that no default zone/group state tracked
     SceneHelper::SceneOnState ret = SceneHelper::DontCare;
@@ -392,5 +336,161 @@ namespace dss {
     }
 
     return ret;
+  }
+
+  std::string SceneHelper::getSceneName(int sceneId, int groupId) {
+    static const std::map<int, const char*> defaultSceneNames = {
+        {SceneOff, "Off"}, {SceneOffA1, "Off-Area1"}, {SceneOffA2, "Off-Area2"}, {SceneOffA3, "Off-Area3"},
+        {SceneOffA4, "Off-Area4"}, {Scene1, "Preset1"}, {SceneA11, "On-Area1"}, {SceneA21, "On-Area2"},
+        {SceneA31, "On-Area3"}, {SceneA41, "On-Area4"}, {SceneDimArea, "Dimm-Area"}, {SceneDec, "Dec"},
+        {SceneInc, "Inc"}, {SceneMin, "Min"}, {SceneMax, "Max"}, {SceneStop, "Stop"}, {Scene2, "Preset2"},
+        {Scene3, "Preset3"}, {Scene4, "Preset4"}, {Scene12, "Preset12"}, {Scene13, "Preset13"}, {Scene14, "Preset14"},
+        {Scene22, "Preset22"}, {Scene23, "Preset23"}, {Scene24, "Preset24"}, {Scene32, "Preset32"},
+        {Scene33, "Preset33"}, {Scene34, "Preset34"}, {Scene42, "Preset42"}, {Scene43, "Preset43"},
+        {Scene44, "Preset44"}, {SceneOffE1, "Off-Preset10"}, {SceneOnE1, "On-Preset11"}, {SceneOffE2, "Off-Preset20"},
+        {SceneOnE2, "On-Preset21"}, {SceneOffE3, "Off-Preset30"}, {SceneOnE3, "On-Preset31"},
+        {SceneOffE4, "Off-Preset40"}, {SceneOnE4, "On-Preset41"}, {SceneAutoOff, "Off-Automatic"},
+        {SceneImpulse, "Impuls"}, {SceneDecA1, "Dec-Area1"}, {SceneIncA1, "Inc-Area1"}, {SceneDecA2, "Dec-Area2"},
+        {SceneIncA2, "Inc-Area2"}, {SceneDecA3, "Dec-Area3"}, {SceneIncA3, "Inc-Area3"}, {SceneDecA4, "Dec-Area4"},
+        {SceneIncA4, "Inc-Area4"}, {SceneLocalOff, "Off-Device"}, {SceneLocalOn, "On-Device"},
+        {SceneStopA1, "Stop-Area1"}, {SceneStopA2, "Stop-Area2"}, {SceneStopA3, "Stop-Area3"},
+        {SceneStopA4, "Stop-Area4"}, {SceneSunProtection, "Sunprotection"}, {SceneAutoStandBy, "AutoStandBy"},
+        {ScenePanic, "Panic"}, {SceneEnergyOverload, "Overload"}, {SceneStandBy, "Zone-Standby"},
+        {SceneDeepOff, "Zone-Deep-Off"}, {SceneSleeping, "Sleeping"}, {SceneWakeUp, "Wake-Up"},
+        {ScenePresent, "Present"}, {SceneAbsent, "Absent"}, {SceneBell, "Bell"}, {SceneAlarm, "Alarm"},
+        {SceneRoomActivate, "Zone-Activate"}, {SceneFire, "Fire"}, {SceneSmoke, "Smoke"}, {SceneWater, "Water"},
+        {SceneGas, "Gas"}, {SceneBell2, "Bell2"}, {SceneBell3, "Bell3"}, {SceneBell4, "Bell4"}, {SceneAlarm2, "Alarm2"},
+        {SceneAlarm3, "Alarm3"}, {SceneAlarm4, "Alarm4"}, {SceneWindActive, "Wind"}, {SceneWindInactive, "WindN"},
+        {SceneRainActive, "Rain"}, {SceneRainInactive, "RainN"}, {SceneHailActive, "Hail"},
+        {SceneHailInactive, "HailN"},
+    };
+
+    static const std::map<int, const char*> temperatureSceneNames = {
+        {0, "Off"}, {1, "Comfort"}, {2, "Economy"}, {4, "Night"}, {5, "Holiday"}, {6, "Cooling"},
+        {7, "CoolingOff"}, {8, "Manual"}, {29, "ClimateControlOn"}, {30, "ClimateControlOff"}, {31, "ValveProtection"},
+    };
+
+    static const std::map<int, const char*> ventilationSceneNames = {
+        {SceneOff, "Off"}, {Scene1, "Level1"}, {Scene2, "Level2"}, {Scene3, "Level3"}, {Scene4, "Level4"},
+        {SceneBoost, "Boost"},
+    };
+
+    if (groupId == GroupIDControlTemperature) {
+      auto it = temperatureSceneNames.find(sceneId);
+      if (it != temperatureSceneNames.end()) {
+        return it->second;
+      }
+    } else if ((groupId == GroupIDVentilation) || (groupId == GroupIDGlobalAppDsVentilation)) {
+      auto it = ventilationSceneNames.find(sceneId);
+      if (it != ventilationSceneNames.end()) {
+        return it->second;
+      }
+    } else {
+      auto it = defaultSceneNames.find(sceneId);
+      if (it != defaultSceneNames.end()) {
+        return it->second;
+      }
+    }
+
+    return "Unknown";
+  }
+
+  const std::vector<int>& SceneHelper::getAvailableScenes() {
+    static const std::vector<int> allScenes = {
+        // Scene constants for devices
+        SceneOff, SceneOffA1, SceneOffA2, SceneOffA3, SceneOffA4, Scene1, SceneA11, SceneA21, SceneA31, SceneA41,
+        SceneDimArea, SceneDec, SceneInc, SceneMin, SceneMax, SceneStop, Scene2, Scene3, Scene4, Scene12, Scene13,
+        Scene14, Scene22, Scene23, Scene24, Scene32, Scene33, Scene34, Scene42, Scene43, Scene44, SceneOffE1, SceneOnE1,
+        SceneOffE2, SceneOnE2, SceneOffE3, SceneBoost, SceneOnE3, SceneOffE4, SceneOnE4, SceneAutoOff, SceneImpulse,
+        SceneDecA1, SceneIncA1, SceneDecA2, SceneIncA2, SceneDecA3, SceneIncA3, SceneDecA4, SceneIncA4, SceneLocalOff,
+        SceneLocalOn, SceneStopA1, SceneStopA2, SceneStopA3, SceneStopA4, SceneSunProtection,
+
+        // Apartment Scenes
+        SceneAutoStandBy, ScenePanic, SceneEnergyOverload, SceneStandBy, SceneDeepOff, SceneSleeping, SceneWakeUp,
+        ScenePresent, SceneAbsent, SceneBell, SceneAlarm, SceneRoomActivate, SceneFire, SceneSmoke, SceneWater,
+        SceneGas, SceneBell2, SceneBell3, SceneBell4, SceneAlarm2, SceneAlarm3, SceneAlarm4, SceneWindActive,
+        SceneWindInactive, SceneRainActive, SceneRainInactive, SceneHailActive, SceneHailInactive,
+    };
+
+    return allScenes;
+  }
+
+  const std::vector<int>& SceneHelper::getReachableScenes(int buttonId, int group) {
+
+    //    ID  | Für alle Farben ausser...           | Für schwarz | For Ventilation     |
+    //    -------------------------------------------------------------------------------
+    //    0   | Gerätetaster (+ Stimmung 2-4)       |             |                     |
+    //    1   | Bereichstaster 1 (+ Stimmung 2-4)   | Alarm       |                     |
+    //    2   | Bereichstaster 2 (+ Stimmung 2-4)   | Panik       |                     |
+    //    3   | Bereichstaster 3 (+ Stimmung 2-4)   | Gehen       |                     |
+    //    4   | Bereichstaster 4 (+ Stimmung 2-4)   |             |                     |
+    //    5   | Raumtaster (+ Stimmung 1-4)         | Klingeln    | Levels 1-4 + Boost  |
+    //    6   | Raumtaster (+ Stimmung 10-14)       |             |                     |
+    //    7   | Raumtaster (+ Stimmung 20-24)       |             |                     |
+    //    8   | Raumtaster (+ Stimmung 30-34)       |             |                     |
+    //    9   | Raumtaster (+ Stimmung 40-44)       |             |                     |
+    //    10  | Bereichstaster 1 (+ Stimmung 12-14) |             |                     |
+    //    11  | Bereichstaster 2 (+ Stimmung 22-24) |             |                     |
+    //    12  | Bereichstaster 3 (+ Stimmung 32-34) |             |                     |
+    //    13  | Bereichstaster 4 (+ Stimmung 42-44) |             |                     |
+    //    14  | unbenutzt                           | unbenutzt   |                     |
+    //    15  | unbenutzt                           | App-Taster  |                     |​
+    //    -------------------------------------------------------------------------------
+    static const std::map<int, std::vector<int> > defaultReachableScenes = {
+        {0,{SceneOff, Scene2, Scene3, Scene4}},                           // 0
+        {1,{SceneOff, SceneOffA1, SceneA11, Scene2, Scene3, Scene4}},     // 1
+        {2,{SceneOff, SceneOffA2, SceneA21, Scene2, Scene3, Scene4}},     // 2
+        {3,{SceneOff, SceneOffA3, SceneA31, Scene2, Scene3, Scene4}},     // 3
+        {4,{SceneOff, SceneOffA4, SceneA41, Scene2, Scene3, Scene4}},     // 4
+        {5,{SceneOff, Scene1, Scene2, Scene3, Scene4}},                   // 5
+        {6,{SceneOff, SceneOffE1, SceneOnE1, Scene12, Scene13, Scene14}}, // 6
+        {7,{SceneOff, SceneOffE2, SceneOnE2, Scene22, Scene23, Scene24}}, // 7
+        {8,{SceneOff, SceneOffE3, SceneOnE3, Scene32, Scene33, Scene34}}, // 8
+        {9,{SceneOff, SceneOffE4, SceneOnE4, Scene42, Scene43, Scene44}}, // 9
+        {10,{SceneOff, SceneOffA1, SceneA11, Scene12, Scene13, Scene14}},  // 10
+        {11,{SceneOff, SceneOffA2, SceneA21, Scene22, Scene23, Scene24}},  // 11
+        {12,{SceneOff, SceneOffA3, SceneA31, Scene32, Scene33, Scene33}},  // 12
+        {13,{SceneOff, SceneOffA4, SceneA41, Scene42, Scene43, Scene44}},  // 13
+    };
+
+    static const std::map<int,std::vector<int> > jokerReachableScenes = {
+        {1,{SceneAlarm}},  // 1
+        {2,{ScenePanic}},  // 2
+        {3,{SceneAbsent}}, // 3
+        {5,{SceneBell}},   // 5
+    };
+
+    static const std::map<int, std::vector<int> > ventilationReachableScenes = {
+        {5, {SceneOff, Scene1, Scene2, Scene3, Scene4, SceneBoost}}, // 5
+    };
+
+    static const std::vector<int> reachableScenesEmpty;
+
+    switch (group) {
+      case GroupIDBlack: {
+        auto it = jokerReachableScenes.find(buttonId);
+        if (it != jokerReachableScenes.end()) {
+          return it->second;
+        }
+        break;
+      }
+      case GroupIDVentilation:
+      case GroupIDGlobalAppDsVentilation: {
+        auto it = ventilationReachableScenes.find(buttonId);
+        if (it != ventilationReachableScenes.end()) {
+          return it->second;
+        }
+        break;
+      }
+      default: {
+        auto it = defaultReachableScenes.find(buttonId);
+        if (it != defaultReachableScenes.end()) {
+          return it->second;
+        }
+        break;
+      }
+    }
+
+    return reachableScenesEmpty;
   }
 }

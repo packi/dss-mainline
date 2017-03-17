@@ -42,6 +42,8 @@
 #include "src/structuremanipulator.h"
 #include "util.h"
 
+#include <algorithm>
+
 namespace dss {
 
 //=========================================== ZoneRequestHandler
@@ -135,27 +137,60 @@ std::string ZoneRequestHandler::sceneGetName(boost::shared_ptr<Zone> pZone, boos
 }
 
 std::string ZoneRequestHandler::getReachableScenes(
-        boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
-  uint64_t reachableScenes = 0uLL;
-  Set devicesInZone;
-  if (pGroup) {
-    devicesInZone = pZone->getDevices().getByGroup(pGroup);
-  } else {
-    devicesInZone = pZone->getDevices();
+    boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
+  if (pGroup == NULL) {
+    return JSONWriter::failure("Need group to work");
   }
-  for (int iDevice = 0; iDevice < devicesInZone.length(); iDevice++) {
-    DeviceReference& ref = devicesInZone.get(iDevice);
-    int buttonID = ref.getDevice()->getButtonID();
-    reachableScenes |= SceneHelper::getReachableScenesBitmapForButtonID(buttonID);
+
+  // for all selected groups try to find all reachable scenes and their names inside group
+  Set devicesInGroup = pGroup->getDevices();
+  std::vector<int> groupReachableScenes;
+
+  for (int iDevice = 0; iDevice < devicesInGroup.length(); iDevice++) {
+    auto device = devicesInGroup.get(iDevice).getDevice();
+
+    // check only devices with buttons that are assigned to this exact group
+    // TODO(soon): if device is removed from cluster the ButtonActiveGroup is set to 255 and not to button group,
+    // current workaround is that we use device activeGroup if the buttonActiveGroup is not set
+    if ((device->getButtonInputCount() > 0) &&
+        ((device->getButtonActiveGroup() == pGroup->getID()) ||
+            ((device->getButtonActiveGroup() == 255) && (device->getActiveGroup() == pGroup->getID())))) {
+      const auto& deviceReachableScenes = SceneHelper::getReachableScenes(device->getButtonID(), pGroup->getID());
+      std::copy(deviceReachableScenes.begin(), deviceReachableScenes.end(), std::back_inserter(groupReachableScenes));
+    }
   }
+
+  // sort the scenes by value and remove duplicates
+  std::sort(groupReachableScenes.begin(), groupReachableScenes.end());
+  groupReachableScenes.resize(std::distance(
+      groupReachableScenes.begin(), std::unique(groupReachableScenes.begin(), groupReachableScenes.end())));
+
+  // filter the scenes so only available scenes in this group remain
+  const auto& availableScenes = pGroup->getAvailableScenes();
+  std::vector<int> filteredGroupScenes;
+
+  std::set_intersection(groupReachableScenes.begin(), groupReachableScenes.end(), availableScenes.begin(),
+      availableScenes.end(), std::back_inserter(filteredGroupScenes));
+
   JSONWriter json;
   json.startArray("reachableScenes");
-  for (int iBit = 0; iBit < 64; iBit++) {
-    if ((reachableScenes & (1uLL << iBit)) != 0uLL) {
-      json.add(iBit);
+  foreach (auto&& sceneNr, filteredGroupScenes) { json.add(sceneNr); }
+  json.endArray();
+
+  json.startArray("userSceneNames");
+  // add the resulting names to the output
+  foreach (auto&& sceneNr, filteredGroupScenes) {
+    // get the user defined scene name
+    auto sceneName = pGroup->getSceneName(sceneNr);
+    if (!sceneName.empty()) {
+      json.startObject();
+      json.add("sceneNr", sceneNr);
+      json.add("sceneName", sceneName);
+      json.endObject();
     }
   }
   json.endArray();
+
   return json.successJSON();
 }
 

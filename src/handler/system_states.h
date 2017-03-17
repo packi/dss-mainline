@@ -35,7 +35,6 @@ namespace dss {
     extern const std::string BuildingService;
     extern const std::string Fire;
     extern const std::string Frost;
-    extern const std::string HeatingModeControl;
     extern const std::string Hibernation;
     extern const std::string Panic;
     extern const std::string Motion;
@@ -45,6 +44,7 @@ namespace dss {
     extern const std::string Wind;
     extern const std::string HeatingSystem;
     extern const std::string HeatingSystemMode;
+    extern const std::string HeatingModeControl;
   }
 
   class SystemState : public SystemEvent {

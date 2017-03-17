@@ -81,27 +81,32 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
     }
 
     m_ApplicationType = applicationType;
-
-    switch (applicationType) {
-    case ApplicationType::Ventilation:
-    case ApplicationType::ApartmentVentilation:
-    case ApplicationType::Recirculation:
-    case ApplicationType::ApartmentRecirculation:
-      m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode, getLastCalledScene()));
-      break;
-    case ApplicationType::None:
-    case ApplicationType::Lights:
-    case ApplicationType::Blinds:
-    case ApplicationType::Heating:
-    case ApplicationType::Audio:
-    case ApplicationType::Video:
-    case ApplicationType::Joker:
-    case ApplicationType::Cooling:
-    case ApplicationType::Window:
-    case ApplicationType::ControlTemperature:
+    [&] {
+      switch (applicationType) {
+        case ApplicationType::Ventilation:
+        case ApplicationType::ApartmentVentilation:
+        case ApplicationType::Recirculation:
+        case ApplicationType::ApartmentRecirculation:
+          m_pApplicationBehavior.reset(new VentilationBehavior(m_pPropertyNode, getLastCalledScene()));
+          return;
+        case ApplicationType::None:
+        case ApplicationType::Lights:
+        case ApplicationType::Blinds:
+        case ApplicationType::Heating:
+        case ApplicationType::Audio:
+        case ApplicationType::Video:
+        case ApplicationType::Joker:
+        case ApplicationType::Cooling:
+        case ApplicationType::Window:
+        case ApplicationType::ControlTemperature:
+          m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
+          return;
+      }
+      log(ds::str("Group::setApplicationType: invalid applicationType:", applicationType, " this:", *this),
+          lsError);
+      m_ApplicationType = ApplicationType::None;
       m_pApplicationBehavior.reset(new DefaultBehavior(m_pPropertyNode, getLastCalledScene()));
-      break;
-    }
+    }();
 
     // Status is supported only for apartment ventilation groups for now.
     if (getApartment().getDss()) {

@@ -316,12 +316,11 @@ createActionDenied(const std::string &_type, const std::string &_name,
  *       - upon raise event verify event matches description
  */
 boost::shared_ptr<Event>
-createHeatingEnabled(int _zoneID, bool _heatingEnabled, bool _coolingEnabled)
+createHeatingEnabled(bool _heatingEnabled, bool _coolingEnabled)
 {
   boost::shared_ptr<Event> event;
 
   event = boost::make_shared<Event>(EventName::HeatingEnabled);
-  event->setProperty("zoneID", intToString(_zoneID));
   event->setProperty("HeatingEnabled", _heatingEnabled ? "true" : "false");
   event->setProperty("CoolingEnabled", _coolingEnabled ? "true" : "false");
   return event;
@@ -501,14 +500,12 @@ boost::shared_ptr<Event>
 }
 
 boost::shared_ptr<Event>
-  createGenericSignalHeatingModeSwitch(const uint8_t &_value, callOrigin_t _origin) {
+  createGenericSignalHeatingModeSwitch(HeatingModeSwitchValue value, callOrigin_t _origin) {
   boost::shared_ptr<Event> event;
   event = boost::make_shared<Event>(EventName::HeatingModeSwitch);
 
-  // value: {Off=0, Heat=1, Cold=2, Auto=3}
-  assert(_value <= 3);
   assert(validOrigin(_origin));
-  event->setProperty("value", intToString(_value));
+  event->setProperty("value", intToString(static_cast<int>(value)));
   event->setProperty(ef_callOrigin, intToString(static_cast<int>(_origin)));
   return event;
 }

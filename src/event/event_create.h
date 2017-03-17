@@ -25,6 +25,7 @@
 #include <boost/shared_ptr.hpp>
 #include <digitalSTROM/dsuid.h>
 
+#include "model/modelconst.h"
 #include "model/data_types.h"
 #include "model/deviceinterface.h"
 #include "model/zone.h"
@@ -95,7 +96,7 @@ boost::shared_ptr<Event>
                      const std::string &_source, const std::string &_reason);
 
 boost::shared_ptr<Event>
-  createHeatingEnabled(int _zoneID, bool _heatingEnabled, bool _coolingEnabled);
+  createHeatingEnabled(bool _heatingEnabled, bool _coolingEnabled);
 
 boost::shared_ptr<Event>
   createHeatingSystemCapability(bool _heatingSupported, bool _coolingSupported);
@@ -128,7 +129,7 @@ boost::shared_ptr<Event>
   createGenericSignalFrostProtection(const uint8_t &_value, callOrigin_t _origin);
 
 boost::shared_ptr<Event>
-  createGenericSignalHeatingModeSwitch(const uint8_t &_value, callOrigin_t _origin);
+  createGenericSignalHeatingModeSwitch(HeatingModeSwitchValue value, callOrigin_t _origin);
 
 boost::shared_ptr<Event>
   createGenericSignalBuildingService(const uint8_t &_value, callOrigin_t _origin);

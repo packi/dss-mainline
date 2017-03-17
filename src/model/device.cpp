@@ -578,14 +578,8 @@ namespace dss {
       }
     }
 
+    publishAliasInZoneGroups();
     foreach (auto&& g, m_groupIds) {
-      std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
-                          "/groups/group" + intToString(g) + "/devices/" +
-                          dsuid2str(m_DSID);
-      PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
-      if (gnode) {
-        gnode->alias(m_pPropertyNode);
-      }
       PropertyNodePtr gsubnode = m_pPropertyNode->createProperty("groups/group" + intToString(g));
       gsubnode->createProperty("id")->setIntegerValue(g);
     }
@@ -596,6 +590,18 @@ namespace dss {
 
     republishModelFeaturesToPropertyTree();
   } // publishToPropertyTree
+
+  void Device::publishAliasInZoneGroups() {
+    foreach (auto&& g, m_groupIds) {
+      std::string gPath = "zones/zone" + intToString(getGroupZoneID(g)) +
+                          "/groups/group" + intToString(g) + "/devices/" +
+                          dsuid2str(m_DSID);
+      PropertyNodePtr gnode = m_pApartment->getPropertyNode()->createProperty(gPath);
+      if (gnode) {
+        gnode->alias(m_pPropertyNode);
+      }
+    }
+  }
 
   bool Device::isOn() const {
     return (m_LastCalledScene != SceneOff) &&
@@ -1359,6 +1365,8 @@ namespace dss {
         }
         base->addChild(m_pAliasNode);
       }
+
+      publishAliasInZoneGroups();
     }
     // Binary input status bit handles depend on zoneId by call to `tryGetGroup`.
     // TODO(someday): refactor to some kind of observer pattern?
@@ -3231,5 +3239,4 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, const Device& x) {
     return stream << x.getName();
   }
-
 } // namespace dss
