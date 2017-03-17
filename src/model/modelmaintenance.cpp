@@ -2703,7 +2703,7 @@ namespace dss {
         std::string iconURL = remoteIconPath.string();
 
         boost::filesystem::path iconBasePath;
-        PropertySystem propSys = DSS::getInstance()->getPropertySystem();
+        auto&& propSys = DSS::getInstance()->getPropertySystem();
         if (DSS::hasInstance()) {
           DSS::getInstance()->getSecurity().loginAsSystemUser("OEMWebQuery needs system-rights");
           iconBasePath = propSys.getStringValue(
@@ -2775,7 +2775,7 @@ namespace dss {
 
   void ModelMaintenance::OEMWebQuery::run()
   {
-    PropertySystem propSys = DSS::getInstance()->getPropertySystem();
+    auto&& propSys = DSS::getInstance()->getPropertySystem();
     std::string mac = propSys.getStringValue("/system/host/interfaces/eth0/mac");
     std::string country = propSys.getStringValue("/config/geodata/country");
     std::string locale = propSys.getStringValue("/system/language/locale");
@@ -2868,7 +2868,7 @@ namespace dss {
     if (dataSize > 0) {
       boost::filesystem::path iconBasePath;
       boost::filesystem::path iconFile;
-      PropertySystem propSys = DSS::getInstance()->getPropertySystem();
+      auto&& propSys = DSS::getInstance()->getPropertySystem();
       iconBasePath = propSys.getStringValue("/config/subsystems/Apartment/iconBasePath");
       iconFile = dsuid2str(m_Device->getDSID()) + ".png";
       boost::filesystem::path iconPath = iconBasePath / iconFile;

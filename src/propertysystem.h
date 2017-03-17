@@ -79,7 +79,7 @@ namespace dss {
    * linked directly to an object or pointer.
    * @author Patrick Staehlin <me@packi.ch>
    */
-  class PropertySystem {
+  class PropertySystem : boost::noncopyable {
     __DECL_LOG_CHANNEL__
   private:
     PropertyNodePtr m_RootNode;
@@ -139,7 +139,7 @@ namespace dss {
    * Calls to set or get the value of the linked node
    * will be redirected to the proxy. */
   template<class T>
-  class PropertyProxy {
+  class PropertyProxy : boost::noncopyable {
   public:
     virtual ~PropertyProxy() {
     }
@@ -354,7 +354,7 @@ namespace dss {
   class Privilege;
 
   /** The heart of the PropertySystem. */
-  class PropertyNode : public boost::enable_shared_from_this<PropertyNode> {
+  class PropertyNode : boost::noncopyable, public boost::enable_shared_from_this<PropertyNode> {
     __DECL_LOG_CHANNEL__
 
   public:
