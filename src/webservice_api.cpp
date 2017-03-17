@@ -801,6 +801,7 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       if (evtProperty) {
         evtName = evtProperty->getAsString();
       }
+      createHeader(json, evtGroup_Activity, evtCategory_UserDefinedActionEvent, event.get());
       json.startObject("EventBody");
       json.add("SourceName", event->getPropertyByName(ef_callOrigin));
       json.add("UserDefinedActionID", evtId);
