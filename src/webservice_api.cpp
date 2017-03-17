@@ -15,7 +15,6 @@
 #include "foreach.h"
 #include "propertysystem.h"
 #include "model/devicereference.h"
-#include "model/modulator.h"
 #include "model/group.h"
 #include "model/state.h"
 #include "webservice_api.h"
@@ -528,6 +527,7 @@ const static std::string evtCategory_DeviceCallScene = "DeviceSceneCall";
 const static std::string evtCategory_ZoneBlink = "ZoneBlink"; // 7
 const static std::string evtCategory_DeviceLocal = "DeviceLocal"; // 11
 const static std::string evtCategory_DeviceBlink = "DeviceBlink"; // 14
+const static std::string evtCategory_UserDefinedActionEvent = "UserDefinedAction"; // 22
 // states
 const static std::string evtCategory_ApartmentStateChange = "ApartmentStateChange"; // 21
 const static std::string evtCategory_ZoneStateChange = "ZoneStateChange"; // 10
@@ -653,6 +653,13 @@ std::vector<std::string> uploadEvents()
   events.push_back(EventName::ExecutionDenied);
   events.push_back(EventName::LogFileData);
   return events;
+}
+
+void stateToJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
+  json.add("StateName", event->getPropertyByName("statename"));
+  json.add("StateValue", event->getPropertyByName("state"));
+  json.add("Value", event->getPropertyByName("value"));
+  json.add("OldValue", event->getPropertyByName("oldvalue"));
 }
 
 void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
@@ -802,43 +809,44 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
     // states and addons
     } else if (event->getName() == EventName::StateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
-      json.startObject("EventBody");
       switch (pState->getType()) {
       case StateType_Apartment:
       case StateType_Service:
       case StateType_Script:
-        createHeader(json, evtGroup_Activity, evtCategory_ApartmentStateChange, event.get());
-        json.add("Origin", event->getPropertyByName(ef_callOrigin));
+        {
+          createHeader(json, evtGroup_Activity, evtCategory_ApartmentStateChange, event.get());
+          json.startObject("EventBody");
+          json.add("Origin", event->getPropertyByName(ef_callOrigin));
+          stateToJson(event, json);
+          json.endObject();
+        }
         break;
       case StateType_Group:
       case StateType_SensorZone:
-        createHeader(json, evtGroup_Activity, evtCategory_ZoneStateChange, event.get());
-        json.add("ZoneId", event->getPropertyByName("zoneId"));
-        json.add("GroupId", event->getPropertyByName("groupId"));
+        {
+          createHeader(json, evtGroup_Activity, evtCategory_ZoneStateChange, event.get());
+          boost::shared_ptr<Group> group = pState->getProviderGroup();
+          json.startObject("EventBody");
+          json.add("ZoneId", intToString(group->getZoneID()));
+          json.add("GroupId", intToString(group->getID()));
+          stateToJson(event, json);
+          json.endObject();
+        }
         break;
       case StateType_Device:
       case StateType_SensorDevice:
         {
           createHeader(json, evtGroup_Activity, evtCategory_DeviceStateChange, event.get());
           boost::shared_ptr<Device> device = pState->getProviderDevice();
+          json.startObject("EventBody");
           json.add("DeviceID", device->getDSID());
+          stateToJson(event, json);
+          json.endObject();
         }
         break;
       case StateType_Circuit:
-        {
-          createHeader(json, evtGroup_Activity, evtCategory_DeviceStateChange, event.get());
-          boost::shared_ptr<DSMeter> meter = pState->getProviderDsm();
-          json.add("DeviceID", meter->getDSID());
-        }
-        break;
-      default:
         break;
       }
-      json.add("StateName", event->getPropertyByName("statename"));
-      json.add("StateValue", event->getPropertyByName("state"));
-      json.add("Value", event->getPropertyByName("value"));
-      json.add("OldValue", event->getPropertyByName("oldvalue"));
-      json.endObject();
     } else if (event->getName() == EventName::AddonStateChange) {
       boost::shared_ptr<const State> pState = event->getRaisedAtState();
       std::string addonName = event->getPropertyByName("scriptID");
