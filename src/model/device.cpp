@@ -3239,5 +3239,4 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, const Device& x) {
     return stream << x.getName();
   }
-
 } // namespace dss
