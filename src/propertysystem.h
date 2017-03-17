@@ -96,10 +96,6 @@ namespace dss {
       return m_RootNode;
     }
 
-    void setRootNode(PropertyNodePtr _node) {
-      m_RootNode = _node;
-    }
-
     /** Creates a property and the path to it. */
     PropertyNodePtr createProperty(const std::string& _propPath);
 
