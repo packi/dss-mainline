@@ -26,6 +26,7 @@
 #include "base.h"
 #include "dss.h"
 #include "event/event_fields.h"
+#include "event/event_create.h"
 #include "foreach.h"
 #include "logger.h"
 #include "model/zone.h"
@@ -48,7 +49,6 @@ namespace StateName {
   const std::string BuildingService = "building_service";
   const std::string Fire = "fire";
   const std::string Frost = "frost";
-  const std::string HeatingModeControl = "heating_water_system";
   const std::string Hibernation = "hibernation";
   const std::string Panic = "panic";
   const std::string Motion = "motion";
@@ -58,6 +58,7 @@ namespace StateName {
   const std::string Wind = "wind";
   const std::string HeatingSystem = "heating_system";
   const std::string HeatingSystemMode = "heating_system_mode";
+  const std::string HeatingModeControl = "heating_water_system";
 }
 
 EventInterpreterPluginSystemState::EventInterpreterPluginSystemState(EventInterpreter* _pInterpreter)
@@ -815,22 +816,21 @@ void SystemState::stateBinaryinput() {
     if (lookupState(heating, StateName::HeatingSystem) &&
         lookupState(heating_mode, StateName::HeatingSystemMode))
     {
-      std::string value; // value: {Off=0, Heat=1, Cold=2, Auto=3}
+      // abuse auto as an invalid value
+      HeatingModeSwitchValue value = HeatingModeSwitchValue::AUTO;
+
       if (heating->getState() == State_Inactive) {
-        value = "0";
+        value = HeatingModeSwitchValue::OFF;
       } else if (heating->getState() == State_Active) {
         if (heating_mode->getState() == State_Active) {
-          value = "1";
+          value = HeatingModeSwitchValue::HEATING;
         } else if (heating_mode->getState() == State_Inactive) {
-          value = "2";
+          value = HeatingModeSwitchValue::COOLING;
         }
       }
 
-      if (!value.empty()) {
-        boost::shared_ptr<Event> event;
-        event = boost::make_shared<Event>(EventName::HeatingModeSwitch);
-        event->setProperty("value", value);
-        event->setProperty(ef_callOrigin, intToString(coSystemBinaryInput));
+      if (value != HeatingModeSwitchValue::AUTO) {
+        auto event = createGenericSignalHeatingModeSwitch(value, coSystemBinaryInput);
         DSS::getInstance()->getEventQueue().pushEvent(event);
       }
     }
@@ -945,20 +945,16 @@ void SystemState::run() {
       getOrRegisterState(StateName::Frost)->setState(coDsmApi, value);
 
     } else if (m_evtName == EventName::HeatingModeSwitch) {
-      boost::shared_ptr<State> state;
-      state = getOrRegisterState(StateName::HeatingModeControl);
-      unsigned int value = strToUInt(m_properties.get("value"));
-      assert(value < state->getValueRangeSize());
-
+      auto state = getOrRegisterState(StateName::HeatingModeControl);
+      auto value = static_cast<HeatingModeSwitchValue>(strToUInt(m_properties.get("value")));
       callOrigin_t origin = coDsmApi;
-
       if (m_properties.has("callOrigin")) {
         std::string s = m_properties.get("callOrigin");
         if (!s.empty()) {
           origin = (callOrigin_t)strToInt(s);
         }
       }
-      state->setState(origin, value);
+      state->setState(origin, static_cast<int>(value));
 
     } else if (m_evtName == EventName::BuildingService) {
       unsigned int value = strToInt(m_properties.get("value"));
@@ -966,8 +962,8 @@ void SystemState::run() {
       getOrRegisterState(StateName::BuildingService)->setState(coDsmApi, value);
 
     }
-  } catch(ItemNotFoundException& ex) {
-    Logger::getInstance()->log("SystemState::run: item not found data model error", lsInfo);
+  } catch (const std::exception &ex) {
+    Logger::getInstance()->log("failed to process event:" + m_evtName + " " + ex.what(), lsWarning);
   }
 }
 

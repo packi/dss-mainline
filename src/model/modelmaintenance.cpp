@@ -2393,7 +2393,7 @@ namespace dss {
           break;
         }
 
-        raiseEvent(createGenericSignalHeatingModeSwitch(value, _origin));
+        raiseEvent(createGenericSignalHeatingModeSwitch(static_cast<HeatingModeSwitchValue>(value), _origin));
       }
       break;
 
