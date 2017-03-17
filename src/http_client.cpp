@@ -410,4 +410,16 @@ long HttpClient::downloadFile(const std::string &_url, const std::string &_filen
   return http_code;
 }
 
+HttpStatistics HttpClient::getStats() {
+  HttpStatistics stats = { 0, };
+  if (NULL != m_curl_handle) {
+    curl_easy_getinfo(m_curl_handle, CURLINFO_TOTAL_TIME, &stats.totalTime);
+    curl_easy_getinfo(m_curl_handle, CURLINFO_SIZE_UPLOAD, &stats.sumUp);
+    curl_easy_getinfo(m_curl_handle, CURLINFO_SIZE_DOWNLOAD, &stats.sumDown);
+    curl_easy_getinfo(m_curl_handle, CURLINFO_SPEED_UPLOAD, &stats.speedUp);
+    curl_easy_getinfo(m_curl_handle, CURLINFO_SPEED_DOWNLOAD, &stats.speedDown);
+  }
+  return stats;
+}
+
 }
