@@ -747,15 +747,16 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
 
     // activity
     } else if (event->getName() == EventName::CallScene) {
-      json.startObject("EventBody");
       if (event->getRaiseLocation() == erlGroup) {
         createHeader(json, evtGroup_Activity, evtCategory_ZoneGroupCallScene, event.get());
         boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
+        json.startObject("EventBody");
         json.add("ZoneID",  pGroup->getZoneID());
         json.add("GroupID", pGroup->getID());
       } else if (event->getRaiseLocation() == erlDevice) {
         createHeader(json, evtGroup_Activity, evtCategory_DeviceCallScene, event.get());
         pDeviceRef = event->getRaisedAtDevice();
+        json.startObject("EventBody");
         json.add("DeviceID", pDeviceRef->getDSID());
       }
       json.add("SceneID", strToInt(event->getPropertyByName(ef_sceneID)));
@@ -774,15 +775,16 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       // TODO: json.add("UserToken", "");
       json.endObject();
     } else if (event->getName() == EventName::IdentifyBlink) {
-      json.startObject("EventBody");
       if (event->getRaiseLocation() == erlGroup) {
         createHeader(json, evtGroup_Activity, evtCategory_ZoneBlink, event.get());
         boost::shared_ptr<const Group> pGroup = event->getRaisedAtGroup();
+        json.startObject("EventBody");
         json.add("ZoneID",  pGroup->getZoneID());
         json.add("GroupID", pGroup->getID());
       } else if (event->getRaiseLocation() == erlDevice) {
         createHeader(json, evtGroup_Activity, evtCategory_DeviceBlink, event.get());
         pDeviceRef = event->getRaisedAtDevice();
+        json.startObject("EventBody");
         json.add("DeviceID", pDeviceRef->getDSID());
       }
       json.add("Origin", event->getPropertyByName(ef_callOrigin));
