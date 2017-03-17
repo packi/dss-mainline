@@ -329,6 +329,7 @@ long HttpClient::internalRequest(const std::string& _url, RequestType _type,
   }
   curl_easy_setopt(m_curl_handle, CURLOPT_TIMEOUT, CURL_TRANSFER_TIMEOUT_SECS);
   curl_easy_setopt(m_curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+  curl_easy_setopt(m_curl_handle, CURLOPT_TCP_KEEPALIVE, 1L);
 
   log("perform: " + std::string((_type == POST) ? "POST " : " ") + _url, lsDebug);
   res = curl_easy_perform(m_curl_handle);
