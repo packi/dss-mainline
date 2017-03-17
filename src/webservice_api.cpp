@@ -733,12 +733,8 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       createHeader(json, evtGroup_Activity, evtCategory_DeviceAppButtonClick, event.get());
       json.startObject("EventBody");
       json.add("ButtonIndex", event->getPropertyByName("buttonIndex"));
-      if (event->hasPropertySet("clickType")) {
-        json.add("ClickType", event->getPropertyByName("clickType"));
-      }
-      if (event->hasPropertySet("holdCount")) {
-        json.add("HoldCount", event->getPropertyByName("holdCount"));
-      }
+      json.add("ClickType", event->getPropertyByName("clickType"));
+      json.add("HoldCount", event->getPropertyByName("holdCount"));
       json.add("DeviceID", pDeviceRef->getDSID());
       json.endObject();
     } else if ((event->getName() == EventName::ButtonDeviceAction) && (event->getRaiseLocation() == erlDevice)) {
