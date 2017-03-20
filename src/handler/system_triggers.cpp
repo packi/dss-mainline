@@ -1152,7 +1152,7 @@ namespace dss {
 
   bool SystemTrigger::setup(Event& _event) {
     SystemEvent::setup(_event);
-    m_evtName = _event.getName();
+
     EventRaiseLocation raiseLocation = _event.getRaiseLocation();
     if((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
       if (!DSS::hasInstance()) {

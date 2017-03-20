@@ -25,12 +25,15 @@
 
 namespace dss {
 
-SystemEvent::SystemEvent() : Task() {
-}
-SystemEvent::~SystemEvent() {
-}
+SystemEvent::SystemEvent() = default;
+SystemEvent::~SystemEvent() = default;
 
 bool SystemEvent::setup(Event& _event) {
+  m_evtName = _event.getName();
+  m_evtRaiseLocation = _event.getRaiseLocation();
+  m_raisedAtGroup = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
+  m_raisedAtDevice = _event.getRaisedAtDevice();
+  m_raisedAtState = _event.getRaisedAtState();
   m_properties = _event.getProperties();
   return true;
 }

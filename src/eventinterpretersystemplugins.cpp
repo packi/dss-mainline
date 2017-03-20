@@ -968,15 +968,8 @@ namespace dss {
     return false;
   }
 
-  SystemEventHighlevel::SystemEventHighlevel() : SystemEventActionExecute() {
-  }
-
-  SystemEventHighlevel::~SystemEventHighlevel() {
-  }
-
-  bool SystemEventHighlevel::setup(Event& _event) {
-    return SystemEvent::setup(_event);
-  }
+  SystemEventHighlevel::SystemEventHighlevel() = default;
+  SystemEventHighlevel::~SystemEventHighlevel() = default;
 
   void SystemEventHighlevel::run() {
     if (!m_properties.has("id")) {
@@ -1164,11 +1157,8 @@ namespace dss {
     addEvent(handler);
   }
 
-  SystemZoneSensorForward::SystemZoneSensorForward() : SystemEvent(), m_evtRaiseLocation(erlApartment) {
-  }
-
-  SystemZoneSensorForward::~SystemZoneSensorForward() {
-  }
+  SystemZoneSensorForward::SystemZoneSensorForward() = default;
+  SystemZoneSensorForward::~SystemZoneSensorForward() = default;
 
   void SystemZoneSensorForward::run() {
     if (DSS::hasInstance()) {
@@ -1181,15 +1171,6 @@ namespace dss {
     if (m_evtName == "deviceSensorValue") {
       deviceSensorValue();
     }
-  }
-
-  bool SystemZoneSensorForward::setup(Event& _event) {
-    m_evtName = _event.getName();
-    m_evtRaiseLocation = _event.getRaiseLocation();
-    m_raisedAtGroup = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
-    m_raisedAtDevice = _event.getRaisedAtDevice();
-    m_raisedAtState = _event.getRaisedAtState();
-    return SystemEvent::setup(_event);
   }
 
   void SystemZoneSensorForward::deviceSensorValue() {

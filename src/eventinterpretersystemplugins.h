@@ -73,7 +73,6 @@ namespace dss {
       SystemEventHighlevel();
       virtual ~SystemEventHighlevel();
       virtual void run();
-      virtual bool setup(Event& _event);
   };
 
   class EventInterpreterPluginActionExecute : public TaskProcessor,
@@ -125,15 +124,8 @@ namespace dss {
       SystemZoneSensorForward();
       virtual ~SystemZoneSensorForward();
       virtual void run();
-      virtual bool setup(Event& _event);
     private:
       void deviceSensorValue();
-
-      std::string m_evtName;
-      EventRaiseLocation m_evtRaiseLocation;
-      boost::shared_ptr<const Group> m_raisedAtGroup;
-      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
-      boost::shared_ptr<const State> m_raisedAtState;
   };
 
 }; // namespace

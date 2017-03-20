@@ -32,6 +32,11 @@ namespace dss {
       virtual bool setup(Event& _event);
     protected:
       Properties m_properties;
+      std::string m_evtName;
+      EventRaiseLocation m_evtRaiseLocation;
+      boost::shared_ptr<const Group> m_raisedAtGroup;
+      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
+      boost::shared_ptr<const State> m_raisedAtState;
   };
 }
 #endif

@@ -55,7 +55,7 @@ namespace dss {
       virtual bool setup(Event& _event);
 
     protected:
-      std::string m_evtName;
+      /* TODO replace by adhoc compution from Event */
       bool m_evtSrcIsGroup;
       bool m_evtSrcIsDevice;
       int m_evtSrcZone;
