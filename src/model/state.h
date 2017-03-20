@@ -93,6 +93,10 @@ namespace dss {
 
     static const std::string INVALID;
 
+    // return value from value name
+    boost::optional<int> tryValueFromName(const std::string& valueName);
+    int valueFromName(const std::string& valueName);
+
     int getState() const;
     void setState(const callOrigin_t _origin, const int _state);
     void setState(const callOrigin_t _origin, const std::string& _state);

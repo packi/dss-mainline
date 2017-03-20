@@ -64,8 +64,8 @@ namespace dss {
             DS_FAIL_REQUIRE("Not allowed or not existing system state", name);
         }
       }
-      // TODO(soon): fail on invalid value
-      m_Apartment.getState(addon, name)->setState(coJSON, value);
+      auto&& state = m_Apartment.getState(addon, name);
+      state->setState(coJSON, state->valueFromName(value));
       return JSONWriter::success();
   }
 

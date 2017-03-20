@@ -24,6 +24,7 @@
   #include "config.h"
 #endif
 
+#include <ds/log.h>
 
 #include "state.h"
 #include "base.h"
@@ -340,6 +341,35 @@ namespace dss {
     }
   } // toString
 
+  boost::optional<int> State::tryValueFromName(const std::string& valueName) {
+    if (!m_values.empty()) {
+      auto it = std::find(m_values.begin(), m_values.end(), valueName);
+      if (it != m_values.end()) {
+        return it - m_values.begin();
+      }
+      return boost::none;
+    }
+
+    if (valueName == "active") {
+      return State_Active;
+    } else if (valueName == "inactive") {
+      return State_Inactive;
+    } else if (valueName == "unknown") {
+      return State_Unknown;
+    } else if (valueName == INVALID) {
+      return State_Invalid;
+    } else {
+      return boost::none;
+    }
+  }
+
+  int State::valueFromName(const std::string& valueName) {
+    if (auto&& value = tryValueFromName(valueName)) {
+        return *value;
+    }
+    DS_FAIL_REQUIRE("Unrecorgnized state value", valueName);
+  }
+
   int State::getState() const {
     return m_state;
   } // getState
@@ -366,19 +396,9 @@ namespace dss {
     }
   } // setState
 
-  void State::setState(const callOrigin_t _origin, const std::string& _state) {
-    if (!m_values.empty()) {
-      ValueRange_t::iterator it = std::find(m_values.begin(), m_values.end(), _state);
-      if (it == m_values.end()) {
-        return;
-      }
-      setState(_origin, it - m_values.begin());
-    } else if (_state == "active") {
-      setState(_origin, State_Active);
-    } else if (_state == "inactive") {
-      setState(_origin, State_Inactive);
-    } else if (_state == "unknown") {
-      setState(_origin, State_Unknown);
+  void State::setState(const callOrigin_t _origin, const std::string& valueName) {
+    if (auto&& value = tryValueFromName(valueName)) {
+      setState(_origin, *value);
     }
   }
 

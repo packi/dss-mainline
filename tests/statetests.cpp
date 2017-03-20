@@ -25,6 +25,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/optional/optional_io.hpp>
 #include "foreach.h"
 
 #include "src/model/apartment.h"
@@ -50,6 +51,19 @@ BOOST_AUTO_TEST_CASE(test_setState)
     role->setState(coTest, cur);
     BOOST_CHECK_EQUAL(role->toString(), cur);
   }
+
+  // tryValueFromName returns int value for existing string value
+  BOOST_CHECK_EQUAL(role->tryValueFromName("good"), 0);
+
+  // tryValueFromName returns none for non existing string value
+  BOOST_CHECK_EQUAL(role->tryValueFromName("notAValue"), boost::none);
+
+  // valueFromName returns int value for existing string value
+  BOOST_CHECK_EQUAL(role->valueFromName("good"), 0);
+
+  // valueFromName throw for non existing string value
+  BOOST_CHECK_THROW(role->valueFromName("notAValue"), std::exception);
+
 }
 
 BOOST_AUTO_TEST_CASE(testCreateDestroyState) {
