@@ -1143,6 +1143,7 @@ insert into name_master values(6260 , 7 , "common_labels" , "Vendedor" , "pt_PT"
 insert into name_master values(6261 , 8 , "common_labels" , "Vendedor Id" , "pt_PT" , "pt" , "PT");
 insert into name_master values(6262 , 9 , "common_labels" , "Classe do aparelho" , "pt_PT" , "pt" , "PT");
 insert into name_master values(6263 , 10 , "common_labels" , "Versão da classe do aparelho" , "pt_PT" , "pt" , "PT");
+insert into name_master values(6265 , 64 , "device_actions_predefined" , "std.dummy" , "base" , "" , "");
 drop table if exists "device_status";
 create table "device_status"(id primary key,device_id,name,tags);
 insert into device_status values(5 , 12 , "operationMode" , "overview");
@@ -1533,6 +1534,7 @@ insert into device_actions_predefined values(60 , "std.up" , 47);
 insert into device_actions_predefined values(61 , "std.down" , 48);
 insert into device_actions_predefined values(62 , "std.level" , 45);
 insert into device_actions_predefined values(63 , "std.moveTo" , 46);
+insert into device_actions_predefined values(64 , "std.dummy" , 7);
 drop table if exists "device_actions_predefined_parameter";
 create table "device_actions_predefined_parameter"(id primary key,value,device_actions_parameter_id,device_actions_predefined_id);
 insert into device_actions_predefined_parameter values(1 , "160" , 1 , 1);
