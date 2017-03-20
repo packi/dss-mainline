@@ -26,9 +26,12 @@
 
 #include "staterequesthandler.h"
 
+#include <ds/log.h>
+
+#include "jsonhelper.h"
+#include "src/handler/system_states.h"
 #include "src/model/apartment.h"
 #include "src/model/state.h"
-#include "jsonhelper.h"
 
 namespace dss {
 
@@ -38,40 +41,32 @@ namespace dss {
   : m_Apartment(_apartment)
   { }
 
-  WebServerResponse StateRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
-    std::string errorMessage;
-    if(_request.getMethod() == "set") {
-      std::string addon = _request.getParameter("addon");
-      std::string name = _request.getParameter("name");
-      std::string value = _request.getParameter("value");
-
-      if (addon.empty()) {
-        return JSONWriter::failure("Parameter 'addon' missing");
-      }
-      if (name.empty()) {
-        return JSONWriter::failure("Parameter 'name' missing");
-      }
-      if (value.empty()) {
-        return JSONWriter::failure("Parameter 'value' missing");
-      }
-
-      try {
-        boost::shared_ptr<State> pState = m_Apartment.getState(StateType_Script, addon, name);
-        pState->setState(coJSON, value);
-      } catch (ItemNotFoundException& e) {
-        try {
-          m_Apartment.getNonScriptState(name); // will throw if not found
-          return JSONWriter::failure(std::string("State ") + " state not writable from script");
-        } catch (ItemNotFoundException& e) {
-          // nope definitely doesn't exist
-          return JSONWriter::failure(std::string("State ") + e.what() + " not found");
-        }
-      }
-
-      return JSONWriter::success();
+  WebServerResponse StateRequestHandler::jsonHandleRequest(
+      const RestfulRequest& request, boost::shared_ptr<Session> session, const struct mg_connection* connection) {
+    auto&& method = request.getMethod();
+    if (method == "set") {
+      return set(request);
     } else {
-      throw std::runtime_error("Unhandled function");
+      DS_FAIL_REQUIRE("Unhandled function.", method);
     }
-  } // jsonHandleRequest
+  }
+
+  std::string StateRequestHandler::set(const RestfulRequest& request) {
+    auto&& addon = request.tryGetParameter("addon").value_or(std::string());
+    auto&& name = request.getRequiredParameter("name");
+    auto&& value = request.getRequiredParameter("value");
+
+    // White list of allowed system states
+    // TODO(someday): remove
+    if (addon.empty()) {
+      if (name != StateName::HeatingSystem && name != StateName::HeatingSystemMode &&
+          name != StateName::HeatingModeControl) {
+        DS_FAIL_REQUIRE("Not allowed or not existing system state", name);
+      }
+    }
+    auto&& state = m_Apartment.getState(addon, name);
+    state->setState(coJSON, state->valueFromName(value));
+    return JSONWriter::success();
+  }
 
 } // namespace dss
