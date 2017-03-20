@@ -365,7 +365,7 @@ namespace dss {
 
   int State::valueFromName(const std::string& valueName) {
     if (auto&& value = tryValueFromName(valueName)) {
-        return *value;
+      return *value;
     }
     DS_FAIL_REQUIRE("Unrecorgnized state value", valueName);
   }
