@@ -1155,12 +1155,7 @@ namespace dss {
 
     EventRaiseLocation raiseLocation = _event.getRaiseLocation();
     if((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
-      if (!DSS::hasInstance()) {
-        return false;
-      }
-      boost::shared_ptr<const Group> group =
-          _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
-
+      auto group = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
       m_evtSrcIsGroup = (raiseLocation == erlGroup);
       m_evtSrcIsDevice = false;
       m_evtSrcZone = group->getZoneID();
