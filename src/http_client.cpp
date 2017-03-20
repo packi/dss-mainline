@@ -412,7 +412,7 @@ long HttpClient::downloadFile(const std::string &_url, const std::string &_filen
 }
 
 HttpStatistics HttpClient::getStats() {
-  HttpStatistics stats = { 0, };
+  HttpStatistics stats = {};
   if (NULL != m_curl_handle) {
     curl_easy_getinfo(m_curl_handle, CURLINFO_TOTAL_TIME, &stats.totalTime);
     curl_easy_getinfo(m_curl_handle, CURLINFO_SIZE_UPLOAD, &stats.sumUp);
