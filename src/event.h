@@ -185,7 +185,7 @@ namespace dss {
     boost::shared_ptr<const Group> getRaisedAtGroup() const;
     boost::shared_ptr<const DeviceReference> getRaisedAtDevice() const { return m_RaisedAtDevice; }
     boost::shared_ptr<const State> getRaisedAtState() const { return m_RaisedAtState; }
-    EventRaiseLocation getRaiseLocation() { return m_RaiseLocation; }
+    EventRaiseLocation getRaiseLocation() const { return m_RaiseLocation; }
 
     const Properties& getProperties() const { return m_Properties; }
     void setProperties(const Properties& _value) { m_Properties = _value; }
