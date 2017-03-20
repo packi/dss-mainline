@@ -217,76 +217,6 @@ void setupPrivileges(PropertySystem &propSys) {
   propSys.getProperty(pathSecurity)->setPrivileges(privilegesSecurityNode);
 }
 
-class FixturePrivilegeTest : public FixtureTestUserTest {
-public:
-  FixturePrivilegeTest() : FixtureTestUserTest() {
-    m_PropertySystem.createProperty("/folder")->createProperty("property");
-    setupPrivileges(m_PropertySystem);
-  }
-};
-
-BOOST_FIXTURE_TEST_CASE(testReadPrivilege, FixturePrivilegeTest) {
-  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/folder/property"));
-  m_pSecurity->authenticate("testuser", "test");
-  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/folder/property"));
-  m_pSecurity->signOff();
-}
-
-BOOST_FIXTURE_TEST_CASE(testReadPrivilegeSecurity, FixturePrivilegeTest) {
-  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty(pathTestUser + "/password"));
-  m_pSecurity->authenticate("testuser", "test");
-  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty(pathTestUser));
-  m_pSecurity->signOff();
-}
-
-BOOST_FIXTURE_TEST_CASE(testWritePrivilege, FixturePrivilegeTest) {
-  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/foo"), SecurityException);
-  m_pSecurity->authenticate("testuser", "test");
-  BOOST_CHECK_NO_THROW(m_PropertySystem.createProperty("/foo"));
-  m_pSecurity->signOff();
-}
-
-BOOST_FIXTURE_TEST_CASE(testWritePrivilegeSecurity, FixturePrivilegeTest) {
-  BOOST_CHECK_THROW(m_PropertySystem.createProperty(pathSecurity + "/users/evil_E"),
-                    SecurityException);
-  m_pSecurity->authenticate("testuser", "test");
-  BOOST_CHECK_THROW(m_PropertySystem.createProperty(pathSecurity + "/users/new_user"),
-                    SecurityException);
-  m_pSecurity->signOff();
-}
-
-class FixtureSentinelTest : public FixtureTestUserTest {
-public:
-  FixtureSentinelTest() : FixtureTestUserTest() {
-    PropertyNodePtr userNode, roleNode;
-    boost::shared_ptr<User> sentinel;
-
-    roleNode = m_PropertySystem.createProperty("/system/security/roles/sentinel");
-    userNode = m_PropertySystem.createProperty("/system/security/users/sentinel");
-    userNode->createProperty("role")->alias(roleNode);
-
-    sentinel.reset(new User(userNode));
-    sentinel->setPassword("sentinel");
-    m_PropertySystem.createProperty("/readme");
-
-    /* will not create privileges for role sentinel */
-    setupPrivileges(m_PropertySystem);
-    /* from now on need to logged in */
-  }
-};
-
-BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesReadAccess, FixtureSentinelTest) {
-  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
-  m_pSecurity->authenticate("sentinel", "sentinel");
-  BOOST_CHECK_NO_THROW(m_PropertySystem.getProperty("/readme"));
-}
-
-BOOST_FIXTURE_TEST_CASE(testUserWithoutPrivilegesWriteAccess, FixtureSentinelTest) {
-  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/no_write_access"), SecurityException);
-  m_pSecurity->authenticate("sentinel", "sentinel");
-  BOOST_CHECK_THROW(m_PropertySystem.createProperty("/no_write_access"), SecurityException);
-}
-
 class FixtureSystemUser : public FixtureTestUserTest {
 public:
   FixtureSystemUser() : FixtureTestUserTest() {
@@ -303,17 +233,6 @@ public:
     setupPrivileges(m_PropertySystem);
   }
 };
-
-BOOST_FIXTURE_TEST_CASE(testRolesWork, FixtureSystemUser) {
-  PropertyNodePtr pNode = m_PropertySystem.getProperty("/test");
-
-  BOOST_CHECK_THROW(pNode->setStringValue("Test"), SecurityException);
-  BOOST_CHECK_EQUAL(pNode->getStringValue(), "not modified");
-
-  m_pSecurity->loginAsSystemUser("unit tests");
-  BOOST_CHECK_NO_THROW(pNode->setStringValue("Test"));
-  BOOST_CHECK_EQUAL(pNode->getStringValue(), "Test");
-}
 
 BOOST_FIXTURE_TEST_CASE(testApplicationToken, FixtureSystemUser) {
   DSSInstanceFixture guard; /* event queue */
