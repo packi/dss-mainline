@@ -49,7 +49,7 @@ namespace dss {
 
   class SystemState : public SystemEvent {
     public:
-      SystemState();
+      SystemState(const Event &event);
       virtual ~SystemState();
       virtual void run();
     private:

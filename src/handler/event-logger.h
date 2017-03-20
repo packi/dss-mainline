@@ -29,7 +29,7 @@
 namespace dss {
   class SystemEventLog : public SystemEvent {
     public:
-      SystemEventLog();
+      SystemEventLog(const Event &event);
       virtual ~SystemEventLog();
       virtual void run();
     private:

@@ -82,10 +82,7 @@ BOOST_FIXTURE_TEST_CASE(testSpeed, DSSInstanceFixture) {
   pEvent->setProperty("zoneID", intToString(9492));
   pEvent->setProperty("token", "wuafhawepufhasuofhawuopfhweaopfuhaweufhaweufhaweufhesufhweaupfhawufhw");
 
-  boost::shared_ptr<SystemTrigger> trigger = boost::make_shared<SystemTrigger>();
-
-  BOOST_CHECK_EQUAL(true, trigger->setup(*pEvent.get()));
-
+  auto trigger = boost::make_shared<SystemTrigger>(*pEvent);
   for (int i = 0; i < 10; ++i) {
     trigger->run();
     BOOST_CHECK(DSS::getInstance()->getEventQueue().popEvent().get());
@@ -115,9 +112,7 @@ BOOST_FIXTURE_TEST_CASE(testRateLimit, DSSInstanceFixture) {
                                      callOrigin_t(2), dsuid_t(),
                                      "fake-token", false);
 
-  SystemTrigger trigger;
-  BOOST_CHECK(trigger.setup(*pEvent));
-
+  SystemTrigger trigger(*pEvent);
   trigger.run();
 
   // only one event in queue
@@ -156,8 +151,7 @@ BOOST_FIXTURE_TEST_CASE(testRateLimitRewind, DSSInstanceFixture) {
                                      callOrigin_t(2), dsuid_t(),
                                      "fake-token", false);
 
-  SystemTrigger trigger;
-  trigger.setup(*pEvent);
+  SystemTrigger trigger(*pEvent);
 
   // disable rewinding -> no change
   dampNode->getProperty(ptn_damp_rewind)->setBooleanValue(false);
@@ -200,8 +194,7 @@ BOOST_FIXTURE_TEST_CASE(testActionLag, DSSInstanceFixture) {
                                      callOrigin_t(2), dsuid_t(),
                                      "fake-token", false);
 
-  SystemTrigger trigger;
-  BOOST_CHECK(trigger.setup(*pEvent));
+  SystemTrigger trigger(*pEvent);
 
   // 0s lag -> immediate execution
   lagNode->getProperty(ptn_action_delay)->setIntegerValue(0);
@@ -267,8 +260,7 @@ BOOST_FIXTURE_TEST_CASE(testActionReschedule, DSSInstanceFixture) {
                                      callOrigin_t(2), dsuid_t(),
                                      "fake-token", false);
 
-  SystemTrigger trigger;
-  BOOST_CHECK(trigger.setup(*pEvent));
+  SystemTrigger trigger(*pEvent);
 
   // no reschedule -> 2nd event is damped, nothing happens
   lagNode->getProperty(ptn_action_delay)->setIntegerValue(1);

@@ -49,10 +49,9 @@ namespace dss {
 
   class SystemTrigger : public SystemEvent {
     public:
-      SystemTrigger();
+      SystemTrigger(const Event &event);
       virtual ~SystemTrigger();
       virtual void run();
-      virtual bool setup(Event& _event);
 
     protected:
       /* TODO replace by adhoc compution from Event */

@@ -36,10 +36,9 @@ namespace dss {
 
   class SystemEventActionExecute : public SystemEvent {
     public:
-      SystemEventActionExecute();
+      SystemEventActionExecute(const Event &event);
       virtual ~SystemEventActionExecute();
       virtual void run();
-      virtual bool setup(Event& _event);
     private:
       std::string m_delay;
       std::string m_path;
@@ -70,7 +69,7 @@ namespace dss {
 
   class SystemEventHighlevel : public SystemEventActionExecute {
     public:
-      SystemEventHighlevel();
+      SystemEventHighlevel(const Event &event);
       virtual ~SystemEventHighlevel();
       virtual void run();
   };
@@ -121,7 +120,7 @@ namespace dss {
 
   class SystemZoneSensorForward : public SystemEvent {
     public:
-      SystemZoneSensorForward();
+      SystemZoneSensorForward(const Event &event);
       virtual ~SystemZoneSensorForward();
       virtual void run();
     private:

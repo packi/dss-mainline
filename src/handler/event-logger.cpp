@@ -37,7 +37,7 @@ namespace dss {
   const std::string EventLog = "system-event.log";
   const std::string SensorLog = "system-sensor.log";
 
-  SystemEventLog::SystemEventLog() = default;
+  SystemEventLog::SystemEventLog(const Event &event) : SystemEvent(event) {}
   SystemEventLog::~SystemEventLog() = default;
 
   std::string SystemEventLog::getZoneName(boost::shared_ptr<Zone> _zone) {

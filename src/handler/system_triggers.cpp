@@ -43,17 +43,34 @@ namespace dss {
   const std::string  ptn_action_ts = "last_event_scheduled_at";
   const std::string  ptn_action_eventid = "eventid";
 
-  SystemTrigger::SystemTrigger()
-    : SystemEvent(),
+  SystemTrigger::SystemTrigger(const Event &event)
+    : SystemEvent(event),
       m_evtSrcIsGroup(false),
       m_evtSrcIsDevice(false),
       m_evtSrcZone(0),
       m_evtSrcGroup(0)
   {
+    EventRaiseLocation raiseLocation = event.getRaiseLocation();
+    if ((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
+      auto group = event.getRaisedAtGroup(DSS::getInstance()->getApartment());
+      m_evtSrcIsGroup = (raiseLocation == erlGroup);
+      m_evtSrcIsDevice = false;
+      m_evtSrcZone = group->getZoneID();
+      m_evtSrcGroup = group->getID();
+    } else if (raiseLocation == erlDevice) {
+      boost::shared_ptr<const DeviceReference> device =
+          event.getRaisedAtDevice();
+      m_evtSrcIsGroup = false;
+      m_evtSrcIsDevice = true;
+      m_evtSrcZone = device->getDevice()->getZoneID();
+      m_evtSrcDSID = device->getDSID();
+    } else if (raiseLocation == erlState) {
+      m_evtSrcIsGroup = false;
+      m_evtSrcIsDevice = false;
+    }
   }
 
-  SystemTrigger::~SystemTrigger() {
-  }
+  SystemTrigger::~SystemTrigger() = default;
 
   bool SystemTrigger::checkSceneZone(PropertyNodePtr _triggerProp) {
     if (!((m_evtName == EventName::CallScene) ||
@@ -1148,30 +1165,5 @@ namespace dss {
       Logger::getInstance()->log("SystemTrigger::run: runtime error at " +
           sTriggerPath + ": " + e.what(), lsInfo);
     }
-  }
-
-  bool SystemTrigger::setup(Event& _event) {
-    SystemEvent::setup(_event);
-
-    EventRaiseLocation raiseLocation = _event.getRaiseLocation();
-    if((raiseLocation == erlGroup) || (raiseLocation == erlApartment)) {
-      auto group = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
-      m_evtSrcIsGroup = (raiseLocation == erlGroup);
-      m_evtSrcIsDevice = false;
-      m_evtSrcZone = group->getZoneID();
-      m_evtSrcGroup = group->getID();
-    } else if (raiseLocation == erlDevice) {
-      boost::shared_ptr<const DeviceReference> device =
-          _event.getRaisedAtDevice();
-      m_evtSrcIsGroup = false;
-      m_evtSrcIsDevice = true;
-      m_evtSrcZone = device->getDevice()->getZoneID();
-      m_evtSrcDSID = device->getDSID();
-    } else if (raiseLocation == erlState) {
-      m_evtSrcIsGroup = false;
-      m_evtSrcIsDevice = false;
-    }
-
-    return true;
   }
 }

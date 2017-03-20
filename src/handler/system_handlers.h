@@ -26,10 +26,9 @@
 namespace dss {
   class SystemEvent : public Task {
     public:
-      SystemEvent();
+      SystemEvent(const Event &event);
       virtual ~SystemEvent();
       virtual void run() = 0;
-      virtual bool setup(Event& _event);
     protected:
       Properties m_properties;
       std::string m_evtName;

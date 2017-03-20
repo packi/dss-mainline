@@ -73,19 +73,12 @@ void EventInterpreterPluginSystemState::handleEvent(Event& _event, const EventSu
           "handleEvent: processing event \'" + _event.getName() + "\'",
           lsDebug);
 
-  boost::shared_ptr<SystemState> state = boost::make_shared<SystemState>();
-
-  if (!state->setup(_event)) {
-    Logger::getInstance()->log("EventInterpreterPluginSystemState::"
-            "handleEvent: could not setup event data!");
-    return;
-  }
-
+  auto state = boost::make_shared<SystemState>(_event);
   addEvent(state);
 }
 
 
-SystemState::SystemState() : SystemEvent(),
+SystemState::SystemState(const Event &event) : SystemEvent(event),
   m_apartment(DSS::getInstance()->getApartment()) {
 }
 
