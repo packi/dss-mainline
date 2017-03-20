@@ -18,7 +18,6 @@
 */
 #include "random.h"
 #include <random>
-#include <boost/optional.hpp>
 #include <boost/thread/tss.hpp>
 #include "common.h"
 
