@@ -31,7 +31,7 @@ namespace dss {
     public:
       SystemEventLog(const Event &event);
       virtual ~SystemEventLog();
-      virtual void run();
+      void run() DS_OVERRIDE;
     private:
       std::string getZoneName(boost::shared_ptr<Zone> _zone);
       std::string getGroupName(boost::shared_ptr<Group> _group);

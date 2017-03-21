@@ -38,7 +38,7 @@ namespace dss {
     public:
       SystemEventActionExecute(const Event &event);
       virtual ~SystemEventActionExecute();
-      virtual void run();
+      void run() DS_OVERRIDE;
     private:
       std::string m_delay;
       std::string m_path;
@@ -71,7 +71,7 @@ namespace dss {
     public:
       SystemEventHighlevel(const Event &event);
       virtual ~SystemEventHighlevel();
-      virtual void run();
+      void run() DS_OVERRIDE;
   };
 
   class EventInterpreterPluginActionExecute : public TaskProcessor,
@@ -122,7 +122,7 @@ namespace dss {
     public:
       SystemZoneSensorForward(const Event &event);
       virtual ~SystemZoneSensorForward();
-      virtual void run();
+      void run() DS_OVERRIDE;
     private:
       void deviceSensorValue();
   };

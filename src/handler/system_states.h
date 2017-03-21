@@ -51,7 +51,7 @@ namespace dss {
     public:
       SystemState(const Event &event);
       virtual ~SystemState();
-      virtual void run();
+      void run() DS_OVERRIDE;
     private:
       std::string formatZoneName(const std::string &_name, int _zoneId);
       std::string formatGroupName(const std::string &_name, int _groupId);

@@ -51,7 +51,7 @@ namespace dss {
     public:
       SystemTrigger(const Event &event);
       virtual ~SystemTrigger();
-      virtual void run();
+      void run() DS_OVERRIDE;
 
     protected:
       /* TODO replace by adhoc compution from Event */

@@ -20,6 +20,7 @@
 #ifndef __SYSTEM_HANDLERS__
 #define __SYSTEM_HANDLERS__
 
+#include "ds/common.h"
 #include "event.h"
 #include "taskprocessor.h"
 
