@@ -49,18 +49,10 @@ namespace dss {
 
   class SystemState : public SystemEvent {
     public:
-      SystemState();
+      SystemState(const Event &event);
       virtual ~SystemState();
-      virtual void run();
-      virtual bool setup(Event& _event);
+      void run() DS_OVERRIDE;
     private:
-      std::string m_evtName;
-
-      EventRaiseLocation m_evtRaiseLocation;
-      boost::shared_ptr<const Group> m_raisedAtGroup;
-      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
-      boost::shared_ptr<const State> m_raisedAtState;
-
       std::string formatZoneName(const std::string &_name, int _zoneId);
       std::string formatGroupName(const std::string &_name, int _groupId);
       std::string formatAppartmentStateName(const std::string &_name, int _groupId);

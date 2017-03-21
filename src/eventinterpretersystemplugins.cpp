@@ -28,6 +28,8 @@
 #include <signal.h>
 #include <set>
 
+#include "ds/log.h"
+
 #include "base.h"
 #include "dss.h"
 #include "event/event_create.h"
@@ -67,11 +69,18 @@
 #define ACTION_DURATION_STATE_CHANGE    100
 
 namespace dss {
-  SystemEventActionExecute::SystemEventActionExecute() : SystemEvent() {
+  SystemEventActionExecute::SystemEventActionExecute(const Event &event) : SystemEvent(event) {
+    if (event.hasPropertySet("path")) {
+      m_path = event.getPropertyByName("path");
+      if (event.hasPropertySet("delay")) {
+        m_delay = event.getPropertyByName("delay");
+      }
+    } else {
+      DS_FAIL_REQUIRE("missing 'path' property ignoring event");
+    }
   }
 
-  SystemEventActionExecute::~SystemEventActionExecute() {
-  }
+  SystemEventActionExecute::~SystemEventActionExecute() = default;
 
   std::string SystemEventActionExecute::getActionName(PropertyNodePtr _actionNode) {
       std::string action_name;
@@ -951,32 +960,8 @@ namespace dss {
     }
   }
 
-  bool SystemEventActionExecute::setup(Event& _event) {
-    SystemEvent::setup(_event);
-
-    if (_event.hasPropertySet("path")) {
-      m_path = _event.getPropertyByName("path");
-      if (_event.hasPropertySet("delay")) {
-        m_delay = _event.getPropertyByName("delay");
-      }
-      return true;
-    } else {
-        Logger::getInstance()->log("SystemEventActionExecute::setup: "
-            "missing property \'path\' in event " + _event.getName());
-    }
-
-    return false;
-  }
-
-  SystemEventHighlevel::SystemEventHighlevel() : SystemEventActionExecute() {
-  }
-
-  SystemEventHighlevel::~SystemEventHighlevel() {
-  }
-
-  bool SystemEventHighlevel::setup(Event& _event) {
-    return SystemEvent::setup(_event);
-  }
+  SystemEventHighlevel::SystemEventHighlevel(const Event &event) : SystemEventActionExecute(event) {}
+  SystemEventHighlevel::~SystemEventHighlevel() = default;
 
   void SystemEventHighlevel::run() {
     if (!m_properties.has("id")) {
@@ -1039,13 +1024,7 @@ namespace dss {
     Logger::getInstance()->log("EventInterpreterPluginActionExecute::"
             "handleEvent: processing event " + _event.getName());
 
-    boost::shared_ptr<SystemEventActionExecute> action = boost::make_shared<SystemEventActionExecute>();
-    if (action->setup(_event) == false) {
-      Logger::getInstance()->log("EventInterpreterPluginActionExecute::"
-              "handleEvent: missing path property, ignoring event");
-      return;
-    }
-
+    auto action = boost::make_shared<SystemEventActionExecute>(_event);
     addEvent(action);
   }
 
@@ -1062,14 +1041,7 @@ namespace dss {
             "handleEvent: processing event \'" + _event.getName() + "\'",
             lsDebug);
 
-    boost::shared_ptr<SystemTrigger> trigger = boost::make_shared<SystemTrigger>();
-
-    if (!trigger->setup(_event)) {
-      Logger::getInstance()->log("EventInterpreterPluginSystemTrigger::"
-              "handleEvent: could not setup event data!");
-      return;
-    }
-
+    auto trigger = boost::make_shared<SystemTrigger>(_event);
     trigger->run();
   }
 
@@ -1084,27 +1056,12 @@ namespace dss {
     Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
             "handleEvent " + _event.getName(), lsDebug);
 
-    boost::shared_ptr<SystemTrigger> trigger = boost::make_shared<SystemTrigger>();
-    if (trigger->setup(_event) == false) {
-      Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
-              "handleEvent: could not setup event data for SystemTrigger!");
-      return;
-    }
-    boost::shared_ptr<SystemEventHighlevel> hl = boost::make_shared<SystemEventHighlevel>();
-    if (hl->setup(_event) == false) {
-      Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
-        "handleEvent: could not setup event data for SystemEventHighlevel!");
-      return;
-    }
+    auto trigger = boost::make_shared<SystemTrigger>(_event);
+    auto hl = boost::make_shared<SystemEventHighlevel>(_event);
     addEvent(trigger);
     addEvent(hl);
 
-    boost::shared_ptr<SystemEventLog> log = boost::make_shared<SystemEventLog>();
-    if (!log->setup(_event)) {
-      Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
-              "handleEvent: could not setup event data SystemEventLog!");
-      return;
-    }
+    auto log = boost::make_shared<SystemEventLog>(_event);
     addEvent(log);
   }
 
@@ -1120,14 +1077,7 @@ namespace dss {
             "handleEvent: processing event \'" + _event.getName() + "\'",
             lsDebug);
 
-    boost::shared_ptr<SystemEventLog> log = boost::make_shared<SystemEventLog>();
-
-    if (!log->setup(_event)) {
-      Logger::getInstance()->log("EventInterpreterPluginSystemEventLog::"
-              "handleEvent: could not setup event data!");
-      return;
-    }
-
+    auto log = boost::make_shared<SystemEventLog>(_event);
     addEvent(log);
   }
 
@@ -1153,22 +1103,12 @@ namespace dss {
             "handleEvent: processing event \'" + _event.getName() + "\'",
             lsDebug);
 
-    boost::shared_ptr<SystemZoneSensorForward> handler(new SystemZoneSensorForward());
-
-    if (!handler->setup(_event)) {
-      Logger::getInstance()->log("EventInterpreterPluginSystemZoneSensorForward::"
-              "handleEvent: could not setup event data!");
-      return;
-    }
-
+    auto handler = boost::make_shared<SystemZoneSensorForward>(_event);
     addEvent(handler);
   }
 
-  SystemZoneSensorForward::SystemZoneSensorForward() : SystemEvent(), m_evtRaiseLocation(erlApartment) {
-  }
-
-  SystemZoneSensorForward::~SystemZoneSensorForward() {
-  }
+  SystemZoneSensorForward::SystemZoneSensorForward(const Event &event) : SystemEvent(event) {}
+  SystemZoneSensorForward::~SystemZoneSensorForward() = default;
 
   void SystemZoneSensorForward::run() {
     if (DSS::hasInstance()) {
@@ -1181,15 +1121,6 @@ namespace dss {
     if (m_evtName == "deviceSensorValue") {
       deviceSensorValue();
     }
-  }
-
-  bool SystemZoneSensorForward::setup(Event& _event) {
-    m_evtName = _event.getName();
-    m_evtRaiseLocation = _event.getRaiseLocation();
-    m_raisedAtGroup = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
-    m_raisedAtDevice = _event.getRaisedAtDevice();
-    m_raisedAtState = _event.getRaisedAtState();
-    return SystemEvent::setup(_event);
   }
 
   void SystemZoneSensorForward::deviceSensorValue() {
