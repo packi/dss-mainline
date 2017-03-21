@@ -33,10 +33,27 @@ std::ostream& operator<<(std::ostream& stream, Enum x) {
 }
 
 TEST_CASE("dsStr", TAGS) {
-    CHECK(ds::str() == "");
-    CHECK(ds::str("a") == "a");
-    CHECK(ds::str("a", "b") == "ab");
-    CHECK(ds::str("a", 4, "b") == "a4b");
-    CHECK(ds::str("a", -4, "b") == "a-4b");
-    CHECK(ds::str("-", Enum::A, Enum::B, "-") == "-ab-");
+    SECTION("all arguments are serialized and concatenated") {
+        CHECK(ds::str() == "");
+        CHECK(ds::str("a") == "a");
+        CHECK(ds::str("a", "b") == "ab");
+        CHECK(ds::str("a", 4, "b") == "a4b");
+        CHECK(ds::str("a", -4, "b") == "a-4b");
+    }
+
+    SECTION("ostream operator << is used for serialization") {
+        CHECK(ds::str("-", Enum::A, Enum::B, "-") == "-ab-");
+    }
+
+    SECTION("unsigned and signed chars are serialized as numbers") {
+        CHECK(ds::str(static_cast<unsigned char>('a')) == "97");
+        CHECK(ds::str(static_cast<signed char>('a')) == "97");
+        CHECK(ds::str(static_cast<uint8_t>('a')) == "97");
+        CHECK(ds::str(static_cast<int8_t>('a')) == "97");
+    }
+
+    SECTION("chars are serialized as characters") {
+        CHECK(ds::str('a') == "a");
+        CHECK(ds::str(static_cast<char>('a')) == "a");
+    }
 }

@@ -25,6 +25,7 @@
 #define SCENEHELPER_H
 
 #include <bitset>
+#include <vector>
 
 #include "src/model/modelconst.h"
 
