@@ -339,7 +339,7 @@ namespace dss {
       pCluster->setIsValid(true);
     }
     return true;
-  } // scanGroupsOfZone
+  }
 
   bool BusScanner::scanDeviceOnBus(boost::shared_ptr<DSMeter> _dsMeter, devid_t _shortAddress) {
     if ((_dsMeter->getApiVersion() > 0) && (_dsMeter->getApiVersion() < 0x200)) {
