@@ -1089,13 +1089,8 @@ namespace dss {
    { }
 
   void EventInterpreterPluginSystemZoneSensorForward::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-
-    subscription.reset(new EventSubscription("deviceSensorValue",
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+    auto&& interpreter = getEventInterpreter();
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, "deviceSensorValue"));
   }
 
   void EventInterpreterPluginSystemZoneSensorForward::handleEvent(Event& _event, const EventSubscription& _subscription) {

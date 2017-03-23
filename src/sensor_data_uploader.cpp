@@ -286,13 +286,9 @@ void SensorDataUploadMsHubPlugin::doSubscribe() {
   }
   m_subscribed = true;
 
-  std::vector<std::string> events = getSubscriptionEvents();
-  boost::shared_ptr<EventSubscription> subscription;
-  foreach (std::string name, events) {
-    subscription.reset(new EventSubscription(name, getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+  auto&& interpreter = getEventInterpreter();
+  foreach (auto&& event, getSubscriptionEvents()) {
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, event));
   }
 }
 
@@ -302,13 +298,9 @@ void SensorDataUploadMsHubPlugin::doUnsubscribe() {
   }
   m_subscribed = false;
 
-  std::vector<std::string> events = getSubscriptionEvents();
-  boost::shared_ptr<EventSubscription> subscription;
-  foreach (std::string name, events) {
-    subscription.reset(new EventSubscription(name, getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().unsubscribe(subscription);
+  auto&& interpreter = getEventInterpreter();
+  foreach (auto&& event, getSubscriptionEvents()) {
+    interpreter.unsubscribe(boost::make_shared<EventSubscription>(*this, event));
   }
 }
 
@@ -495,14 +487,9 @@ void SensorDataUploadDsHubPlugin::doSubscribe() {
   }
   m_subscribed = true;
 
-  std::vector<std::string> events = getSubscriptionEvents();
-
-  boost::shared_ptr<EventSubscription> subscription;
-  foreach (std::string name, events) {
-    subscription.reset(new EventSubscription(name, getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+  auto&& interpreter = getEventInterpreter();
+  foreach (auto&& event, getSubscriptionEvents()) {
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, event));
   }
 }
 
@@ -512,13 +499,9 @@ void SensorDataUploadDsHubPlugin::doUnsubscribe() {
   }
   m_subscribed = false;
 
-  std::vector<std::string> events = getSubscriptionEvents();
-  boost::shared_ptr<EventSubscription> subscription;
-  foreach (std::string name, events) {
-    subscription.reset(new EventSubscription(name, getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().unsubscribe(subscription);
+  auto&& interpreter = getEventInterpreter();
+  foreach (auto&& event, getSubscriptionEvents()) {
+    interpreter.unsubscribe(boost::make_shared<EventSubscription>(*this, event));
   }
 }
 

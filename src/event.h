@@ -294,6 +294,7 @@ namespace dss {
 
   //-------------------------------------------------- EventSubscription
 
+  class EventInterpreterPlugin;
   class EventSubscription {
   public:
     typedef enum {
@@ -312,6 +313,8 @@ namespace dss {
     void initialize();
   public:
     EventSubscription(const std::string& _eventName, const std::string& _handlerName, EventInterpreter& _interpreter, boost::shared_ptr<SubscriptionOptions> _options);
+    EventSubscription(EventInterpreterPlugin& plugin, const std::string& eventName,
+        boost::shared_ptr<SubscriptionOptions> options = boost::shared_ptr<SubscriptionOptions>());
 
     ~EventSubscription();
 
@@ -340,13 +343,13 @@ namespace dss {
   private:
     std::string m_Name;
     EventInterpreter* const m_pInterpreter;
-  protected:
-    EventInterpreter& getEventInterpreter() { return *m_pInterpreter; }
   public:
     EventInterpreterPlugin(const std::string& _name, EventInterpreter* _interpreter);
     virtual ~EventInterpreterPlugin() {}
 
     const std::string& getName() const { return m_Name; }
+    EventInterpreter& getEventInterpreter() { return *m_pInterpreter; }
+
     /**
      * Subscribe to given events.
      * Fallback when subscribtions.xml makes no sense
