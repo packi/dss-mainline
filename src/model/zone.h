@@ -45,28 +45,26 @@ namespace dss {
   class DateTime;
 
   typedef struct ZoneHeatingProperties {
-    ZoneHeatingProperties() :
-      m_HeatingControlMode(0),
-      m_Kp(0),
-      m_Ts(0),
-      m_Ti(0),
-      m_Kd(0),
-      m_Imin(0),
-      m_Imax(0),
-      m_Ymin(0),
-      m_Ymax(0),
-      m_AntiWindUp(0),
-      m_KeepFloorWarm(0),
-      m_HeatingControlState(0),
-      m_HeatingMasterZone(0),
-      m_CtrlOffset(0),
-      m_EmergencyValue(175),
-      m_ManualValue(0),
-      m_HeatingControlDSUID(DSUID_NULL)
-      {
-      }
+    ZoneHeatingProperties()
+        : m_HeatingControlMode(HeatingControlMode::OFF),
+          m_Kp(0),
+          m_Ts(0),
+          m_Ti(0),
+          m_Kd(0),
+          m_Imin(0),
+          m_Imax(0),
+          m_Ymin(0),
+          m_Ymax(0),
+          m_AntiWindUp(0),
+          m_KeepFloorWarm(0),
+          m_HeatingControlState(0),
+          m_HeatingMasterZone(0),
+          m_CtrlOffset(0),
+          m_EmergencyValue(175),
+          m_ManualValue(0),
+          m_HeatingControlDSUID(DSUID_NULL) {}
     void reset() {
-      m_HeatingControlMode = 0;
+      m_HeatingControlMode = HeatingControlMode::OFF;
       m_Kp = 0;
       m_Ts = 0;
       m_Ti = 0;
@@ -101,7 +99,7 @@ namespace dss {
               (_config.EmergencyValue == m_EmergencyValue) &&
               (_config.ManualValue == m_ManualValue));
     }
-    int m_HeatingControlMode;      // Control mode: 0=off; 1=pid-control; 2=zone-follower; 3=fixed-value; 4=manual
+    HeatingControlMode m_HeatingControlMode;
     uint16_t m_Kp;
     uint8_t  m_Ts;
     uint16_t m_Ti;

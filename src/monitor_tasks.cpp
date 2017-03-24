@@ -235,7 +235,7 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
     ZoneHeatingProperties_t hConfig = pZone->getHeatingProperties();
 
     switch (hConfig.m_HeatingControlMode) {
-      case HeatingControlModeIDPID:
+      case HeatingControlMode::PID:
         if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
           pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
           usleep(1000 * 1000);
@@ -247,13 +247,13 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
         }
 
         break;
-      case HeatingControlModeIDFixed:
+      case HeatingControlMode::FIXED:
         if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
           pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
           usleep(1000 * 1000);
         }
         break;
-      case HeatingControlModeIDManual:
+      case HeatingControlMode::MANUAL:
         if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
           if (hStatus.m_ControlValueTS != DateTime::NullDate) {
@@ -263,8 +263,8 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
           }
         }
         break;
-      case HeatingControlModeIDZoneFollower:
-      case HeatingControlModeIDOff:
+      case HeatingControlMode::ZONE_FOLLOWER:
+      case HeatingControlMode::OFF:
         break;
     }
   } catch (const std::exception& e) {

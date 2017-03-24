@@ -1091,7 +1091,7 @@ namespace dss {
     loginFromCallback();
 
     boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
-    spec->ControllerMode = _ControllerMode;
+    spec->ControllerMode = static_cast<HeatingControlMode>(_ControllerMode);
     spec->Kp = _Kp;
     spec->Ts = _Ts,
     spec->Ti = _Ti;

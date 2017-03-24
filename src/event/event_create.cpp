@@ -346,24 +346,32 @@ createHeatingControllerConfig(int _zoneID, const dsuid_t &_ctrlDsuid,
 
   event->setProperty("ZoneID", intToString(_zoneID));
   event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
-  event->setProperty("ControlMode", intToString(_config.ControllerMode));
+  event->setProperty("ControlMode", intToString(static_cast<uint8_t>(_config.ControllerMode)));
   event->setProperty("EmergencyValue", intToString(_config.EmergencyValue - 100));
-  if (_config.ControllerMode == HeatingControlModeIDPID) {
-    event->setProperty("CtrlKp", doubleToString((double)_config.Kp * 0.025));
-    event->setProperty("CtrlTs", intToString(_config.Ts));
-    event->setProperty("CtrlTi", intToString(_config.Ti));
-    event->setProperty("CtrlKd", intToString(_config.Kd));
-    event->setProperty("CtrlImin", doubleToString((double)_config.Imin * 0.025));
-    event->setProperty("CtrlImax", doubleToString((double)_config.Imax * 0.025));
-    event->setProperty("CtrlYmin", intToString(_config.Ymin - 100));
-    event->setProperty("CtrlYmax", intToString(_config.Ymax - 100));
-    event->setProperty("CtrlAntiWindUp", (_config.AntiWindUp > 0) ? "true" : "false");
-    event->setProperty("CtrlKeepFloorWarm", (_config.KeepFloorWarm > 0) ? "true" : "false");
-  } else if (_config.ControllerMode == HeatingControlModeIDZoneFollower) {
-    event->setProperty("ReferenceZone", intToString(_config.SourceZoneId));
-    event->setProperty("CtrlOffset", intToString(_config.Offset));
-  } else if (_config.ControllerMode == HeatingControlModeIDManual) {
-    event->setProperty("ManualValue", intToString(_config.ManualValue - 100));
+  switch (_config.ControllerMode) {
+    case HeatingControlMode::OFF:
+      break;
+    case HeatingControlMode::PID:
+      event->setProperty("CtrlKp", doubleToString((double)_config.Kp * 0.025));
+      event->setProperty("CtrlTs", intToString(_config.Ts));
+      event->setProperty("CtrlTi", intToString(_config.Ti));
+      event->setProperty("CtrlKd", intToString(_config.Kd));
+      event->setProperty("CtrlImin", doubleToString((double)_config.Imin * 0.025));
+      event->setProperty("CtrlImax", doubleToString((double)_config.Imax * 0.025));
+      event->setProperty("CtrlYmin", intToString(_config.Ymin - 100));
+      event->setProperty("CtrlYmax", intToString(_config.Ymax - 100));
+      event->setProperty("CtrlAntiWindUp", (_config.AntiWindUp > 0) ? "true" : "false");
+      event->setProperty("CtrlKeepFloorWarm", (_config.KeepFloorWarm > 0) ? "true" : "false");
+      break;
+    case HeatingControlMode::ZONE_FOLLOWER:
+      event->setProperty("ReferenceZone", intToString(_config.SourceZoneId));
+      event->setProperty("CtrlOffset", intToString(_config.Offset));
+      break;
+    case HeatingControlMode::FIXED:
+      break;
+    case HeatingControlMode::MANUAL:
+      event->setProperty("ManualValue", intToString(_config.ManualValue - 100));
+      break;
   }
   return event;
 }
@@ -378,40 +386,49 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
 
     event->setProperty("ZoneID", intToString(_zoneID));
     event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
-    if (_properties.m_HeatingControlMode == HeatingControlModeIDPID) {
-      event->setProperty("NominalTemperature_Off",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode0)));
-      event->setProperty("NominalTemperature_Comfort",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode1)));
-      event->setProperty("NominalTemperature_Economy",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode2)));
-      event->setProperty("NominalTemperature_NotUsed",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode3)));
-      event->setProperty("NominalTemperature_Night",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode4)));
-      event->setProperty("NominalTemperature_Holiday",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode5)));
-      event->setProperty("NominalTemperature_Cooling",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode6)));
-      event->setProperty("NominalTemperature_CoolingOff",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode7)));
-    } else if (_properties.m_HeatingControlMode == HeatingControlModeIDFixed) {
-      event->setProperty("ControlValue_Off",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode0)));
-      event->setProperty("ControlValue_Comfort",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode1)));
-      event->setProperty("ControlValue_Economy",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode2)));
-      event->setProperty("ControlValue_NotUsed",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode3)));
-      event->setProperty("ControlValue_Night",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode4)));
-      event->setProperty("ControlValue_Holiday",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode5)));
-      event->setProperty("ControlValue_Cooling",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode6)));
-      event->setProperty("ControlValue_CoolingOff",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode7)));
+    switch (_properties.m_HeatingControlMode) {
+      case HeatingControlMode::OFF:
+        break;
+      case HeatingControlMode::PID:
+        event->setProperty("NominalTemperature_Off",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode0)));
+        event->setProperty("NominalTemperature_Comfort",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode1)));
+        event->setProperty("NominalTemperature_Economy",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode2)));
+        event->setProperty("NominalTemperature_NotUsed",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode3)));
+        event->setProperty("NominalTemperature_Night",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode4)));
+        event->setProperty("NominalTemperature_Holiday",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode5)));
+        event->setProperty("NominalTemperature_Cooling",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode6)));
+        event->setProperty("NominalTemperature_CoolingOff",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureSetpoint, _mode.OpMode7)));
+        break;
+      case HeatingControlMode::ZONE_FOLLOWER:
+        break;
+      case HeatingControlMode::FIXED:
+        event->setProperty("ControlValue_Off",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode0)));
+        event->setProperty("ControlValue_Comfort",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode1)));
+        event->setProperty("ControlValue_Economy",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode2)));
+        event->setProperty("ControlValue_NotUsed",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode3)));
+        event->setProperty("ControlValue_Night",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode4)));
+        event->setProperty("ControlValue_Holiday",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode5)));
+        event->setProperty("ControlValue_Cooling",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode6)));
+        event->setProperty("ControlValue_CoolingOff",
+            doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _mode.OpMode7)));
+        break;
+      case HeatingControlMode::MANUAL:
+        break;
     }
     return event;
 }
@@ -435,12 +452,21 @@ createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
   case 6: event->setProperty("OperationMode", "Cooling"); break;
   case 7: event->setProperty("OperationMode", "CoolingOff"); break;
   }
-  if (_props.m_HeatingControlMode == HeatingControlModeIDPID) {
-    event->setProperty("NominalTemperature",
-                       doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _stat.m_NominalValue)));
-  } else if (_props.m_HeatingControlMode == HeatingControlModeIDFixed) {
-    event->setProperty("ControlValue",
-                       doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _stat.m_ControlValue)));
+  switch (_props.m_HeatingControlMode) {
+    case HeatingControlMode::OFF:
+      break;
+    case HeatingControlMode::PID:
+      event->setProperty("NominalTemperature",
+          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _stat.m_NominalValue)));
+      break;
+    case HeatingControlMode::ZONE_FOLLOWER:
+      break;
+    case HeatingControlMode::FIXED:
+      event->setProperty("ControlValue",
+          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _stat.m_ControlValue)));
+      break;
+    case HeatingControlMode::MANUAL:
+      break;
   }
   return event;
 }
