@@ -164,56 +164,6 @@ void SensorMonitorTask::run() {
   }
 }
 
-void HeatingMonitorTask::syncZone(int _zoneID) {
-  try {
-    boost::shared_ptr<Zone> pZone = m_Apartment->getZone(_zoneID);
-    boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDControlTemperature);
-    ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
-    ZoneHeatingProperties_t hConfig = pZone->getHeatingProperties();
-
-    switch (hConfig.m_HeatingControlMode) {
-      case HeatingControlModeIDPID:
-        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
-          pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
-          usleep(1000 * 1000);
-        }
-        if (hSensors.m_TemperatureValueTS  != DateTime::NullDate) {
-          pZone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
-                            SensorType::TemperatureIndoors,
-                            hSensors.m_TemperatureValue, "");
-          usleep(1000 * 1000);
-        }
-
-        break;
-      case HeatingControlModeIDFixed:
-        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
-          pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
-          usleep(1000 * 1000);
-        }
-        break;
-      case HeatingControlModeIDManual:
-        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
-          ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
-          if (hStatus.m_ControlValueTS != DateTime::NullDate) {
-            pGroup->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
-                               SensorType::RoomTemperatureControlVariable,
-                               hStatus.m_ControlValue, "");
-            usleep(1000 * 1000);
-          }
-
-        }
-        break;
-      case HeatingControlModeIDZoneFollower:
-      case HeatingControlModeIDOff:
-        break;
-    }
-  } catch (std::exception& e) {
-    Logger::getInstance()->log("HeatingMonitorTask: sync controller exception: " + std::string(e.what()), lsWarning);
-  } catch (...) {
-    Logger::getInstance()->log("HeatingMonitorTask: sync controller error", lsError);
-  }
-}
-
 DateTime SensorMonitorTask::getDateTimeForSensor(const ZoneSensorStatus_t& _hSensors, SensorType _sensorType)
 {
   switch (_sensorType) {
@@ -278,6 +228,53 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorTyp
       DSS::getInstance()->getEventQueue().
         pushEvent(createZoneSensorErrorEvent(_zone->getGroup(GroupIDBroadcast), _sensorType, DateTime::NullDate));
     }
+  }
+}
+
+void HeatingMonitorTask::syncZone(int _zoneID) {
+  try {
+    boost::shared_ptr<Zone> pZone = m_Apartment->getZone(_zoneID);
+    boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDControlTemperature);
+    ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
+    ZoneHeatingProperties_t hConfig = pZone->getHeatingProperties();
+
+    switch (hConfig.m_HeatingControlMode) {
+      case HeatingControlModeIDPID:
+        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
+          pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
+          usleep(1000 * 1000);
+        }
+        if (hSensors.m_TemperatureValueTS != DateTime::NullDate) {
+          pZone->pushSensor(
+              coSystem, SAC_MANUAL, DSUID_NULL, SensorType::TemperatureIndoors, hSensors.m_TemperatureValue, "");
+          usleep(1000 * 1000);
+        }
+
+        break;
+      case HeatingControlModeIDFixed:
+        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
+          pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
+          usleep(1000 * 1000);
+        }
+        break;
+      case HeatingControlModeIDManual:
+        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
+          ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
+          if (hStatus.m_ControlValueTS != DateTime::NullDate) {
+            pGroup->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::RoomTemperatureControlVariable,
+                hStatus.m_ControlValue, "");
+            usleep(1000 * 1000);
+          }
+        }
+        break;
+      case HeatingControlModeIDZoneFollower:
+      case HeatingControlModeIDOff:
+        break;
+    }
+  } catch (std::exception& e) {
+    Logger::getInstance()->log("HeatingMonitorTask: sync controller exception: " + std::string(e.what()), lsWarning);
+  } catch (...) {
+    Logger::getInstance()->log("HeatingMonitorTask: sync controller error", lsError);
   }
 }
 
