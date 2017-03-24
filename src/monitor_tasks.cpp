@@ -126,10 +126,8 @@ void SensorMonitorTask::run() {
         }
       }
     }
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     Logger::getInstance()->log("SensorMonitorTask: device sensor timeout exception: " + std::string(e.what()), lsWarning);
-  } catch (...) {
-    Logger::getInstance()->log("SensorMonitorTask: device sensor timeout error", lsError);
   }
 
   try {
@@ -150,10 +148,8 @@ void SensorMonitorTask::run() {
         }
       }
     }
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     Logger::getInstance()->log("SensorMonitorTask: zone sensor timeout exception: " + std::string(e.what()), lsWarning);
-  } catch (...) {
-    Logger::getInstance()->log("SensorMonitorTask: zone sensor timeout error", lsError);
   }
 
   boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
@@ -271,10 +267,8 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
       case HeatingControlModeIDOff:
         break;
     }
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     Logger::getInstance()->log("HeatingMonitorTask: sync controller exception: " + std::string(e.what()), lsWarning);
-  } catch (...) {
-    Logger::getInstance()->log("HeatingMonitorTask: sync controller error", lsError);
   }
 }
 
@@ -320,10 +314,8 @@ void HeatingMonitorTask::run() {
           group->callScene(coSystem, SAC_MANUAL, group->getLastCalledScene(), "", false);
         }
       }
-    } catch (std::exception& e) {
+    } catch (const std::exception& e) {
       Logger::getInstance()->log("HeatingMonitorTask: check heating groups exception: " + std::string(e.what()), lsWarning);
-    } catch (...) {
-      Logger::getInstance()->log("HeatingMonitorTask: check heating groups error", lsError);
     }
 
     boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckHeatingGroups);
@@ -411,10 +403,8 @@ void HeatingValveProtectionTask::run() {
       }
       m_zoneIndex = 0;
 
-    } catch (std::exception& e) {
+    } catch (const std::exception& e) {
       Logger::getInstance()->log("HeatingValveProtectionTask: exception: " + std::string(e.what()), lsWarning);
-    } catch (...) {
-      Logger::getInstance()->log("HeatingValveProtectionTask: execution error", lsError);
     }
   }
 }
