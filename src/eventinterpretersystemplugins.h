@@ -32,8 +32,8 @@
 #include "model/deviceinterface.h"
 
 namespace dss {
-  class Device;
-
+  /// generic mechanism to perform action
+  /// event must contain 'path' property to pass remaining action paramters
   class SystemEventActionExecute : public SystemEvent {
     public:
       SystemEventActionExecute(const Event &event);
@@ -42,32 +42,11 @@ namespace dss {
     private:
       std::string m_delay;
       std::string m_path;
-
-      std::string getActionName(PropertyNodePtr _actionNode);
-      boost::shared_ptr<Device> getDeviceFromNode(PropertyNodePtr _actionNode);
-      void executeZoneScene(PropertyNodePtr _actionNode);
-      void executeZoneUndoScene(PropertyNodePtr _actionNode);
-      void executeDeviceScene(PropertyNodePtr _actionNode);
-      void executeDeviceChannelValue(PropertyNodePtr _actionNode);
-      void executeDeviceValue(PropertyNodePtr _actionNode);
-      void executeDeviceBlink(PropertyNodePtr _actionNode);
-      void executeDeviceAction(PropertyNodePtr _actionNode);
-      void executeZoneBlink(PropertyNodePtr _actionNode);
-      void executeCustomEvent(PropertyNodePtr _actionNode);
-      void executeURL(PropertyNodePtr _actionNode);
-      void executeStateChange(PropertyNodePtr _actionNode);
-      void executeAddonStateChange(PropertyNodePtr _actionNode);
-      void executeHeatingMode(PropertyNodePtr _actionNode);
-      unsigned int executeOne(PropertyNodePtr _actionNode);
-      void executeStep(std::vector<PropertyNodePtr> _actionNodes);
-      std::vector<PropertyNodePtr> filterActionsWithDelay(PropertyNodePtr _actionNode, int _delayValue);
-      void executeWithDelay(std::string _path, std::string _delay);
-    protected:
-      void execute(std::string _path);
-
   };
 
-  class SystemEventHighlevel : public SystemEventActionExecute {
+  /// UDA: expects action paramters in /usr/events/<id>/
+  /// event must contain 'path' property
+  class SystemEventHighlevel : public SystemEvent {
     public:
       SystemEventHighlevel(const Event &event);
       virtual ~SystemEventHighlevel();

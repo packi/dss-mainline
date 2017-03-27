@@ -35,6 +35,7 @@
 #include "event/event_create.h"
 #include "event/event_fields.h"
 #include "eventinterpretersystemplugins.h"
+#include "handler/action-execute.h"
 #include "handler/system_triggers.h"
 #include "handler/event-logger.h"
 #include "http_client.h"
@@ -82,7 +83,7 @@ namespace dss {
 
   SystemEventActionExecute::~SystemEventActionExecute() = default;
 
-  std::string SystemEventActionExecute::getActionName(PropertyNodePtr _actionNode) {
+  std::string ActionExecute::getActionName(PropertyNodePtr _actionNode) {
       std::string action_name;
       PropertyNode *parent1 = _actionNode->getParentNode();
       if (parent1 != NULL) {
@@ -97,7 +98,7 @@ namespace dss {
       return action_name;
   }
 
-  void SystemEventActionExecute::executeZoneScene(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeZoneScene(PropertyNodePtr _actionNode) {
     try {
       int zoneId;
       int groupId;
@@ -107,7 +108,7 @@ namespace dss {
 
       PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
       if (oZoneNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute:: "
+        Logger::getInstance()->log("ActionExecute:: "
                 "executeZoneScene - missing zone parameter", lsError);
         return;
       } else {
@@ -116,7 +117,7 @@ namespace dss {
 
       PropertyNodePtr oGroupNode = _actionNode->getPropertyByName("group");
       if (oGroupNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute:: "
+        Logger::getInstance()->log("ActionExecute:: "
                 "executeZoneScene - missing group parameter", lsError);
         return;
       } else {
@@ -125,7 +126,7 @@ namespace dss {
 
       PropertyNodePtr oSceneNode = _actionNode->getPropertyByName("scene");
       if (oSceneNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                 "executeZoneScene: missing scene parameter", lsError);
         return;
       } else {
@@ -149,7 +150,7 @@ namespace dss {
         group->callScene(coJSScripting, sceneAccess, sceneId, "", forceFlag);
       }
     } catch(SceneAccessException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
                     "executeZoneScene: execution not allowed: " +
                     std::string(e.what()));
       if (DSS::hasInstance()) {
@@ -162,13 +163,13 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeZoneScene: could not call scene on zone " +
               std::string(e.what()));
     }
   }
 
-  void SystemEventActionExecute::executeZoneUndoScene(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeZoneUndoScene(PropertyNodePtr _actionNode) {
     try {
       int zoneId;
       int groupId;
@@ -177,7 +178,7 @@ namespace dss {
 
       PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
       if (oZoneNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute:: "
+        Logger::getInstance()->log("ActionExecute:: "
                 "executeZoneUndoScene - missing zone parameter", lsError);
         return;
       } else {
@@ -186,7 +187,7 @@ namespace dss {
 
       PropertyNodePtr oGroupNode = _actionNode->getPropertyByName("group");
       if (oGroupNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute:: "
+        Logger::getInstance()->log("ActionExecute:: "
                 "executeZoneUndoScene - missing group parameter", lsError);
         return;
       } else {
@@ -195,7 +196,7 @@ namespace dss {
 
       PropertyNodePtr oSceneNode = _actionNode->getPropertyByName("scene");
       if (oSceneNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                 "executeZoneUndoScene: missing scene parameter", lsError);
         return;
       } else {
@@ -214,7 +215,7 @@ namespace dss {
         group->undoScene(coJSScripting, sceneAccess, sceneId, "");
       }
     } catch(SceneAccessException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
                     "executeZoneUndoScene: execution not allowed: " +
                     std::string(e.what()));
       if (DSS::hasInstance()) {
@@ -226,17 +227,17 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeZoneUndoScene: could not undo scene on zone " +
               std::string(e.what()));
     }
   }
 
-  boost::shared_ptr<Device> SystemEventActionExecute::getDeviceFromNode(PropertyNodePtr _actionNode) {
+  boost::shared_ptr<Device> ActionExecute::getDeviceFromNode(PropertyNodePtr _actionNode) {
       boost::shared_ptr<Device> device;
       PropertyNodePtr oDeviceNode = _actionNode->getPropertyByName("dsuid");
       if (oDeviceNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
               "executeDeviceScene: could call scene on device - missing dsuid",
               lsError);
         return device;
@@ -244,7 +245,7 @@ namespace dss {
 
       std::string dsuidStr = oDeviceNode->getStringValue();
       if (dsuidStr.empty()) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
               "executeDeviceScene: could call scene on device - empty dsuid",
               lsError);
         return device;
@@ -258,7 +259,7 @@ namespace dss {
       return device;
   }
 
-  void SystemEventActionExecute::executeDeviceScene(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeDeviceScene(PropertyNodePtr _actionNode) {
     try {
       int sceneId;
       bool forceFlag = false;
@@ -266,7 +267,7 @@ namespace dss {
 
       PropertyNodePtr oSceneNode = _actionNode->getPropertyByName("scene");
       if (oSceneNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                 "executeDeviceScene: missing scene parameter", lsError);
         return;
       } else {
@@ -285,7 +286,7 @@ namespace dss {
   
       boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
       if (target == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                  "executeDeviceScene: could not call scene on device - device "
                  "was not found", lsError);
         return;
@@ -294,7 +295,7 @@ namespace dss {
       target->callScene(coJSScripting, sceneAccess, sceneId, "", forceFlag);
 
     } catch(SceneAccessException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
                     "executeDeviceScene: execution not allowed: " +
                     std::string(e.what()));
       if (DSS::hasInstance()) {
@@ -306,17 +307,17 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeDeviceScene: could not call scene on zone " +
               std::string(e.what()));
     }
   }
 
-  void SystemEventActionExecute::executeDeviceChannelValue(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeDeviceChannelValue(PropertyNodePtr _actionNode) {
     try {
       boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
       if (target == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                  "executeDeviceChannelValue: could not set value on device - device "
                  "was not found", lsError);
         return;
@@ -342,7 +343,7 @@ namespace dss {
       auto numNonApplyChannels = static_cast <int>(vChannels.size()) - 1;
 
       if (numNonApplyChannels < 0) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                  "executeDeviceChannelValue: no channel settings found", lsWarning);
         return;
       }
@@ -355,7 +356,7 @@ namespace dss {
       target->setDeviceOutputChannelValue(ch.id, getOutputChannelSize(ch.id), ch.value, true);
 
     } catch(SceneAccessException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
                     "executeDeviceChannelValue: execution not allowed: " +
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
@@ -369,19 +370,19 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeDeviceChannelValue: could not set value on device " +
               std::string(e.what()));
     }
   }
 
-  void SystemEventActionExecute::executeDeviceValue(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeDeviceValue(PropertyNodePtr _actionNode) {
     try {
       SceneAccessCategory sceneAccess = SAC_UNKNOWN;
 
       PropertyNodePtr oValueNode = _actionNode->getPropertyByName("value");
       if (oValueNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
               "executeDeviceValue: could not set value on device - missing "
               "value", lsError);
         return;
@@ -389,7 +390,7 @@ namespace dss {
 
       boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
       if (target == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                  "executeDeviceValue: could not set value on device - device "
                  "was not found", lsError);
         return;
@@ -405,7 +406,7 @@ namespace dss {
                        oValueNode->getIntegerValue(), "");
 
     } catch(SceneAccessException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
                     "executeDeviceValue: execution not allowed: " +
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
@@ -419,19 +420,19 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeDeviceValue: could not set value on device " +
               std::string(e.what()));
     }
   }
 
-  void SystemEventActionExecute::executeDeviceBlink(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeDeviceBlink(PropertyNodePtr _actionNode) {
     try {
       SceneAccessCategory sceneAccess = SAC_UNKNOWN;
 
       boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
       if (target == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                  "executeDeviceBlink: could not blink device - device "
                  "was not found", lsError);
         return;
@@ -445,7 +446,7 @@ namespace dss {
       target->callScene(coJSScripting, sceneAccess, SceneImpulse, "", true);
 
     } catch(SceneAccessException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
                     "executeDeviceBlink: execution not allowed: " +
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
@@ -459,18 +460,18 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeDeviceBlink: could not blink device " +
               std::string(e.what()));
     }
   }
 
-  void SystemEventActionExecute::executeDeviceAction(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeDeviceAction(PropertyNodePtr _actionNode) {
     try {
       std::string id;
       PropertyNodePtr idNode = _actionNode->getPropertyByName("id");
       if (idNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                 "executeDeviceAction: missing parameter id", lsError);
         return;
       } else {
@@ -479,7 +480,7 @@ namespace dss {
 
       boost::shared_ptr<Device> target = getDeviceFromNode(_actionNode);
       if (target == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                  "executeDeviceScene: could not call scene on device - device "
                  "was not found", lsError);
         return;
@@ -496,7 +497,7 @@ namespace dss {
       target->callAction(id, *paramsElement);
 
     } catch(SceneAccessException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
                     "executeDeviceAction: execution not allowed: " +
                     std::string(e.what()));
       if (DSS::hasInstance()) {
@@ -508,12 +509,12 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::executeDeviceAction failed: "
+      Logger::getInstance()->log("ActionExecute::executeDeviceAction failed: "
           + std::string(e.what()));
     }
   }
 
-  void SystemEventActionExecute::executeZoneBlink(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeZoneBlink(PropertyNodePtr _actionNode) {
     try {
       int zoneId;
       int groupId;
@@ -521,7 +522,7 @@ namespace dss {
 
       PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
       if (oZoneNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                 "executeZoneBlink - missing zone parameter", lsError);
         return;
       } else {
@@ -530,7 +531,7 @@ namespace dss {
 
       PropertyNodePtr oGroupNode = _actionNode->getPropertyByName("group");
       if (oGroupNode == NULL) {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                 "executeZoneBlink - missing group parameter", lsError);
         return;
       } else {
@@ -549,7 +550,7 @@ namespace dss {
         group->callScene(coJSScripting, sceneAccess, SceneImpulse, "", true);
       }
     } catch(SceneAccessException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
                     "executeZoneBlink: execution not allowed: " +
                     std::string(e.what()));
       std::string action_name = getActionName(_actionNode);
@@ -563,16 +564,16 @@ namespace dss {
         DSS::getInstance()->getEventQueue().pushEvent(pEvent);
       }
     } catch (std::runtime_error& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeZoneBlink: could not blink zone " +
               std::string(e.what()));
     }
   }
 
-  void SystemEventActionExecute::executeCustomEvent(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeCustomEvent(PropertyNodePtr _actionNode) {
     PropertyNodePtr oEventNode = _actionNode->getPropertyByName("event");
     if (oEventNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeCustomEvent - missing event parameter", lsError);
       return;
     }
@@ -585,22 +586,22 @@ namespace dss {
     }
   }
 
-  void SystemEventActionExecute::executeURL(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeURL(PropertyNodePtr _actionNode) {
     PropertyNodePtr oUrlNode =  _actionNode->getPropertyByName("url");
     if (oUrlNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeURL: missing url parameter", lsError);
       return;
     }
 
     std::string oUrl = unescapeHTML(oUrlNode->getAsString());
     if (oUrl.empty()) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeURL: empty url parameter", lsError);
       return;
     }
 
-    Logger::getInstance()->log("SystemEventActionExecute::"
+    Logger::getInstance()->log("ActionExecute::"
             "executeURL: " + oUrl);
 
     boost::shared_ptr<HttpClient> http = boost::make_shared<HttpClient>();
@@ -608,15 +609,15 @@ namespace dss {
     std::ostringstream out;
     out << code;
 
-    Logger::getInstance()->log("SystemEventActionExecute::"
+    Logger::getInstance()->log("ActionExecute::"
             "executeURL: request to " + oUrl + " returned HTTP code " +
             out.str());
   }
 
-  void SystemEventActionExecute::executeStateChange(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeStateChange(PropertyNodePtr _actionNode) {
     PropertyNodePtr oStateNode = _actionNode->getPropertyByName("statename");
     if (oStateNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeStateChange - missing statename parameter", lsError);
       return;
     }
@@ -625,19 +626,19 @@ namespace dss {
     try {
       pState = DSS::getInstance()->getApartment().getNonScriptState(oStateNode->getStringValue());
     } catch(ItemNotFoundException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeStateChange - state '" + oStateNode->getStringValue() + "' does not exist", lsError);
       return;
     }
 
     if (pState->getType() == StateType_Device) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeStateChange - cannot modify states of type \'device\'", lsError);
       return;
     }
 
     if (pState->getType() == StateType_Circuit) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeStateChange - cannot modify dsm power states", lsError);
       return;
     }
@@ -645,7 +646,7 @@ namespace dss {
     PropertyNodePtr oValueNode = _actionNode->getPropertyByName("value");
     PropertyNodePtr oSValueNode = _actionNode->getPropertyByName("state");
     if (oValueNode == NULL && oSValueNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeStateChange: missing value or state parameter", lsError);
       return;
     }
@@ -655,23 +656,23 @@ namespace dss {
     } else if (oSValueNode && oSValueNode->getValueType() == vTypeString) {
       pState->setState(coJSScripting, oSValueNode->getStringValue());
     } else {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeStateChange: wrong data type for value or state parameter", lsError);
     }
   }
 
-  void SystemEventActionExecute::executeAddonStateChange(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeAddonStateChange(PropertyNodePtr _actionNode) {
 
     PropertyNodePtr oScriptNode = _actionNode->getPropertyByName("addon-id");
     if (oScriptNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeAddonStateChange - missing addon-id parameter", lsError);
       return;
     }
 
     PropertyNodePtr oStateNode = _actionNode->getPropertyByName("statename");
     if (oStateNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeAddonStateChange - missing statename parameter", lsError);
       return;
     }
@@ -681,7 +682,7 @@ namespace dss {
       pState = DSS::getInstance()->getApartment().getState(StateType_Script,
         oScriptNode->getStringValue(), oStateNode->getStringValue());
     } catch(ItemNotFoundException& e) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeAddonStateChange - state '" + oStateNode->getStringValue() + "' does not exist", lsError);
       return;
     }
@@ -689,7 +690,7 @@ namespace dss {
     PropertyNodePtr oValueNode = _actionNode->getPropertyByName("value");
     PropertyNodePtr oSValueNode = _actionNode->getPropertyByName("state");
     if (oValueNode == NULL && oSValueNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeAddonStateChange: missing value or state parameter", lsError);
       return;
     }
@@ -699,22 +700,22 @@ namespace dss {
     } else if (oSValueNode && oSValueNode->getValueType() == vTypeString) {
       pState->setState(coJSScripting, oSValueNode->getStringValue());
     } else {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeAddonStateChange: wrong data type for value or state parameter", lsError);
     }
   }
 
-  void SystemEventActionExecute::executeHeatingMode(PropertyNodePtr _actionNode) {
+  void ActionExecute::executeHeatingMode(PropertyNodePtr _actionNode) {
     PropertyNodePtr oZoneNode = _actionNode->getPropertyByName("zone");
     if (oZoneNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeAddonStateChange - missing zone parameter", lsError);
       return;
     }
 
     PropertyNodePtr oModeNode = _actionNode->getPropertyByName("mode");
     if (oModeNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeAddonStateChange - missing mode parameter", lsError);
       return;
     }
@@ -734,9 +735,9 @@ namespace dss {
     }
   }
 
-  unsigned int SystemEventActionExecute::executeOne(
+  unsigned int ActionExecute::executeOne(
                                                 PropertyNodePtr _actionNode) {
-    Logger::getInstance()->log("SystemEventActionExecute::"
+    Logger::getInstance()->log("ActionExecute::"
             "executeOne: " + _actionNode->getDisplayName(), lsDebug);
 
     PropertyNodePtr oTypeNode = _actionNode->getPropertyByName("type");
@@ -785,11 +786,11 @@ namespace dss {
         }
 
       } else {
-        Logger::getInstance()->log("SystemEventActionExecute::"
+        Logger::getInstance()->log("ActionExecute::"
                 "type is not available", lsError);
       }
     } else {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "type node is not available", lsError);
 
     }
@@ -797,14 +798,14 @@ namespace dss {
     return 0;
   }
 
-  void SystemEventActionExecute::executeStep(std::vector<PropertyNodePtr> _actionNodes) {
+  void ActionExecute::executeStep(std::vector<PropertyNodePtr> _actionNodes) {
       for (size_t i = 0; i < _actionNodes.size(); i++) {
         PropertyNodePtr oActionNode = _actionNodes.at(i);
           unsigned int lWaitingTime = 100;
           if (oActionNode != NULL) {
             lWaitingTime = executeOne(oActionNode);
           } else {
-            Logger::getInstance()->log("SystemEventActionExecute::"
+            Logger::getInstance()->log("ActionExecute::"
                  "action node in executeStep is not available", lsError);
           }
           if (lWaitingTime > 0) {
@@ -813,7 +814,7 @@ namespace dss {
       }
   }
 
-  void SystemEventActionExecute::execute(std::string _path) {
+  void ActionExecute::execute(std::string _path) {
     if (_path.empty()) {
       return;
     }
@@ -822,7 +823,7 @@ namespace dss {
     }
     PropertyNodePtr oBaseActionNode = DSS::getInstance()->getPropertySystem().getProperty(_path + "/actions");
     if (oBaseActionNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute: no "
+      Logger::getInstance()->log("ActionExecute: no "
               "actionNodes in path " + _path, lsError);
       return;
     }
@@ -852,7 +853,7 @@ namespace dss {
     oDelay.swap(temp);
 
     if (oDelay.size() > 1) {
-      Logger::getInstance()->log("SystemEventActionExecute: delay "
+      Logger::getInstance()->log("ActionExecute: delay "
               "parameter present, execution will be fragmented", lsDebug);
 
       for (size_t s = 0; s < oDelay.size(); s++) {
@@ -869,11 +870,11 @@ namespace dss {
       }
     } else {
       if (m_properties.has("ignoreConditions")) {
-        Logger::getInstance()->log("SystemEventActionExecute: "
+        Logger::getInstance()->log("ActionExecute: "
             "condition check disabled in path" + _path);
       }
       else if (!checkSystemCondition(_path)) {
-        Logger::getInstance()->log("SystemEventActionExecute: "
+        Logger::getInstance()->log("ActionExecute: "
             "condition check failed in path " + _path);
         return;
       }
@@ -890,7 +891,7 @@ namespace dss {
     }
   }
 
-  std::vector<PropertyNodePtr> SystemEventActionExecute::filterActionsWithDelay(PropertyNodePtr _actionNode, int _delayValue) {
+  std::vector<PropertyNodePtr> ActionExecute::filterActionsWithDelay(PropertyNodePtr _actionNode, int _delayValue) {
     std::vector<PropertyNodePtr> oResultArray;
     for (int i = 0; i < _actionNode->getChildCount(); i++) {
       PropertyNodePtr delayParent = _actionNode->getChild(i);
@@ -909,7 +910,7 @@ namespace dss {
     return oResultArray;
   }
 
-  void SystemEventActionExecute::executeWithDelay(std::string _path,
+  void ActionExecute::executeWithDelay(std::string _path,
                                                            std::string _delay) {
     if (!DSS::hasInstance()) {
       return;
@@ -917,22 +918,22 @@ namespace dss {
     PropertyNodePtr oBaseActionNode =
         DSS::getInstance()->getPropertySystem().getProperty(_path + "/actions");
     if (oBaseActionNode == NULL) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeWithDelay: no actionNodes in path " + _path, lsError);
       return;
     }
     if (oBaseActionNode->getChildCount() == 0) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeWithDelay: no actionSubnodes in path " + _path, lsError);
       return;
     }
 
     if (m_properties.has("ignoreConditions")) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
           "executeWithDelay: condition check disabled in path" + _path);
     }
     else if (!checkSystemCondition(_path)) {
-      Logger::getInstance()->log("SystemEventActionExecute::"
+      Logger::getInstance()->log("ActionExecute::"
               "executeWithDelay: condition check failed in path " + _path,
               lsError);
       return;
@@ -953,14 +954,15 @@ namespace dss {
       return;
     }
 
+    ActionExecute actionExecute(m_properties);
     if (!m_delay.empty()) {
-      executeWithDelay(m_path, m_delay);
+      actionExecute.executeWithDelay(m_path, m_delay);
     } else {
-      execute(m_path);
+      actionExecute.execute(m_path);
     }
   }
 
-  SystemEventHighlevel::SystemEventHighlevel(const Event &event) : SystemEventActionExecute(event) {}
+  SystemEventHighlevel::SystemEventHighlevel(const Event &event) : SystemEvent(event) {}
   SystemEventHighlevel::~SystemEventHighlevel() = default;
 
   void SystemEventHighlevel::run() {
@@ -1003,7 +1005,7 @@ namespace dss {
             }
             nextNode = nextNode->getParentNode();
           }
-          execute(fullName);
+          ActionExecute(m_properties).execute(fullName);
           return;
         }
       }
