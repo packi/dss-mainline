@@ -181,11 +181,15 @@ namespace dss {
     Logger::getInstance()->log("EventInterpreterPluginHighlevelEvent::"
             "handleEvent " + _event.getName(), lsDebug);
 
+    // triggers might be launched on any event, no filter on event name
     auto trigger = boost::make_shared<SystemTrigger>(_event);
+
+    // TODO(cleanup): probably filter on 'highlevelevent' or merge with 'action_execute' plugin
     auto hl = boost::make_shared<SystemEventHighlevel>(_event);
     addEvent(trigger);
     addEvent(hl);
 
+    // TODO(cleanup): plugin 'system_event_log' not registered on 'highlevelevent' in subscriptions.xml
     auto log = boost::make_shared<SystemEventLog>(_event);
     addEvent(log);
   }
