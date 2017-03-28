@@ -34,7 +34,7 @@ namespace dss {
   class DSS;
   class LogChannel;
 
-  class Subsystem {
+  class Subsystem : private boost::noncopyable {
   private:
     typedef enum {
       ssCreated,

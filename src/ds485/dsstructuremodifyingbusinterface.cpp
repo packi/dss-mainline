@@ -295,11 +295,10 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        _spec.ControllerMode, _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd,
-        _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax,
-        _spec.AntiWindUp, _spec.KeepFloorWarm, _spec.SourceZoneId,
-        _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
+    int ret =
+        ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
+            _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
+            _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
     DSBusInterface::checkResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
   } /* synchronizeZoneHeatingConfig */
@@ -315,11 +314,9 @@ namespace dss {
             (_spec.EmergencyValue >= 100) ? _spec.EmergencyValue : 150);
     DSBusInterface::checkBroadcastResultCode(ret);
     usleep(BROADCAST_SLEEP_MICROSECONDS);
-    ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        _spec.ControllerMode, _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd,
-        _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax,
-        _spec.AntiWindUp, _spec.KeepFloorWarm, _spec.SourceZoneId,
-        _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
+    ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
+        _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
+        _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
     if (_dsMeterID == DSUID_BROADCAST) {
       DSBusInterface::checkBroadcastResultCode(ret);
     } else {

@@ -3954,11 +3954,11 @@ namespace dss {
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
-      obj.setProperty<int>("ControlMode", hProp.m_HeatingControlMode);
+      obj.setProperty<int>("ControlMode", static_cast<uint8_t>(hProp.m_HeatingControlMode));
       switch (hProp.m_HeatingControlMode) {
-        case HeatingControlModeIDOff:
+        case HeatingControlMode::OFF:
           break;
-        case HeatingControlModeIDPID:
+        case HeatingControlMode::PID:
           obj.setProperty<int>("OperationMode", pZone->getHeatingOperationMode());
           obj.setProperty<double>("TemperatureValue", hSensors.m_TemperatureValue);
           obj.setProperty<std::string>("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
@@ -3967,12 +3967,12 @@ namespace dss {
           obj.setProperty<double>("ControlValue", hStatus.m_ControlValue);
           obj.setProperty<std::string>("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
           break;
-        case HeatingControlModeIDZoneFollower:
+        case HeatingControlMode::ZONE_FOLLOWER:
           obj.setProperty<double>("ControlValue", hStatus.m_ControlValue);
           obj.setProperty<std::string>("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
           break;
-        case HeatingControlModeIDFixed:
-        case HeatingControlModeIDManual:
+        case HeatingControlMode::FIXED:
+        case HeatingControlMode::MANUAL:
           obj.setProperty<int>("OperationMode", pZone->getHeatingOperationMode());
           obj.setProperty<double>("ControlValue", hStatus.m_ControlValue);
           break;
@@ -4015,12 +4015,12 @@ namespace dss {
         obj.setProperty<bool>("IsConfigured", true);
       }
       obj.setProperty<std::string>("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
-      obj.setProperty<int>("ControlMode", hProp.m_HeatingControlMode);
+      obj.setProperty<int>("ControlMode", static_cast<uint8_t>(hProp.m_HeatingControlMode));
       obj.setProperty<int>("EmergencyValue", hProp.m_EmergencyValue - 100);
       switch (hProp.m_HeatingControlMode) {
-        case HeatingControlModeIDOff:
+        case HeatingControlMode::OFF:
           break;
-        case HeatingControlModeIDPID:
+        case HeatingControlMode::PID:
           obj.setProperty<double>("CtrlKp", (double)hProp.m_Kp * 0.025);
           obj.setProperty<int>("CtrlTs", hProp.m_Ts);
           obj.setProperty<int>("CtrlTi", hProp.m_Ti);
@@ -4032,14 +4032,14 @@ namespace dss {
           obj.setProperty<bool>("CtrlAntiWindUp", (hProp.m_AntiWindUp > 0));
           obj.setProperty<bool>("CtrlKeepFloorWarm", (hProp.m_KeepFloorWarm > 0));
           break;
-        case HeatingControlModeIDZoneFollower:
+        case HeatingControlMode::ZONE_FOLLOWER:
           obj.setProperty<int>("ReferenceZone", hProp.m_HeatingMasterZone);
           obj.setProperty<int>("CtrlOffset", hProp.m_CtrlOffset);
           break;
-        case HeatingControlModeIDManual:
+        case HeatingControlMode::MANUAL:
           obj.setProperty<int>("ManualValue", hProp.m_ManualValue - 100);
           break;
-        case HeatingControlModeIDFixed:
+        case HeatingControlMode::FIXED:
           break;
       }
       return JS_TRUE;
@@ -4086,46 +4086,46 @@ namespace dss {
       }
 
       switch (hProp.m_HeatingControlMode) {
-      case HeatingControlModeIDOff:
-        break;
-      case HeatingControlModeIDPID:
-        obj.setProperty<double>("Off",
-            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
-        obj.setProperty<double>("Comfort",
-            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
-        obj.setProperty<double>("Economy",
-            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
-        obj.setProperty<double>("NotUsed",
-            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
-        obj.setProperty<double>("Night",
-            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
-        obj.setProperty<double>("Holiday",
-            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
-        obj.setProperty<double>("Cooling",
-            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
-        obj.setProperty<double>("CoolingOff",
-            sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
-        break;
-      case HeatingControlModeIDZoneFollower:
-        break;
-      case HeatingControlModeIDFixed:
-        obj.setProperty<double>("Off",
-            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
-        obj.setProperty<double>("Comfort",
-            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
-        obj.setProperty<double>("Economy",
-            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
-        obj.setProperty<double>("NotUsed",
-            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
-        obj.setProperty<double>("Night",
-            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
-        obj.setProperty<double>("Holiday",
-            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
-        obj.setProperty<double>("Cooling",
-            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
-        obj.setProperty<double>("CoolingOff",
-            sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
-        break;
+        case HeatingControlMode::OFF:
+          break;
+        case HeatingControlMode::PID:
+          obj.setProperty<double>("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+          obj.setProperty<double>(
+              "Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+          obj.setProperty<double>(
+              "Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+          obj.setProperty<double>(
+              "NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+          obj.setProperty<double>("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+          obj.setProperty<double>(
+              "Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+          obj.setProperty<double>(
+              "Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+          obj.setProperty<double>(
+              "CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+          break;
+        case HeatingControlMode::ZONE_FOLLOWER:
+          break;
+        case HeatingControlMode::FIXED:
+          obj.setProperty<double>(
+              "Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+          obj.setProperty<double>(
+              "Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+          obj.setProperty<double>(
+              "Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+          obj.setProperty<double>(
+              "NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+          obj.setProperty<double>(
+              "Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+          obj.setProperty<double>(
+              "Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+          obj.setProperty<double>(
+              "Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+          obj.setProperty<double>(
+              "CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+          break;
+        case HeatingControlMode::MANUAL:
+          break;
       }
       return JS_TRUE;
 
@@ -4191,7 +4191,7 @@ namespace dss {
 
         int intValue = strtol(propValue, NULL, 10);
         if (strcmp(propKey, "ControlMode") == 0) {
-          hConfig.ControllerMode = intValue;
+          hConfig.ControllerMode = static_cast<HeatingControlMode>(intValue);
         } else if (strcmp(propKey, "ReferenceZone") == 0) {
           hConfig.SourceZoneId = intValue;
         } else if (strcmp(propKey, "CtrlOffset") == 0) {
@@ -4267,9 +4267,9 @@ namespace dss {
       ZoneHeatingOperationModeSpec_t hOpValues;
       SensorType SensorConversion;
 
-      if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
+      if (hProp.m_HeatingControlMode == HeatingControlMode::PID) {
         SensorConversion = SensorType::RoomTemperatureSetpoint;
-      } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
+      } else if (hProp.m_HeatingControlMode == HeatingControlMode::FIXED) {
         SensorConversion = SensorType::RoomTemperatureControlVariable;
       } else {
         JS_ReportError(cx, "Model.zone_setTemperatureControlValues: cannot set control values in current mode");

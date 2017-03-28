@@ -24,6 +24,7 @@
 #define THREAD_H_INCLUDED
 
 #include <pthread.h>
+#include <boost/noncopyable.hpp>
 #include <string>
 
 namespace dss {
@@ -31,7 +32,7 @@ namespace dss {
 /** Wrapper for pthread-threads
 @author Patrick Staehlin
 */
-class Thread{
+class Thread : private boost::noncopyable {
 private:
   pthread_t m_ThreadHandle;
   std::string m_Name;

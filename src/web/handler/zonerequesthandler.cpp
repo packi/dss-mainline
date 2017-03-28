@@ -214,9 +214,9 @@ std::string ZoneRequestHandler::getTemperatureControlStatus(
   json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
 
   switch (hProp.m_HeatingControlMode) {
-    case HeatingControlModeIDOff:
+    case HeatingControlMode::OFF:
       break;
-    case HeatingControlModeIDPID:
+    case HeatingControlMode::PID:
       json.add("OperationMode", pZone->getHeatingOperationMode());
       json.add("TemperatureValue", hSensors.m_TemperatureValue);
       json.add("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
@@ -225,12 +225,12 @@ std::string ZoneRequestHandler::getTemperatureControlStatus(
       json.add("ControlValue", hStatus.m_ControlValue);
       json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
       break;
-    case HeatingControlModeIDZoneFollower:
+    case HeatingControlMode::ZONE_FOLLOWER:
       json.add("ControlValue", hStatus.m_ControlValue);
       json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
       break;
-    case HeatingControlModeIDFixed:
-    case HeatingControlModeIDManual:
+    case HeatingControlMode::FIXED:
+    case HeatingControlMode::MANUAL:
       json.add("OperationMode", pZone->getHeatingOperationMode());
       json.add("ControlValue", hStatus.m_ControlValue);
       break;
@@ -257,9 +257,9 @@ std::string ZoneRequestHandler::getTemperatureControlConfig(
   json.add("ControlMode", hProp.m_HeatingControlMode);
   json.add("EmergencyValue", hProp.m_EmergencyValue - 100);
   switch (hProp.m_HeatingControlMode) {
-    case HeatingControlModeIDOff:
+    case HeatingControlMode::OFF:
       break;
-    case HeatingControlModeIDPID:
+    case HeatingControlMode::PID:
       json.add("CtrlKp", (double)hProp.m_Kp * 0.025);
       json.add("CtrlTs", hProp.m_Ts);
       json.add("CtrlTi", hProp.m_Ti);
@@ -271,14 +271,14 @@ std::string ZoneRequestHandler::getTemperatureControlConfig(
       json.add("CtrlAntiWindUp", (hProp.m_AntiWindUp > 0));
       json.add("CtrlKeepFloorWarm", (hProp.m_KeepFloorWarm > 0));
       break;
-    case HeatingControlModeIDZoneFollower:
+    case HeatingControlMode::ZONE_FOLLOWER:
       json.add("ReferenceZone", hProp.m_HeatingMasterZone);
       json.add("CtrlOffset", hProp.m_CtrlOffset);
       break;
-    case HeatingControlModeIDManual:
+    case HeatingControlMode::MANUAL:
       json.add("ManualValue", hProp.m_ManualValue - 100);
       break;
-    case HeatingControlModeIDFixed:
+    case HeatingControlMode::FIXED:
       break;
   }
   return json.successJSON();
@@ -307,7 +307,9 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   }
 
   if (_request.hasParameter("ControlMode")) {
-    (void)_request.getParameter("ControlMode", hConfig.ControllerMode);
+    uint8_t x;
+    (void)_request.getParameter("ControlMode", x);
+    hConfig.ControllerMode = static_cast<HeatingControlMode>(x);
   }
   if (_request.hasParameter("ReferenceZone")) {
     (void)_request.getParameter("ReferenceZone", hConfig.SourceZoneId);
@@ -379,9 +381,9 @@ std::string ZoneRequestHandler::getTemperatureControlValues(
   }
 
   switch (hProp.m_HeatingControlMode) {
-    case HeatingControlModeIDOff:
+    case HeatingControlMode::OFF:
       break;
-    case HeatingControlModeIDPID:
+    case HeatingControlMode::PID:
       json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
       json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
       json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
@@ -391,9 +393,9 @@ std::string ZoneRequestHandler::getTemperatureControlValues(
       json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
       json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
       break;
-    case HeatingControlModeIDZoneFollower:
+    case HeatingControlMode::ZONE_FOLLOWER:
       break;
-    case HeatingControlModeIDFixed:
+    case HeatingControlMode::FIXED:
       json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
       json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
       json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
@@ -402,6 +404,8 @@ std::string ZoneRequestHandler::getTemperatureControlValues(
       json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
       json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
       json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+      break;
+    case HeatingControlMode::MANUAL:
       break;
   }
   return json.successJSON();
@@ -420,9 +424,9 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   int iValue;
   double fValue;
 
-  if (hProp.m_HeatingControlMode == HeatingControlModeIDPID) {
+  if (hProp.m_HeatingControlMode == HeatingControlMode::PID) {
     SensorConversion = SensorType::RoomTemperatureSetpoint;
-  } else if (hProp.m_HeatingControlMode == HeatingControlModeIDFixed) {
+  } else if (hProp.m_HeatingControlMode == HeatingControlMode::FIXED) {
     SensorConversion = SensorType::RoomTemperatureControlVariable;
   } else {
     return JSONWriter::failure("Cannot set control values in current mode");
@@ -598,7 +602,7 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
   json.add("ControlMode", hProp.m_HeatingControlMode);
   json.add("ControlState", hProp.m_HeatingControlState);
 
-  if (hProp.m_HeatingControlMode != HeatingControlModeIDPID) {
+  if (hProp.m_HeatingControlMode != HeatingControlMode::PID) {
     return JSONWriter::failure("Not a PID controller");
   }
   if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {

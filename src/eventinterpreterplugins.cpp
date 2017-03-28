@@ -1195,31 +1195,11 @@ Sample: {
   }
 
   void EventInterpreterWebservicePlugin::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-
-    subscription.reset(new EventSubscription(EventName::Running,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-
-    subscription.reset(new EventSubscription(EventName::WebserviceKeepAlive,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-
-    subscription.reset(new EventSubscription(EventName::WebserviceGetWeatherInformation,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-
-    subscription.reset(new EventSubscription(EventName::ApplicationTokenDeleted,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+    auto&& interpreter = getEventInterpreter();
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::Running));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::WebserviceKeepAlive));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::WebserviceGetWeatherInformation));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::ApplicationTokenDeleted));
   }
 
   void EventInterpreterWebservicePlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
@@ -1268,19 +1248,9 @@ Sample: {
   __DEFINE_LOG_CHANNEL__(EventInterpreterSensorMonitorPlugin, lsInfo);
 
   void EventInterpreterSensorMonitorPlugin::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-
-    subscription.reset(new EventSubscription(EventName::ModelReady,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-
-    subscription.reset(new EventSubscription(EventName::CheckSensorValues,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+    auto&& interpreter = getEventInterpreter();
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::ModelReady));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::CheckSensorValues));
   }
 
   void EventInterpreterSensorMonitorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
@@ -1309,19 +1279,9 @@ Sample: {
   __DEFINE_LOG_CHANNEL__(EventInterpreterStateSensorPlugin, lsInfo);
 
   void EventInterpreterStateSensorPlugin::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-
-    subscription.reset(new EventSubscription(EventName::DeviceSensorValue,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-
-    subscription.reset(new EventSubscription(EventName::ZoneSensorValue,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+    auto&& interpreter = getEventInterpreter();
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::DeviceSensorValue));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::ZoneSensorValue));
   }
 
   void EventInterpreterStateSensorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
@@ -1368,27 +1328,11 @@ Sample: {
   __DEFINE_LOG_CHANNEL__(EventInterpreterHeatingMonitorPlugin, lsInfo);
 
   void EventInterpreterHeatingMonitorPlugin::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription(EventName::ModelReady,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription(EventName::DSMeterReady,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription(EventName::HeatingControllerState,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription(EventName::CheckHeatingGroups,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+    auto&& interpreter = getEventInterpreter();
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::ModelReady));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::DSMeterReady));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::HeatingControllerState));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::CheckHeatingGroups));
   }
 
   void EventInterpreterHeatingMonitorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
@@ -1406,17 +1350,9 @@ Sample: {
   __DEFINE_LOG_CHANNEL__(EventInterpreterHeatingValveProtectionPlugin, lsInfo);
 
   void EventInterpreterHeatingValveProtectionPlugin::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription(EventName::ModelReady,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription(EventName::HeatingValveProtection,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+    auto&& interpreter = getEventInterpreter();
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::ModelReady));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::HeatingValveProtection));
   }
 
   void EventInterpreterHeatingValveProtectionPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
@@ -1434,17 +1370,9 @@ Sample: {
   __DEFINE_LOG_CHANNEL__(EventInterpreterDebugMonitorPlugin, lsInfo);
 
   void EventInterpreterDebugMonitorPlugin::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-    subscription.reset(new EventSubscription(EventName::ModelReady,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-    subscription.reset(new EventSubscription(EventName::DebugMonitorUpdate,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+    auto&& interpreter = getEventInterpreter();
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::ModelReady));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::DebugMonitorUpdate));
   }
 
   void EventInterpreterDebugMonitorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
@@ -1517,19 +1445,9 @@ Sample: {
   __DEFINE_LOG_CHANNEL__(AutoclusterUpdatePlugin, lsInfo);
 
   void AutoclusterUpdatePlugin::subscribe() {
-    boost::shared_ptr<EventSubscription> subscription;
-
-    subscription.reset(new EventSubscription(EventName::ModelReady,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
-
-    subscription.reset(new EventSubscription(EventName::AutoClusterUpdate,
-                                             getName(),
-                                             getEventInterpreter(),
-                                             boost::shared_ptr<SubscriptionOptions>()));
-    getEventInterpreter().subscribe(subscription);
+    auto&& interpreter = getEventInterpreter();
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::ModelReady));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::AutoClusterUpdate));
   }
 
   void AutoclusterUpdatePlugin::handleEvent(Event& _event, const EventSubscription& _subscription)

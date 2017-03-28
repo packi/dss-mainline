@@ -130,7 +130,8 @@ namespace dss {
         opts->setParameter(st.convert(keyValue[0]), st.convert(keyValue[1]));
       }
     }
-    boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>(eventName, handlerName, boost::ref<EventInterpreter>(m_EventInterpreter), opts);
+    boost::shared_ptr<EventSubscription> subscription =
+        boost::make_shared<EventSubscription>(eventName, handlerName, m_EventInterpreter, opts);
 
     m_EventInterpreter.subscribe(subscription);
 

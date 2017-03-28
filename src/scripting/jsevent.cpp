@@ -478,7 +478,8 @@ namespace dss {
       JS_free(cx, propName);
     }
 
-    boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>(eventName, handlerName, boost::ref<EventInterpreter>(ext->getEventInterpreter()), opts);
+    boost::shared_ptr<EventSubscription> subscription =
+        boost::make_shared<EventSubscription>(eventName, handlerName, ext->getEventInterpreter(), opts);
     subscription_wrapper* subscriptionWrapper = new subscription_wrapper();
     subscriptionWrapper->subscription = subscription;
 

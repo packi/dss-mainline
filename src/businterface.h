@@ -144,7 +144,7 @@ namespace dss {
   } DSMeterHash_t;
 
   typedef struct {
-    uint8_t ControllerMode;
+    HeatingControlMode ControllerMode;
     uint16_t Kp;
     uint8_t Ts;
     uint16_t Ti;

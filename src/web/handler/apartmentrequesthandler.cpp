@@ -286,9 +286,9 @@ namespace dss {
           }
 
           switch (hProp.m_HeatingControlMode) {
-            case HeatingControlModeIDOff:
+            case HeatingControlMode::OFF:
               break;
-            case HeatingControlModeIDPID:
+            case HeatingControlMode::PID:
               json.add("OperationMode", pZone->getHeatingOperationMode());
               json.add("TemperatureValue", hSensors.m_TemperatureValue);
               json.add("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
@@ -297,13 +297,15 @@ namespace dss {
               json.add("ControlValue", hStatus.m_ControlValue);
               json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
               break;
-            case HeatingControlModeIDZoneFollower:
+            case HeatingControlMode::ZONE_FOLLOWER:
               json.add("ControlValue", hStatus.m_ControlValue);
               json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
               break;
-            case HeatingControlModeIDFixed:
+            case HeatingControlMode::FIXED:
               json.add("OperationMode", pZone->getHeatingOperationMode());
               json.add("ControlValue", hStatus.m_ControlValue);
+              break;
+            case HeatingControlMode::MANUAL:
               break;
           }
           json.endObject();
@@ -336,9 +338,9 @@ namespace dss {
           json.add("ControlMode", hProp.m_HeatingControlMode);
           json.add("EmergencyValue", hProp.m_EmergencyValue - 100);
           switch (hProp.m_HeatingControlMode) {
-            case HeatingControlModeIDOff:
+            case HeatingControlMode::OFF:
               break;
-            case HeatingControlModeIDPID:
+            case HeatingControlMode::PID:
               json.add("CtrlKp", (double)hProp.m_Kp * 0.025);
               json.add("CtrlTs", hProp.m_Ts);
               json.add("CtrlTi", hProp.m_Ti);
@@ -350,11 +352,13 @@ namespace dss {
               json.add("CtrlAntiWindUp", (hProp.m_AntiWindUp > 0));
               json.add("CtrlKeepFloorWarm", (hProp.m_KeepFloorWarm > 0));
               break;
-            case HeatingControlModeIDZoneFollower:
+            case HeatingControlMode::ZONE_FOLLOWER:
               json.add("ReferenceZone", hProp.m_HeatingMasterZone);
               json.add("CtrlOffset", hProp.m_CtrlOffset);
               break;
-            case HeatingControlModeIDFixed:
+            case HeatingControlMode::FIXED:
+              break;
+            case HeatingControlMode::MANUAL:
               break;
           }
           json.endObject();
@@ -400,30 +404,33 @@ namespace dss {
 
           json.add("IsConfigured", true);
           switch (hProp.m_HeatingControlMode) {
-          case HeatingControlModeIDOff:
-            break;
-          case HeatingControlModeIDPID:
-            json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
-            json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
-            json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
-            json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
-            json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
-            json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
-            json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
-            break;
-          case HeatingControlModeIDZoneFollower:
-            break;
-          case HeatingControlModeIDFixed:
-            json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
-            json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
-            json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
-            json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
-            json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
-            json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
-            json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
-            break;
+            case HeatingControlMode::OFF:
+              break;
+            case HeatingControlMode::PID:
+              json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+              json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+              json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+              json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+              json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+              json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+              json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+              json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+              break;
+            case HeatingControlMode::ZONE_FOLLOWER:
+              break;
+            case HeatingControlMode::FIXED:
+              json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+              json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+              json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+              json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+              json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+              json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+              json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+              json.add(
+                  "CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+              break;
+            case HeatingControlMode::MANUAL:
+              break;
           }
           json.endObject();
         }

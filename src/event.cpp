@@ -1001,6 +1001,13 @@ namespace dss {
     initialize();
   } // ctor
 
+  EventSubscription::EventSubscription(
+      EventInterpreterPlugin& plugin, const std::string& eventName, boost::shared_ptr<SubscriptionOptions> options)
+      : m_EventName(eventName), m_HandlerName(plugin.getName()), m_SubscriptionOptions(std::move(options)) {
+    m_ID = plugin.getEventInterpreter().uniqueSubscriptionID(eventName + "_" + m_HandlerName);
+    initialize();
+  }
+
   EventSubscription::~EventSubscription() {
   } // dtor
 
