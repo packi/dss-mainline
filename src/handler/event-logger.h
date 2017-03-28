@@ -29,10 +29,9 @@
 namespace dss {
   class SystemEventLog : public SystemEvent {
     public:
-      SystemEventLog();
+      SystemEventLog(const Event &event);
       virtual ~SystemEventLog();
-      virtual void run();
-      virtual bool setup(Event& _event);
+      void run() DS_OVERRIDE;
     private:
       std::string getZoneName(boost::shared_ptr<Zone> _zone);
       std::string getGroupName(boost::shared_ptr<Group> _group);
@@ -152,12 +151,5 @@ namespace dss {
       void operationLock(const std::string& _evtName);
       void devicesFirstSeen();
       void highlevelevent();
-
-      std::string m_evtName;
-
-      EventRaiseLocation m_evtRaiseLocation;
-      boost::shared_ptr<const Group> m_raisedAtGroup;
-      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
-      boost::shared_ptr<const State> m_raisedAtState;
   };
 }; // namespace

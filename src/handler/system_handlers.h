@@ -20,18 +20,23 @@
 #ifndef __SYSTEM_HANDLERS__
 #define __SYSTEM_HANDLERS__
 
+#include "ds/common.h"
 #include "event.h"
 #include "taskprocessor.h"
 
 namespace dss {
   class SystemEvent : public Task {
     public:
-      SystemEvent();
+      SystemEvent(const Event &event);
       virtual ~SystemEvent();
       virtual void run() = 0;
-      virtual bool setup(Event& _event);
     protected:
       Properties m_properties;
+      std::string m_evtName;
+      EventRaiseLocation m_evtRaiseLocation;
+      boost::shared_ptr<const Group> m_raisedAtGroup;
+      boost::shared_ptr<const DeviceReference> m_raisedAtDevice;
+      boost::shared_ptr<const State> m_raisedAtState;
   };
 }
 #endif

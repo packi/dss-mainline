@@ -431,7 +431,7 @@ namespace dss {
               try {
                 plugin->handleEvent(*toProcess, **ipSubscription);
               } catch(std::runtime_error& e) {
-                log(std::string("Interpreter: error while handling event: ") + e.what(), lsError);
+                log(std::string("Interpreter: error handling event:") + toProcess->getName() + std::string(" plugin:") + plugin->getName() + std::string(" what:") + e.what(), lsError);
               }
             }
             else {

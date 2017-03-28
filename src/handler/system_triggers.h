@@ -49,13 +49,12 @@ namespace dss {
 
   class SystemTrigger : public SystemEvent {
     public:
-      SystemTrigger();
+      SystemTrigger(const Event &event);
       virtual ~SystemTrigger();
-      virtual void run();
-      virtual bool setup(Event& _event);
+      void run() DS_OVERRIDE;
 
     protected:
-      std::string m_evtName;
+      /* TODO replace by adhoc compution from Event */
       bool m_evtSrcIsGroup;
       bool m_evtSrcIsDevice;
       int m_evtSrcZone;

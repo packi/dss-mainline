@@ -73,19 +73,12 @@ void EventInterpreterPluginSystemState::handleEvent(Event& _event, const EventSu
           "handleEvent: processing event \'" + _event.getName() + "\'",
           lsDebug);
 
-  boost::shared_ptr<SystemState> state = boost::make_shared<SystemState>();
-
-  if (!state->setup(_event)) {
-    Logger::getInstance()->log("EventInterpreterPluginSystemState::"
-            "handleEvent: could not setup event data!");
-    return;
-  }
-
+  auto state = boost::make_shared<SystemState>(_event);
   addEvent(state);
 }
 
 
-SystemState::SystemState() : SystemEvent(), m_evtRaiseLocation(erlState),
+SystemState::SystemState(const Event &event) : SystemEvent(event),
   m_apartment(DSS::getInstance()->getApartment()) {
 }
 
@@ -896,15 +889,6 @@ void SystemState::stateApartment() {
       callScene(0, groupId, SceneWindInactive, coSystem);
     }
   }
-}
-
-bool SystemState::setup(Event& _event) {
-  m_evtName = _event.getName();
-  m_evtRaiseLocation = _event.getRaiseLocation();
-  m_raisedAtGroup = _event.getRaisedAtGroup(m_apartment);
-  m_raisedAtDevice = _event.getRaisedAtDevice();
-  m_raisedAtState = _event.getRaisedAtState();
-  return SystemEvent::setup(_event);
 }
 
 void SystemState::run() {

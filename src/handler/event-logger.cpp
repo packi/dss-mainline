@@ -37,11 +37,8 @@ namespace dss {
   const std::string EventLog = "system-event.log";
   const std::string SensorLog = "system-sensor.log";
 
-  SystemEventLog::SystemEventLog() : SystemEvent(), m_evtRaiseLocation(erlApartment) {
-  }
-
-  SystemEventLog::~SystemEventLog() {
-  }
+  SystemEventLog::SystemEventLog(const Event &event) : SystemEvent(event) {}
+  SystemEventLog::~SystemEventLog() = default;
 
   std::string SystemEventLog::getZoneName(boost::shared_ptr<Zone> _zone) {
     std::string zName = _zone->getName();
@@ -1130,14 +1127,5 @@ namespace dss {
     } else if (m_evtName == EventName::HighLevelEvent) {
       highlevelevent();
     }
-  }
-
-  bool SystemEventLog::setup(Event& _event) {
-    m_evtName = _event.getName();
-    m_evtRaiseLocation = _event.getRaiseLocation();
-    m_raisedAtGroup = _event.getRaisedAtGroup(DSS::getInstance()->getApartment());
-    m_raisedAtDevice = _event.getRaisedAtDevice();
-    m_raisedAtState = _event.getRaisedAtState();
-    return SystemEvent::setup(_event);
   }
 }; // namespace

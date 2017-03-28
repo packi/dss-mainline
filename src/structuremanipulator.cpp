@@ -52,9 +52,6 @@
 namespace dss {
 
   void StructureManipulator::createZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
     boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     if(!_dsMeter->isPresent()) {
       throw std::runtime_error("Need dsMeter to be present");
@@ -82,12 +79,6 @@ namespace dss {
   }
 
   void StructureManipulator::addDeviceToZone(boost::shared_ptr<Device> _device, boost::shared_ptr<Zone> _zone) {
-    if(_zone->getPropertyNode() != NULL) {
-      _zone->getPropertyNode()->checkWriteAccess();
-    }
-    if(_device->getPropertyNode() != NULL) {
-      _device->getPropertyNode()->checkWriteAccess();
-    }
     boost::recursive_mutex::scoped_lock scoped_lock(m_Apartment.getMutex());
     if(!_device->isPresent()) {
       throw std::runtime_error("Need device to be present");
@@ -428,9 +419,6 @@ namespace dss {
   } // persistSet
 
   int StructureManipulator::persistSet(Set& _set, const std::string& _originalSet, int _groupNumber) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
     boost::shared_ptr<Group> pGroup;
     try {
       pGroup = m_Apartment.getGroup(_groupNumber);
@@ -452,9 +440,6 @@ namespace dss {
   } // persistSet
 
   void StructureManipulator::unpersistSet(std::string _setDescription) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
     std::vector<boost::shared_ptr<Group> > groups = m_Apartment.getZone(0)->getGroups();
     boost::shared_ptr<Group> pGroup;
     for(std::size_t iGroup = 0; iGroup < groups.size(); iGroup++) {
@@ -478,10 +463,6 @@ namespace dss {
 
   void StructureManipulator::createGroup(boost::shared_ptr<Zone> _zone, int _groupNumber, ApplicationType applicationType,
       const int applicationConfiguration, const std::string& _name) {
-    if (m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
-
     if (isDefaultGroup(_groupNumber) || isGlobalAppDsGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
@@ -546,10 +527,6 @@ namespace dss {
   } // createGroup
 
   void StructureManipulator::removeGroup(boost::shared_ptr<Zone> _zone, int _groupNumber) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
-
     if (isDefaultGroup(_groupNumber) || isGlobalAppDsGroup(_groupNumber)) {
       throw DSSException("Group with id " + intToString(_groupNumber) + " is reserved");
     }
@@ -681,9 +658,6 @@ namespace dss {
   } // sceneSetName
 
   void StructureManipulator::deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
     assert(_device.get() != NULL);
     assert(_group.get() != NULL);
 
@@ -725,9 +699,6 @@ namespace dss {
   } // deviceAddToGroup
 
   void StructureManipulator::deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
-    if(m_Apartment.getPropertyNode() != NULL) {
-      m_Apartment.getPropertyNode()->checkWriteAccess();
-    }
     assert(_device.get() != NULL);
     assert(_group.get() != NULL);
 
