@@ -1319,7 +1319,7 @@ namespace dss {
       for (size_t i = 0; i < channels->size(); i++) {
         json.startObject();
         json.add("channel", getOutputChannelName(channels->at(i).first));
-        json.add("value", pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene));
+        json.add("value", convertFromOutputChannelValue(channels->at(i).first, pDevice->getDeviceOutputChannelSceneValue(channels->at(i).first, scene)));
         json.endObject();
       }
       json.endArray();
