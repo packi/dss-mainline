@@ -37,6 +37,12 @@ namespace dss {
                        StructureModifyingBusInterface* _pBusInterface,
                        StructureQueryBusInterface* _pQueryBusInterface);
     virtual WebServerResponse jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
+
+    // methods to render different heating info in JSON format
+    static void addTemperatureControlStatus(JSONWriter& json, boost::shared_ptr<Zone> pZone);
+    static void addTemperatureControlConfig(JSONWriter& json, boost::shared_ptr<Zone> pZone);
+    static void addTemperatureControlValues(JSONWriter& json, boost::shared_ptr<Zone> pZone);
+
   private:
     Apartment& m_Apartment;
     StructureModifyingBusInterface* m_pStructureBusInterface;
