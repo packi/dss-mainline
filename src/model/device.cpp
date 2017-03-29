@@ -2381,7 +2381,7 @@ namespace dss {
       } catch (std::runtime_error& ex) {
           log("Device::initStates:" + dsuid2str(m_DSID)
               + " state:" + stateName + " what:" + ex.what(), lsError);
-          throw ex;
+          throw;
       }
     }
   }
