@@ -4008,19 +4008,12 @@ namespace dss {
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
-      if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-        obj.setProperty<bool>("IsConfigured", false);
-        return JS_TRUE;
-      } else {
-        obj.setProperty<bool>("IsConfigured", true);
-      }
-      obj.setProperty<std::string>("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
       obj.setProperty<int>("ControlMode", static_cast<uint8_t>(hProp.m_HeatingControlMode));
-      obj.setProperty<int>("EmergencyValue", hProp.m_EmergencyValue - 100);
       switch (hProp.m_HeatingControlMode) {
         case HeatingControlMode::OFF:
           break;
         case HeatingControlMode::PID:
+          obj.setProperty<int>("EmergencyValue", hProp.m_EmergencyValue - 100);
           obj.setProperty<double>("CtrlKp", (double)hProp.m_Kp * 0.025);
           obj.setProperty<int>("CtrlTs", hProp.m_Ts);
           obj.setProperty<int>("CtrlTi", hProp.m_Ti);
@@ -4077,10 +4070,8 @@ namespace dss {
 
       memset(&hOpValues, 0, sizeof(hOpValues));
       if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-        obj.setProperty<bool>("IsConfigured", false);
         return JS_TRUE;
       } else {
-        obj.setProperty<bool>("IsConfigured", true);
         hOpValues = ext->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
             hProp.m_HeatingControlDSUID, pZone->getID());
       }
@@ -4161,9 +4152,6 @@ namespace dss {
           *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
           ext->getApartment());
 
-      std::string ControlDSUID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-      dsuid_from_string(ControlDSUID.c_str(), &hProp.m_HeatingControlDSUID);
-
       memset(&hConfig, 0, sizeof(hConfig));
       if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
         manipulator.clearZoneHeatingConfig(pZone);
@@ -4173,7 +4161,7 @@ namespace dss {
         hConfig = pZone->getHeatingControlMode();
       }
 
-      JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [1]);
+      JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [0]);
       JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
       jsid propID;
       while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
