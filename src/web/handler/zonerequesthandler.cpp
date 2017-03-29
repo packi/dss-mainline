@@ -208,10 +208,7 @@ std::string ZoneRequestHandler::getTemperatureControlStatus(
     return JSONWriter::failure("Not a heating control device");
   }
 
-  json.add("IsConfigured", true);
   json.add("ControlMode", hProp.m_HeatingControlMode);
-  json.add("ControlState", hProp.m_HeatingControlState);
-  json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
 
   switch (hProp.m_HeatingControlMode) {
     case HeatingControlMode::OFF:
@@ -249,17 +246,14 @@ std::string ZoneRequestHandler::getTemperatureControlConfig(
 
   if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
     return JSONWriter::failure("Not a heating control device");
-  } else {
-    json.add("IsConfigured", true);
   }
 
-  json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
   json.add("ControlMode", hProp.m_HeatingControlMode);
-  json.add("EmergencyValue", hProp.m_EmergencyValue - 100);
   switch (hProp.m_HeatingControlMode) {
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:
+      json.add("EmergencyValue", hProp.m_EmergencyValue - 100);
       json.add("CtrlKp", (double)hProp.m_Kp * 0.025);
       json.add("CtrlTs", hProp.m_Ts);
       json.add("CtrlTi", hProp.m_Ti);
@@ -269,7 +263,6 @@ std::string ZoneRequestHandler::getTemperatureControlConfig(
       json.add("CtrlYmin", hProp.m_Ymin - 100);
       json.add("CtrlYmax", hProp.m_Ymax - 100);
       json.add("CtrlAntiWindUp", (hProp.m_AntiWindUp > 0));
-      json.add("CtrlKeepFloorWarm", (hProp.m_KeepFloorWarm > 0));
       break;
     case HeatingControlMode::ZONE_FOLLOWER:
       json.add("ReferenceZone", hProp.m_HeatingMasterZone);
@@ -294,15 +287,10 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
   ZoneHeatingConfigSpec_t hConfig;
 
-  if (_request.hasParameter("ControlDSUID")) {
-    dsuid_from_string(_request.getParameter("ControlDSUID").c_str(), &hProp.m_HeatingControlDSUID);
-  }
-
   memset(&hConfig, 0, sizeof(hConfig));
   if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
     return JSONWriter::failure("Not a heating control device");
   } else {
-    json.add("IsConfigured", true);
     hConfig = pZone->getHeatingControlMode();
   }
 
@@ -352,9 +340,6 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   if (_request.getParameter("CtrlAntiWindUp", tempBool)) {
     hConfig.AntiWindUp = tempBool ? 1 : 0;
   }
-  if (_request.getParameter("CtrlKeepFloorWarm", tempBool)) {
-    hConfig.KeepFloorWarm = tempBool ? 1 : 0;
-  }
 
   StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
   manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
@@ -375,7 +360,6 @@ std::string ZoneRequestHandler::getTemperatureControlValues(
   if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
     return JSONWriter::failure("Not a heating control device");
   } else {
-    json.add("IsConfigured", true);
     hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
             hProp.m_HeatingControlDSUID, pZone->getID());
   }
@@ -436,7 +420,6 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
     return JSONWriter::failure("Not a heating control device");
   } else {
-    json.add("IsConfigured", true);
     hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
             hProp.m_HeatingControlDSUID, pZone->getID());
   }
@@ -544,45 +527,6 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   return json.successJSON();
 }
 
-std::string ZoneRequestHandler::setTemperatureControlState(
-        boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
-  if (pZone->getID() == 0) {
-    return JSONWriter::failure("Zone id 0 is invalid");
-  }
-
-  JSONWriter json;
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
-  ZoneHeatingStateSpec_t hState;
-
-  if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-    return JSONWriter::failure("Not a heating control device");
-  } else {
-    json.add("IsConfigured", true);
-    hState = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingState(
-            hProp.m_HeatingControlDSUID, pZone->getID());
-  }
-
-  int value = hState.State;
-  std::string rState = _request.getParameter("ControlState");
-  if (rState == "internal") {
-    value = HeatingControlStateIDInternal;
-  } else if (rState == "external") {
-    value = HeatingControlStateIDExternal;
-  } else {
-    try {
-      value = strToUInt(_request.getParameter("ControlState"));
-    } catch (std::invalid_argument& e) {
-      return JSONWriter::failure("Invalid mode for the control state");
-    }
-  }
-  hState.State = (uint8_t)value;
-
-  m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingState(
-          hProp.m_HeatingControlDSUID, pZone->getID(), hState);
-
-  return JSONWriter::success();
-}
-
 std::string ZoneRequestHandler::getTemperatureControlInternals(
         boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
   if (pZone->getID() == 0) {
@@ -593,35 +537,42 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
   ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
   ZoneHeatingInternalsSpec_t hInternals;
 
-  if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-    return JSONWriter::failure("Not a heating control device");
-  }
+  // TODO: now we know only about one controller - will need to extend it when we will track all of them
+  std::vector<dsuid_t> heatingControllers;
+  heatingControllers.push_back(hProp.m_HeatingControlDSUID);
 
-  json.add("IsConfigured", true);
-  json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
-  json.add("ControlMode", hProp.m_HeatingControlMode);
-  json.add("ControlState", hProp.m_HeatingControlState);
+  foreach(auto dsuid, heatingControllers) {
+    // start the response for this dsm
+    json.startObject(dsuid2str(dsuid));
 
-  if (hProp.m_HeatingControlMode != HeatingControlMode::PID) {
-    return JSONWriter::failure("Not a PID controller");
-  }
-  if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {
-    return JSONWriter::failure("PID controller not running");
-  }
-  memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
-  hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
-          hProp.m_HeatingControlDSUID, pZone->getID());
+    json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
+    json.add("ControlMode", hProp.m_HeatingControlMode);
+    json.add("ControlState", hProp.m_HeatingControlState);
 
-  json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
-  json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
-  json.add("CtrlTError", (double)hInternals.TError * 0.025);
-  json.add("CtrlTErrorPrev", (double)hInternals.TErrorPrev * 0.025);
-  json.add("CtrlIntegral", (double)hInternals.Integral * 0.025);
-  json.add("CtrlYp", (double)hInternals.Yp * 0.01);
-  json.add("CtrlYi", (double)hInternals.Yi * 0.01);
-  json.add("CtrlYd", (double)hInternals.Yd * 0.01);
-  json.add("CtrlY", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hInternals.Y));
-  json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
+    if (hProp.m_HeatingControlMode != HeatingControlMode::PID) {
+      return JSONWriter::failure("Not a PID controller");
+    }
+    if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {
+      return JSONWriter::failure("PID controller not running");
+    }
+    memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
+    hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
+            hProp.m_HeatingControlDSUID, pZone->getID());
+
+    json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
+    json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
+    json.add("CtrlTError", (double)hInternals.TError * 0.025);
+    json.add("CtrlTErrorPrev", (double)hInternals.TErrorPrev * 0.025);
+    json.add("CtrlIntegral", (double)hInternals.Integral * 0.025);
+    json.add("CtrlYp", (double)hInternals.Yp * 0.01);
+    json.add("CtrlYi", (double)hInternals.Yi * 0.01);
+    json.add("CtrlYd", (double)hInternals.Yd * 0.01);
+    json.add("CtrlY", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hInternals.Y));
+    json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
+
+    // end current dsm object
+    json.endObject();
+  }
 
   return json.successJSON();
 }
@@ -860,8 +811,6 @@ WebServerResponse ZoneRequestHandler::jsonHandleRequest(
         return getTemperatureControlValues(pZone, pGroup, _request);
       } else if (_request.getMethod() == "setTemperatureControlValues") {
         return setTemperatureControlValues(pZone, pGroup, _request);
-      } else if (_request.getMethod() == "setTemperatureControlState") {
-        return setTemperatureControlState(pZone, pGroup, _request);
       } else if (_request.getMethod() == "getTemperatureControlInternals") {
         return getTemperatureControlInternals(pZone, pGroup, _request);
       } else if (_request.getMethod() == "setStatusField") {
