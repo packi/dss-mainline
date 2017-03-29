@@ -321,6 +321,10 @@ namespace dss {
     MANUAL = 4,
   };
 
+  boost::optional<const char*> heatingControlModeName(HeatingControlMode x);
+  boost::optional<HeatingControlMode> heatingControlModeFromName(const std::string& x);
+  std::ostream& operator<<(std::ostream& stream, HeatingControlMode x);
+
   // Heating Control States
   const int HeatingControlStateIDInternal = 0;
   const int HeatingControlStateIDExternal = 1;

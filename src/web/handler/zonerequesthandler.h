@@ -41,6 +41,7 @@ namespace dss {
     // methods to render different heating info in JSON format
     static void addTemperatureControlStatus(JSONWriter& json, boost::shared_ptr<Zone> pZone);
     static void addTemperatureControlConfig(JSONWriter& json, boost::shared_ptr<Zone> pZone);
+    static void addTemperatureControlConfig2(JSONWriter& json, boost::shared_ptr<Zone> pZone);
     static void addTemperatureControlValues(JSONWriter& json, boost::shared_ptr<Zone> pZone);
 
   private:
@@ -56,6 +57,7 @@ namespace dss {
     std::string getReachableScenes(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getTemperatureControlStatus(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getTemperatureControlConfig(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string getTemperatureControlConfig2(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string setTemperatureControlConfig(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getTemperatureControlValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string setTemperatureControlValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);

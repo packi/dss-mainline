@@ -299,6 +299,24 @@ namespace dss {
         json.endArray();
         return json.successJSON();
 
+      } else if(_request.getMethod() == "getTemperatureControlConfig2") {
+        JSONWriter json;
+
+        json.startArray("zones");
+        std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zoneList) {
+          if (pZone->getID() == 0) {
+            continue;
+          }
+          json.startObject();
+          json.add("id", pZone->getID());
+          json.add("name", pZone->getName());
+          ZoneRequestHandler::addTemperatureControlConfig2(json, pZone);
+          json.endObject();
+        }
+        json.endArray();
+        return json.successJSON();
+
       } else if(_request.getMethod() == "getTemperatureControlValues") {
         JSONWriter json;
 

@@ -218,6 +218,18 @@ std::string ZoneRequestHandler::getTemperatureControlConfig(
   return json.successJSON();
 }
 
+std::string ZoneRequestHandler::getTemperatureControlConfig2(
+        boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
+  if (pZone->getID() == 0) {
+    return JSONWriter::failure("Zone id 0 is invalid");
+  }
+
+  JSONWriter json;
+  addTemperatureControlConfig2(json, pZone);
+
+  return json.successJSON();
+}
+
 std::string ZoneRequestHandler::setTemperatureControlConfig(
         boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
   if (pZone->getID() == 0) {
@@ -708,6 +720,8 @@ WebServerResponse ZoneRequestHandler::jsonHandleRequest(
         return getTemperatureControlStatus(pZone, pGroup, _request);
       } else if (_request.getMethod() == "getTemperatureControlConfig") {
         return getTemperatureControlConfig(pZone, pGroup, _request);
+      } else if (_request.getMethod() == "getTemperatureControlConfig2") {
+        return getTemperatureControlConfig2(pZone, pGroup, _request);
       } else if (_request.getMethod() == "setTemperatureControlConfig") {
         return setTemperatureControlConfig(pZone, pGroup, _request);
       } else if (_request.getMethod() == "getTemperatureControlValues") {
@@ -798,6 +812,88 @@ void ZoneRequestHandler::addTemperatureControlConfig(JSONWriter& json, boost::sh
     case HeatingControlMode::FIXED:
       break;
   }
+}
+
+void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
+
+  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+  ZoneHeatingOperationModeSpec_t hOpValues;
+  memset(&hOpValues, 0, sizeof(hOpValues));
+
+  // TODO(now): currently we do not have a way to get values when no dsm is set as controller
+  if (hProp.m_HeatingControlDSUID != DSUID_NULL) {
+    hOpValues = DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
+        hProp.m_HeatingControlDSUID, pZone->getID());
+  }
+
+  if (auto&& name = heatingControlModeName(hProp.m_HeatingControlMode)) {
+    json.add("mode", *name);
+  } else {
+    json.add("mode", "unknown");
+  }
+
+  switch (hProp.m_HeatingControlMode) {
+    case HeatingControlMode::OFF:
+      break;
+    case HeatingControlMode::PID:
+      json.startObject("targetTemperatures");
+      json.add("0", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+      json.add("1", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+      json.add("2", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+      json.add("3", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+      json.add("4", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+      json.add("5", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+      json.add("6", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+      json.add("7", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+      json.add("8", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode8));
+      json.add("9", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode9));
+      json.add("10", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeA));
+      json.add("11", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeB));
+      json.endObject();
+      break;
+    case HeatingControlMode::ZONE_FOLLOWER:
+      break;
+    case HeatingControlMode::MANUAL:
+      break;
+    case HeatingControlMode::FIXED:
+      json.startObject("fixedValues");
+      json.add("0", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+      json.add("1", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+      json.add("2", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+      json.add("3", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+      json.add("4", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+      json.add("5", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+      json.add("6", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+      json.add("7", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+      json.add("8", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode8));
+      json.add("9", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode9));
+      json.add("10", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeA));
+      json.add("11", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeB));
+      json.endObject();
+      break;
+  }
+
+  json.startObject("controlMode");
+  json.add("emergencyValue", hProp.m_EmergencyValue - 100);
+  json.add("ctrlKp", (double)hProp.m_Kp * 0.025);
+  json.add("ctrlTs", hProp.m_Ts);
+  json.add("ctrlTi", hProp.m_Ti);
+  json.add("ctrlKd", hProp.m_Kd);
+  json.add("ctrlImin", (double)hProp.m_Imin * 0.025);
+  json.add("ctrlImax", (double)hProp.m_Imax * 0.025);
+  json.add("ctrlYmin", hProp.m_Ymin - 100);
+  json.add("ctrlYmax", hProp.m_Ymax - 100);
+  json.add("ctrlAntiWindUp", (hProp.m_AntiWindUp > 0));
+  json.endObject();
+
+  json.startObject("zoneFollowerMode");
+  json.add("referenceZone", hProp.m_HeatingMasterZone);
+  json.add("ctrlOffset", hProp.m_CtrlOffset);
+  json.endObject();
+
+  json.startObject("manualMode");
+  json.add("controlValue", hProp.m_ManualValue - 100);
+  json.endObject();
 }
 
 void ZoneRequestHandler::addTemperatureControlValues(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
