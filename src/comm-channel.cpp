@@ -283,10 +283,10 @@ std::string CommChannel::sendMessage(const std::string& message)
       return "";
     }
     int dSAPort = DSS::getInstance()->getPropertySystem().getIntValue("/config/communication/sendport");
-    CC::CommunicationChannelClient cc(dSAPort);
 
     try
     {
+        CC::CommunicationChannelClient cc(dSAPort);
         boost::shared_ptr<CC::CommunicationData> c = cc.sendData((unsigned char*) message.c_str(), message.length());
         const char *data = (const char *) c->getDataPtr();
         if (data != NULL)
