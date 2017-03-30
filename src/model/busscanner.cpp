@@ -159,7 +159,7 @@ namespace dss {
         boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(0);
         try {
           scanGroupsOfZone(_dsMeter, zone);
-          // TODO(soon): read scene history
+          // TODO(someday): read scene history
         } catch(BusApiError& e) {
           log("scanDSMeter: error scanning zone 0: " + std::string(e.what()), lsWarning);
         }
@@ -771,7 +771,7 @@ namespace dss {
       if (isDefaultGroup(group.GroupID)) {
         boost::shared_ptr<Group> zoneGroup = _zone->tryGetGroup(group.GroupID).lock();
 
-        // TODO(soon): re-implement the configuration synchronization logic for default groups
+        // TODO(someday): re-implement the configuration synchronization logic for default groups
         if (zoneGroup == NULL) {
           // note: This should never happen as default groups are created during zone allocation
           log(" scanDSMeter:    Adding new group to zone");

@@ -399,7 +399,7 @@ namespace dss {
               json.endObject();
               continue;
             }
-            throw e;
+            throw;
           }
 
           json.add("IsConfigured", true);
