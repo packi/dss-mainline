@@ -24,6 +24,7 @@
 #define ZONEREQUESTHANDLER_H_
 
 #include "deviceinterfacerequesthandler.h"
+#include "businterface.h"
 
 namespace dss {
 
@@ -59,6 +60,7 @@ namespace dss {
     std::string getTemperatureControlConfig(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getTemperatureControlConfig2(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string setTemperatureControlConfig(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+    std::string setTemperatureControlConfig2(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getTemperatureControlValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string setTemperatureControlValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getTemperatureControlInternals(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
@@ -67,6 +69,13 @@ namespace dss {
     std::string clearSensorSource(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getAssignedSensors(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getSensorValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
+
+    void parseTargetTemperatures(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
+    void parseFixedValues(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
+    void parseControlMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+    void parseFollowerMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+    void parseManualMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+
   }; // ZoneRequestHandler
 
 }

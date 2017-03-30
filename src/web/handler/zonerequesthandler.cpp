@@ -44,6 +44,10 @@
 
 #include <algorithm>
 
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/document.h>
+using rapidjson::Document;
+
 namespace dss {
 
 //=========================================== ZoneRequestHandler
@@ -292,6 +296,255 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   bool tempBool;
   if (_request.getParameter("CtrlAntiWindUp", tempBool)) {
     hConfig.AntiWindUp = tempBool ? 1 : 0;
+  }
+
+  StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
+  manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
+  return json.successJSON();
+}
+
+void ZoneRequestHandler::parseTargetTemperatures(
+    const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues) {
+  Document d;
+  d.Parse(jsonObject.c_str());
+
+  if (!d.IsObject()) {
+    throw std::runtime_error("Error during Json parsing");
+  }
+
+  // try to get all valid passed values
+  if (d.HasMember("0") && d["0"].IsNumber()) {
+    hOpValues.OpMode0 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["0"].GetDouble());
+  }
+  if (d.HasMember("1") && d["1"].IsNumber()) {
+    hOpValues.OpMode1 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["1"].GetDouble());
+  }
+  if (d.HasMember("2") && d["2"].IsNumber()) {
+    hOpValues.OpMode2 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["2"].GetDouble());
+  }
+  if (d.HasMember("3") && d["3"].IsNumber()) {
+    hOpValues.OpMode3 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["3"].GetDouble());
+  }
+  if (d.HasMember("4") && d["4"].IsNumber()) {
+    hOpValues.OpMode4 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["4"].GetDouble());
+  }
+  if (d.HasMember("5") && d["5"].IsNumber()) {
+    hOpValues.OpMode5 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["5"].GetDouble());
+  }
+  if (d.HasMember("6") && d["6"].IsNumber()) {
+    hOpValues.OpMode6 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["6"].GetDouble());
+  }
+  if (d.HasMember("7") && d["7"].IsNumber()) {
+    hOpValues.OpMode7 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["7"].GetDouble());
+  }
+  if (d.HasMember("8") && d["8"].IsNumber()) {
+    hOpValues.OpMode8 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["8"].GetDouble());
+  }
+  if (d.HasMember("9") && d["9"].IsNumber()) {
+    hOpValues.OpMode9 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["9"].GetDouble());
+  }
+  if (d.HasMember("10") && d["10"].IsNumber()) {
+    hOpValues.OpModeA = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["10"].GetDouble());
+  }
+  if (d.HasMember("11") && d["11"].IsNumber()) {
+    hOpValues.OpModeB = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["11"].GetDouble());
+  }
+}
+
+void ZoneRequestHandler::parseFixedValues(
+    const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues) {
+  Document d;
+  d.Parse(jsonObject.c_str());
+
+  if (!d.IsObject()) {
+    throw std::runtime_error("Error during Json parsing");
+  }
+
+  // try to get all valid passed values
+  if (d.HasMember("0") && d["0"].IsNumber()) {
+    hOpValues.OpMode0 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["0"].GetDouble());
+  }
+  if (d.HasMember("1") && d["1"].IsNumber()) {
+    hOpValues.OpMode1 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["1"].GetDouble());
+  }
+  if (d.HasMember("2") && d["2"].IsNumber()) {
+    hOpValues.OpMode2 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["2"].GetDouble());
+  }
+  if (d.HasMember("3") && d["3"].IsNumber()) {
+    hOpValues.OpMode3 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["3"].GetDouble());
+  }
+  if (d.HasMember("4") && d["4"].IsNumber()) {
+    hOpValues.OpMode4 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["4"].GetDouble());
+  }
+  if (d.HasMember("5") && d["5"].IsNumber()) {
+    hOpValues.OpMode5 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["5"].GetDouble());
+  }
+  if (d.HasMember("6") && d["6"].IsNumber()) {
+    hOpValues.OpMode6 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["6"].GetDouble());
+  }
+  if (d.HasMember("7") && d["7"].IsNumber()) {
+    hOpValues.OpMode7 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["7"].GetDouble());
+  }
+  if (d.HasMember("8") && d["8"].IsNumber()) {
+    hOpValues.OpMode8 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["8"].GetDouble());
+  }
+  if (d.HasMember("9") && d["9"].IsNumber()) {
+    hOpValues.OpMode9 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["9"].GetDouble());
+  }
+  if (d.HasMember("10") && d["10"].IsNumber()) {
+    hOpValues.OpModeA = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["10"].GetDouble());
+  }
+  if (d.HasMember("11") && d["11"].IsNumber()) {
+    hOpValues.OpModeB = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["11"].GetDouble());
+  }
+}
+
+void ZoneRequestHandler::parseControlMode(
+    const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
+  Document d;
+  d.Parse(jsonObject.c_str());
+
+  if (!d.IsObject()) {
+    throw std::runtime_error("Error during Json parsing");
+  }
+
+  if (d.HasMember("emergencyValue") && d["emergencyValue"].IsNumber()) {
+    hConfig.EmergencyValue = d["emergencyValue"].GetInt() + 100;
+  }
+  if (d.HasMember("ctrlKp") && d["ctrlKp"].IsNumber()) {
+    hConfig.Kp = d["ctrlKp"].GetDouble() * 40;
+  }
+  if (d.HasMember("ctrlTs") && d["ctrlTs"].IsNumber()) {
+    hConfig.Ts = d["ctrlTs"].GetInt();
+  }
+  if (d.HasMember("ctrlTi") && d["ctrlTi"].IsNumber()) {
+    hConfig.Ti = d["ctrlTi"].GetInt();
+  }
+  if (d.HasMember("ctrlKd") && d["ctrlKd"].IsNumber()) {
+    hConfig.Kd = d["ctrlKd"].GetInt();
+  }
+  if (d.HasMember("ctrlImin") && d["ctrlImin"].IsNumber()) {
+    hConfig.Imin = d["ctrlImin"].GetDouble() * 40;
+  }
+  if (d.HasMember("ctrlImax") && d["ctrlImax"].IsNumber()) {
+    hConfig.Imax = d["ctrlImax"].GetDouble() * 40;
+  }
+  if (d.HasMember("ctrlYmin") && d["ctrlYmin"].IsNumber()) {
+    hConfig.Ymin = d["ctrlYmin"].GetInt() + 100;
+  }
+  if (d.HasMember("ctrlYmax") && d["ctrlYmax"].IsNumber()) {
+    hConfig.Ymax = d["ctrlYmax"].GetInt() + 100;
+  }
+  if (d.HasMember("ctrlAntiWindUp") && d["ctrlAntiWindUp"].IsBool()) {
+    hConfig.AntiWindUp = d["ctrlAntiWindUp"].GetBool() ? 1 : 0;
+  }
+}
+
+void ZoneRequestHandler::parseFollowerMode(
+    const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
+  Document d;
+  d.Parse(jsonObject.c_str());
+
+  if (!d.IsObject()) {
+    throw std::runtime_error("Error during Json parsing");
+  }
+
+  if (d.HasMember("referenceZone") && d["referenceZone"].IsNumber()) {
+    hConfig.SourceZoneId = d["referenceZone"].GetInt();
+  }
+  if (d.HasMember("ctrlOffset") && d["ctrlOffset"].IsNumber()) {
+    hConfig.Offset = d["ctrlOffset"].GetInt();
+  }
+}
+
+void ZoneRequestHandler::parseManualMode(
+    const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
+  Document d;
+  d.Parse(jsonObject.c_str());
+
+  if (!d.IsObject()) {
+    throw std::runtime_error("Error during Json parsing");
+  }
+
+  if (d.HasMember("controlValue") && d["controlValue"].IsNumber()) {
+    hConfig.ManualValue = d["controlValue"].GetInt() + 100;
+  }
+}
+
+std::string ZoneRequestHandler::setTemperatureControlConfig2(
+        boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
+  if (pZone->getID() == 0) {
+    return JSONWriter::failure("Zone id 0 is invalid");
+  }
+
+  JSONWriter json;
+  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+  ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
+
+  if (_request.hasParameter("mode")) {
+    if (auto controlMode = heatingControlModeFromName(_request.getParameter("mode"))) {
+      hConfig.ControllerMode = *controlMode;
+    } else {
+      return JSONWriter::failure("Mode is invalid!");
+    }
+  }
+
+  if (_request.hasParameter("targetTemperatures")) {
+    ZoneHeatingOperationModeSpec_t hOpValues;
+
+    // TODO(now) now we can set this values only in case proper mode is set, change this when data will be stored in dss
+    if (hConfig.ControllerMode != HeatingControlMode::PID) {
+      return JSONWriter::failure("Cannot set control values in current mode");
+    }
+
+    memset(&hOpValues, 0, sizeof(hOpValues));
+    if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
+      return JSONWriter::failure("Not a heating control device");
+    } else {
+      hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
+              hProp.m_HeatingControlDSUID, pZone->getID());
+    }
+
+    // update the temperatures
+    parseTargetTemperatures(_request.getParameter("targetTemperatures"), hOpValues);
+
+    m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingOperationModes(
+            hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
+  }
+
+  if (_request.hasParameter("fixedValues")) {
+    ZoneHeatingOperationModeSpec_t hOpValues;
+
+    // TODO(now) now we can set this values only in case proper mode is set, change this when data will be stored in dss
+    if (hConfig.ControllerMode != HeatingControlMode::FIXED) {
+      return JSONWriter::failure("Cannot set control values in current mode");
+    }
+
+    memset(&hOpValues, 0, sizeof(hOpValues));
+    if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
+      return JSONWriter::failure("Not a heating control device");
+    } else {
+      hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
+              hProp.m_HeatingControlDSUID, pZone->getID());
+    }
+
+    // update the fixed values
+    parseFixedValues(_request.getParameter("fixedValues"), hOpValues);
+
+    m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingOperationModes(
+            hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
+  }
+
+  if (_request.hasParameter("controlMode")) {
+    parseControlMode(_request.getParameter("controlMode"), hConfig);
+  }
+
+  if (_request.hasParameter("zoneFollowerMode")) {
+    parseFollowerMode(_request.getParameter("zoneFollowerMode"), hConfig);
+  }
+
+  if (_request.hasParameter("manualMode")) {
+    parseManualMode(_request.getParameter("manualMode"), hConfig);
   }
 
   StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
@@ -724,6 +977,8 @@ WebServerResponse ZoneRequestHandler::jsonHandleRequest(
         return getTemperatureControlConfig2(pZone, pGroup, _request);
       } else if (_request.getMethod() == "setTemperatureControlConfig") {
         return setTemperatureControlConfig(pZone, pGroup, _request);
+      } else if (_request.getMethod() == "setTemperatureControlConfig2") {
+        return setTemperatureControlConfig2(pZone, pGroup, _request);
       } else if (_request.getMethod() == "getTemperatureControlValues") {
         return getTemperatureControlValues(pZone, pGroup, _request);
       } else if (_request.getMethod() == "setTemperatureControlValues") {
