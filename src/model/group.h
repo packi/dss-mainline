@@ -152,6 +152,7 @@ namespace dss {
 
     /// Get status object for the group. nullptr if the group does not support status.
     Status* tryGetStatus() { return m_status.get(); }
+    Status& getStatus();
 
     /// Convenient scripting support method calling `getStatus()->getField(field).setValueAndPush(value)`.
     /// Throws on any error.
