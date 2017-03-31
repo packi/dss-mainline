@@ -601,12 +601,14 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   BOOST_CHECK_EQUAL(num, 1);
 } // testApartmentGetDSMeters
 
-BOOST_AUTO_TEST_CASE(testConnectedDevice) {
+BOOST_AUTO_TEST_CASE(testTemperatureControlConfiguration2) {
   Apartment apt(NULL);
+  InstanceHelper helper(&apt);
   PropertySystem propSys;
   apt.setPropertySystem(&propSys);
+
+  ZoneHeatingProperties_t hProps;
   apt.allocateZone(42);
-  apt.allocateZone(43);
 
   boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
   env->initialize();
@@ -615,25 +617,40 @@ BOOST_AUTO_TEST_CASE(testConnectedDevice) {
 
   boost::scoped_ptr<ScriptContext> ctx(env->getContext());
 
-  BOOST_CHECK_EQUAL(apt.getZone(42)->getGroup(4)->hasConnectedDevices(), false);
-  PropertyNodePtr connectedNode = propSys.getProperty("/apartment/zones/zone42/groups/group4/connectedDevices");
-  BOOST_CHECK(connectedNode);
-  BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 0);
+  // check first initial configuration
+  auto jsResponse = ctx->evaluate<std::string>("JSON.stringify(getZoneByID(42).getTemperatureControlConfiguration2())");
+  BOOST_CHECK_EQUAL(jsResponse, R"({"mode":"off","controlMode":{"emergencyValue":75,"ctrlKp":0,"ctrlTs":0,"ctrlTi":0,"ctrlKd":0,"ctrlImin":0,"ctrlImax":0,"ctrlYmin":-100,"ctrlYmax":-100,"ctrlAntiWindUp":false},"zoneFollowerMode":{"referenceZone":0,"ctrlOffset":0},"manualMode":{"controlValue":-100}})");
 
-  ctx->evaluate<void>("getZoneByID(42).addConnectedDevice(4)");
+  // set some dummy control dms uid
+  hProps = apt.getZone(42)->getHeatingProperties();
+  hProps.m_HeatingControlDSUID = dsuid1;
+  apt.getZone(42)->setHeatingProperties(hProps);
 
-  BOOST_CHECK_EQUAL(apt.getZone(42)->getGroup(4)->hasConnectedDevices(), true);
-  BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 1);
+  // try to set configuration through javascript
+  ctx->evaluate<void>(R"(getZoneByID(42).setTemperatureControlConfiguration2(JSON.parse('{"mode":"control","controlMode":{"emergencyValue":100,"ctrlKp":1,"ctrlTs":2,"ctrlTi":3,"ctrlKd":4,"ctrlImin":5,"ctrlImax":6,"ctrlYmin":7,"ctrlYmax":8,"ctrlAntiWindUp":true},"zoneFollowerMode":{"referenceZone":1,"ctrlOffset":15},"manualMode":{"controlValue":25}}')))");
+  // check that the settings were applied in model
+  hProps = apt.getZone(42)->getHeatingProperties();
 
-  ctx->evaluate<void>("getZoneByID(43).removeConnectedDevice(4)");
+  BOOST_CHECK_EQUAL(hProps.m_HeatingControlMode, HeatingControlMode::PID);
 
-  BOOST_CHECK_EQUAL(apt.getZone(42)->getGroup(4)->hasConnectedDevices(), true);
-  BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 1);
+  BOOST_CHECK_EQUAL(hProps.m_EmergencyValue, 100 + 100);
+  BOOST_CHECK_EQUAL(hProps.m_Kp, 1 * 40);
+  BOOST_CHECK_EQUAL(hProps.m_Ts, 2);
+  BOOST_CHECK_EQUAL(hProps.m_Ti, 3);
+  BOOST_CHECK_EQUAL(hProps.m_Kd, 4);
+  BOOST_CHECK_EQUAL(hProps.m_Imin, 5 * 40);
+  BOOST_CHECK_EQUAL(hProps.m_Imax, 6 * 40);
+  BOOST_CHECK_EQUAL(hProps.m_Ymin, 7 + 100);
+  BOOST_CHECK_EQUAL(hProps.m_Ymax, 8 + 100);
+  BOOST_CHECK_EQUAL(hProps.m_AntiWindUp, 1);
 
-  ctx->evaluate<void>("getZoneByID(42).removeConnectedDevice(4)");
+  BOOST_CHECK_EQUAL(hProps.m_HeatingMasterZone, 1);
+  BOOST_CHECK_EQUAL(hProps.m_CtrlOffset, 15);
 
-  BOOST_CHECK_EQUAL(apt.getZone(42)->getGroup(4)->hasConnectedDevices(), false);
-  BOOST_CHECK_EQUAL(connectedNode->getIntegerValue(), 0);
+  BOOST_CHECK_EQUAL(hProps.m_ManualValue, 125);
+
+
+
 } // testConnectedDevice
 
 BOOST_AUTO_TEST_CASE(testGroupConfiguration) {
