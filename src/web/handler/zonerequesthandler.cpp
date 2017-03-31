@@ -308,45 +308,55 @@ void ZoneRequestHandler::parseTargetTemperatures(
   Document d;
   d.Parse(jsonObject.c_str());
 
-  if (!d.IsObject()) {
-    throw std::runtime_error("Error during Json parsing");
-  }
+  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
 
   // try to get all valid passed values
-  if (d.HasMember("0") && d["0"].IsNumber()) {
+  if (d.HasMember("0")) {
+    DS_REQUIRE(d["0"].IsNumber());
     hOpValues.OpMode0 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["0"].GetDouble());
   }
-  if (d.HasMember("1") && d["1"].IsNumber()) {
+  if (d.HasMember("1")) {
+    DS_REQUIRE(d["1"].IsNumber());
     hOpValues.OpMode1 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["1"].GetDouble());
   }
-  if (d.HasMember("2") && d["2"].IsNumber()) {
+  if (d.HasMember("2")) {
+    DS_REQUIRE(d["2"].IsNumber());
     hOpValues.OpMode2 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["2"].GetDouble());
   }
-  if (d.HasMember("3") && d["3"].IsNumber()) {
+  if (d.HasMember("3")) {
+    DS_REQUIRE(d["3"].IsNumber());
     hOpValues.OpMode3 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["3"].GetDouble());
   }
-  if (d.HasMember("4") && d["4"].IsNumber()) {
+  if (d.HasMember("4")) {
+    DS_REQUIRE(d["4"].IsNumber());
     hOpValues.OpMode4 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["4"].GetDouble());
   }
-  if (d.HasMember("5") && d["5"].IsNumber()) {
+  if (d.HasMember("5")) {
+    DS_REQUIRE(d["5"].IsNumber());
     hOpValues.OpMode5 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["5"].GetDouble());
   }
-  if (d.HasMember("6") && d["6"].IsNumber()) {
+  if (d.HasMember("6")) {
+    DS_REQUIRE(d["6"].IsNumber());
     hOpValues.OpMode6 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["6"].GetDouble());
   }
-  if (d.HasMember("7") && d["7"].IsNumber()) {
+  if (d.HasMember("7")) {
+    DS_REQUIRE(d["7"].IsNumber());
     hOpValues.OpMode7 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["7"].GetDouble());
   }
-  if (d.HasMember("8") && d["8"].IsNumber()) {
+  if (d.HasMember("8")) {
+    DS_REQUIRE(d["8"].IsNumber());
     hOpValues.OpMode8 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["8"].GetDouble());
   }
-  if (d.HasMember("9") && d["9"].IsNumber()) {
+  if (d.HasMember("9")) {
+    DS_REQUIRE(d["9"].IsNumber());
     hOpValues.OpMode9 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["9"].GetDouble());
   }
-  if (d.HasMember("10") && d["10"].IsNumber()) {
+  if (d.HasMember("10")) {
+    DS_REQUIRE(d["10"].IsNumber());
     hOpValues.OpModeA = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["10"].GetDouble());
   }
-  if (d.HasMember("11") && d["11"].IsNumber()) {
+  if (d.HasMember("11")) {
+    DS_REQUIRE(d["11"].IsNumber());
     hOpValues.OpModeB = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["11"].GetDouble());
   }
 }
@@ -356,45 +366,55 @@ void ZoneRequestHandler::parseFixedValues(
   Document d;
   d.Parse(jsonObject.c_str());
 
-  if (!d.IsObject()) {
-    throw std::runtime_error("Error during Json parsing");
-  }
+  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
 
   // try to get all valid passed values
-  if (d.HasMember("0") && d["0"].IsNumber()) {
+  if (d.HasMember("0")) {
+    DS_REQUIRE(d["0"].IsNumber());
     hOpValues.OpMode0 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["0"].GetDouble());
   }
-  if (d.HasMember("1") && d["1"].IsNumber()) {
+  if (d.HasMember("1")) {
+    DS_REQUIRE(d["1"].IsNumber());
     hOpValues.OpMode1 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["1"].GetDouble());
   }
-  if (d.HasMember("2") && d["2"].IsNumber()) {
+  if (d.HasMember("2")) {
+    DS_REQUIRE(d["2"].IsNumber());
     hOpValues.OpMode2 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["2"].GetDouble());
   }
-  if (d.HasMember("3") && d["3"].IsNumber()) {
+  if (d.HasMember("3")) {
+    DS_REQUIRE(d["3"].IsNumber());
     hOpValues.OpMode3 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["3"].GetDouble());
   }
-  if (d.HasMember("4") && d["4"].IsNumber()) {
+  if (d.HasMember("4")) {
+    DS_REQUIRE(d["4"].IsNumber());
     hOpValues.OpMode4 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["4"].GetDouble());
   }
-  if (d.HasMember("5") && d["5"].IsNumber()) {
+  if (d.HasMember("5")) {
+    DS_REQUIRE(d["5"].IsNumber());
     hOpValues.OpMode5 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["5"].GetDouble());
   }
-  if (d.HasMember("6") && d["6"].IsNumber()) {
+  if (d.HasMember("6")) {
+    DS_REQUIRE(d["6"].IsNumber());
     hOpValues.OpMode6 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["6"].GetDouble());
   }
-  if (d.HasMember("7") && d["7"].IsNumber()) {
+  if (d.HasMember("7")) {
+    DS_REQUIRE(d["7"].IsNumber());
     hOpValues.OpMode7 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["7"].GetDouble());
   }
-  if (d.HasMember("8") && d["8"].IsNumber()) {
+  if (d.HasMember("8")) {
+    DS_REQUIRE(d["8"].IsNumber());
     hOpValues.OpMode8 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["8"].GetDouble());
   }
-  if (d.HasMember("9") && d["9"].IsNumber()) {
+  if (d.HasMember("9")) {
+    DS_REQUIRE(d["9"].IsNumber());
     hOpValues.OpMode9 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["9"].GetDouble());
   }
-  if (d.HasMember("10") && d["10"].IsNumber()) {
+  if (d.HasMember("10")) {
+    DS_REQUIRE(d["10"].IsNumber());
     hOpValues.OpModeA = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["10"].GetDouble());
   }
-  if (d.HasMember("11") && d["11"].IsNumber()) {
+  if (d.HasMember("11")) {
+    DS_REQUIRE(d["11"].IsNumber());
     hOpValues.OpModeB = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["11"].GetDouble());
   }
 }
@@ -404,38 +424,46 @@ void ZoneRequestHandler::parseControlMode(
   Document d;
   d.Parse(jsonObject.c_str());
 
-  if (!d.IsObject()) {
-    throw std::runtime_error("Error during Json parsing");
-  }
+  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
 
-  if (d.HasMember("emergencyValue") && d["emergencyValue"].IsNumber()) {
+  if (d.HasMember("emergencyValue")) {
+    DS_REQUIRE(d["emergencyValue"].IsNumber());
     hConfig.EmergencyValue = d["emergencyValue"].GetInt() + 100;
   }
-  if (d.HasMember("ctrlKp") && d["ctrlKp"].IsNumber()) {
+  if (d.HasMember("ctrlKp")) {
+    DS_REQUIRE(d["ctrlKp"].IsNumber());
     hConfig.Kp = d["ctrlKp"].GetDouble() * 40;
   }
-  if (d.HasMember("ctrlTs") && d["ctrlTs"].IsNumber()) {
+  if (d.HasMember("ctrlTs")) {
+    DS_REQUIRE(d["ctrlTs"].IsNumber());
     hConfig.Ts = d["ctrlTs"].GetInt();
   }
-  if (d.HasMember("ctrlTi") && d["ctrlTi"].IsNumber()) {
+  if (d.HasMember("ctrlTi")) {
+    DS_REQUIRE(d["ctrlTi"].IsNumber());
     hConfig.Ti = d["ctrlTi"].GetInt();
   }
-  if (d.HasMember("ctrlKd") && d["ctrlKd"].IsNumber()) {
+  if (d.HasMember("ctrlKd")) {
+    DS_REQUIRE(d["ctrlKd"].IsNumber());
     hConfig.Kd = d["ctrlKd"].GetInt();
   }
-  if (d.HasMember("ctrlImin") && d["ctrlImin"].IsNumber()) {
+  if (d.HasMember("ctrlImin")) {
+    DS_REQUIRE(d["ctrlImin"].IsNumber());
     hConfig.Imin = d["ctrlImin"].GetDouble() * 40;
   }
-  if (d.HasMember("ctrlImax") && d["ctrlImax"].IsNumber()) {
+  if (d.HasMember("ctrlImax")) {
+    DS_REQUIRE(d["ctrlImax"].IsNumber());
     hConfig.Imax = d["ctrlImax"].GetDouble() * 40;
   }
-  if (d.HasMember("ctrlYmin") && d["ctrlYmin"].IsNumber()) {
+  if (d.HasMember("ctrlYmin")) {
+    DS_REQUIRE(d["ctrlYmin"].IsNumber());
     hConfig.Ymin = d["ctrlYmin"].GetInt() + 100;
   }
-  if (d.HasMember("ctrlYmax") && d["ctrlYmax"].IsNumber()) {
+  if (d.HasMember("ctrlYmax")) {
+    DS_REQUIRE(d["ctrlYmax"].IsNumber());
     hConfig.Ymax = d["ctrlYmax"].GetInt() + 100;
   }
-  if (d.HasMember("ctrlAntiWindUp") && d["ctrlAntiWindUp"].IsBool()) {
+  if (d.HasMember("ctrlAntiWindUp")) {
+    DS_REQUIRE(d["ctrlAntiWindUp"].IsBool());
     hConfig.AntiWindUp = d["ctrlAntiWindUp"].GetBool() ? 1 : 0;
   }
 }
@@ -445,14 +473,14 @@ void ZoneRequestHandler::parseFollowerMode(
   Document d;
   d.Parse(jsonObject.c_str());
 
-  if (!d.IsObject()) {
-    throw std::runtime_error("Error during Json parsing");
-  }
+  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
 
-  if (d.HasMember("referenceZone") && d["referenceZone"].IsNumber()) {
+  if (d.HasMember("referenceZone")) {
+    DS_REQUIRE(d["referenceZone"].IsNumber());
     hConfig.SourceZoneId = d["referenceZone"].GetInt();
   }
-  if (d.HasMember("ctrlOffset") && d["ctrlOffset"].IsNumber()) {
+  if (d.HasMember("ctrlOffset")) {
+    DS_REQUIRE(d["ctrlOffset"].IsNumber());
     hConfig.Offset = d["ctrlOffset"].GetInt();
   }
 }
@@ -462,11 +490,10 @@ void ZoneRequestHandler::parseManualMode(
   Document d;
   d.Parse(jsonObject.c_str());
 
-  if (!d.IsObject()) {
-    throw std::runtime_error("Error during Json parsing");
-  }
+  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
 
-  if (d.HasMember("controlValue") && d["controlValue"].IsNumber()) {
+  if (d.HasMember("controlValue")) {
+    DS_REQUIRE(d["controlValue"].IsNumber());
     hConfig.ManualValue = d["controlValue"].GetInt() + 100;
   }
 }
