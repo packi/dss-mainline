@@ -160,6 +160,10 @@ namespace dss {
     /** Helper function to convert a jsval to a t. */
     template<class t>
     t convertTo(const jsval& _val);
+
+    /*** Helper function to convert value to JSON */
+    std::string jsonStringify(jsval& val);
+
   }; // ScriptContext
 
   /** Exception class that will be raised if anything out of the

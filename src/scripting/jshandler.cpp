@@ -248,6 +248,41 @@ namespace dss {
     throw ScriptException("Value is not of type number");
   }
 
+  class Stringifier
+  {
+    std::stringstream m_Stream;
+    ScriptContext& m_Context;
+
+  public:
+
+    Stringifier(ScriptContext& context) : m_Context(context) { }
+
+    static int callback(const jschar *buf, uint32 len, void *data)
+    {
+      char tmpBuff[len+1];
+      size_t dstlenp = sizeof(tmpBuff);
+      memset(tmpBuff, 0, dstlenp);
+
+      JS_EncodeCharacters(static_cast<Stringifier*>(data)->m_Context.getJSContext(), buf, len, tmpBuff, &dstlenp);
+      static_cast<Stringifier*>(data)->m_Stream << tmpBuff;
+      return 1;
+    }
+
+    std::string getOutput() { return m_Stream.str(); }
+
+  };
+
+  std::string ScriptContext::jsonStringify(jsval& val) {
+    Stringifier stringifier(*this);
+
+    if (!JS_Stringify(getJSContext(), &val, nullptr, 0, &Stringifier::callback, &stringifier))
+    {
+      return std::string();
+    }
+
+    return stringifier.getOutput();
+  }
+
   void ScriptContext::jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er) {
     char *pointer=NULL;
     char *line=NULL;
