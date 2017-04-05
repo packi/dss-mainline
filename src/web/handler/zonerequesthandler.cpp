@@ -44,10 +44,6 @@
 
 #include <algorithm>
 
-#define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/document.h>
-using rapidjson::Document;
-
 namespace dss {
 
 //=========================================== ZoneRequestHandler
@@ -295,119 +291,6 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   return json.successJSON();
 }
 
-void ZoneRequestHandler::parseTargetTemperatures(
-    const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues) {
-  Document d;
-  d.Parse(jsonObject.c_str());
-
-  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
-
-  // try to get all valid passed values
-  for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
-    std::string strIdx = ds::str(i);
-    if (d.HasMember(strIdx)) {
-      DS_REQUIRE(d[strIdx].IsNumber());
-      hOpValues.OpModeTab[i] = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d[strIdx].GetDouble());
-    }
-  }
-}
-
-void ZoneRequestHandler::parseFixedValues(
-    const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues) {
-  Document d;
-  d.Parse(jsonObject.c_str());
-
-  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
-
-  // try to get all valid passed values
-  for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
-    std::string strIdx = ds::str(i);
-    if (d.HasMember(strIdx)) {
-      DS_REQUIRE(d[strIdx].IsNumber());
-      hOpValues.OpModeTab[i] = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d[strIdx].GetDouble());
-    }
-  }
-}
-
-void ZoneRequestHandler::parseControlMode(
-    const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
-  Document d;
-  d.Parse(jsonObject.c_str());
-
-  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
-
-  if (d.HasMember("emergencyValue")) {
-    DS_REQUIRE(d["emergencyValue"].IsNumber());
-    hConfig.EmergencyValue = d["emergencyValue"].GetInt() + 100;
-  }
-  if (d.HasMember("ctrlKp")) {
-    DS_REQUIRE(d["ctrlKp"].IsNumber());
-    hConfig.Kp = d["ctrlKp"].GetDouble() * 40;
-  }
-  if (d.HasMember("ctrlTs")) {
-    DS_REQUIRE(d["ctrlTs"].IsNumber());
-    hConfig.Ts = d["ctrlTs"].GetInt();
-  }
-  if (d.HasMember("ctrlTi")) {
-    DS_REQUIRE(d["ctrlTi"].IsNumber());
-    hConfig.Ti = d["ctrlTi"].GetInt();
-  }
-  if (d.HasMember("ctrlKd")) {
-    DS_REQUIRE(d["ctrlKd"].IsNumber());
-    hConfig.Kd = d["ctrlKd"].GetInt();
-  }
-  if (d.HasMember("ctrlImin")) {
-    DS_REQUIRE(d["ctrlImin"].IsNumber());
-    hConfig.Imin = d["ctrlImin"].GetDouble() * 40;
-  }
-  if (d.HasMember("ctrlImax")) {
-    DS_REQUIRE(d["ctrlImax"].IsNumber());
-    hConfig.Imax = d["ctrlImax"].GetDouble() * 40;
-  }
-  if (d.HasMember("ctrlYmin")) {
-    DS_REQUIRE(d["ctrlYmin"].IsNumber());
-    hConfig.Ymin = d["ctrlYmin"].GetInt() + 100;
-  }
-  if (d.HasMember("ctrlYmax")) {
-    DS_REQUIRE(d["ctrlYmax"].IsNumber());
-    hConfig.Ymax = d["ctrlYmax"].GetInt() + 100;
-  }
-  if (d.HasMember("ctrlAntiWindUp")) {
-    DS_REQUIRE(d["ctrlAntiWindUp"].IsBool());
-    hConfig.AntiWindUp = d["ctrlAntiWindUp"].GetBool() ? 1 : 0;
-  }
-}
-
-void ZoneRequestHandler::parseFollowerMode(
-    const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
-  Document d;
-  d.Parse(jsonObject.c_str());
-
-  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
-
-  if (d.HasMember("referenceZone")) {
-    DS_REQUIRE(d["referenceZone"].IsNumber());
-    hConfig.SourceZoneId = d["referenceZone"].GetInt();
-  }
-  if (d.HasMember("ctrlOffset")) {
-    DS_REQUIRE(d["ctrlOffset"].IsNumber());
-    hConfig.Offset = d["ctrlOffset"].GetInt();
-  }
-}
-
-void ZoneRequestHandler::parseManualMode(
-    const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
-  Document d;
-  d.Parse(jsonObject.c_str());
-
-  DS_REQUIRE(d.IsObject(), "Error during Json parsing");
-
-  if (d.HasMember("controlValue")) {
-    DS_REQUIRE(d["controlValue"].IsNumber());
-    hConfig.ManualValue = d["controlValue"].GetInt() + 100;
-  }
-}
-
 std::string ZoneRequestHandler::setTemperatureControlConfig2(
         boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request) {
   if (pZone->getID() == 0) {
@@ -429,7 +312,7 @@ std::string ZoneRequestHandler::setTemperatureControlConfig2(
     ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingControlOperationModeValues();
 
     // update the temperatures
-    parseTargetTemperatures(_request.getParameter("targetTemperatures"), hOpValues);
+    ZoneHeatingProperties::parseTargetTemperatures(_request.getParameter("targetTemperatures"), hOpValues);
 
     // set data in model
     pZone->setHeatingControlOperationMode(hOpValues);
@@ -439,22 +322,22 @@ std::string ZoneRequestHandler::setTemperatureControlConfig2(
     ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingFixedOperationModeValues();
 
     // update the fixed values
-    parseFixedValues(_request.getParameter("fixedValues"), hOpValues);
+    ZoneHeatingProperties::parseFixedValues(_request.getParameter("fixedValues"), hOpValues);
 
     // set data in model
     pZone->setHeatingFixedOperationMode(hOpValues);
   }
 
   if (_request.hasParameter("controlMode")) {
-    parseControlMode(_request.getParameter("controlMode"), hConfig);
+    ZoneHeatingProperties::parseControlMode(_request.getParameter("controlMode"), hConfig);
   }
 
   if (_request.hasParameter("zoneFollowerMode")) {
-    parseFollowerMode(_request.getParameter("zoneFollowerMode"), hConfig);
+    ZoneHeatingProperties::parseFollowerMode(_request.getParameter("zoneFollowerMode"), hConfig);
   }
 
   if (_request.hasParameter("manualMode")) {
-    parseManualMode(_request.getParameter("manualMode"), hConfig);
+    ZoneHeatingProperties::parseManualMode(_request.getParameter("manualMode"), hConfig);
   }
 
   StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);

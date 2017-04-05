@@ -59,7 +59,6 @@
 #include "src/messages/vdc-messages.pb.h"
 #include "src/vdc-element-reader.h"
 #include "src/web/webrequests.h"
-#include "src/web/handler/zonerequesthandler.h"
 #include "src/protobufjson.h"
 #include "src/stringconverter.h"
 #include "src/vdc-connection.h"
@@ -4332,7 +4331,7 @@ namespace dss {
 
           // update the temperatures
           std::string jsonObj = ctx->jsonStringify(jsvPropValue);
-          ZoneRequestHandler::parseTargetTemperatures(jsonObj, hOpValues);
+          ZoneHeatingProperties::parseTargetTemperatures(jsonObj, hOpValues);
 
           // set data in model
           pZone->setHeatingControlOperationMode(hOpValues);
@@ -4341,22 +4340,22 @@ namespace dss {
 
           // update the temperatures
           std::string jsonObj = ctx->jsonStringify(jsvPropValue);
-          ZoneRequestHandler::parseFixedValues(jsonObj, hOpValues);
+          ZoneHeatingProperties::parseFixedValues(jsonObj, hOpValues);
 
           // set data in model
           pZone->setHeatingFixedOperationMode(hOpValues);
         } else if (key == "controlMode") {
           // update the control values
           std::string jsonObj = ctx->jsonStringify(jsvPropValue);
-          ZoneRequestHandler::parseControlMode(jsonObj, hConfig);
+          ZoneHeatingProperties::parseControlMode(jsonObj, hConfig);
         } else if (key == "zoneFollowerMode") {
           // update the control values
           std::string jsonObj = ctx->jsonStringify(jsvPropValue);
-          ZoneRequestHandler::parseFollowerMode(jsonObj, hConfig);
+          ZoneHeatingProperties::parseFollowerMode(jsonObj, hConfig);
         } else if (key == "manualMode") {
           // update the control values
           std::string jsonObj = ctx->jsonStringify(jsvPropValue);
-          ZoneRequestHandler::parseManualMode(jsonObj, hConfig);
+          ZoneHeatingProperties::parseManualMode(jsonObj, hConfig);
         } else {
           JS_ReportWarning(
               cx, "Model.zone_setTemperatureControlConfiguration2: unknown configuration \"%s\"", key.c_str());

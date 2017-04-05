@@ -28,6 +28,7 @@
 #include "zone.h"
 
 #include <vector>
+#include <ds/log.h>
 
 #include "src/dss.h"
 #include "src/businterface.h"
@@ -43,6 +44,10 @@
 #include "src/model/group.h"
 #include "src/model/apartment.h"
 #include "src/model/modulator.h"
+
+#define RAPIDJSON_HAS_STDSTRING 1
+#include <rapidjson/document.h>
+using rapidjson::Document;
 
 namespace dss {
 
@@ -582,6 +587,188 @@ namespace dss {
   void Zone::dirty() {
     if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
       m_pApartment->getModelMaintenance()->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
+    }
+  }
+
+  ZoneHeatingProperties::ZoneHeatingProperties()
+      : m_HeatingControlMode(HeatingControlMode::OFF),
+        m_Kp(0), m_Ts(0), m_Ti(0), m_Kd(0),
+        m_Imin(0), m_Imax(0), m_Ymin(0), m_Ymax(0),
+        m_AntiWindUp(0), m_KeepFloorWarm(0),
+        m_HeatingControlState(0), m_HeatingMasterZone(0),
+        m_CtrlOffset(0), m_EmergencyValue(175),
+        m_ManualValue(0), m_HeatingControlDSUID(DSUID_NULL) {
+
+  }
+
+  void ZoneHeatingProperties::reset() {
+    m_HeatingControlMode = HeatingControlMode::OFF;
+    m_Kp = 0;
+    m_Ts = 0;
+    m_Ti = 0;
+    m_Kd = 0;
+    m_Imin = 0;
+    m_Imax = 0;
+    m_Ymin =0;
+    m_Ymax = 0;
+    m_AntiWindUp =0;
+    m_KeepFloorWarm =0;
+    m_HeatingControlState = 0;
+    m_HeatingMasterZone = 0;
+    m_CtrlOffset = 0;
+    m_EmergencyValue = 175;
+    m_ManualValue = 0;
+    m_HeatingControlDSUID = DSUID_NULL;
+  }
+
+  bool ZoneHeatingProperties::isEqual(const ZoneHeatingConfigSpec_t& config, const ZoneHeatingOperationModeSpec_t& operationMode) {
+    bool configEqual = ((config.ControllerMode == m_HeatingControlMode) &&
+            (config.Kp == m_Kp) &&
+            (config.Ts == m_Ts) &&
+            (config.Ti == m_Ti) &&
+            (config.Kd == m_Kd) &&
+            (config.Imin == m_Imin) &&
+            (config.Imax == m_Imax) &&
+            (config.Ymin == m_Ymin) &&
+            (config.Ymax == m_Ymax) &&
+            (config.AntiWindUp == m_AntiWindUp) &&
+            (config.KeepFloorWarm == m_KeepFloorWarm) &&
+            (config.SourceZoneId == m_HeatingMasterZone) &&
+            (config.Offset == m_CtrlOffset) &&
+            (config.EmergencyValue == m_EmergencyValue) &&
+            (config.ManualValue == m_ManualValue));
+
+    // the operation mode is important only in control and fixed mode
+    bool operationModeEqual = true;
+    if (m_HeatingControlMode == HeatingControlMode::PID) {
+      for (int i = 0; i < 16; ++i) {
+        if ( doubleToSensorValue(SensorType::RoomTemperatureSetpoint, m_TeperatureSetpoints[i]) != operationMode.OpModeTab[i]) {
+          operationModeEqual = false;
+          break;
+        }
+      }
+    } else if (m_HeatingControlMode == HeatingControlMode::FIXED) {
+      for (int i = 0; i < 16; ++i) {
+        if ( doubleToSensorValue(SensorType::RoomTemperatureControlVariable, m_FixedControlValues[i]) != operationMode.OpModeTab[i]) {
+          operationModeEqual = false;
+          break;
+        }
+      }
+    }
+
+    return configEqual && operationModeEqual;
+  }
+
+  void ZoneHeatingProperties::parseTargetTemperatures(
+      const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues) {
+    Document d;
+    d.Parse(jsonObject.c_str());
+
+    DS_REQUIRE(d.IsObject(), "Error during Json parsing");
+
+    // try to get all valid passed values
+    for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+      std::string strIdx = ds::str(i);
+      if (d.HasMember(strIdx)) {
+        DS_REQUIRE(d[strIdx].IsNumber());
+        hOpValues.OpModeTab[i] = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d[strIdx].GetDouble());
+      }
+    }
+  }
+
+  void ZoneHeatingProperties::parseFixedValues(
+      const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues) {
+    Document d;
+    d.Parse(jsonObject.c_str());
+
+    DS_REQUIRE(d.IsObject(), "Error during Json parsing");
+
+    // try to get all valid passed values
+    for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+      std::string strIdx = ds::str(i);
+      if (d.HasMember(strIdx)) {
+        DS_REQUIRE(d[strIdx].IsNumber());
+        hOpValues.OpModeTab[i] = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d[strIdx].GetDouble());
+      }
+    }
+  }
+
+  void ZoneHeatingProperties::parseControlMode(
+      const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
+    Document d;
+    d.Parse(jsonObject.c_str());
+
+    DS_REQUIRE(d.IsObject(), "Error during Json parsing");
+
+    if (d.HasMember("emergencyValue")) {
+      DS_REQUIRE(d["emergencyValue"].IsNumber());
+      hConfig.EmergencyValue = d["emergencyValue"].GetInt() + 100;
+    }
+    if (d.HasMember("ctrlKp")) {
+      DS_REQUIRE(d["ctrlKp"].IsNumber());
+      hConfig.Kp = d["ctrlKp"].GetDouble() * 40;
+    }
+    if (d.HasMember("ctrlTs")) {
+      DS_REQUIRE(d["ctrlTs"].IsNumber());
+      hConfig.Ts = d["ctrlTs"].GetInt();
+    }
+    if (d.HasMember("ctrlTi")) {
+      DS_REQUIRE(d["ctrlTi"].IsNumber());
+      hConfig.Ti = d["ctrlTi"].GetInt();
+    }
+    if (d.HasMember("ctrlKd")) {
+      DS_REQUIRE(d["ctrlKd"].IsNumber());
+      hConfig.Kd = d["ctrlKd"].GetInt();
+    }
+    if (d.HasMember("ctrlImin")) {
+      DS_REQUIRE(d["ctrlImin"].IsNumber());
+      hConfig.Imin = d["ctrlImin"].GetDouble() * 40;
+    }
+    if (d.HasMember("ctrlImax")) {
+      DS_REQUIRE(d["ctrlImax"].IsNumber());
+      hConfig.Imax = d["ctrlImax"].GetDouble() * 40;
+    }
+    if (d.HasMember("ctrlYmin")) {
+      DS_REQUIRE(d["ctrlYmin"].IsNumber());
+      hConfig.Ymin = d["ctrlYmin"].GetInt() + 100;
+    }
+    if (d.HasMember("ctrlYmax")) {
+      DS_REQUIRE(d["ctrlYmax"].IsNumber());
+      hConfig.Ymax = d["ctrlYmax"].GetInt() + 100;
+    }
+    if (d.HasMember("ctrlAntiWindUp")) {
+      DS_REQUIRE(d["ctrlAntiWindUp"].IsBool());
+      hConfig.AntiWindUp = d["ctrlAntiWindUp"].GetBool() ? 1 : 0;
+    }
+  }
+
+  void ZoneHeatingProperties::parseFollowerMode(
+      const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
+    Document d;
+    d.Parse(jsonObject.c_str());
+
+    DS_REQUIRE(d.IsObject(), "Error during Json parsing");
+
+    if (d.HasMember("referenceZone")) {
+      DS_REQUIRE(d["referenceZone"].IsNumber());
+      hConfig.SourceZoneId = d["referenceZone"].GetInt();
+    }
+    if (d.HasMember("ctrlOffset")) {
+      DS_REQUIRE(d["ctrlOffset"].IsNumber());
+      hConfig.Offset = d["ctrlOffset"].GetInt();
+    }
+  }
+
+  void ZoneHeatingProperties::parseManualMode(
+      const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig) {
+    Document d;
+    d.Parse(jsonObject.c_str());
+
+    DS_REQUIRE(d.IsObject(), "Error during Json parsing");
+
+    if (d.HasMember("controlValue")) {
+      DS_REQUIRE(d["controlValue"].IsNumber());
+      hConfig.ManualValue = d["controlValue"].GetInt() + 100;
     }
   }
 

@@ -44,13 +44,6 @@ namespace dss {
     static void addTemperatureControlConfig(JSONWriter& json, boost::shared_ptr<Zone> pZone);
     static void addTemperatureControlConfig2(JSONWriter& json, boost::shared_ptr<Zone> pZone);
     static void addTemperatureControlValues(JSONWriter& json, boost::shared_ptr<Zone> pZone);
-
-    static void parseTargetTemperatures(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
-    static void parseFixedValues(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
-    static void parseControlMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
-    static void parseFollowerMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
-    static void parseManualMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
-
   private:
     Apartment& m_Apartment;
     StructureModifyingBusInterface* m_pStructureBusInterface;
