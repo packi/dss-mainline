@@ -366,7 +366,7 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   }
 
   JSONWriter json;
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+  const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
   ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingOperationModeValues();
   SensorType SensorConversion;
   int iValue;
@@ -495,7 +495,7 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
   }
 
   JSONWriter json;
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+  const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
   ZoneHeatingInternalsSpec_t hInternals;
 
   foreach(auto dsuid, hProp.m_HeatingControlDSUIDs) {
@@ -796,7 +796,7 @@ WebServerResponse ZoneRequestHandler::jsonHandleRequest(
 } // handleRequest
 
 void ZoneRequestHandler::addTemperatureControlStatus(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+  const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
   ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
   ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
 
@@ -827,7 +827,7 @@ void ZoneRequestHandler::addTemperatureControlStatus(JSONWriter& json, boost::sh
 }
 
 void ZoneRequestHandler::addTemperatureControlConfig(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+  const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
   json.add("ControlMode", static_cast<int>(hProp.m_HeatingControlMode));
   switch (hProp.m_HeatingControlMode) {
@@ -858,8 +858,7 @@ void ZoneRequestHandler::addTemperatureControlConfig(JSONWriter& json, boost::sh
 }
 
 void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
-
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+  const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
   if (auto&& name = heatingControlModeName(hProp.m_HeatingControlMode)) {
     json.add("mode", *name);
@@ -914,7 +913,7 @@ void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::s
 }
 
 void ZoneRequestHandler::addTemperatureControlValues(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+  const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
   switch (hProp.m_HeatingControlMode) {
     case HeatingControlMode::OFF:

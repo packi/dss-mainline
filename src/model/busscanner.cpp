@@ -937,7 +937,7 @@ namespace dss {
       ZoneHeatingConfigSpec_t hConfig = {};
       ZoneHeatingStateSpec_t hState = {};
       ZoneHeatingOperationModeSpec_t hOpValues = {};
-      ZoneHeatingProperties_t hProp = _zone->getHeatingProperties();
+      const ZoneHeatingProperties_t& hProp = _zone->getHeatingProperties();
 
       try {
         hConfig = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());

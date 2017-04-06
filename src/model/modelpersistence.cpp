@@ -1183,7 +1183,7 @@ namespace dss {
          << std::endl;
   } // zoneSensorToXML
 
-  void heatingConfigToXML(ZoneHeatingProperties_t heatingConfig, std::ofstream& _ofs, const int _indent)
+  void heatingConfigToXML(const ZoneHeatingProperties_t& heatingConfig, std::ofstream& _ofs, const int _indent)
   {
     _ofs << doIndent(_indent) << "<heatingConfig";
     addAttribute(_ofs, "Mode", uintToString(static_cast<uint8_t>(heatingConfig.m_HeatingControlMode)));
@@ -1234,7 +1234,7 @@ namespace dss {
     // heating controller
     if (_pZone->getID() != 0) {
       if (_pZone->isHeatingEnabled()) {
-        ZoneHeatingProperties_t config =_pZone->getHeatingProperties();
+        const ZoneHeatingProperties_t& config =_pZone->getHeatingProperties();
         heatingConfigToXML(config, _ofs, _indent+1);
       }
     }

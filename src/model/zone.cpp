@@ -634,7 +634,7 @@ namespace dss {
     m_HeatingControlDSUIDs.clear();
   }
 
-  bool ZoneHeatingProperties::isEqual(const ZoneHeatingConfigSpec_t& config, const ZoneHeatingOperationModeSpec_t& operationMode) {
+  bool ZoneHeatingProperties::isEqual(const ZoneHeatingConfigSpec_t& config, const ZoneHeatingOperationModeSpec_t& operationMode) const {
     bool configEqual = ((config.ControllerMode == m_HeatingControlMode) &&
             (config.Kp == m_Kp) &&
             (config.Ts == m_Ts) &&

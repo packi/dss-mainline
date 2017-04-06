@@ -3947,7 +3947,7 @@ namespace dss {
         return JS_FALSE;
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
-      ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+      const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
       ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
       ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
 
@@ -4003,7 +4003,7 @@ namespace dss {
         return JS_FALSE;
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
-      ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+      const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
@@ -4061,7 +4061,7 @@ namespace dss {
         return JS_FALSE;
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
-      ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+      const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
@@ -4147,7 +4147,7 @@ namespace dss {
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
-      ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+      const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
       switch (hProp.m_HeatingControlMode) {
         case HeatingControlMode::OFF:
@@ -4393,7 +4393,7 @@ namespace dss {
         return JS_FALSE;
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
-      ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+      const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
       ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingOperationModeValues();
       SensorType SensorConversion;
 
