@@ -179,22 +179,7 @@ namespace dss {
   } ZoneHeatingStateSpec_t;
 
   typedef struct {
-    uint16_t OpMode0;
-    uint16_t OpMode1;
-    uint16_t OpMode2;
-    uint16_t OpMode3;
-    uint16_t OpMode4;
-    uint16_t OpMode5;
-    uint16_t OpMode6;
-    uint16_t OpMode7;
-    uint16_t OpMode8;
-    uint16_t OpMode9;
-    uint16_t OpModeA;
-    uint16_t OpModeB;
-    uint16_t OpModeC;
-    uint16_t OpModeD;
-    uint16_t OpModeE;
-    uint16_t OpModeF;
+    uint16_t OpModeTab[16];
   } ZoneHeatingOperationModeSpec_t;
 
   class DeviceBusInterface {

@@ -764,10 +764,10 @@ namespace dss {
     }
     ZoneHeatingOperationModeSpec_t result;
     int ret = ControllerHeating_get_operation_modes(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        &result.OpMode0, &result.OpMode1, &result.OpMode2, &result.OpMode3,
-        &result.OpMode4, &result.OpMode5, &result.OpMode6, &result.OpMode7,
-        &result.OpMode8, &result.OpMode9, &result.OpModeA, &result.OpModeB,
-        &result.OpModeC, &result.OpModeD, &result.OpModeE, &result.OpModeF);
+        &result.OpModeTab[0], &result.OpModeTab[1], &result.OpModeTab[2], &result.OpModeTab[3],
+        &result.OpModeTab[4], &result.OpModeTab[5], &result.OpModeTab[6], &result.OpModeTab[7],
+        &result.OpModeTab[8], &result.OpModeTab[9], &result.OpModeTab[10], &result.OpModeTab[11],
+        &result.OpModeTab[12], &result.OpModeTab[13], &result.OpModeTab[14], &result.OpModeTab[15]);
     DSBusInterface::checkResultCode(ret);
     return result;
   } // getZoneHeatingOperationModes

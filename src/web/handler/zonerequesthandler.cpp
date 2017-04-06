@@ -311,53 +311,12 @@ void ZoneRequestHandler::parseTargetTemperatures(
   DS_REQUIRE(d.IsObject(), "Error during Json parsing");
 
   // try to get all valid passed values
-  if (d.HasMember("0")) {
-    DS_REQUIRE(d["0"].IsNumber());
-    hOpValues.OpMode0 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["0"].GetDouble());
-  }
-  if (d.HasMember("1")) {
-    DS_REQUIRE(d["1"].IsNumber());
-    hOpValues.OpMode1 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["1"].GetDouble());
-  }
-  if (d.HasMember("2")) {
-    DS_REQUIRE(d["2"].IsNumber());
-    hOpValues.OpMode2 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["2"].GetDouble());
-  }
-  if (d.HasMember("3")) {
-    DS_REQUIRE(d["3"].IsNumber());
-    hOpValues.OpMode3 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["3"].GetDouble());
-  }
-  if (d.HasMember("4")) {
-    DS_REQUIRE(d["4"].IsNumber());
-    hOpValues.OpMode4 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["4"].GetDouble());
-  }
-  if (d.HasMember("5")) {
-    DS_REQUIRE(d["5"].IsNumber());
-    hOpValues.OpMode5 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["5"].GetDouble());
-  }
-  if (d.HasMember("6")) {
-    DS_REQUIRE(d["6"].IsNumber());
-    hOpValues.OpMode6 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["6"].GetDouble());
-  }
-  if (d.HasMember("7")) {
-    DS_REQUIRE(d["7"].IsNumber());
-    hOpValues.OpMode7 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["7"].GetDouble());
-  }
-  if (d.HasMember("8")) {
-    DS_REQUIRE(d["8"].IsNumber());
-    hOpValues.OpMode8 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["8"].GetDouble());
-  }
-  if (d.HasMember("9")) {
-    DS_REQUIRE(d["9"].IsNumber());
-    hOpValues.OpMode9 = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["9"].GetDouble());
-  }
-  if (d.HasMember("10")) {
-    DS_REQUIRE(d["10"].IsNumber());
-    hOpValues.OpModeA = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["10"].GetDouble());
-  }
-  if (d.HasMember("11")) {
-    DS_REQUIRE(d["11"].IsNumber());
-    hOpValues.OpModeB = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d["11"].GetDouble());
+  for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+    std::string strIdx = ds::str(i);
+    if (d.HasMember(strIdx)) {
+      DS_REQUIRE(d[strIdx].IsNumber());
+      hOpValues.OpModeTab[i] = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d[strIdx].GetDouble());
+    }
   }
 }
 
@@ -369,53 +328,12 @@ void ZoneRequestHandler::parseFixedValues(
   DS_REQUIRE(d.IsObject(), "Error during Json parsing");
 
   // try to get all valid passed values
-  if (d.HasMember("0")) {
-    DS_REQUIRE(d["0"].IsNumber());
-    hOpValues.OpMode0 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["0"].GetDouble());
-  }
-  if (d.HasMember("1")) {
-    DS_REQUIRE(d["1"].IsNumber());
-    hOpValues.OpMode1 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["1"].GetDouble());
-  }
-  if (d.HasMember("2")) {
-    DS_REQUIRE(d["2"].IsNumber());
-    hOpValues.OpMode2 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["2"].GetDouble());
-  }
-  if (d.HasMember("3")) {
-    DS_REQUIRE(d["3"].IsNumber());
-    hOpValues.OpMode3 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["3"].GetDouble());
-  }
-  if (d.HasMember("4")) {
-    DS_REQUIRE(d["4"].IsNumber());
-    hOpValues.OpMode4 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["4"].GetDouble());
-  }
-  if (d.HasMember("5")) {
-    DS_REQUIRE(d["5"].IsNumber());
-    hOpValues.OpMode5 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["5"].GetDouble());
-  }
-  if (d.HasMember("6")) {
-    DS_REQUIRE(d["6"].IsNumber());
-    hOpValues.OpMode6 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["6"].GetDouble());
-  }
-  if (d.HasMember("7")) {
-    DS_REQUIRE(d["7"].IsNumber());
-    hOpValues.OpMode7 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["7"].GetDouble());
-  }
-  if (d.HasMember("8")) {
-    DS_REQUIRE(d["8"].IsNumber());
-    hOpValues.OpMode8 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["8"].GetDouble());
-  }
-  if (d.HasMember("9")) {
-    DS_REQUIRE(d["9"].IsNumber());
-    hOpValues.OpMode9 = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["9"].GetDouble());
-  }
-  if (d.HasMember("10")) {
-    DS_REQUIRE(d["10"].IsNumber());
-    hOpValues.OpModeA = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["10"].GetDouble());
-  }
-  if (d.HasMember("11")) {
-    DS_REQUIRE(d["11"].IsNumber());
-    hOpValues.OpModeB = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d["11"].GetDouble());
+  for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+    std::string strIdx = ds::str(i);
+    if (d.HasMember(strIdx)) {
+      DS_REQUIRE(d[strIdx].IsNumber());
+      hOpValues.OpModeTab[i] = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d[strIdx].GetDouble());
+    }
   }
 }
 
@@ -623,11 +541,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Off")) {
     try {
       iValue = strToUInt(_request.getParameter("Off"));
-      hOpValues.OpMode0 = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.OpModeTab[0] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Off"));
-        hOpValues.OpMode0 = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.OpModeTab[0] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -635,11 +553,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Comfort")) {
     try {
       iValue = strToUInt(_request.getParameter("Comfort"));
-      hOpValues.OpMode1 = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.OpModeTab[1] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Comfort"));
-        hOpValues.OpMode1 = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.OpModeTab[1] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -647,11 +565,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Economy")) {
     try {
       iValue = strToUInt(_request.getParameter("Economy"));
-      hOpValues.OpMode2 = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.OpModeTab[2] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Economy"));
-        hOpValues.OpMode2 = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.OpModeTab[2] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -659,11 +577,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("NotUsed")) {
     try {
       iValue = strToUInt(_request.getParameter("NotUsed"));
-      hOpValues.OpMode3 = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.OpModeTab[3] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("NotUsed"));
-        hOpValues.OpMode3 = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.OpModeTab[3] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -671,11 +589,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Night")) {
     try {
       iValue = strToUInt(_request.getParameter("Night"));
-      hOpValues.OpMode4 = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.OpModeTab[4] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Night"));
-        hOpValues.OpMode4 = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.OpModeTab[4] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -683,11 +601,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Holiday")) {
     try {
       iValue = strToUInt(_request.getParameter("Holiday"));
-      hOpValues.OpMode5 = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.OpModeTab[5] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Holiday"));
-        hOpValues.OpMode5 = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.OpModeTab[5] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -695,11 +613,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Cooling")) {
     try {
       iValue = strToUInt(_request.getParameter("Cooling"));
-      hOpValues.OpMode6 = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.OpModeTab[6] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Cooling"));
-        hOpValues.OpMode6 = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.OpModeTab[6] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -707,11 +625,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("CoolingOff")) {
     try {
       iValue = strToUInt(_request.getParameter("CoolingOff"));
-      hOpValues.OpMode7 = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.OpModeTab[7] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("CoolingOff"));
-        hOpValues.OpMode7 = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.OpModeTab[7] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -1119,18 +1037,9 @@ void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::s
       break;
     case HeatingControlMode::PID:
       json.startObject("targetTemperatures");
-      json.add("0", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
-      json.add("1", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
-      json.add("2", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
-      json.add("3", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
-      json.add("4", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
-      json.add("5", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
-      json.add("6", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
-      json.add("7", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
-      json.add("8", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode8));
-      json.add("9", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode9));
-      json.add("10", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeA));
-      json.add("11", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeB));
+      for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+        json.add(ds::str(i), sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[i]));
+      }
       json.endObject();
       break;
     case HeatingControlMode::ZONE_FOLLOWER:
@@ -1139,18 +1048,9 @@ void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::s
       break;
     case HeatingControlMode::FIXED:
       json.startObject("fixedValues");
-      json.add("0", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
-      json.add("1", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
-      json.add("2", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
-      json.add("3", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
-      json.add("4", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
-      json.add("5", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
-      json.add("6", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
-      json.add("7", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
-      json.add("8", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode8));
-      json.add("9", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode9));
-      json.add("10", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeA));
-      json.add("11", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeB));
+      for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+        json.add(ds::str(i), sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[i]));
+      }
       json.endObject();
       break;
   }
@@ -1193,26 +1093,26 @@ void ZoneRequestHandler::addTemperatureControlValues(JSONWriter& json, boost::sh
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:
-      json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
-      json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
-      json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
-      json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
-      json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
-      json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
-      json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
-      json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+      json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[0]));
+      json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[1]));
+      json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[2]));
+      json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[3]));
+      json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[4]));
+      json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[5]));
+      json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[6]));
+      json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[7]));
       break;
     case HeatingControlMode::ZONE_FOLLOWER:
       break;
     case HeatingControlMode::FIXED:
-      json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
-      json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
-      json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
-      json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
-      json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
-      json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
-      json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
-      json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+      json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[0]));
+      json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[1]));
+      json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[2]));
+      json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[3]));
+      json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[4]));
+      json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[5]));
+      json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[6]));
+      json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[7]));
       break;
     case HeatingControlMode::MANUAL:
       break;

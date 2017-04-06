@@ -360,10 +360,10 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     int ret = ControllerHeating_set_operation_modes(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        _spec.OpMode0, _spec.OpMode1, _spec.OpMode2, _spec.OpMode3,
-        _spec.OpMode4, _spec.OpMode5, _spec.OpMode6, _spec.OpMode7,
-        _spec.OpMode8, _spec.OpMode9, _spec.OpModeA, _spec.OpModeB,
-        _spec.OpModeC, _spec.OpModeD, _spec.OpModeE, _spec.OpModeF
+        _spec.OpModeTab[0], _spec.OpModeTab[1], _spec.OpModeTab[2], _spec.OpModeTab[3],
+        _spec.OpModeTab[4], _spec.OpModeTab[5], _spec.OpModeTab[6], _spec.OpModeTab[7],
+        _spec.OpModeTab[8], _spec.OpModeTab[9], _spec.OpModeTab[10], _spec.OpModeTab[11],
+        _spec.OpModeTab[12], _spec.OpModeTab[13], _spec.OpModeTab[14], _spec.OpModeTab[15]
         );
     DSBusInterface::checkResultCode(ret);
 
