@@ -241,15 +241,7 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   }
 
   JSONWriter json;
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
-  ZoneHeatingConfigSpec_t hConfig;
-
-  memset(&hConfig, 0, sizeof(hConfig));
-  if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-    return JSONWriter::failure("Not a heating control device");
-  } else {
-    hConfig = pZone->getHeatingControlMode();
-  }
+  ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
 
   if (_request.hasParameter("ControlMode")) {
     uint8_t x;
@@ -299,7 +291,7 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   }
 
   StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-  manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
+  manipulator.setZoneHeatingConfig(pZone, hConfig);
   return json.successJSON();
 }
 
@@ -423,7 +415,6 @@ std::string ZoneRequestHandler::setTemperatureControlConfig2(
   }
 
   JSONWriter json;
-  ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
   ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
 
   if (_request.hasParameter("mode")) {
@@ -435,49 +426,23 @@ std::string ZoneRequestHandler::setTemperatureControlConfig2(
   }
 
   if (_request.hasParameter("targetTemperatures")) {
-    ZoneHeatingOperationModeSpec_t hOpValues;
-
-    // TODO(now) now we can set this values only in case proper mode is set, change this when data will be stored in dss
-    if (hConfig.ControllerMode != HeatingControlMode::PID) {
-      return JSONWriter::failure("Cannot set control values in current mode");
-    }
-
-    memset(&hOpValues, 0, sizeof(hOpValues));
-    if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-      return JSONWriter::failure("Not a heating control device");
-    } else {
-      hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
-              hProp.m_HeatingControlDSUID, pZone->getID());
-    }
+    ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingControlOperationModeValues();
 
     // update the temperatures
     parseTargetTemperatures(_request.getParameter("targetTemperatures"), hOpValues);
 
-    m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingOperationModes(
-            hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
+    // set data in model
+    pZone->setHeatingControlOperationMode(hOpValues);
   }
 
   if (_request.hasParameter("fixedValues")) {
-    ZoneHeatingOperationModeSpec_t hOpValues;
-
-    // TODO(now) now we can set this values only in case proper mode is set, change this when data will be stored in dss
-    if (hConfig.ControllerMode != HeatingControlMode::FIXED) {
-      return JSONWriter::failure("Cannot set control values in current mode");
-    }
-
-    memset(&hOpValues, 0, sizeof(hOpValues));
-    if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-      return JSONWriter::failure("Not a heating control device");
-    } else {
-      hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
-              hProp.m_HeatingControlDSUID, pZone->getID());
-    }
+    ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingFixedOperationModeValues();
 
     // update the fixed values
     parseFixedValues(_request.getParameter("fixedValues"), hOpValues);
 
-    m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingOperationModes(
-            hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
+    // set data in model
+    pZone->setHeatingFixedOperationMode(hOpValues);
   }
 
   if (_request.hasParameter("controlMode")) {
@@ -493,7 +458,9 @@ std::string ZoneRequestHandler::setTemperatureControlConfig2(
   }
 
   StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
-  manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
+  manipulator.setZoneHeatingConfig(pZone, hConfig);
+  manipulator.setZoneHeatingOperationModeValues(pZone);
+
   return json.successJSON();
 }
 
@@ -517,7 +484,7 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
 
   JSONWriter json;
   ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
-  ZoneHeatingOperationModeSpec_t hOpValues;
+  ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingOperationModeValues();
   SensorType SensorConversion;
   int iValue;
   double fValue;
@@ -530,14 +497,7 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
     return JSONWriter::failure("Cannot set control values in current mode");
   }
 
-  memset(&hOpValues, 0, sizeof(hOpValues));
-  if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-    return JSONWriter::failure("Not a heating control device");
-  } else {
-    hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
-            hProp.m_HeatingControlDSUID, pZone->getID());
-  }
-
+  //TODO(now): clean this code!
   if (_request.hasParameter("Off")) {
     try {
       iValue = strToUInt(_request.getParameter("Off"));
@@ -635,8 +595,12 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
     }
   }
 
+  // set the requested data in the zone model
+  pZone->setHeatingOperationMode(hOpValues);
+
+  // send current operation mode to all dsms
   m_Apartment.getBusInterface()->getStructureModifyingBusInterface()->setZoneHeatingOperationModes(
-          hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
+          DSUID_BROADCAST, pZone->getID(), hOpValues);
 
   return json.successJSON();
 }
@@ -1017,14 +981,6 @@ void ZoneRequestHandler::addTemperatureControlConfig(JSONWriter& json, boost::sh
 void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
 
   ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
-  ZoneHeatingOperationModeSpec_t hOpValues;
-  memset(&hOpValues, 0, sizeof(hOpValues));
-
-  // TODO(now): currently we do not have a way to get values when no dsm is set as controller
-  if (hProp.m_HeatingControlDSUID != DSUID_NULL) {
-    hOpValues = DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
-        hProp.m_HeatingControlDSUID, pZone->getID());
-  }
 
   if (auto&& name = heatingControlModeName(hProp.m_HeatingControlMode)) {
     json.add("mode", *name);
@@ -1038,7 +994,7 @@ void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::s
     case HeatingControlMode::PID:
       json.startObject("targetTemperatures");
       for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
-        json.add(ds::str(i), sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[i]));
+        json.add(ds::str(i), hProp.m_TeperatureSetpoints[i]);
       }
       json.endObject();
       break;
@@ -1049,7 +1005,7 @@ void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::s
     case HeatingControlMode::FIXED:
       json.startObject("fixedValues");
       for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
-        json.add(ds::str(i), sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[i]));
+        json.add(ds::str(i), hProp.m_FixedControlValues[i]);
       }
       json.endObject();
       break;
@@ -1080,39 +1036,31 @@ void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::s
 
 void ZoneRequestHandler::addTemperatureControlValues(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
   ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
-  ZoneHeatingOperationModeSpec_t hOpValues;
-  memset(&hOpValues, 0, sizeof(hOpValues));
-
-  // TODO(now): currently we do not have a way to get values when no dsm is set as controller
-  if (hProp.m_HeatingControlDSUID != DSUID_NULL) {
-    hOpValues = DSS::getInstance()->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
-        hProp.m_HeatingControlDSUID, pZone->getID());
-  }
 
   switch (hProp.m_HeatingControlMode) {
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:
-      json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[0]));
-      json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[1]));
-      json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[2]));
-      json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[3]));
-      json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[4]));
-      json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[5]));
-      json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[6]));
-      json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeTab[7]));
+			json.add("Off", hProp.m_TeperatureSetpoints[0]);
+      json.add("Comfort", hProp.m_TeperatureSetpoints[1]);
+      json.add("Economy", hProp.m_TeperatureSetpoints[2]);
+      json.add("NotUsed", hProp.m_TeperatureSetpoints[3]);
+      json.add("Night", hProp.m_TeperatureSetpoints[4]);
+      json.add("Holiday", hProp.m_TeperatureSetpoints[5]);
+      json.add("Cooling", hProp.m_TeperatureSetpoints[6]);
+      json.add("CoolingOff", hProp.m_TeperatureSetpoints[7]);
       break;
     case HeatingControlMode::ZONE_FOLLOWER:
       break;
     case HeatingControlMode::FIXED:
-      json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[0]));
-      json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[1]));
-      json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[2]));
-      json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[3]));
-      json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[4]));
-      json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[5]));
-      json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[6]));
-      json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeTab[7]));
+			json.add("Off", hProp.m_FixedControlValues[0]);
+      json.add("Comfort", hProp.m_FixedControlValues[1]);
+      json.add("Economy", hProp.m_FixedControlValues[2]);
+      json.add("NotUsed", hProp.m_FixedControlValues[3]);
+      json.add("Night", hProp.m_FixedControlValues[4]);
+      json.add("Holiday", hProp.m_FixedControlValues[5]);
+      json.add("Cooling", hProp.m_FixedControlValues[6]);
+      json.add("CoolingOff", hProp.m_FixedControlValues[7]);
       break;
     case HeatingControlMode::MANUAL:
       break;

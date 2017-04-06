@@ -45,6 +45,12 @@ namespace dss {
     static void addTemperatureControlConfig2(JSONWriter& json, boost::shared_ptr<Zone> pZone);
     static void addTemperatureControlValues(JSONWriter& json, boost::shared_ptr<Zone> pZone);
 
+    static void parseTargetTemperatures(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
+    static void parseFixedValues(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
+    static void parseControlMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+    static void parseFollowerMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+    static void parseManualMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+
   private:
     Apartment& m_Apartment;
     StructureModifyingBusInterface* m_pStructureBusInterface;
@@ -69,12 +75,6 @@ namespace dss {
     std::string clearSensorSource(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getAssignedSensors(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
     std::string getSensorValues(boost::shared_ptr<Zone> pZone, boost::shared_ptr<Group> pGroup, const RestfulRequest& _request);
-
-    void parseTargetTemperatures(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
-    void parseFixedValues(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
-    void parseControlMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
-    void parseFollowerMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
-    void parseManualMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
 
   }; // ZoneRequestHandler
 

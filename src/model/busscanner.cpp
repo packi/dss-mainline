@@ -936,14 +936,15 @@ namespace dss {
       DateTime now, age;
       ZoneHeatingConfigSpec_t hConfig = {};
       ZoneHeatingStateSpec_t hState = {};
+      ZoneHeatingOperationModeSpec_t hOpValues = {};
       ZoneHeatingProperties_t hProp = _zone->getHeatingProperties();
 
       try {
         hConfig = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
         hState = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
+        hOpValues = m_Interface.getZoneHeatingOperationModes(_dsMeter->getDSID(), _zone->getID());
 
-        log(std::string("Heating properties") + " for zone " + intToString(_zone->getID()) + ": control dsm  " +
-                dsuid2str(hProp.m_HeatingControlDSUID) + ", mode " +
+        log(std::string("Heating properties") + " for zone " + intToString(_zone->getID()) + ", mode " +
                 intToString(static_cast<uint8_t>(hProp.m_HeatingControlMode)) + ", state " +
                 intToString(hProp.m_HeatingControlState),
             lsInfo);
@@ -964,37 +965,17 @@ namespace dss {
                         m_Apartment);
 
       if (_zone->isHeatingPropertiesValid()) {
-        // dss knows the zone heating configuration
-        if (hProp.m_HeatingControlDSUID == _dsMeter->getDSID()) {
-          // current dSMeter is the active controller for this zone
-          if (!hProp.isEqual(hConfig)) {
-            // dSMeter has diverging settings, overwrite from dSS settings
-            log(std::string("Heating config mismatch: Overwrite controller") + " for zone " +
-                    intToString(_zone->getID()) + " on dsm " + dsuid2str(_dsMeter->getDSID()) + ": mode " +
-                    intToString(static_cast<uint8_t>(hConfig.ControllerMode)),
-                lsInfo);
-            manip.setZoneHeatingConfig(_zone, _dsMeter->getDSID(), _zone->getHeatingControlMode());
-          }
-        } else {
-          if (hConfig.ControllerMode != HeatingControlMode::OFF) {
-            log(std::string("Conflicting configuration: Reset controller") +
-                " for zone " + intToString(_zone->getID()) +
-                " on dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
-            ZoneHeatingConfigSpec_t disableConfig = hConfig;
-            disableConfig.ControllerMode = HeatingControlMode::OFF;
+        // current dSMeter is active controller for this zone
+        if (!hProp.isEqual(hConfig, hOpValues)) {
+          // dSMeter has diverging settings, overwrite from dSS settings
+          log(std::string("Heating config mismatch: Overwrite controller") + " for zone " +
+                  intToString(_zone->getID()) + " on dsm " + dsuid2str(_dsMeter->getDSID()) + ": mode " +
+                  intToString(static_cast<uint8_t>(hConfig.ControllerMode)),
+              lsInfo);
 
-            // disable controller ONLY on dsMeter.
-            // keep configuration! Do not touch zone configuration!
-            try {
-              StructureModifyingBusInterface& modifyingItf =
-                *(m_Apartment.getBusInterface()->getStructureModifyingBusInterface());
-              modifyingItf.synchronizeZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID(), disableConfig);
-            } catch (std::runtime_error &err) {
-              Logger::getInstance()->log(std::string("BusScanner::scanStatusOfZone: can not disable heating zone on dsMeter: ") +
-              dsuid2str(_dsMeter->getDSID()) +
-              err.what(), lsWarning);
-            }
-          }
+          // resend the current settings to all DSMs
+          manip.setZoneHeatingConfig(_zone, _zone->getHeatingControlMode());
+          manip.setZoneHeatingOperationModeValues(_zone);
         }
       } else {
         // dSS has no configuration for this zone, take the first valid configuration
@@ -1004,12 +985,13 @@ namespace dss {
             log(std::string("Store heating configuration") +
                 " for zone " + intToString(_zone->getID()) +
                 " from dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
-            _zone->setHeatingControlMode(hConfig, _dsMeter->getDSID());
-            hProp = _zone->getHeatingProperties();
+            _zone->setHeatingControlMode(hConfig);
+            _zone->setHeatingOperationMode(hOpValues);
           }
         }
       }
 
+      // TODO: change the Control DSUID for is Master check
       // sync zone settings from the controlling dsm only
       if (hProp.m_HeatingControlDSUID == _dsMeter->getDSID()) {
         ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();

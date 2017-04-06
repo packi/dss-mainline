@@ -445,8 +445,6 @@ namespace dss {
         config.m_EmergencyValue = strToUIntDef(tempVal, 0);
       } else if (strcmp(_attrs[i], "ManualVal") == 0) {
         config.m_ManualValue = strToIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "controllerDSUID") == 0) {
-        config.m_HeatingControlDSUID = str2dsuid(tempVal);
       }
     }
     m_tempZone->setHeatingProperties(config);
@@ -1204,7 +1202,6 @@ namespace dss {
     addAttribute(_ofs, "Offset",  intToString(heatingConfig.m_CtrlOffset));
     addAttribute(_ofs, "EmergencyVal", uintToString(heatingConfig.m_EmergencyValue));
     addAttribute(_ofs, "ManualVal", uintToString(heatingConfig.m_ManualValue));
-    addAttribute(_ofs, "controllerDSUID", dsuid2str(heatingConfig.m_HeatingControlDSUID));
     _ofs << "/>" << std::endl;
   } // heatingConfigToXML
 

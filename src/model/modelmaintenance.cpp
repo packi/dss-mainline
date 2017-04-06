@@ -2255,14 +2255,13 @@ namespace dss {
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
       hProp = zone->getHeatingProperties();
-      zone->setHeatingControlMode(*config.get(), _dsMeterID);
+      zone->setHeatingControlMode(*config.get());
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on heating control config event, item not found: ") + e.what(), lsWarning);
       return;
     }
 
-    log(std::string("onHeatingControllerConfig:  dsMeter " + dsuid2str(_dsMeterID) +
-        ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
+    log(std::string("onHeatingControllerConfig:  dsMeter " + dsuid2str(_dsMeterID), lsInfo));
     raiseEvent(createHeatingControllerConfig(_zoneID, _dsMeterID, *config));
   } // onHeatingControllerConfig
 
@@ -2282,8 +2281,7 @@ namespace dss {
       return;
     }
 
-    log(std::string("onHeatingControllerValues:  dsMeter " + dsuid2str(_dsMeterID) +
-        ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
+    log(std::string("onHeatingControllerValues:  dsMeter " + dsuid2str(_dsMeterID), lsInfo));
 
     raiseEvent(createHeatingControllerValue(_zoneID, _dsMeterID, hProp, *values));
     raiseEvent(createHeatingControllerValueDsHub(_zoneID,

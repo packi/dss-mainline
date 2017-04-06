@@ -186,11 +186,6 @@ namespace dss {
         alias->getParentNode()->removeChild(alias);
       }
     }
-    ZoneHeatingProperties_t prop = getHeatingProperties();
-    if (prop.m_HeatingControlDSUID == _dsMeter->getDSID()) {
-      clearHeatingControlMode();
-    }
-
   } // removeFromDSMeter
 
   bool Zone::registeredOnDSMeter(boost::shared_ptr<const DSMeter> _dsMeter) const {
@@ -242,15 +237,15 @@ namespace dss {
     }
   } // removeFromPropertyTree
 
-  ZoneHeatingProperties_t Zone::getHeatingProperties() const {
+  const ZoneHeatingProperties_t& Zone::getHeatingProperties() const {
     return m_HeatingProperties;
   }
 
-  ZoneHeatingStatus_t Zone::getHeatingStatus() const {
+  const ZoneHeatingStatus_t& Zone::getHeatingStatus() const {
     return m_HeatingStatus;
   }
 
-  ZoneSensorStatus_t Zone::getSensorStatus() const {
+  const ZoneSensorStatus_t& Zone::getSensorStatus() const {
     return m_SensorStatus;
   }
 
@@ -265,7 +260,7 @@ namespace dss {
     return m_HeatingPropValid;
   }
 
-  void Zone::setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec, dsuid_t ctrlDevice) {
+  void Zone::setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec) {
     m_HeatingProperties.m_HeatingControlMode = _spec.ControllerMode;
     m_HeatingProperties.m_Kp = _spec.Kp;
     m_HeatingProperties.m_Ts = _spec.Ts;
@@ -281,7 +276,6 @@ namespace dss {
     m_HeatingProperties.m_CtrlOffset = _spec.Offset;
     m_HeatingProperties.m_EmergencyValue = _spec.EmergencyValue;
     m_HeatingProperties.m_ManualValue = _spec.ManualValue;
-    m_HeatingProperties.m_HeatingControlDSUID = ctrlDevice;
     m_HeatingPropValid = true;
     dirty();
   }
@@ -313,6 +307,68 @@ namespace dss {
   void Zone::setHeatingControlState(int _ctrlState) {
     m_HeatingProperties.m_HeatingControlState = _ctrlState;
     dirty();
+  }
+
+  void Zone::setHeatingControlOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues) {
+    for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+      m_HeatingProperties.m_TeperatureSetpoints[i] =
+          sensorValueToDouble(SensorType::RoomTemperatureSetpoint, operationModeValues.OpModeTab[i]);
+    }
+    dirty();
+  }
+
+  void Zone::setHeatingFixedOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues) {
+    for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+      m_HeatingProperties.m_FixedControlValues[i] =
+          sensorValueToDouble(SensorType::RoomTemperatureControlVariable, operationModeValues.OpModeTab[i]);
+    }
+    dirty();
+  }
+
+  void Zone::setHeatingOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues) {
+    switch (m_HeatingProperties.m_HeatingControlMode) {
+      case HeatingControlMode::PID:
+        setHeatingControlOperationMode(operationModeValues);
+        break;
+      case HeatingControlMode::FIXED:
+        setHeatingFixedOperationMode(operationModeValues);
+        break;
+      default:
+        break;
+    }
+  }
+
+  ZoneHeatingOperationModeSpec_t Zone::getHeatingControlOperationModeValues() const {
+    ZoneHeatingOperationModeSpec_t retVal;
+
+    for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+      retVal.OpModeTab[i] =
+          doubleToSensorValue(SensorType::RoomTemperatureSetpoint, m_HeatingProperties.m_TeperatureSetpoints[i]);
+    }
+
+    return retVal;
+  }
+
+  ZoneHeatingOperationModeSpec_t Zone::getHeatingFixedOperationModeValues() const {
+    ZoneHeatingOperationModeSpec_t retVal;
+
+    for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+      retVal.OpModeTab[i] =
+          doubleToSensorValue(SensorType::RoomTemperatureControlVariable, m_HeatingProperties.m_FixedControlValues[i]);
+    }
+
+    return retVal;
+  }
+
+  ZoneHeatingOperationModeSpec_t Zone::getHeatingOperationModeValues() const {
+    switch (m_HeatingProperties.m_HeatingControlMode) {
+      case HeatingControlMode::PID:
+        return getHeatingControlOperationModeValues();
+      case HeatingControlMode::FIXED:
+        return getHeatingFixedOperationModeValues();
+      default:
+        return ZoneHeatingOperationModeSpec_t();
+    }
   }
 
   void Zone::setHeatingOperationMode(int _operationMode) {

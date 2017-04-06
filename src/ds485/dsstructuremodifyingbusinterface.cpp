@@ -319,10 +319,10 @@ namespace dss {
         _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
     if (_dsMeterID == DSUID_BROADCAST) {
       DSBusInterface::checkBroadcastResultCode(ret);
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
     } else {
       DSBusInterface::checkResultCode(ret);
     }
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
 
     if (m_pModelMaintenance) {
       boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
@@ -343,7 +343,12 @@ namespace dss {
     }
     int ret = ControllerHeating_set_state(m_DSMApiHandle, _dsMeterID, _ZoneID,
         _spec.State);
-    DSBusInterface::checkResultCode(ret);
+    if (_dsMeterID == DSUID_BROADCAST) {
+      DSBusInterface::checkBroadcastResultCode(ret);
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
+    } else {
+      DSBusInterface::checkResultCode(ret);
+    }
 
     if (m_pModelMaintenance) {
       ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerState, _dsMeterID);
@@ -365,7 +370,12 @@ namespace dss {
         _spec.OpModeTab[8], _spec.OpModeTab[9], _spec.OpModeTab[10], _spec.OpModeTab[11],
         _spec.OpModeTab[12], _spec.OpModeTab[13], _spec.OpModeTab[14], _spec.OpModeTab[15]
         );
-    DSBusInterface::checkResultCode(ret);
+    if (_dsMeterID == DSUID_BROADCAST) {
+      DSBusInterface::checkBroadcastResultCode(ret);
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
+    } else {
+      DSBusInterface::checkResultCode(ret);
+    }
 
     if (m_pModelMaintenance) {
       boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec = boost::make_shared<ZoneHeatingOperationModeSpec_t>();
