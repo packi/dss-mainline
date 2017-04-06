@@ -4008,19 +4008,12 @@ namespace dss {
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
-      if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-        obj.setProperty<bool>("IsConfigured", false);
-        return JS_TRUE;
-      } else {
-        obj.setProperty<bool>("IsConfigured", true);
-      }
-      obj.setProperty<std::string>("ControlDSUID", dsuid2str(hProp.m_HeatingControlDSUID));
       obj.setProperty<int>("ControlMode", static_cast<uint8_t>(hProp.m_HeatingControlMode));
-      obj.setProperty<int>("EmergencyValue", hProp.m_EmergencyValue - 100);
       switch (hProp.m_HeatingControlMode) {
         case HeatingControlMode::OFF:
           break;
         case HeatingControlMode::PID:
+          obj.setProperty<int>("EmergencyValue", hProp.m_EmergencyValue - 100);
           obj.setProperty<double>("CtrlKp", (double)hProp.m_Kp * 0.025);
           obj.setProperty<int>("CtrlTs", hProp.m_Ts);
           obj.setProperty<int>("CtrlTi", hProp.m_Ti);
@@ -4057,6 +4050,142 @@ namespace dss {
     return JS_FALSE;
   } // zone_getTemperatureControlConfiguration
 
+  JSBool zone_getTemperatureControlConfiguration2(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_getTemperatureControlConfiguration2: ext of wrong type");
+        return JS_FALSE;
+      }
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+
+      ScriptObject obj(*ctx, NULL);
+      JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
+
+      if (auto heatingName = heatingControlModeName(hProp.m_HeatingControlMode)) {
+        obj.setProperty<std::string>("mode", *heatingName);
+      } else {
+        obj.setProperty<std::string>("mode", std::string("unknown"));
+      }
+
+      ScriptObject controlModeObj(*ctx, NULL);
+      controlModeObj.setProperty<int>("emergencyValue", hProp.m_EmergencyValue - 100);
+      controlModeObj.setProperty<double>("ctrlKp", (double)hProp.m_Kp * 0.025);
+      controlModeObj.setProperty<int>("ctrlTs", hProp.m_Ts);
+      controlModeObj.setProperty<int>("ctrlTi", hProp.m_Ti);
+      controlModeObj.setProperty<int>("ctrlKd", hProp.m_Kd);
+      controlModeObj.setProperty<double>("ctrlImin", (double)hProp.m_Imin * 0.025);
+      controlModeObj.setProperty<double>("ctrlImax", (double)hProp.m_Imax * 0.025);
+      controlModeObj.setProperty<int>("ctrlYmin", hProp.m_Ymin - 100);
+      controlModeObj.setProperty<int>("ctrlYmax", hProp.m_Ymax - 100);
+      controlModeObj.setProperty<bool>("ctrlAntiWindUp", (hProp.m_AntiWindUp > 0));
+      obj.setProperty("controlMode", &controlModeObj);
+
+      ScriptObject zoneFollowerModeObj(*ctx, NULL);
+      zoneFollowerModeObj.setProperty<int>("referenceZone", hProp.m_HeatingMasterZone);
+      zoneFollowerModeObj.setProperty<int>("ctrlOffset", hProp.m_CtrlOffset);
+      obj.setProperty("zoneFollowerMode", &zoneFollowerModeObj);
+
+      ScriptObject manualModeObj(*ctx, NULL);
+      manualModeObj.setProperty<int>("controlValue", hProp.m_ManualValue - 100);
+      obj.setProperty("manualMode", &manualModeObj);
+
+      ZoneHeatingOperationModeSpec_t hOpValues;
+
+      // TODO(now): currently we do not have a way to get values when no dsm is set as controller
+      memset(&hOpValues, 0, sizeof(hOpValues));
+      if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
+        return JS_TRUE;
+      } else {
+        hOpValues =
+            ext->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
+                hProp.m_HeatingControlDSUID, pZone->getID());
+      }
+
+      switch (hProp.m_HeatingControlMode) {
+        case HeatingControlMode::OFF:
+          break;
+        case HeatingControlMode::PID: {
+          ScriptObject targetTemperaturesObj(*ctx, NULL);
+          targetTemperaturesObj.setProperty<double>(
+              "0", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
+          targetTemperaturesObj.setProperty<double>(
+              "1", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
+          targetTemperaturesObj.setProperty<double>(
+              "2", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
+          targetTemperaturesObj.setProperty<double>(
+              "3", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
+          targetTemperaturesObj.setProperty<double>(
+              "4", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
+          targetTemperaturesObj.setProperty<double>(
+              "5", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
+          targetTemperaturesObj.setProperty<double>(
+              "6", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
+          targetTemperaturesObj.setProperty<double>(
+              "7", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
+          targetTemperaturesObj.setProperty<double>(
+              "8", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode8));
+          targetTemperaturesObj.setProperty<double>(
+              "9", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode9));
+          targetTemperaturesObj.setProperty<double>(
+              "10", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeA));
+          targetTemperaturesObj.setProperty<double>(
+              "11", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpModeB));
+          obj.setProperty("targetTemperatures", &targetTemperaturesObj);
+        } break;
+        case HeatingControlMode::ZONE_FOLLOWER:
+          break;
+        case HeatingControlMode::MANUAL:
+          break;
+        case HeatingControlMode::FIXED: {
+          ScriptObject fixedValuesObj(*ctx, NULL);
+          fixedValuesObj.setProperty<double>(
+              "0", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
+          fixedValuesObj.setProperty<double>(
+              "1", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
+          fixedValuesObj.setProperty<double>(
+              "2", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
+          fixedValuesObj.setProperty<double>(
+              "3", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
+          fixedValuesObj.setProperty<double>(
+              "4", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
+          fixedValuesObj.setProperty<double>(
+              "5", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
+          fixedValuesObj.setProperty<double>(
+              "6", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
+          fixedValuesObj.setProperty<double>(
+              "7", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
+          fixedValuesObj.setProperty<double>(
+              "8", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode8));
+          fixedValuesObj.setProperty<double>(
+              "9", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode9));
+          fixedValuesObj.setProperty<double>(
+              "10", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeA));
+          fixedValuesObj.setProperty<double>(
+              "11", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpModeB));
+          obj.setProperty("fixedValues", &fixedValuesObj);
+        } break;
+      }
+
+      return JS_TRUE;
+
+    } catch (ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+
+    return JS_FALSE;
+  } // zone_getTemperatureControlConfiguration2
+
   JSBool zone_getTemperatureControlValues(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
 
@@ -4077,10 +4206,8 @@ namespace dss {
 
       memset(&hOpValues, 0, sizeof(hOpValues));
       if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-        obj.setProperty<bool>("IsConfigured", false);
         return JS_TRUE;
       } else {
-        obj.setProperty<bool>("IsConfigured", true);
         hOpValues = ext->getApartment().getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
             hProp.m_HeatingControlDSUID, pZone->getID());
       }
@@ -4161,9 +4288,6 @@ namespace dss {
           *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
           ext->getApartment());
 
-      std::string ControlDSUID = ctx->convertTo<std::string>(JS_ARGV(cx, vp)[0]);
-      dsuid_from_string(ControlDSUID.c_str(), &hProp.m_HeatingControlDSUID);
-
       memset(&hConfig, 0, sizeof(hConfig));
       if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
         manipulator.clearZoneHeatingConfig(pZone);
@@ -4173,7 +4297,7 @@ namespace dss {
         hConfig = pZone->getHeatingControlMode();
       }
 
-      JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [1]);
+      JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [0]);
       JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
       jsid propID;
       while(JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
@@ -4251,6 +4375,322 @@ namespace dss {
 
     return JS_FALSE;
   } // zone_setTemperatureControlConfiguration
+
+  void parseTargetTemperatures(JSContext* cx, jsval& jv, ZoneHeatingOperationModeSpec_t& hOpValues) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    JSObject* configObj = JSVAL_TO_OBJECT(jv);
+    JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
+    jsid propID;
+    while (JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+      if (JSID_IS_VOID(propID)) {
+        break;
+      }
+      JSObject* obj;
+      jsval jsvPropKey, jsvPropValue;
+
+      JS_GetMethodById(cx, configObj, propID, &obj, &jsvPropValue);
+      JS_IdToValue(cx, propID, &jsvPropKey);
+
+      std::string key = ctx->convertTo<std::string>(jsvPropKey);
+
+      if (key == "0") {
+        hOpValues.OpMode0 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "1") {
+        hOpValues.OpMode1 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "2") {
+        hOpValues.OpMode2 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "3") {
+        hOpValues.OpMode3 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "4") {
+        hOpValues.OpMode4 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "5") {
+        hOpValues.OpMode5 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "6") {
+        hOpValues.OpMode6 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "7") {
+        hOpValues.OpMode7 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "8") {
+        hOpValues.OpMode8 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "9") {
+        hOpValues.OpMode9 =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "10") {
+        hOpValues.OpModeA =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "11") {
+        hOpValues.OpModeB =
+            doubleToSensorValue(SensorType::RoomTemperatureSetpoint, ctx->convertTo<double>(jsvPropValue));
+      }
+    }
+  }
+
+  void parseFixedValues(JSContext* cx, jsval& jv, ZoneHeatingOperationModeSpec_t& hOpValues) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    JSObject* configObj = JSVAL_TO_OBJECT(jv);
+    JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
+    jsid propID;
+    while (JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+      if (JSID_IS_VOID(propID)) {
+        break;
+      }
+      JSObject* obj;
+      jsval jsvPropKey, jsvPropValue;
+
+      JS_GetMethodById(cx, configObj, propID, &obj, &jsvPropValue);
+      JS_IdToValue(cx, propID, &jsvPropKey);
+
+      std::string key = ctx->convertTo<std::string>(jsvPropKey);
+
+      if (key == "0") {
+        hOpValues.OpMode0 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "1") {
+        hOpValues.OpMode1 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "2") {
+        hOpValues.OpMode2 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "3") {
+        hOpValues.OpMode3 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "4") {
+        hOpValues.OpMode4 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "5") {
+        hOpValues.OpMode5 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "6") {
+        hOpValues.OpMode6 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "7") {
+        hOpValues.OpMode7 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "8") {
+        hOpValues.OpMode8 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "9") {
+        hOpValues.OpMode9 =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "10") {
+        hOpValues.OpModeA =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      } else if (key == "11") {
+        hOpValues.OpModeB =
+            doubleToSensorValue(SensorType::RoomTemperatureControlVariable, ctx->convertTo<double>(jsvPropValue));
+      }
+    }
+  }
+
+  void parseControlMode(JSContext* cx, jsval& jv, ZoneHeatingConfigSpec_t& hConfig) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    JSObject* configObj = JSVAL_TO_OBJECT(jv);
+    JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
+    jsid propID;
+    while (JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+      if (JSID_IS_VOID(propID)) {
+        break;
+      }
+      JSObject* obj;
+      jsval jsvPropKey, jsvPropValue;
+
+      JS_GetMethodById(cx, configObj, propID, &obj, &jsvPropValue);
+      JS_IdToValue(cx, propID, &jsvPropKey);
+
+      std::string key = ctx->convertTo<std::string>(jsvPropKey);
+
+      if (key == "emergencyValue") {
+        hConfig.EmergencyValue = ctx->convertTo<int>(jsvPropValue) + 100;
+      } else if (key == "ctrlKp") {
+        hConfig.Kp = ctx->convertTo<double>(jsvPropValue) * 40;
+      } else if (key == "ctrlTs") {
+        hConfig.Ts = ctx->convertTo<int>(jsvPropValue);
+      } else if (key == "ctrlTi") {
+        hConfig.Ti = ctx->convertTo<int>(jsvPropValue);
+      } else if (key == "ctrlKd") {
+        hConfig.Kd = ctx->convertTo<int>(jsvPropValue);
+      } else if (key == "ctrlImin") {
+        hConfig.Imin = ctx->convertTo<double>(jsvPropValue) * 40;
+      } else if (key == "ctrlImax") {
+        hConfig.Imax = ctx->convertTo<double>(jsvPropValue) * 40;
+      } else if (key == "ctrlYmin") {
+        hConfig.Ymin = ctx->convertTo<int>(jsvPropValue) + 100;
+      } else if (key == "ctrlYmax") {
+        hConfig.Ymax = ctx->convertTo<int>(jsvPropValue) + 100;
+      } else if (key == "ctrlAntiWindUp") {
+        hConfig.AntiWindUp = ctx->convertTo<bool>(jsvPropValue) ? 1 : 0;
+      }
+    }
+  }
+
+  void parseFollowerMode(JSContext* cx, jsval& jv, ZoneHeatingConfigSpec_t& hConfig) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    JSObject* configObj = JSVAL_TO_OBJECT(jv);
+    JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
+    jsid propID;
+    while (JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+      if (JSID_IS_VOID(propID)) {
+        break;
+      }
+      JSObject* obj;
+      jsval jsvPropKey, jsvPropValue;
+
+      JS_GetMethodById(cx, configObj, propID, &obj, &jsvPropValue);
+      JS_IdToValue(cx, propID, &jsvPropKey);
+
+      std::string key = ctx->convertTo<std::string>(jsvPropKey);
+
+      if (key == "referenceZone") {
+        hConfig.SourceZoneId = ctx->convertTo<int>(jsvPropValue);
+      } else if (key == "ctrlOffset") {
+        hConfig.Offset = ctx->convertTo<int>(jsvPropValue);
+      }
+    }
+  }
+
+  void parseManualMode(JSContext* cx, jsval& jv, ZoneHeatingConfigSpec_t& hConfig) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    JSObject* configObj = JSVAL_TO_OBJECT(jv);
+    JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
+    jsid propID;
+    while (JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+      if (JSID_IS_VOID(propID)) {
+        break;
+      }
+      JSObject* obj;
+      jsval jsvPropKey, jsvPropValue;
+
+      JS_GetMethodById(cx, configObj, propID, &obj, &jsvPropValue);
+      JS_IdToValue(cx, propID, &jsvPropKey);
+
+      std::string key = ctx->convertTo<std::string>(jsvPropKey);
+
+      if (key == "controlValue") {
+        hConfig.ManualValue = ctx->convertTo<int>(jsvPropValue) + 100;
+      }
+    }
+  }
+
+  JSBool zone_setTemperatureControlConfiguration2(JSContext* cx, uintN argc, jsval* vp) {
+    ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
+
+    try {
+      ModelScriptContextExtension* ext = dynamic_cast<ModelScriptContextExtension*>(
+          ctx->getEnvironment().getExtension(ModelScriptcontextExtensionName));
+      if (ext == NULL) {
+        JS_ReportError(cx, "Model.zone_setTemperatureControlConfiguration2: ext of wrong type");
+        return JS_FALSE;
+      }
+      boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
+      ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
+      ZoneHeatingConfigSpec_t hConfig;
+
+      auto structureModifyingBusInterface = ext->getApartment().getBusInterface()->getStructureModifyingBusInterface();
+      auto structureQueryBusInterface = ext->getApartment().getBusInterface()->getStructureQueryBusInterface();
+      StructureManipulator manipulator(
+          *structureModifyingBusInterface, *structureQueryBusInterface, ext->getApartment());
+
+      memset(&hConfig, 0, sizeof(hConfig));
+      if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
+        manipulator.clearZoneHeatingConfig(pZone);
+        JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(true));
+        return JS_TRUE;
+      } else {
+        hConfig = pZone->getHeatingControlMode();
+      }
+
+      JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp)[0]);
+      JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
+      jsid propID;
+      while (JS_NextProperty(cx, propIter, &propID) == JS_TRUE) {
+        if (JSID_IS_VOID(propID)) {
+          break;
+        }
+        JSObject* obj;
+        jsval jsvPropValue, jsvPropKey;
+
+        JS_GetMethodById(cx, configObj, propID, &obj, &jsvPropValue);
+        JS_IdToValue(cx, propID, &jsvPropKey);
+
+        std::string key = ctx->convertTo<std::string>(jsvPropKey);
+
+        if (key == "mode") {
+          if (auto heatingMode = heatingControlModeFromName(ctx->convertTo<std::string>(jsvPropValue))) {
+            hConfig.ControllerMode = *heatingMode;
+          }
+        } else if (key == "targetTemperatures") {
+          // TODO(now) now we can set this values only in case proper mode is set
+          if (hConfig.ControllerMode == HeatingControlMode::PID) {
+            if (hProp.m_HeatingControlDSUID != DSUID_NULL) {
+              ZoneHeatingOperationModeSpec_t hOpValues =
+                  structureQueryBusInterface->getZoneHeatingOperationModes(hProp.m_HeatingControlDSUID, pZone->getID());
+
+              // update the temperatures
+              parseTargetTemperatures(cx, jsvPropValue, hOpValues);
+
+              structureModifyingBusInterface->setZoneHeatingOperationModes(
+                  hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
+            }
+          }
+        } else if (key == "fixedValues") {
+          // TODO(now) now we can set this values only in case proper mode is set
+          if (hConfig.ControllerMode == HeatingControlMode::FIXED) {
+            if (hProp.m_HeatingControlDSUID != DSUID_NULL) {
+              ZoneHeatingOperationModeSpec_t hOpValues =
+                  structureQueryBusInterface->getZoneHeatingOperationModes(hProp.m_HeatingControlDSUID, pZone->getID());
+
+              // update the control values
+              parseFixedValues(cx, jsvPropValue, hOpValues);
+
+              structureModifyingBusInterface->setZoneHeatingOperationModes(
+                  hProp.m_HeatingControlDSUID, pZone->getID(), hOpValues);
+            }
+          }
+        } else if (key == "controlMode") {
+          // update the control values
+          parseControlMode(cx, jsvPropValue, hConfig);
+        } else if (key == "zoneFollowerMode") {
+          // update the control values
+          parseFollowerMode(cx, jsvPropValue, hConfig);
+        } else if (key == "manualMode") {
+          // update the control values
+          parseManualMode(cx, jsvPropValue, hConfig);
+        } else {
+          JS_ReportWarning(
+              cx, "Model.zone_setTemperatureControlConfiguration2: unknown configuration \"%s\"", key.c_str());
+        }
+      }
+
+      manipulator.setZoneHeatingConfig(pZone, hProp.m_HeatingControlDSUID, hConfig);
+
+      JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
+      return JS_TRUE;
+
+    } catch (ItemNotFoundException& ex) {
+      JS_ReportWarning(cx, "Item not found: %s", ex.what());
+    } catch (SecurityException& ex) {
+      JS_ReportError(cx, "Access denied: %s", ex.what());
+    } catch (DSSException& ex) {
+      JS_ReportError(cx, "Failure: %s", ex.what());
+    } catch (std::exception& ex) {
+      JS_ReportError(cx, "General failure: %s", ex.what());
+    }
+
+    return JS_FALSE;
+  } // zone_setTemperatureControlConfiguration2
 
   JSBool zone_setTemperatureControlValues(JSContext* cx, uintN argc, jsval* vp) {
     ScriptContext* ctx = static_cast<ScriptContext*>(JS_GetContextPrivate(cx));
@@ -4766,8 +5206,10 @@ namespace dss {
     JS_FS("removeConnectedDevice", zone_removeConnectedDevice, 1, 0),
     JS_FS("getTemperatureControlStatus", zone_getTemperatureControlStatus, 0, 0),
     JS_FS("getTemperatureControlConfiguration", zone_getTemperatureControlConfiguration, 0, 0),
+    JS_FS("getTemperatureControlConfiguration2", zone_getTemperatureControlConfiguration2, 0, 0),
     JS_FS("getTemperatureControlValues", zone_getTemperatureControlValues, 0, 0),
     JS_FS("setTemperatureControlConfiguration", zone_setTemperatureControlConfiguration, 1, 0),
+    JS_FS("setTemperatureControlConfiguration2", zone_setTemperatureControlConfiguration2, 1, 0),
     JS_FS("setTemperatureControlValues", zone_setTemperatureControlValues, 1, 0),
     JS_FS("getAssignedSensor", zone_getAssignedSensor, 1, 0),
     JS_FS("addStateSensor", zone_addStateSensor, 3, 0),
