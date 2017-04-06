@@ -991,11 +991,12 @@ namespace dss {
         }
       }
 
-      // TODO: change the Control DSUID for is Master check
-      // sync zone settings from the controlling dsm only
-      if (hProp.m_HeatingControlDSUID == _dsMeter->getDSID()) {
-        ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
-        ZoneSensorStatus_t zSensors = _zone->getSensorStatus();
+      // sync zone sensors only if they are not valid
+      ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
+      ZoneSensorStatus_t zSensors = _zone->getSensorStatus();
+
+      // get the temperature from this dsm if we do not have already a good enough one
+      if (now.difference(zSensors.m_TemperatureValueTS) > 10*60) {
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::TemperatureIndoors,
               &sensorValue, &sensorAge);
@@ -1011,6 +1012,10 @@ namespace dss {
           log("Error getting heating temperature value on zone " + intToString(_zone->getID()) +
               " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
         }
+      }
+
+      // get the nominal value from this dsm if we do not have already a good enough one
+      if (now.difference(zValues.m_NominalValueTS) > 10*60) {
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::RoomTemperatureSetpoint,
               &sensorValue, &sensorAge);
@@ -1026,6 +1031,10 @@ namespace dss {
           log("Error reading heating nominal temperature value on zone " + intToString(_zone->getID()) +
               " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
         }
+      }
+
+      // get the control value from this dsm if we do not have already a good enough one
+      if (now.difference(zValues.m_ControlValueTS) > 10*60) {
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::RoomTemperatureControlVariable,
               &sensorValue, &sensorAge);
