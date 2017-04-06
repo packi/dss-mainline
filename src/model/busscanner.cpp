@@ -991,6 +991,8 @@ namespace dss {
         }
       }
 
+      _zone->addHeatingController(_dsMeter->getDSID());
+
       // sync zone sensors only if they are not valid
       ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
       ZoneSensorStatus_t zSensors = _zone->getSensorStatus();

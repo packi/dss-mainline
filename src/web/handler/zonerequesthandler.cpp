@@ -498,11 +498,7 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
   ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
   ZoneHeatingInternalsSpec_t hInternals;
 
-  // TODO: now we know only about one controller - will need to extend it when we will track all of them
-  std::vector<dsuid_t> heatingControllers;
-  heatingControllers.push_back(hProp.m_HeatingControlDSUID);
-
-  foreach(auto dsuid, heatingControllers) {
+  foreach(auto dsuid, hProp.m_HeatingControlDSUIDs) {
     // start the response for this dsm
     json.startObject(dsuid2str(dsuid));
 
@@ -517,7 +513,7 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
     }
     memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
     hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
-            hProp.m_HeatingControlDSUID, pZone->getID());
+        dsuid, pZone->getID());
 
     json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
     json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));

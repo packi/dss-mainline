@@ -73,7 +73,7 @@ namespace dss {
     int m_ManualValue;             // only used for mode 4
     double m_TeperatureSetpoints[16]; // temperature set points used in mode 1
     double m_FixedControlValues[16];  // control values used in mode 3
-    dsuid_t m_HeatingControlDSUID; // DSUID of the meter or device or service running a controller for this zone
+    std::vector<dsuid_t> m_HeatingControlDSUIDs; // DSUIDs of the meters or devices or services running a controller for this zone
   } ZoneHeatingProperties_t;
 
   typedef struct ZoneHeatingStatus {
@@ -207,6 +207,8 @@ namespace dss {
     ZoneHeatingOperationModeSpec_t getHeatingControlOperationModeValues() const;
     ZoneHeatingOperationModeSpec_t getHeatingFixedOperationModeValues() const;
     ZoneHeatingOperationModeSpec_t getHeatingOperationModeValues() const;
+    void addHeatingController(const dsuid_t& dsuid);
+    bool isHeatingController(const dsuid_t& dsuid);
     void setHeatingOperationMode(int _operationMode);
     int getHeatingOperationMode() const;
     void setTemperature(double _value, DateTime& _ts);

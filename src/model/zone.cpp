@@ -376,6 +376,19 @@ namespace dss {
     }
   }
 
+  void Zone::addHeatingController(const dsuid_t& dsuid) {
+    if (!isHeatingController(dsuid)) {
+      m_HeatingProperties.m_HeatingControlDSUIDs.push_back(dsuid);
+    }
+  }
+
+  bool Zone::isHeatingController(const dsuid_t& dsuid) {
+    auto it = find_if(m_HeatingProperties.m_HeatingControlDSUIDs.begin(), m_HeatingProperties.m_HeatingControlDSUIDs.end(),
+        [&](dsuid_t item) { return dsuid_equal(&dsuid, &item);});
+
+    return it != m_HeatingProperties.m_HeatingControlDSUIDs.end();
+  }
+
   void Zone::setHeatingOperationMode(int _operationMode) {
     if (_operationMode > HeatingOperationModeIDMax) {
       Logger::getInstance()->log("Zone::setHeatingOperationMode: zone-id:" + intToString(m_ZoneID) +
@@ -597,7 +610,7 @@ namespace dss {
         m_AntiWindUp(0), m_KeepFloorWarm(0),
         m_HeatingControlState(0), m_HeatingMasterZone(0),
         m_CtrlOffset(0), m_EmergencyValue(175),
-        m_ManualValue(0), m_HeatingControlDSUID(DSUID_NULL) {
+        m_ManualValue(0) {
 
   }
 
@@ -618,7 +631,7 @@ namespace dss {
     m_CtrlOffset = 0;
     m_EmergencyValue = 175;
     m_ManualValue = 0;
-    m_HeatingControlDSUID = DSUID_NULL;
+    m_HeatingControlDSUIDs.clear();
   }
 
   bool ZoneHeatingProperties::isEqual(const ZoneHeatingConfigSpec_t& config, const ZoneHeatingOperationModeSpec_t& operationMode) {
