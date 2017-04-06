@@ -603,15 +603,8 @@ namespace dss {
     }
   }
 
-  ZoneHeatingProperties::ZoneHeatingProperties()
-      : m_HeatingControlMode(HeatingControlMode::OFF),
-        m_Kp(0), m_Ts(0), m_Ti(0), m_Kd(0),
-        m_Imin(0), m_Imax(0), m_Ymin(0), m_Ymax(0),
-        m_AntiWindUp(0), m_KeepFloorWarm(0),
-        m_HeatingControlState(0), m_HeatingMasterZone(0),
-        m_CtrlOffset(0), m_EmergencyValue(175),
-        m_ManualValue(0) {
-
+  ZoneHeatingProperties::ZoneHeatingProperties() {
+    reset();
   }
 
   void ZoneHeatingProperties::reset() {
@@ -631,6 +624,8 @@ namespace dss {
     m_CtrlOffset = 0;
     m_EmergencyValue = 175;
     m_ManualValue = 0;
+    memset(m_TeperatureSetpoints, 0, sizeof(m_TeperatureSetpoints));
+    memset(m_FixedControlValues, 0, sizeof(m_FixedControlValues));
     m_HeatingControlDSUIDs.clear();
   }
 

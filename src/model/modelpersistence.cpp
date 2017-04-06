@@ -404,50 +404,90 @@ namespace dss {
   }
 
   void ModelPersistence::parseHeatingConfig(const char *_name, const char **_attrs) {
-    if ((m_tempZone == NULL) && (strcmp(_name, "heatingConfig") != 0)) {
+    if (m_tempZone == NULL) {
       return;
     }
 
-    ZoneHeatingProperties_t config;
-    for (int i = 0; _attrs[i]; i += 2)
-    {
-      const char *tempVal = 0;
-      tempVal = _attrs[i + 1];
-      if (strcmp(_attrs[i], "Mode") == 0) {
-        config.m_HeatingControlMode = static_cast<HeatingControlMode>(strToUIntDef(tempVal, 0));
-      } else if (strcmp(_attrs[i], "Kp") == 0) {
-        config.m_Kp = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "Ts") == 0) {
-        config.m_Ts = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "Ti") == 0) {
-        config.m_Ti = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "Kd") == 0) {
-        config.m_Kd = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "Imin") == 0) {
-        config.m_Imin = strToIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "IMax") == 0) {
-        config.m_Imax = strToIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "Ymin") == 0) {
-        config.m_Ymin = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "Ymax") == 0) {
-        config.m_Ymax = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "AntiWindup") == 0) {
-        config.m_AntiWindUp = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "FloorWarm") == 0) {
-        config.m_KeepFloorWarm = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "State") == 0) {
-        config.m_HeatingControlState = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "SourceZone") == 0) {
-        config.m_HeatingMasterZone = strToIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "Offset") == 0) {
-        config.m_CtrlOffset = strToIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "EmergencyVal") == 0) {
-        config.m_EmergencyValue = strToUIntDef(tempVal, 0);
-      } else if (strcmp(_attrs[i], "ManualVal") == 0) {
-        config.m_ManualValue = strToIntDef(tempVal, 0);
+    if (strcmp(_name, "heatingConfig") == 0) {
+      ZoneHeatingProperties_t config;
+      for (int i = 0; _attrs[i]; i += 2)
+      {
+        const char *tempVal = 0;
+        tempVal = _attrs[i + 1];
+        if (strcmp(_attrs[i], "Mode") == 0) {
+          config.m_HeatingControlMode = static_cast<HeatingControlMode>(strToUIntDef(tempVal, 0));
+        } else if (strcmp(_attrs[i], "Kp") == 0) {
+          config.m_Kp = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "Ts") == 0) {
+          config.m_Ts = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "Ti") == 0) {
+          config.m_Ti = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "Kd") == 0) {
+          config.m_Kd = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "Imin") == 0) {
+          config.m_Imin = strToIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "IMax") == 0) {
+          config.m_Imax = strToIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "Ymin") == 0) {
+          config.m_Ymin = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "Ymax") == 0) {
+          config.m_Ymax = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "AntiWindup") == 0) {
+          config.m_AntiWindUp = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "FloorWarm") == 0) {
+          config.m_KeepFloorWarm = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "State") == 0) {
+          config.m_HeatingControlState = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "SourceZone") == 0) {
+          config.m_HeatingMasterZone = strToIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "Offset") == 0) {
+          config.m_CtrlOffset = strToIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "EmergencyVal") == 0) {
+          config.m_EmergencyValue = strToUIntDef(tempVal, 0);
+        } else if (strcmp(_attrs[i], "ManualVal") == 0) {
+          config.m_ManualValue = strToIntDef(tempVal, 0);
+        }
       }
+      m_tempZone->setHeatingProperties(config);
     }
-    m_tempZone->setHeatingProperties(config);
+
+    if (strcmp(_name, "temperatureSetpoints") == 0) {
+      ZoneHeatingProperties_t config = m_tempZone->getHeatingProperties();
+
+      for (int i = 0; _attrs[i]; i += 2) {
+        const char *tempVal = _attrs[i + 1];
+
+        for (int j = 0; j <= HeatingOperationModeIDMax; ++j) {
+          std::string attrName = ds::str("val", j);
+
+          if (strcmp(_attrs[i], attrName.c_str()) == 0) {
+            config.m_TeperatureSetpoints[j] = strToDouble(tempVal, config.m_TeperatureSetpoints[j]);
+            break;
+          }
+        }
+      }
+
+      m_tempZone->setHeatingProperties(config);
+    }
+
+    if (strcmp(_name, "controlValues") == 0) {
+      ZoneHeatingProperties_t config = m_tempZone->getHeatingProperties();
+
+      for (int i = 0; _attrs[i]; i += 2) {
+        const char *tempVal = _attrs[i + 1];
+
+        for (int j = 0; j <= HeatingOperationModeIDMax; ++j) {
+          std::string attrName = ds::str("val", j);
+
+          if (strcmp(_attrs[i], attrName.c_str()) == 0) {
+            config.m_FixedControlValues[j] = strToDouble(tempVal, config.m_FixedControlValues[j]);
+            break;
+          }
+        }
+      }
+
+      m_tempZone->setHeatingProperties(config);
+    }
   }
 
   void ModelPersistence::parseGroup(const char *_name, const char **_attrs) {
@@ -760,7 +800,7 @@ namespace dss {
             (strcmp(_name, "lockedScenes") == 0)) {
           m_state = ps_lockedScenes;
         }
-      // level 4 supports <property>, <group>, <sensor>, <lockedScene>
+      // level 4 supports <property>, <group>, <sensor>, <lockedScene>, <temperatureSetpoints>, <controlValues>
       } else if (m_level == 4) {
         if (m_state == ps_group) {
           parseGroup(_name, _attrs);
@@ -768,6 +808,9 @@ namespace dss {
           parseSensor(_name, _attrs);
         } else if (m_state == ps_lockedScenes) {
           parseLockedScenes(_name, _attrs);
+        } else if ((m_state == ps_zone) &&
+            ((strcmp(_name, "temperatureSetpoints") == 0) || (strcmp(_name, "controlValues") == 0))) {
+          parseHeatingConfig(_name,_attrs);
         }
       // level 5 supports <property>, <value>, <name>, <scenes>, <associatedSet>, <color>, <configuration>
       } else if (m_level == 5) {
@@ -1202,7 +1245,21 @@ namespace dss {
     addAttribute(_ofs, "Offset",  intToString(heatingConfig.m_CtrlOffset));
     addAttribute(_ofs, "EmergencyVal", uintToString(heatingConfig.m_EmergencyValue));
     addAttribute(_ofs, "ManualVal", uintToString(heatingConfig.m_ManualValue));
+    _ofs << ">" << std::endl;
+
+    _ofs << doIndent(_indent+1) << "<temperatureSetpoints";
+    for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+      addAttribute(_ofs, ds::str("val", i), ds::str(heatingConfig.m_TeperatureSetpoints[i]));
+    }
     _ofs << "/>" << std::endl;
+
+    _ofs << doIndent(_indent+1) << "<controlValues";
+    for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
+      addAttribute(_ofs, ds::str("val", i), ds::str(heatingConfig.m_FixedControlValues[i]));
+    }
+    _ofs << "/>" << std::endl;
+
+    _ofs << doIndent(_indent) << "</heatingConfig>" << std::endl;
   } // heatingConfigToXML
 
   void zoneToXML(boost::shared_ptr<Zone> _pZone, std::ofstream& _ofs, const int _indent) {
