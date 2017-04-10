@@ -87,7 +87,6 @@ namespace dss {
         _writer.startObject();
         _writer.add("name");
         _writer.add(tempElement.name().c_str());
-        _writer.add("elements");
         processElements(tempElement.elements(), _writer);
         _writer.endObject();
       }
