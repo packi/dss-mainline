@@ -74,6 +74,7 @@ public:
     std::string name; // technical name
     std::string title; // translated name alt_label
     propertyTypeId typeId;
+    std::string typePostfix;  // optional postfix, like in: numeric.duration
     std::string defaultValue;
     std::string minValue;
     std::string maxValue;
