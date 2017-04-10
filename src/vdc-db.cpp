@@ -252,7 +252,7 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
   }
 
   // name, alt_label, type_id, default_value, min_value, max_value, resolution, si_unit, tags, gtin, lang_code
-  std::string sql = R"sqlquery(select distinct name, alt_label, type_id, default_value, min_value, max_value, resolution, si_unit from callGetProperties "
+  std::string sql = R"sqlquery(select distinct name, alt_label, base_type, default_value, min_value, max_value, resolution, si_unit from callGetProperties "
                               "where gtin=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
   SqlStatement query = m_db.prepare(sql);
   SqlStatement::BindScope scope = query.bind(gtin, lang, country);
