@@ -244,7 +244,7 @@ namespace dss {
       // the dSM removes the zone only, if the controller is disabled.
       ZoneHeatingConfigSpec_t disableConfig;
       memset(&disableConfig, 0, sizeof(ZoneHeatingConfigSpec_t));
-      disableConfig.ControllerMode = 0;
+      disableConfig.ControllerMode = HeatingControlMode::OFF;
       m_Interface.setZoneHeatingConfig(
         DSUID_BROADCAST,
         _zone->getID(),

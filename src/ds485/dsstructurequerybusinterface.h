@@ -60,6 +60,7 @@ namespace dss {
   private:
     int getGroupCount(const dsuid_t& _dsMeterID, const int _zoneID);
     std::vector<int> makeDeviceGroups(const uint8_t *bitfield, int bits, const DeviceSpec_t& spec);
+    void checkDeviceActiveDefaultGroup(const DeviceSpec_t& spec);
     void updateButtonGroupFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateBinaryInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);
     void updateSensorInputTableFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec);

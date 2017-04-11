@@ -154,7 +154,7 @@ BOOST_FIXTURE_TEST_CASE(testSubscription, NonRunningFixture) {
   opts->setParameter("event_name", "event1");
   opts->setParameter("test_override", "always testing");
   opts->setParameter("test2_default", "defaults to that");
-  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
+  auto subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", *m_pEventInterpreter, opts);
   m_pEventInterpreter->subscribe(subscription);
 
   m_pQueue->pushEvent(pEvent);
@@ -297,7 +297,7 @@ BOOST_FIXTURE_TEST_CASE(testRemovingSubscription, NonRunningFixture) {
 
   boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("event_name", "event1");
-  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
+  auto subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", *m_pEventInterpreter, opts);
   m_pEventInterpreter->subscribe(subscription);
 
   m_pQueue->pushEvent(pEvent);
@@ -602,7 +602,7 @@ BOOST_FIXTURE_TEST_CASE(testOverrideOnlyOverrides, RelayEventFixture) {
   boost::shared_ptr<SubscriptionOptions> opts = boost::make_shared<SubscriptionOptions>();
   opts->setParameter("event_name", kReraisedName);
   opts->setParameter("test_override", "always testing");
-  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
+  auto subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", *m_pEventInterpreter, opts);
   m_pEventInterpreter->subscribe(subscription);
 
   boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
@@ -620,7 +620,7 @@ BOOST_FIXTURE_TEST_CASE(testOverrideOverrides, RelayEventFixture) {
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_override", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
+  auto subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", *m_pEventInterpreter, opts);
   m_pEventInterpreter->subscribe(subscription);
 
   boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
@@ -639,7 +639,7 @@ BOOST_FIXTURE_TEST_CASE(testDefaultDoesntOverride, RelayEventFixture) {
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_default", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
+  auto subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", *m_pEventInterpreter, opts);
   m_pEventInterpreter->subscribe(subscription);
 
   boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");
@@ -659,7 +659,7 @@ BOOST_FIXTURE_TEST_CASE(testDefaultSetsDefault, RelayEventFixture) {
   opts->setParameter("event_name", kReraisedName);
   const std::string kTestValue = "always testing";
   opts->setParameter("test_default", kTestValue);
-  boost::shared_ptr<EventSubscription> subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", boost::ref<EventInterpreter>(*m_pEventInterpreter), opts);
+  auto subscription = boost::make_shared<EventSubscription>("my_event", "raise_event", *m_pEventInterpreter, opts);
   m_pEventInterpreter->subscribe(subscription);
 
   boost::shared_ptr<Event> pEvent = boost::make_shared<Event>("my_event");

@@ -431,6 +431,48 @@ namespace dss {
     return 0;
   }
 
+  boost::optional<const char*> heatingControlModeName(HeatingControlMode x) {
+    switch (x) {
+      case HeatingControlMode::OFF:
+        return "off";
+      case HeatingControlMode::PID:
+        return "control";
+      case HeatingControlMode::ZONE_FOLLOWER:
+        return "zoneFollower";
+      case HeatingControlMode::FIXED:
+        return "fixed";
+      case HeatingControlMode::MANUAL:
+        return "manual";
+    }
+    return boost::none;
+  }
+
+  boost::optional<HeatingControlMode> heatingControlModeFromName(const std::string& x) {
+    if (x == "off") {
+      return HeatingControlMode::OFF;
+    } else if (x == "control") {
+      return HeatingControlMode::PID;
+    } else if (x == "zoneFollower") {
+      return HeatingControlMode::ZONE_FOLLOWER;
+    } else if (x == "fixed") {
+      return HeatingControlMode::FIXED;
+    } else if (x == "manual") {
+      return HeatingControlMode::MANUAL;
+    }
+
+    return boost::none;
+  }
+
+  std::ostream& operator<<(std::ostream& stream, HeatingControlMode x) {
+    return [&]()-> std::ostream& {
+      if (auto&& name = heatingControlModeName(x)) {
+        return stream << *name;
+      } else {
+        return stream << "unknown";
+      }
+    }() << '(' << static_cast<int>(x) << ')';
+  }
+
   boost::optional<const char*> modelFeatureName(ModelFeatureId x) {
     switch (x) {
       case ModelFeatureId::dontcare:

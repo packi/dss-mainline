@@ -313,12 +313,17 @@ namespace dss {
   const uint8_t ClickTypeLS = 0x0e;     // Local-Stop Click
   const uint8_t ClickTypeRES = 0x0f;
 
-  // Heating Control Mode
-  const int HeatingControlModeIDOff = 0;
-  const int HeatingControlModeIDPID = 1;
-  const int HeatingControlModeIDZoneFollower = 2;
-  const int HeatingControlModeIDFixed = 3;
-  const int HeatingControlModeIDManual = 4;
+  enum class HeatingControlMode : uint8_t {
+    OFF = 0,
+    PID = 1,
+    ZONE_FOLLOWER = 2,
+    FIXED = 3,
+    MANUAL = 4,
+  };
+
+  boost::optional<const char*> heatingControlModeName(HeatingControlMode x);
+  boost::optional<HeatingControlMode> heatingControlModeFromName(const std::string& x);
+  std::ostream& operator<<(std::ostream& stream, HeatingControlMode x);
 
   // Heating Control States
   const int HeatingControlStateIDInternal = 0;

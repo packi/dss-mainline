@@ -21,6 +21,7 @@
 #define __DS485_DUMMY_INTERFACES__
 
 #include "dss.h"
+#include "model/group.h"
 #include "src/messages/vdc-messages.pb.h"
 #include "src/model/modelconst.h"
 

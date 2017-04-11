@@ -336,6 +336,39 @@ namespace dss {
     return result;
   }
 
+  // Workaround when DSM generates wrong defaultGroup and activeGroup fields
+  // Proposed cleanup: http://redmine.digitalstrom.org/issues/17198
+  void DSStructureQueryBusInterface::checkDeviceActiveDefaultGroup(const DeviceSpec_t& spec) {
+    const auto& deviceDsid = spec.DSID;
+    const auto& groups = spec.Groups;
+    uint8_t groupsActiveDefaultGroup = 0;
+    foreach (auto&& group, groups) {
+      if (groupsActiveDefaultGroup == 0 || isControlGroup(group)) {
+        groupsActiveDefaultGroup = group;
+      }
+    }
+
+    auto isValid = [&](const uint8_t group) {
+      if (group == 0 || group == 255) {
+        return false; // just wrong
+      }
+      if (group > 64) {
+        return true; // group > 64 cannot be in groups
+      } else {
+        // group < 64 must be present in groups
+        return std::find(groups.begin(), groups.end(), group) != groups.end();
+      }
+    };
+
+    if (!isValid(spec.activeGroup)) {
+      Logger::getInstance()->log(ds::str("Device activeGroup does not match groups. deviceDsid:", deviceDsid), lsError);
+    }
+    if (!isValid(spec.defaultGroup)) {
+      Logger::getInstance()->log(
+          ds::str("Device defaultGroup does not match groups. deviceDsid:", deviceDsid), lsError);
+    }
+  }
+
   void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
     int ret = -1;
     try {
@@ -503,6 +536,7 @@ namespace dss {
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = makeDeviceGroups(groups, sizeof(groups) * 8, spec);
+      checkDeviceActiveDefaultGroup(spec);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
       if (complete) {
@@ -541,6 +575,7 @@ namespace dss {
       DSBusInterface::checkResultCode(ret);
       spec.Locked = (locked != 0);
       spec.Groups = makeDeviceGroups(groups, sizeof(groups) * 8, spec);
+      checkDeviceActiveDefaultGroup(spec);
       spec.Name = std::string(reinterpret_cast<char*>(name));
 
       updateButtonGroupFromMeter(_dsMeterID, spec);
@@ -575,6 +610,7 @@ namespace dss {
     }
     result.Locked = (locked != 0);
     result.Groups = makeDeviceGroups(groups, sizeof(groups) * 8, result);
+    checkDeviceActiveDefaultGroup(result);
     result.Name = std::string(reinterpret_cast<char*>(name));
 
     updateButtonGroupFromMeter(_dsMeterID, result);
@@ -681,11 +717,12 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     ZoneHeatingConfigSpec_t result;
-    int ret = ControllerHeating_get_config(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        &result.ControllerMode, (uint16_t*)&result.Kp, &result.Ts, &result.Ti, &result.Kd,
-        (uint16_t*)&result.Imin, (uint16_t*)&result.Imax, &result.Ymin, &result.Ymax,
-        &result.AntiWindUp, &result.KeepFloorWarm, &result.SourceZoneId,
-        (uint16_t*)&result.Offset, &result.ManualValue, &result.EmergencyValue);
+    uint8_t controllerMode;
+    int ret = ControllerHeating_get_config(m_DSMApiHandle, _dsMeterID, _ZoneID, &controllerMode, (uint16_t*)&result.Kp,
+        &result.Ts, &result.Ti, &result.Kd, (uint16_t*)&result.Imin, (uint16_t*)&result.Imax, &result.Ymin,
+        &result.Ymax, &result.AntiWindUp, &result.KeepFloorWarm, &result.SourceZoneId, (uint16_t*)&result.Offset,
+        &result.ManualValue, &result.EmergencyValue);
+    result.ControllerMode = static_cast<HeatingControlMode>(controllerMode);
 
     if (result.EmergencyValue == 0) {
       result.EmergencyValue = 100;

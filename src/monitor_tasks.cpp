@@ -126,10 +126,8 @@ void SensorMonitorTask::run() {
         }
       }
     }
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     Logger::getInstance()->log("SensorMonitorTask: device sensor timeout exception: " + std::string(e.what()), lsWarning);
-  } catch (...) {
-    Logger::getInstance()->log("SensorMonitorTask: device sensor timeout error", lsError);
   }
 
   try {
@@ -150,10 +148,8 @@ void SensorMonitorTask::run() {
         }
       }
     }
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     Logger::getInstance()->log("SensorMonitorTask: zone sensor timeout exception: " + std::string(e.what()), lsWarning);
-  } catch (...) {
-    Logger::getInstance()->log("SensorMonitorTask: zone sensor timeout error", lsError);
   }
 
   boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckSensorValues);
@@ -161,56 +157,6 @@ void SensorMonitorTask::run() {
   if (DSS::hasInstance()) {
     Logger::getInstance()->log("queued check_sensor_values event");
     DSS::getInstance()->getEventQueue().pushEvent(pEvent);
-  }
-}
-
-void HeatingMonitorTask::syncZone(int _zoneID) {
-  try {
-    boost::shared_ptr<Zone> pZone = m_Apartment->getZone(_zoneID);
-    boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDControlTemperature);
-    ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
-    ZoneHeatingProperties_t hConfig = pZone->getHeatingProperties();
-
-    switch (hConfig.m_HeatingControlMode) {
-      case HeatingControlModeIDPID:
-        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
-          pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
-          usleep(1000 * 1000);
-        }
-        if (hSensors.m_TemperatureValueTS  != DateTime::NullDate) {
-          pZone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
-                            SensorType::TemperatureIndoors,
-                            hSensors.m_TemperatureValue, "");
-          usleep(1000 * 1000);
-        }
-
-        break;
-      case HeatingControlModeIDFixed:
-        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
-          pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
-          usleep(1000 * 1000);
-        }
-        break;
-      case HeatingControlModeIDManual:
-        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
-          ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
-          if (hStatus.m_ControlValueTS != DateTime::NullDate) {
-            pGroup->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL,
-                               SensorType::RoomTemperatureControlVariable,
-                               hStatus.m_ControlValue, "");
-            usleep(1000 * 1000);
-          }
-
-        }
-        break;
-      case HeatingControlModeIDZoneFollower:
-      case HeatingControlModeIDOff:
-        break;
-    }
-  } catch (std::exception& e) {
-    Logger::getInstance()->log("HeatingMonitorTask: sync controller exception: " + std::string(e.what()), lsWarning);
-  } catch (...) {
-    Logger::getInstance()->log("HeatingMonitorTask: sync controller error", lsError);
   }
 }
 
@@ -281,6 +227,51 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorTyp
   }
 }
 
+void HeatingMonitorTask::syncZone(int _zoneID) {
+  try {
+    boost::shared_ptr<Zone> pZone = m_Apartment->getZone(_zoneID);
+    boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDControlTemperature);
+    ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
+    ZoneHeatingProperties_t hConfig = pZone->getHeatingProperties();
+
+    switch (hConfig.m_HeatingControlMode) {
+      case HeatingControlMode::PID:
+        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
+          pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
+          usleep(1000 * 1000);
+        }
+        if (hSensors.m_TemperatureValueTS != DateTime::NullDate) {
+          pZone->pushSensor(
+              coSystem, SAC_MANUAL, DSUID_NULL, SensorType::TemperatureIndoors, hSensors.m_TemperatureValue, "");
+          usleep(1000 * 1000);
+        }
+
+        break;
+      case HeatingControlMode::FIXED:
+        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
+          pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
+          usleep(1000 * 1000);
+        }
+        break;
+      case HeatingControlMode::MANUAL:
+        if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
+          ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
+          if (hStatus.m_ControlValueTS != DateTime::NullDate) {
+            pGroup->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::RoomTemperatureControlVariable,
+                hStatus.m_ControlValue, "");
+            usleep(1000 * 1000);
+          }
+        }
+        break;
+      case HeatingControlMode::ZONE_FOLLOWER:
+      case HeatingControlMode::OFF:
+        break;
+    }
+  } catch (const std::exception& e) {
+    Logger::getInstance()->log("HeatingMonitorTask: sync controller exception: " + std::string(e.what()), lsWarning);
+  }
+}
+
 void HeatingMonitorTask::run() {
 
   if (m_event->getName() == EventName::ModelReady) {
@@ -323,10 +314,8 @@ void HeatingMonitorTask::run() {
           group->callScene(coSystem, SAC_MANUAL, group->getLastCalledScene(), "", false);
         }
       }
-    } catch (std::exception& e) {
+    } catch (const std::exception& e) {
       Logger::getInstance()->log("HeatingMonitorTask: check heating groups exception: " + std::string(e.what()), lsWarning);
-    } catch (...) {
-      Logger::getInstance()->log("HeatingMonitorTask: check heating groups error", lsError);
     }
 
     boost::shared_ptr<Event> pEvent = boost::make_shared<Event>(EventName::CheckHeatingGroups);
@@ -414,10 +403,8 @@ void HeatingValveProtectionTask::run() {
       }
       m_zoneIndex = 0;
 
-    } catch (std::exception& e) {
+    } catch (const std::exception& e) {
       Logger::getInstance()->log("HeatingValveProtectionTask: exception: " + std::string(e.what()), lsWarning);
-    } catch (...) {
-      Logger::getInstance()->log("HeatingValveProtectionTask: execution error", lsError);
     }
   }
 }

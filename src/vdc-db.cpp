@@ -218,7 +218,7 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
   std::string lang, country;
   extractLangAndCountry(langCode, lang, country);
 
-  // name, type_id, default_value, min_value, max_value, resolution, si_unit, tags, gtin
+  // name, base_type, default_value, min_value, max_value, resolution, si_unit, tags, gtin, type_name
   std::string sql0("select * from callGetPropertiesBase where gtin=?");
   SqlStatement query0 = m_db.prepare(sql0);
   SqlStatement::BindScope scope0 = query0.bind(gtin);
@@ -249,10 +249,13 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
     props.back().resolution = query0.getColumn<std::string>(5);
     props.back().siUnit = query0.getColumn<std::string>(6);
     props.back().tags = query0.getColumn<std::string>(7);
+    if (sqlite3_column_type(query0, 9) != SQLITE_NULL) {
+      props.back().typePostfix = query0.getColumn<std::string>(9);
+    }
   }
 
-  // name, alt_label, type_id, default_value, min_value, max_value, resolution, si_unit, tags, gtin, lang_code
-  std::string sql = R"sqlquery(select distinct name, alt_label, type_id, default_value, min_value, max_value, resolution, si_unit from callGetProperties "
+  // name, alt_label, base_type, default_value, min_value, max_value, resolution, si_unit, tags, gtin, lang_code
+  std::string sql = R"sqlquery(select distinct name, alt_label, base_type, default_value, min_value, max_value, resolution, si_unit from callGetProperties "
                               "where gtin=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
   SqlStatement query = m_db.prepare(sql);
   SqlStatement::BindScope scope = query.bind(gtin, lang, country);

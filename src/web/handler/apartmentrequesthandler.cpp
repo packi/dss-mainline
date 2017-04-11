@@ -54,6 +54,8 @@
 #include "vdc-info.h"
 #include "comm-channel.h"
 
+#include "zonerequesthandler.h"
+
 namespace dss {
 
   //=========================================== ApartmentRequestHandler
@@ -271,41 +273,9 @@ namespace dss {
             continue;
           }
           json.startObject();
-          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
-          ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
-          ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
           json.add("id", pZone->getID());
           json.add("name", pZone->getName());
-          json.add("ControlMode", hProp.m_HeatingControlMode);
-          json.add("ControlState", hProp.m_HeatingControlState);
-          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
-          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-            json.add("IsConfigured", false);
-          } else {
-            json.add("IsConfigured", true);
-          }
-
-          switch (hProp.m_HeatingControlMode) {
-            case HeatingControlModeIDOff:
-              break;
-            case HeatingControlModeIDPID:
-              json.add("OperationMode", pZone->getHeatingOperationMode());
-              json.add("TemperatureValue", hSensors.m_TemperatureValue);
-              json.add("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
-              json.add("NominalValue", hStatus.m_NominalValue);
-              json.add("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
-              json.add("ControlValue", hStatus.m_ControlValue);
-              json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
-              break;
-            case HeatingControlModeIDZoneFollower:
-              json.add("ControlValue", hStatus.m_ControlValue);
-              json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
-              break;
-            case HeatingControlModeIDFixed:
-              json.add("OperationMode", pZone->getHeatingOperationMode());
-              json.add("ControlValue", hStatus.m_ControlValue);
-              break;
-          }
+          ZoneRequestHandler::addTemperatureControlStatus(json, pZone);
           json.endObject();
         }
         json.endArray();
@@ -321,45 +291,28 @@ namespace dss {
             continue;
           }
           json.startObject();
-          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           json.add("id", pZone->getID());
           json.add("name", pZone->getName());
-          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
-
-          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-            json.add("IsConfigured", false);
-            json.endObject();
-            continue;
-          }
-
-          json.add("IsConfigured", true);
-          json.add("ControlMode", hProp.m_HeatingControlMode);
-          json.add("EmergencyValue", hProp.m_EmergencyValue - 100);
-          switch (hProp.m_HeatingControlMode) {
-            case HeatingControlModeIDOff:
-              break;
-            case HeatingControlModeIDPID:
-              json.add("CtrlKp", (double)hProp.m_Kp * 0.025);
-              json.add("CtrlTs", hProp.m_Ts);
-              json.add("CtrlTi", hProp.m_Ti);
-              json.add("CtrlKd", hProp.m_Kd);
-              json.add("CtrlImin", (double)hProp.m_Imin * 0.025);
-              json.add("CtrlImax", (double)hProp.m_Imax * 0.025);
-              json.add("CtrlYmin", hProp.m_Ymin - 100);
-              json.add("CtrlYmax", hProp.m_Ymax - 100);
-              json.add("CtrlAntiWindUp", (hProp.m_AntiWindUp > 0));
-              json.add("CtrlKeepFloorWarm", (hProp.m_KeepFloorWarm > 0));
-              break;
-            case HeatingControlModeIDZoneFollower:
-              json.add("ReferenceZone", hProp.m_HeatingMasterZone);
-              json.add("CtrlOffset", hProp.m_CtrlOffset);
-              break;
-            case HeatingControlModeIDFixed:
-              break;
-          }
+          ZoneRequestHandler::addTemperatureControlConfig(json, pZone);
           json.endObject();
         }
         json.endArray();
+        return json.successJSON();
+
+      } else if(_request.getMethod() == "getTemperatureControlConfig2") {
+        JSONWriter json;
+
+        json.startObject("zones");
+        std::vector<boost::shared_ptr<Zone> > zoneList = m_Apartment.getZones();
+        foreach(boost::shared_ptr<Zone> pZone, zoneList) {
+          if (pZone->getID() == 0) {
+            continue;
+          }
+          json.startObject(ds::str(pZone->getID()));
+          ZoneRequestHandler::addTemperatureControlConfig2(json, pZone);
+          json.endObject();
+        }
+        json.endObject();
         return json.successJSON();
 
       } else if(_request.getMethod() == "getTemperatureControlValues") {
@@ -372,59 +325,9 @@ namespace dss {
             continue;
           }
           json.startObject();
-          ZoneHeatingProperties_t hProp = pZone->getHeatingProperties();
           json.add("id", pZone->getID());
           json.add("name", pZone->getName());
-          json.add("ControlDSUID", hProp.m_HeatingControlDSUID);
-
-          ZoneHeatingOperationModeSpec_t hOpValues;
-          memset(&hOpValues, 0, sizeof(hOpValues));
-
-          if (hProp.m_HeatingControlDSUID == DSUID_NULL) {
-            json.add("IsConfigured", false);
-            json.endObject();
-            continue;
-          }
-
-          try {
-            hOpValues = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingOperationModes(
-                hProp.m_HeatingControlDSUID, pZone->getID());
-          } catch (BusApiError& e) {
-            if (e.error == ERROR_ZONE_NOT_FOUND) {
-              json.add("IsConfigured", false);
-              json.endObject();
-              continue;
-            }
-            throw e;
-          }
-
-          json.add("IsConfigured", true);
-          switch (hProp.m_HeatingControlMode) {
-          case HeatingControlModeIDOff:
-            break;
-          case HeatingControlModeIDPID:
-            json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode0));
-            json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode1));
-            json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode2));
-            json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode3));
-            json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode4));
-            json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode5));
-            json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hOpValues.OpMode7));
-            break;
-          case HeatingControlModeIDZoneFollower:
-            break;
-          case HeatingControlModeIDFixed:
-            json.add("Off", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode0));
-            json.add("Comfort", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode1));
-            json.add("Economy", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode2));
-            json.add("NotUsed", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode3));
-            json.add("Night", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode4));
-            json.add("Holiday", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode5));
-            json.add("Cooling", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode6));
-            json.add("CoolingOff", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hOpValues.OpMode7));
-            break;
-          }
+          ZoneRequestHandler::addTemperatureControlValues(json, pZone);
           json.endObject();
         }
         json.endArray();
