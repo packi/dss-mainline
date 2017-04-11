@@ -37,7 +37,7 @@ static void addParameterDescriptions(VdcDb& db, const VdcDb::PropertyDesc& prop,
   switch (prop.typeId) {
     case VdcDb::propertyTypeId::integer:
     case VdcDb::propertyTypeId::numeric:
-      json.add("type", "numeric");
+      json.add("type", prop.typePostfix.empty() ? "numeric" : prop.typePostfix);
       json.add("min", prop.minValue);
       json.add("max", prop.maxValue);
       json.add("resolution", prop.resolution);
@@ -45,7 +45,7 @@ static void addParameterDescriptions(VdcDb& db, const VdcDb::PropertyDesc& prop,
       json.add("default", prop.defaultValue);
       break;
     case VdcDb::propertyTypeId::string:
-      json.add("type", "string");
+      json.add("type", prop.typePostfix.empty() ? "string" : prop.typePostfix);
       json.add("default", prop.defaultValue);
       break;
     case VdcDb::propertyTypeId::enumeration:
