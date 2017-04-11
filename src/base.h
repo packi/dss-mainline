@@ -65,6 +65,11 @@ namespace dss {
   void replaceAll(std::string& s, const std::string& a, const std::string& b);
   bool endsWith(const std::string& str, const std::string& searchString);
   bool beginsWith(const std::string& str, const std::string& searchString);
+  /**
+   * returns the position of the first occurrence of c in str that is not prefixed with \. The
+   * encountered escape characters (\) are removed.
+   */
+  std::size_t findAndUnescape(std::string& str, const char c, std::size_t startPos = 0);
 
   std::pair<std::string, std::string> splitIntoKeyValue(const std::string& _keyValue);
 
