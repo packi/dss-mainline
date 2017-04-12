@@ -92,7 +92,7 @@ namespace dss {
 
   // _input: Key1(valname1=value1,valname2=value2),Key2,Key3(valname1=value1)
   std::vector<std::string> PropertyQuery::evalPropertyList(std::string& _input, std::string& _output_key) {
-    std::size_t colonPos   = _input.find(',');
+    std::size_t colonPos = findAndUnescape(_input, ',');
     std::size_t bracketPos = _input.find('(');
     // Key without values
     if ((colonPos != std::string::npos) &&
@@ -109,7 +109,7 @@ namespace dss {
           throw std::runtime_error("illegal query: missing ')'");
         }
         std::string propListStr = _input.substr(bracketPos + 1, bracketEndPos - bracketPos - 1);
-        std::size_t eraseEnd = _input.find(',',bracketEndPos);
+        std::size_t eraseEnd = findAndUnescape(_input, ',', bracketEndPos);
         if (eraseEnd == std::string::npos) {
             eraseEnd = bracketEndPos + 1; // ')' remove inclusive
         } else {

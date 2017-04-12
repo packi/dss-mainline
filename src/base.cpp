@@ -218,6 +218,15 @@ namespace dss {
     return sstream.str();
   }
 
+  std::size_t findAndUnescape(std::string& str, const char c, std::size_t startPos) {
+    std::size_t pos = str.find(c, startPos);
+    while ((pos != std::string::npos) && (pos > 0) && (str.at(pos - 1) == '\\')) {
+      str.erase(pos - 1, 1);
+      pos = str.find(c, pos);
+    }
+    return pos;
+  }
+
   std::vector<std::string> splitString(const std::string& _source,
                                        const char _delimiter,
                                        bool _trimEntries) {
