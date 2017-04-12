@@ -827,9 +827,10 @@ namespace dss {
   } // setZoneHeatingControlOperationModeValues
 
   void StructureManipulator::setZoneHeatingOperationModeValues(boost::shared_ptr<Zone> zone) {
-    if ((zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::PID) ||
-        (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::FIXED)) {
-      m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), zone->getHeatingOperationModeValues());
+    if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::PID) {
+      m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), zone->getHeatingControlOperationModeValues());
+    } else if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::FIXED) {
+      m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
     }
   } // setZoneHeatingOperationModeValues
 

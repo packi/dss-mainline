@@ -57,6 +57,8 @@
 #include "src/ds485/dsbusinterface.h"
 #include "vdc-connection.h"
 
+#define HEATING_MAX_SENSOR_AGE (60 * 60)
+#define SENSOR_MAX_AGE 0xffffffff
 
 namespace dss {
 
@@ -933,7 +935,7 @@ namespace dss {
     if (_dsMeter->getCapability_HasTemperatureControl()) {
       uint16_t sensorValue;
       uint32_t sensorAge;
-      DateTime now, age;
+      DateTime now;
       ZoneHeatingConfigSpec_t hConfig = {};
       ZoneHeatingStateSpec_t hState = {};
       ZoneHeatingOperationModeSpec_t hOpValues = {};
@@ -991,24 +993,20 @@ namespace dss {
         }
       }
 
-      _zone->addHeatingController(_dsMeter->getDSID());
-
       // sync zone sensors only if they are not valid
       ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
       ZoneSensorStatus_t zSensors = _zone->getSensorStatus();
 
-      // get the temperature from this dsm if we do not have already a good enough one
-      if (now.difference(zSensors.m_TemperatureValueTS) > 10*60) {
+      // TODO (soon): adapt this code to logic found in the new synchronization between dsms
+      // get the temperature from this dsm if we do not have already a valid one
+      if (zSensors.m_TemperatureValueTS == 0) {
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::TemperatureIndoors,
               &sensorValue, &sensorAge);
-          age = now.addSeconds(-1 * sensorAge);
-          if (age > zSensors.m_TemperatureValueTS) {
+          if (sensorAge <= HEATING_MAX_SENSOR_AGE) {
+            DateTime age = now.addSeconds(-1 * sensorAge);
             _zone->setTemperature(
                 sensorValueToDouble(SensorType::TemperatureIndoors, sensorValue), age);
-          } else {
-            _zone->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::TemperatureIndoors,
-                sensorValueToDouble(SensorType::TemperatureIndoors, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error getting heating temperature value on zone " + intToString(_zone->getID()) +
@@ -1016,18 +1014,16 @@ namespace dss {
         }
       }
 
-      // get the nominal value from this dsm if we do not have already a good enough one
-      if (now.difference(zValues.m_NominalValueTS) > 10*60) {
+      // get the nominal value from this dsm if we do not have already a valid one
+      if (zValues.m_NominalValueTS == 0) {
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::RoomTemperatureSetpoint,
               &sensorValue, &sensorAge);
-          age = now.addSeconds(-1 * sensorAge);
-          if (age > zValues.m_NominalValueTS) {
+          // set the nominal value only when it is valid
+          if (sensorAge <= SENSOR_MAX_AGE) {
+            DateTime age = now.addSeconds(-1 * sensorAge);
             _zone->setNominalValue(
                 sensorValueToDouble(SensorType::RoomTemperatureSetpoint, sensorValue), age);
-          } else {
-            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::RoomTemperatureSetpoint,
-                sensorValueToDouble(SensorType::RoomTemperatureSetpoint, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error reading heating nominal temperature value on zone " + intToString(_zone->getID()) +
@@ -1035,18 +1031,15 @@ namespace dss {
         }
       }
 
-      // get the control value from this dsm if we do not have already a good enough one
-      if (now.difference(zValues.m_ControlValueTS) > 10*60) {
+      // get the control value from this dsm if we do not have already a valid one
+      if (zValues.m_ControlValueTS == 0) {
         try {
           m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::RoomTemperatureControlVariable,
               &sensorValue, &sensorAge);
-          age = now.addSeconds(-1 * sensorAge);
-          if (age > zValues.m_ControlValueTS) {
+          if (sensorAge <= HEATING_MAX_SENSOR_AGE) {
+            DateTime age = now.addSeconds(-1 * sensorAge);
             _zone->setControlValue(
                 sensorValueToDouble(SensorType::RoomTemperatureControlVariable, sensorValue), age);
-          } else {
-            _zone->getGroup(GroupIDControlTemperature)->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::RoomTemperatureControlVariable,
-                sensorValueToDouble(SensorType::RoomTemperatureControlVariable, sensorValue), "");
           }
         } catch (BusApiError& e) {
           log("Error reading heating control value on zone " + intToString(_zone->getID()) +

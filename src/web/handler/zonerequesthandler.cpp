@@ -38,6 +38,7 @@
 #include "src/model/set.h"
 #include "src/model/zone.h"
 #include "src/model/status.h"
+#include "src/model/modulator.h"
 #include "src/stringconverter.h"
 #include "src/structuremanipulator.h"
 #include "util.h"
@@ -384,11 +385,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Off")) {
     try {
       iValue = strToUInt(_request.getParameter("Off"));
-      hOpValues.OpModeTab[0] = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.opModes[0] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Off"));
-        hOpValues.OpModeTab[0] = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.opModes[0] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -396,11 +397,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Comfort")) {
     try {
       iValue = strToUInt(_request.getParameter("Comfort"));
-      hOpValues.OpModeTab[1] = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.opModes[1] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Comfort"));
-        hOpValues.OpModeTab[1] = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.opModes[1] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -408,11 +409,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Economy")) {
     try {
       iValue = strToUInt(_request.getParameter("Economy"));
-      hOpValues.OpModeTab[2] = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.opModes[2] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Economy"));
-        hOpValues.OpModeTab[2] = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.opModes[2] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -420,11 +421,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("NotUsed")) {
     try {
       iValue = strToUInt(_request.getParameter("NotUsed"));
-      hOpValues.OpModeTab[3] = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.opModes[3] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("NotUsed"));
-        hOpValues.OpModeTab[3] = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.opModes[3] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -432,11 +433,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Night")) {
     try {
       iValue = strToUInt(_request.getParameter("Night"));
-      hOpValues.OpModeTab[4] = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.opModes[4] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Night"));
-        hOpValues.OpModeTab[4] = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.opModes[4] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -444,11 +445,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Holiday")) {
     try {
       iValue = strToUInt(_request.getParameter("Holiday"));
-      hOpValues.OpModeTab[5] = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.opModes[5] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Holiday"));
-        hOpValues.OpModeTab[5] = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.opModes[5] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -456,11 +457,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("Cooling")) {
     try {
       iValue = strToUInt(_request.getParameter("Cooling"));
-      hOpValues.OpModeTab[6] = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.opModes[6] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("Cooling"));
-        hOpValues.OpModeTab[6] = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.opModes[6] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -468,11 +469,11 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   if (_request.hasParameter("CoolingOff")) {
     try {
       iValue = strToUInt(_request.getParameter("CoolingOff"));
-      hOpValues.OpModeTab[7] = doubleToSensorValue(SensorConversion, iValue);
+      hOpValues.opModes[7] = doubleToSensorValue(SensorConversion, iValue);
     } catch (std::invalid_argument& e) {
       try {
         fValue = strToDouble(_request.getParameter("CoolingOff"));
-        hOpValues.OpModeTab[7] = doubleToSensorValue(SensorConversion, fValue);
+        hOpValues.opModes[7] = doubleToSensorValue(SensorConversion, fValue);
       } catch (std::invalid_argument& e) {
       }
     }
@@ -498,36 +499,40 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
   const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
   ZoneHeatingInternalsSpec_t hInternals;
 
-  foreach(auto dsuid, hProp.m_HeatingControlDSUIDs) {
-    // start the response for this dsm
-    json.startObject(dsuid2str(dsuid));
+  foreach(auto dsm, pZone->getDSMeters()) {
 
-    json.add("ControlMode", static_cast<int>(hProp.m_HeatingControlMode));
-    json.add("ControlState", hProp.m_HeatingControlState);
+    if (dsm->getCapability_HasTemperatureControl()) {
 
-    if (hProp.m_HeatingControlMode != HeatingControlMode::PID) {
-      return JSONWriter::failure("Not a PID controller");
+      // start the response for this dsm
+      json.startObject(dsuid2str(dsm->getDSID()));
+
+      json.add("ControlMode", static_cast<int>(hProp.m_HeatingControlMode));
+      json.add("ControlState", hProp.m_HeatingControlState);
+
+      if (hProp.m_HeatingControlMode != HeatingControlMode::PID) {
+        return JSONWriter::failure("Not a PID controller");
+      }
+      if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {
+        return JSONWriter::failure("PID controller not running");
+      }
+      memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
+      hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
+          dsm->getDSID(), pZone->getID());
+
+      json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
+      json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
+      json.add("CtrlTError", (double)hInternals.TError * 0.025);
+      json.add("CtrlTErrorPrev", (double)hInternals.TErrorPrev * 0.025);
+      json.add("CtrlIntegral", (double)hInternals.Integral * 0.025);
+      json.add("CtrlYp", (double)hInternals.Yp * 0.01);
+      json.add("CtrlYi", (double)hInternals.Yi * 0.01);
+      json.add("CtrlYd", (double)hInternals.Yd * 0.01);
+      json.add("CtrlY", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hInternals.Y));
+      json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
+
+      // end current dsm object
+      json.endObject();
     }
-    if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {
-      return JSONWriter::failure("PID controller not running");
-    }
-    memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
-    hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
-        dsuid, pZone->getID());
-
-    json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
-    json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
-    json.add("CtrlTError", (double)hInternals.TError * 0.025);
-    json.add("CtrlTErrorPrev", (double)hInternals.TErrorPrev * 0.025);
-    json.add("CtrlIntegral", (double)hInternals.Integral * 0.025);
-    json.add("CtrlYp", (double)hInternals.Yp * 0.01);
-    json.add("CtrlYi", (double)hInternals.Yi * 0.01);
-    json.add("CtrlYd", (double)hInternals.Yd * 0.01);
-    json.add("CtrlY", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hInternals.Y));
-    json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
-
-    // end current dsm object
-    json.endObject();
   }
 
   return json.successJSON();
@@ -919,7 +924,7 @@ void ZoneRequestHandler::addTemperatureControlValues(JSONWriter& json, boost::sh
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:
-			json.add("Off", hProp.m_TeperatureSetpoints[0]);
+      json.add("Off", hProp.m_TeperatureSetpoints[0]);
       json.add("Comfort", hProp.m_TeperatureSetpoints[1]);
       json.add("Economy", hProp.m_TeperatureSetpoints[2]);
       json.add("NotUsed", hProp.m_TeperatureSetpoints[3]);
@@ -931,7 +936,7 @@ void ZoneRequestHandler::addTemperatureControlValues(JSONWriter& json, boost::sh
     case HeatingControlMode::ZONE_FOLLOWER:
       break;
     case HeatingControlMode::FIXED:
-			json.add("Off", hProp.m_FixedControlValues[0]);
+      json.add("Off", hProp.m_FixedControlValues[0]);
       json.add("Comfort", hProp.m_FixedControlValues[1]);
       json.add("Economy", hProp.m_FixedControlValues[2]);
       json.add("NotUsed", hProp.m_FixedControlValues[3]);

@@ -4435,21 +4435,21 @@ namespace dss {
 
         double fValue = strToDouble(propValue);
         if (propKey == "Off") {
-          hOpValues.OpModeTab[0] = doubleToSensorValue(SensorConversion, fValue);
+          hOpValues.opModes[0] = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Comfort") {
-          hOpValues.OpModeTab[1] = doubleToSensorValue(SensorConversion, fValue);
+          hOpValues.opModes[1] = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Economy") {
-          hOpValues.OpModeTab[2] = doubleToSensorValue(SensorConversion, fValue);
+          hOpValues.opModes[2] = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "NotUsed") {
-          hOpValues.OpModeTab[3] = doubleToSensorValue(SensorConversion, fValue);
+          hOpValues.opModes[3] = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Night") {
-          hOpValues.OpModeTab[4] = doubleToSensorValue(SensorConversion, fValue);
+          hOpValues.opModes[4] = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Holiday") {
-          hOpValues.OpModeTab[5] = doubleToSensorValue(SensorConversion, fValue);
+          hOpValues.opModes[5] = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "Cooling") {
-          hOpValues.OpModeTab[6] = doubleToSensorValue(SensorConversion, fValue);
+          hOpValues.opModes[6] = doubleToSensorValue(SensorConversion, fValue);
         } else if (propKey == "CoolingOff") {
-          hOpValues.OpModeTab[7] = doubleToSensorValue(SensorConversion, fValue);
+          hOpValues.opModes[7] = doubleToSensorValue(SensorConversion, fValue);
         } else {
           JS_ReportWarning(cx, "Model.zone_setTemperatureControlValues: unknown opmode \"%s\"", propKey.c_str());
         }

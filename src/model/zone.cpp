@@ -317,7 +317,7 @@ namespace dss {
   void Zone::setHeatingControlOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues) {
     for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
       m_HeatingProperties.m_TeperatureSetpoints[i] =
-          sensorValueToDouble(SensorType::RoomTemperatureSetpoint, operationModeValues.OpModeTab[i]);
+          sensorValueToDouble(SensorType::RoomTemperatureSetpoint, operationModeValues.opModes[i]);
     }
     dirty();
   }
@@ -325,7 +325,7 @@ namespace dss {
   void Zone::setHeatingFixedOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues) {
     for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
       m_HeatingProperties.m_FixedControlValues[i] =
-          sensorValueToDouble(SensorType::RoomTemperatureControlVariable, operationModeValues.OpModeTab[i]);
+          sensorValueToDouble(SensorType::RoomTemperatureControlVariable, operationModeValues.opModes[i]);
     }
     dirty();
   }
@@ -347,7 +347,7 @@ namespace dss {
     ZoneHeatingOperationModeSpec_t retVal;
 
     for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
-      retVal.OpModeTab[i] =
+      retVal.opModes[i] =
           doubleToSensorValue(SensorType::RoomTemperatureSetpoint, m_HeatingProperties.m_TeperatureSetpoints[i]);
     }
 
@@ -358,7 +358,7 @@ namespace dss {
     ZoneHeatingOperationModeSpec_t retVal;
 
     for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
-      retVal.OpModeTab[i] =
+      retVal.opModes[i] =
           doubleToSensorValue(SensorType::RoomTemperatureControlVariable, m_HeatingProperties.m_FixedControlValues[i]);
     }
 
@@ -374,19 +374,6 @@ namespace dss {
       default:
         return ZoneHeatingOperationModeSpec_t();
     }
-  }
-
-  void Zone::addHeatingController(const dsuid_t& dsuid) {
-    if (!isHeatingController(dsuid)) {
-      m_HeatingProperties.m_HeatingControlDSUIDs.push_back(dsuid);
-    }
-  }
-
-  bool Zone::isHeatingController(const dsuid_t& dsuid) {
-    auto it = find_if(m_HeatingProperties.m_HeatingControlDSUIDs.begin(), m_HeatingProperties.m_HeatingControlDSUIDs.end(),
-        [&](dsuid_t item) { return dsuid_equal(&dsuid, &item);});
-
-    return it != m_HeatingProperties.m_HeatingControlDSUIDs.end();
   }
 
   void Zone::setHeatingOperationMode(int _operationMode) {
@@ -626,7 +613,6 @@ namespace dss {
     m_ManualValue = 0;
     memset(m_TeperatureSetpoints, 0, sizeof(m_TeperatureSetpoints));
     memset(m_FixedControlValues, 0, sizeof(m_FixedControlValues));
-    m_HeatingControlDSUIDs.clear();
   }
 
   bool ZoneHeatingProperties::isEqual(const ZoneHeatingConfigSpec_t& config, const ZoneHeatingOperationModeSpec_t& operationMode) const {
@@ -650,14 +636,14 @@ namespace dss {
     bool operationModeEqual = true;
     if (m_HeatingControlMode == HeatingControlMode::PID) {
       for (int i = 0; i < 16; ++i) {
-        if ( doubleToSensorValue(SensorType::RoomTemperatureSetpoint, m_TeperatureSetpoints[i]) != operationMode.OpModeTab[i]) {
+        if ( doubleToSensorValue(SensorType::RoomTemperatureSetpoint, m_TeperatureSetpoints[i]) != operationMode.opModes[i]) {
           operationModeEqual = false;
           break;
         }
       }
     } else if (m_HeatingControlMode == HeatingControlMode::FIXED) {
       for (int i = 0; i < 16; ++i) {
-        if ( doubleToSensorValue(SensorType::RoomTemperatureControlVariable, m_FixedControlValues[i]) != operationMode.OpModeTab[i]) {
+        if ( doubleToSensorValue(SensorType::RoomTemperatureControlVariable, m_FixedControlValues[i]) != operationMode.opModes[i]) {
           operationModeEqual = false;
           break;
         }
@@ -679,7 +665,7 @@ namespace dss {
       std::string strIdx = ds::str(i);
       if (d.HasMember(strIdx)) {
         DS_REQUIRE(d[strIdx].IsNumber());
-        hOpValues.OpModeTab[i] = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d[strIdx].GetDouble());
+        hOpValues.opModes[i] = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d[strIdx].GetDouble());
       }
     }
   }
@@ -696,7 +682,7 @@ namespace dss {
       std::string strIdx = ds::str(i);
       if (d.HasMember(strIdx)) {
         DS_REQUIRE(d[strIdx].IsNumber());
-        hOpValues.OpModeTab[i] = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d[strIdx].GetDouble());
+        hOpValues.opModes[i] = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d[strIdx].GetDouble());
       }
     }
   }

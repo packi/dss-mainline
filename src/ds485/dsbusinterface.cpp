@@ -1138,22 +1138,22 @@ namespace dss {
     loginFromCallback();
 
     boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec = boost::make_shared<ZoneHeatingOperationModeSpec_t>();
-    spec->OpModeTab[0] = _OperationMode0;
-    spec->OpModeTab[1] = _OperationMode1;
-    spec->OpModeTab[2] = _OperationMode2;
-    spec->OpModeTab[3] = _OperationMode3;
-    spec->OpModeTab[4] = _OperationMode4;
-    spec->OpModeTab[5] = _OperationMode5;
-    spec->OpModeTab[6] = _OperationMode6;
-    spec->OpModeTab[7] = _OperationMode7;
-    spec->OpModeTab[8] = _OperationMode8;
-    spec->OpModeTab[9] = _OperationMode9;
-    spec->OpModeTab[10] = _OperationModeA;
-    spec->OpModeTab[11] = _OperationModeB;
-    spec->OpModeTab[12] = _OperationModeC;
-    spec->OpModeTab[13] = _OperationModeD;
-    spec->OpModeTab[14] = _OperationModeE;
-    spec->OpModeTab[15] = _OperationModeF;
+    spec->opModes[0] = _OperationMode0;
+    spec->opModes[1] = _OperationMode1;
+    spec->opModes[2] = _OperationMode2;
+    spec->opModes[3] = _OperationMode3;
+    spec->opModes[4] = _OperationMode4;
+    spec->opModes[5] = _OperationMode5;
+    spec->opModes[6] = _OperationMode6;
+    spec->opModes[7] = _OperationMode7;
+    spec->opModes[8] = _OperationMode8;
+    spec->opModes[9] = _OperationMode9;
+    spec->opModes[10] = _OperationModeA;
+    spec->opModes[11] = _OperationModeB;
+    spec->opModes[12] = _OperationModeC;
+    spec->opModes[13] = _OperationModeD;
+    spec->opModes[14] = _OperationModeE;
+    spec->opModes[15] = _OperationModeF;
 
     ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerValues, _destinationID);
     pEvent->addParameter(_ZoneId);

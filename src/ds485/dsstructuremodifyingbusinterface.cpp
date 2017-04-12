@@ -319,10 +319,10 @@ namespace dss {
         _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
     if (_dsMeterID == DSUID_BROADCAST) {
       DSBusInterface::checkBroadcastResultCode(ret);
-      usleep(BROADCAST_SLEEP_MICROSECONDS);
     } else {
       DSBusInterface::checkResultCode(ret);
     }
+    usleep(BROADCAST_SLEEP_MICROSECONDS);
 
     if (m_pModelMaintenance) {
       boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
@@ -365,10 +365,10 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     int ret = ControllerHeating_set_operation_modes(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        _spec.OpModeTab[0], _spec.OpModeTab[1], _spec.OpModeTab[2], _spec.OpModeTab[3],
-        _spec.OpModeTab[4], _spec.OpModeTab[5], _spec.OpModeTab[6], _spec.OpModeTab[7],
-        _spec.OpModeTab[8], _spec.OpModeTab[9], _spec.OpModeTab[10], _spec.OpModeTab[11],
-        _spec.OpModeTab[12], _spec.OpModeTab[13], _spec.OpModeTab[14], _spec.OpModeTab[15]
+        _spec.opModes[0], _spec.opModes[1], _spec.opModes[2], _spec.opModes[3],
+        _spec.opModes[4], _spec.opModes[5], _spec.opModes[6], _spec.opModes[7],
+        _spec.opModes[8], _spec.opModes[9], _spec.opModes[10], _spec.opModes[11],
+        _spec.opModes[12], _spec.opModes[13], _spec.opModes[14], _spec.opModes[15]
         );
     if (_dsMeterID == DSUID_BROADCAST) {
       DSBusInterface::checkBroadcastResultCode(ret);

@@ -453,14 +453,18 @@ namespace dss {
 
     if (strcmp(_name, "temperatureSetpoints") == 0) {
       ZoneHeatingProperties_t config = m_tempZone->getHeatingProperties();
+      std::vector<std::string> valNames;
+      valNames.reserve(HeatingOperationModeIDMax);
+
+      for (int j = 0; j <= HeatingOperationModeIDMax; ++j) {
+        valNames.emplace_back(ds::str("val", j));
+      }
 
       for (int i = 0; _attrs[i]; i += 2) {
         const char *tempVal = _attrs[i + 1];
 
         for (int j = 0; j <= HeatingOperationModeIDMax; ++j) {
-          std::string attrName = ds::str("val", j);
-
-          if (strcmp(_attrs[i], attrName.c_str()) == 0) {
+          if (strcmp(_attrs[i], valNames[j].c_str()) == 0) {
             config.m_TeperatureSetpoints[j] = strToDouble(tempVal, config.m_TeperatureSetpoints[j]);
             break;
           }

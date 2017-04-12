@@ -346,8 +346,9 @@ void HeatingMonitorTask::run() {
       if (zones[i]->getID() == 0) {
         continue;
       }
+
       Set devices = devList.getByZone(zones[i]->getID());
-      if (!devices.isEmpty() || zones[i]->isHeatingController(dsmdsuid)) {
+      if (!devices.isEmpty() || zones[i]->registeredOnDSMeter(pMeter)) {
         syncZone(zones[i]->getID());
       }
     }

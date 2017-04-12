@@ -248,34 +248,46 @@ namespace dss {
     throw ScriptException("Value is not of type number");
   }
 
-  class Stringifier
-  {
-    std::stringstream m_Stream;
-    ScriptContext& m_Context;
-
-  public:
-
-    Stringifier(ScriptContext& context) : m_Context(context) { }
-
-    static int callback(const jschar *buf, uint32 len, void *data)
+  namespace _private {
+    class Stringifier
     {
-      char tmpBuff[len+1];
-      size_t dstlenp = sizeof(tmpBuff);
-      memset(tmpBuff, 0, dstlenp);
+      std::stringstream m_Stream;
+      ScriptContext& m_Context;
 
-      JS_EncodeCharacters(static_cast<Stringifier*>(data)->m_Context.getJSContext(), buf, len, tmpBuff, &dstlenp);
-      static_cast<Stringifier*>(data)->m_Stream << tmpBuff;
-      return 1;
-    }
+    public:
 
-    std::string getOutput() { return m_Stream.str(); }
+      Stringifier(ScriptContext& context) : m_Context(context) { }
 
-  };
+      static int callback(const jschar *buf, uint32 len, void *data)
+      {
+        auto cx = static_cast<Stringifier*>(data)->m_Context.getJSContext();
+
+        /* Determine how many bytes to allocate. */
+        size_t dstlen = 0;
+        if (!JS_EncodeCharacters(cx, buf, len, NULL, &dstlen))
+            return JS_FALSE;
+
+        /* Allocate. */
+        char dst[dstlen + 1];
+        memset(dst, 0, sizeof(dst));
+
+        /* Convert characters to bytes. */
+        JS_EncodeCharacters(cx, buf, len, dst, &dstlen);
+
+        /* Use the converted bytes for something. */
+        static_cast<Stringifier*>(data)->m_Stream << dst;
+
+        return JS_TRUE;
+      }
+
+      std::string getOutput() { return m_Stream.str(); }
+    };
+  }
 
   std::string ScriptContext::jsonStringify(jsval& val) {
-    Stringifier stringifier(*this);
+    _private::Stringifier stringifier(*this);
 
-    if (!JS_Stringify(getJSContext(), &val, nullptr, 0, &Stringifier::callback, &stringifier))
+    if (!JS_Stringify(getJSContext(), &val, nullptr, 0, &_private::Stringifier::callback, &stringifier))
     {
       return std::string();
     }
