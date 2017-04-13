@@ -310,7 +310,11 @@ namespace dss {
           }
           json.startObject(ds::str(pZone->getID()));
           json.add("name", pZone->getName());
+
+          json.startObject("config");
           ZoneRequestHandler::addTemperatureControlConfig2(json, pZone);
+          json.endObject();
+
           json.endObject();
         }
         json.endObject();
