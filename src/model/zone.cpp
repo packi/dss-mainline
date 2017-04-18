@@ -91,7 +91,7 @@ namespace dss {
 
   void Zone::addGroup(boost::shared_ptr<Group> _group) {
     // TODO(soon): remove again before R1705
-    if (_group->getID() == GroupIDGlobalAppDsRecirculation) {
+    if (_group->getID() > GroupIDGlobalAppDsVentilation) {
       return;
     }
     // until here
