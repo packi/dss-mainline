@@ -248,7 +248,7 @@ namespace dss {
     throw ScriptException("Value is not of type number");
   }
 
-  namespace _private {
+  namespace {
     class Stringifier
     {
       std::stringstream m_Stream;
@@ -267,14 +267,14 @@ namespace dss {
         if (!JS_EncodeCharacters(cx, buf, len, NULL, &dstlen))
             return JS_FALSE;
 
-        /* Allocate. */
+        /* Create tmp buffer. */
         char dst[dstlen + 1];
         memset(dst, 0, sizeof(dst));
 
-        /* Convert characters to bytes. */
+        /* Convert js characters to C chars. */
         JS_EncodeCharacters(cx, buf, len, dst, &dstlen);
 
-        /* Use the converted bytes for something. */
+        /* Copy the converted characters to output stream. */
         static_cast<Stringifier*>(data)->m_Stream << dst;
 
         return JS_TRUE;
@@ -285,9 +285,9 @@ namespace dss {
   }
 
   std::string ScriptContext::jsonStringify(jsval& val) {
-    _private::Stringifier stringifier(*this);
+    Stringifier stringifier(*this);
 
-    if (!JS_Stringify(getJSContext(), &val, nullptr, 0, &_private::Stringifier::callback, &stringifier))
+    if (!JS_Stringify(getJSContext(), &val, nullptr, 0, & Stringifier::callback, &stringifier))
     {
       return std::string();
     }

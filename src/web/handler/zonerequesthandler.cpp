@@ -499,7 +499,7 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
   const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
   ZoneHeatingInternalsSpec_t hInternals;
 
-  foreach(auto dsm, pZone->getDSMeters()) {
+  foreach(auto&& dsm, pZone->getDSMeters()) {
 
     if (dsm->getCapability_HasTemperatureControl()) {
 
