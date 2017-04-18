@@ -6746,11 +6746,11 @@ connect_socket(struct mg_context *ctx /* may be NULL */,
 	}
 
 	if (ip_ver == 4) {
-		*sock = socket(PF_INET, SOCK_STREAM, 0);
+		*sock = socket(PF_INET, SOCK_CLOEXEC | SOCK_STREAM, 0);
 	}
 #ifdef USE_IPV6
 	else if (ip_ver == 6) {
-		*sock = socket(PF_INET6, SOCK_STREAM, 0);
+		*sock = socket(PF_INET6, SOCK_CLOEXEC | SOCK_STREAM, 0);
 	}
 #endif
 
@@ -11233,7 +11233,7 @@ set_ports_option(struct mg_context *ctx)
 		}
 #endif
 
-		if ((so.sock = socket(so.lsa.sa.sa_family, SOCK_STREAM, 6))
+		if ((so.sock = socket(so.lsa.sa.sa_family, SOCK_CLOEXEC | SOCK_STREAM, 6))
 		    == INVALID_SOCKET) {
 
 			mg_cry(fc(ctx), "cannot create socket (entry %i)", portsTotal);
