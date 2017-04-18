@@ -90,6 +90,11 @@ namespace dss {
   } // addDevice
 
   void Zone::addGroup(boost::shared_ptr<Group> _group) {
+    // TODO(soon): remove again before R1705
+    if (_group->getID() == GroupIDGlobalAppDsRecirculation) {
+      return;
+    }
+    // until here
     if(_group->getZoneID() != m_ZoneID) {
       throw std::runtime_error("Zone::addGroup: ZoneID of _group does not match own");
     }
