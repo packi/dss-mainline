@@ -4768,6 +4768,10 @@ pull_all(FILE *fp, struct mg_connection *conn, char *buf, int len)
 	int n, nread = 0;
 	double timeout = -1.0;
 
+	if (!conn->ctx) {
+	  return 0;
+	}
+
 	if (conn->ctx->config[REQUEST_TIMEOUT]) {
 		timeout = atoi(conn->ctx->config[REQUEST_TIMEOUT]) / 1000.0;
 	}
