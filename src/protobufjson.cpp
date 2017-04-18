@@ -193,7 +193,6 @@ namespace dss {
       _parts.erase(_parts.begin());
       if (_parts.size() > 0) {
         if (_parts.at(0).child) {
-          rootProp = _prop->add_properties();
           setupMessage(rootProp, _parts);
         } else {
           startSetupMessage(_prop, _parts);
@@ -227,7 +226,6 @@ namespace dss {
       _parts.erase(_parts.begin());
       if (_parts.size() > 0) {
         if (_parts.at(0).child) {
-          rootProp = _prop->add_query();
           setupMessage(rootProp, _parts);
         } else {
           startSetupMessage(_prop, _parts);
