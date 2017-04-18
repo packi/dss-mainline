@@ -20,6 +20,10 @@
  * THE SOFTWARE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #if defined(_WIN32)
 #if !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS /* Disable deprecation warning in VS2005 */
@@ -13674,11 +13678,15 @@ worker_thread_run(struct worker_thread_args *thread_args)
 		if (conn->client.rsa.sa.sa_family == AF_INET6) {
 			conn->request_info.remote_port =
 			    ntohs(conn->client.rsa.sin6.sin6_port);
+			conn->request_info.local_port =
+				ntohs(conn->client.lsa.sin6.sin6_port);
 		} else
 #endif
 		{
 			conn->request_info.remote_port =
 			    ntohs(conn->client.rsa.sin.sin_port);
+			conn->request_info.local_port =
+				ntohs(conn->client.lsa.sin.sin_port);
 		}
 
 		sockaddr_to_string(conn->request_info.remote_addr,
