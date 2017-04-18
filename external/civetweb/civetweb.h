@@ -1114,6 +1114,8 @@ CIVETWEB_API unsigned mg_check_feature(unsigned feature);
 */
 CIVETWEB_API int mg_get_system_info(char *buffer, int buflen);
 
+CIVETWEB_API int mg_connection_active(struct mg_connection *conn);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

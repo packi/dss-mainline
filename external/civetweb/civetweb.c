@@ -1234,7 +1234,6 @@ typedef int socklen_t;
 #define MGSQLEN (20)
 #endif
 
-
 #if defined(NO_SSL)
 typedef struct SSL SSL; /* dummy for SSL argument to push/pull */
 typedef struct SSL_CTX SSL_CTX;
@@ -1339,7 +1338,6 @@ struct ssl_func {
 	(*(int (*)(SSL_CTX *, const unsigned char *, unsigned int))ssl_sw[29].ptr)
 #define SSL_CTX_ctrl (*(long (*)(SSL_CTX *, int, long, void *))ssl_sw[30].ptr)
 
-
 #define SSL_CTX_set_cipher_list                                                \
 	(*(int (*)(SSL_CTX *, const char *))ssl_sw[31].ptr)
 #define SSL_CTX_set_options(ctx, op)                                           \
@@ -1348,6 +1346,8 @@ struct ssl_func {
 	SSL_CTX_ctrl((ctx), SSL_CTRL_CLEAR_OPTIONS, (op), NULL)
 #define SSL_CTX_set_ecdh_auto(ctx, onoff)                                      \
 	SSL_CTX_ctrl(ctx, SSL_CTRL_SET_ECDH_AUTO, onoff, NULL)
+
+#define SSL_peek (*(int(*)(SSL *,void *,int))ssl_sw[32].ptr)
 
 #define X509_get_notBefore(x) ((x)->cert_info->validity->notBefore)
 #define X509_get_notAfter(x) ((x)->cert_info->validity->notAfter)
@@ -1421,6 +1421,7 @@ static struct ssl_func ssl_sw[] = {{"SSL_free", NULL},
                                    {"SSL_CTX_set_session_id_context", NULL},
                                    {"SSL_CTX_ctrl", NULL},
                                    {"SSL_CTX_set_cipher_list", NULL},
+                                   {"SSL_peek", NULL },
                                    {NULL, NULL}};
 
 
@@ -7594,6 +7595,33 @@ mg_send_mime_file2(struct mg_connection *conn,
 	} else {
 		send_http_error(conn, 404, "%s", "Error: File not found");
 	}
+}
+
+int
+mg_connection_active(struct mg_connection *conn) {
+	int tmp, res, err;
+	if (conn->ssl) {
+		set_blocking_mode(conn->client.sock, 0);
+		res = SSL_peek(conn->ssl, &tmp, 1);
+		set_blocking_mode(conn->client.sock, 1);
+		if (res <= 0) {
+			err = SSL_get_error(conn->ssl, res);
+			if ((err != SSL_ERROR_WANT_READ) && (err != SSL_ERROR_WANT_WRITE)) {
+				return 0;
+			}
+		}
+	} else {
+		res = recv(conn->client.sock, &tmp, 1,  MSG_PEEK | MSG_DONTWAIT);
+		if (res == -1) {
+			if ((errno != EAGAIN) && (errno != EINTR) && (errno != EWOULDBLOCK)) {
+				return 0;
+			}
+		} else if (res == 0) {
+			// if we were still connected, recv would return -1 with an errno listed above or 1
+			return 0;
+		}
+	}
+	return 1;
 }
 
 
