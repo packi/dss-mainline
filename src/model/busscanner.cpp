@@ -508,6 +508,20 @@ namespace dss {
 
     // synchronize sensor configuration
     if (_spec.sensorInputsValid) {
+      if (dev->isVdcDevice()) {
+        try {
+          // read extended sensor info
+          auto sList = VdcHelper::getSensorDesc(dev->getDSMeterDSID(), dev->getDSID());
+          for (auto it = sList.begin(); it != sList.end(); it ++) {
+            int index = it->first;
+            VdcHelper::SensorDesc sDesc = it->second;
+            _spec.sensorInputs[index].usage = sDesc.sensorUsage;
+            _spec.sensorInputs[index].name = sDesc.sensorName;
+          }
+        } catch (const std::runtime_error& e) {
+          log(std::string("initializeDeviceFromSpec() sensor read error:") + e.what(), lsError);
+        }
+      }
       dev->setSensors(_spec.sensorInputs);
     }
 

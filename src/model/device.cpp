@@ -2518,6 +2518,8 @@ namespace dss {
       boost::shared_ptr<DeviceSensor_t> binput = boost::make_shared<DeviceSensor_t>();
       binput->m_sensorIndex = m_sensorInputCount;
       binput->m_sensorType = it->sensorType;
+      binput->m_sensorUsage = it->usage;
+      binput->m_sensorName = it->name;
       binput->m_sensorPollInterval = it->SensorPollInterval;
       binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
       binput->m_sensorPushConversionFlag = it->SensorConversionFlag;
@@ -2534,6 +2536,10 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int, SensorType>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
         entry->createProperty("index")
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorIndex));
+        entry->createProperty("usage")
+                ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_sensorInputs[m_sensorInputCount]->m_sensorUsage));
+        entry->createProperty("name")
+                ->linkToProxy(PropertyProxyReference<std::string>(m_sensorInputs[m_sensorInputCount]->m_sensorName));
         entry->createProperty("valid")
                 ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorValueValidity));
         entry->createProperty("value")
@@ -2542,6 +2548,8 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int, unsigned int>(m_sensorInputs[m_sensorInputCount]->m_sensorValue));
         entry->createProperty("timestamp")
                 ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toString));
+        entry->createProperty("timeISO8601")
+                ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toISO8601_ms));
       }
 
       m_sensorInputCount ++;
