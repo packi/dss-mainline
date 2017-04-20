@@ -74,6 +74,8 @@ namespace dss {
     DateTime addMinute(const int _minutes) const;
     /** Adds \a _seconds seconds to the time and normalizes the DateTime */
     DateTime addSeconds(const int _seconds) const;
+    /** Adds \a _milliseconds seconds to the time and normalizes the DateTime */
+    DateTime addMilliSeconds(const int _milliseconds) const;
     /** Adds \a _month months to the date and normalizes the DateTime */
     DateTime addMonth(const int _month) const;
     /** Adds \a _years years to the date and normalizes the DateTime */
