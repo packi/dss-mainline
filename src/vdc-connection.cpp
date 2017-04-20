@@ -317,6 +317,43 @@ namespace dss {
     return state;
   }
 
+  std::map<int,VdcHelper::SensorDesc> VdcHelper::getSensorDesc(dsuid_t _vdsm, dsuid_t _device)
+  {
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+    vdcapi::PropertyElement* el = query.Add();
+    el->set_name("sensorDescriptions");
+
+    vdcapi::Message message = VdcConnection::getProperty(_vdsm, _device, query);
+
+    Logger::getInstance()->log("VdcHelper::getSensorDesc: message " + message.DebugString(), lsDebug);
+    vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
+    VdcElementReader reader(message.vdc_response_get_property().properties());
+
+    std::map<int,SensorDesc> sensorList;
+    VdcElementReader sensorDescReader = reader["sensorDescriptions"];
+    for (VdcElementReader::iterator it = sensorDescReader.begin(); it != sensorDescReader.end(); it++) {
+      SensorDesc sDesc;
+      VdcElementReader sensorReader = *it;
+      const std::string& sSensorName = sensorReader.getName();
+      int sSensorIndex = strToInt(sSensorName);
+      for (VdcElementReader::iterator it = sensorReader.begin(); it != sensorReader.end(); it++) {
+        VdcElementReader sensorFieldProp = *it;
+        const std::string& sensorField = sensorFieldProp.getName();
+        if (sensorField == "name") {
+          sDesc.sensorName = sensorFieldProp.getValueAsString();
+        } else if (sensorField == "sensorType") {
+          sDesc.sensorType = static_cast<SensorType>(sensorFieldProp.getValueAsInt());
+        } else if (sensorField == "sensorUsage") {
+          sDesc.sensorUsage = sensorFieldProp.getValueAsInt();
+        } else if (sensorField == "updateInterval") {
+          sDesc.updateInterval = sensorFieldProp.getValueAsDouble();
+        }
+      }
+      sensorList[sSensorIndex] = sDesc;
+    }
+    return sensorList;
+  }
+
   vdcapi::Message VdcHelper::callLearningFunction(dsuid_t vdc, bool establish, int64_t timeout, const vdcapi::PropertyElement& params)
   {
     DeviceBusInterface* deviceBusInterface = DSS::getInstance()->getApartment().getDeviceBusInterface();
