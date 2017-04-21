@@ -148,17 +148,26 @@ typedef struct OutputChannelInfo
 } OutputChannelInfo_t;
 
 static OutputChannelInfo kOutputChannels[] = {
-    { NULL,             0,  0,      0       },  // id 0
-    { "brightness",     8,  0,      100     },  // id 1,    %
-    { "hue",            8,  0,      358.6   },  // id 2,    °
-    { "saturation",     8,  0,      100     },  // id 3,    %
-    { "colortemp",      8,  100,    1000    },  // id 4,    mired
-    { "x",              8,  0,      1.0     },  // id 5
-    { "y",              8,  0,      1.0     },  // id 6
-    { "verticalpos",    16, 0,      100     },  // id 7,    %
-    { "horizontalpos",  16, 0,      100     },  // id 8,    %
-    { "openinganglepos",8,  0,      100     },  // id 9,    %
-    { "permeability",   8,  0,      100     }   // id 10,   %
+    { NULL,                        0,  0,      0       },  // id 0
+    { "brightness",                8,  0,      100     },  // id 1  light brightness
+    { "hue",                       8,  0,      358.6   },  // id 2  colored light hue
+    { "saturation",                8,  0,      100     },  // id 3  colored light saturation
+    { "colortemp",                 8,  100,    1000    },  // id 4, color temperature mired
+    { "x",                         8,  0,      1.0     },  // id 5  CIE color model x component
+    { "y",                         8,  0,      1.0     },  // id 6  CIE color model y component
+    { "shadePositionOutside",      16, 0,      100     },  // id 7  shade position opening percentage for e.g. blinds and roller shutters
+    { "shadePositionIndoor",       16, 0,      100     },  // id 8  shade position opening percentage for e.g. curtains
+    { "shadeOpeningAngleOutside",  8,  0,      100     },  // id 9  shade position opening angle for e.g. lamellars
+    { "shadeOpeningAngleIndoor",   8,  0,      100     },  // id 10  indoor shade position opening angle for e.g. lamellars
+    { "transparency",              8,  0,      100     },  // id 11  transparency of e.g. a smart window
+    { "airFlowIntensity",          8,  0,      100     },  // id 12  intensity of ventilation
+    { "airFlowDirection",          8,  0,      2       },  // id 13  direction of air flow
+    { "airFlapPosition",           8,  0,      100     },  // id 14  flap position
+    { "airLouverPosition",         8,  0,      100     },  // id 15  louver position
+    { "heatingPower",              8,  0,      100     },  // id 16  heating power and intensity
+    { "coolingCapacity",           8,  0,      100     },  // id 17  cooling capacity and intensity
+    { "audioVolume",               8,  0,      100     },  // id 18  audio loudness
+    { "powerState",                8,  0,      2       },  // id 19  power status
 };
 
   std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName) {
