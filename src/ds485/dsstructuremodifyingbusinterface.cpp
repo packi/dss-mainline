@@ -309,20 +309,25 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ControllerHeating_set_config(m_DSMApiHandle, DSUID_BROADCAST, _ZoneID,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            (_spec.EmergencyValue >= 100) ? _spec.EmergencyValue : 150);
-    DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
-    ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
-        _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
-        _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
-    if (_dsMeterID == DSUID_BROADCAST) {
-      DSBusInterface::checkBroadcastResultCode(ret);
+    if (1) {
+      // Disabled until dsms support temperature control master election
+      Logger::getInstance()->log("Skipping call to ControllerHeating_set_config", lsWarning);
     } else {
-      DSBusInterface::checkResultCode(ret);
+      int ret = ControllerHeating_set_config(m_DSMApiHandle, DSUID_BROADCAST, _ZoneID,
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+              (_spec.EmergencyValue >= 100) ? _spec.EmergencyValue : 150);
+      DSBusInterface::checkBroadcastResultCode(ret);
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
+      ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
+          _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
+          _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
+      if (_dsMeterID == DSUID_BROADCAST) {
+        DSBusInterface::checkBroadcastResultCode(ret);
+      } else {
+        DSBusInterface::checkResultCode(ret);
+      }
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
     }
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
 
     if (m_pModelMaintenance) {
       boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
