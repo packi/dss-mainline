@@ -2250,40 +2250,35 @@ namespace dss {
   void ModelMaintenance::onHeatingControllerConfig(dsuid_t _dsMeterID, const int _zoneID, boost::shared_ptr<void> _spec) {
     boost::shared_ptr<ZoneHeatingConfigSpec_t> config =
         boost::static_pointer_cast<ZoneHeatingConfigSpec_t> (_spec);
-    ZoneHeatingProperties_t hProp;
 
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
-      hProp = zone->getHeatingProperties();
-      zone->setHeatingControlMode(*config.get(), _dsMeterID);
+      zone->setHeatingControlMode(*config.get());
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on heating control config event, item not found: ") + e.what(), lsWarning);
       return;
     }
 
-    log(std::string("onHeatingControllerConfig:  dsMeter " + dsuid2str(_dsMeterID) +
-        ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
+    log(std::string("onHeatingControllerConfig:  dsMeter " + dsuid2str(_dsMeterID), lsInfo));
     raiseEvent(createHeatingControllerConfig(_zoneID, _dsMeterID, *config));
   } // onHeatingControllerConfig
 
   void ModelMaintenance::onHeatingControllerValues(dsuid_t _dsMeterID, const int _zoneID, boost::shared_ptr<void> _spec) {
     boost::shared_ptr<ZoneHeatingOperationModeSpec_t> values =
         boost::static_pointer_cast<ZoneHeatingOperationModeSpec_t> (_spec);
-    ZoneHeatingProperties_t hProp;
-    ZoneHeatingStatus_t hStatus;
 
     boost::shared_ptr<Zone> zone;
     try {
       zone = m_pApartment->getZone(_zoneID);
-      hProp = zone->getHeatingProperties();
-      hStatus = zone->getHeatingStatus();
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on heating control value event, item not found: ") + e.what(), lsWarning);
       return;
     }
 
-    log(std::string("onHeatingControllerValues:  dsMeter " + dsuid2str(_dsMeterID) +
-        ", current controller " + dsuid2str(hProp.m_HeatingControlDSUID), lsInfo));
+    log(std::string("onHeatingControllerValues:  dsMeter " + dsuid2str(_dsMeterID), lsInfo));
+
+    const ZoneHeatingProperties_t& hProp = zone->getHeatingProperties();
+    const ZoneHeatingStatus_t& hStatus = zone->getHeatingStatus();
 
     raiseEvent(createHeatingControllerValue(_zoneID, _dsMeterID, hProp, *values));
     raiseEvent(createHeatingControllerValueDsHub(_zoneID,

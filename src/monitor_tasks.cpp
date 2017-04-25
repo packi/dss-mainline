@@ -232,9 +232,9 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
     boost::shared_ptr<Zone> pZone = m_Apartment->getZone(_zoneID);
     boost::shared_ptr<Group> pGroup = pZone->getGroup(GroupIDControlTemperature);
     ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
-    ZoneHeatingProperties_t hConfig = pZone->getHeatingProperties();
+    const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
-    switch (hConfig.m_HeatingControlMode) {
+    switch (hProp.m_HeatingControlMode) {
       case HeatingControlMode::PID:
         if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
           pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
@@ -346,9 +346,9 @@ void HeatingMonitorTask::run() {
       if (zones[i]->getID() == 0) {
         continue;
       }
+
       Set devices = devList.getByZone(zones[i]->getID());
-      ZoneHeatingProperties_t hConfig = zones[i]->getHeatingProperties();
-      if (!devices.isEmpty() || (hConfig.m_HeatingControlDSUID == dsmdsuid)) {
+      if (!devices.isEmpty() || zones[i]->registeredOnDSMeter(pMeter)) {
         syncZone(zones[i]->getID());
       }
     }

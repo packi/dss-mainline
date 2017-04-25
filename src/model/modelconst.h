@@ -340,6 +340,7 @@ namespace dss {
   const int HeatingOperationModeIDHoliday = 5;
   const int HeatingOperationModeIDCooling = 6;
   const int HeatingOperationModeIDCoolingOff = 7;
+  const int HeatingOperationModeIDMax = 11;   // maximum allowed value
   const int HeatingOperationModeInvalid = 0xff;
 
   const int HeatingOperationModeIDValveProtection = 31;

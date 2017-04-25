@@ -621,11 +621,6 @@ BOOST_AUTO_TEST_CASE(testTemperatureControlConfiguration2) {
   auto jsResponse = ctx->evaluate<std::string>("JSON.stringify(getZoneByID(42).getTemperatureControlConfiguration2())");
   BOOST_CHECK_EQUAL(jsResponse, R"({"mode":"off","controlMode":{"emergencyValue":75,"ctrlKp":0,"ctrlTs":0,"ctrlTi":0,"ctrlKd":0,"ctrlImin":0,"ctrlImax":0,"ctrlYmin":-100,"ctrlYmax":-100,"ctrlAntiWindUp":false},"zoneFollowerMode":{"referenceZone":0,"ctrlOffset":0},"manualMode":{"controlValue":-100}})");
 
-  // set some dummy control dms uid
-  hProps = apt.getZone(42)->getHeatingProperties();
-  hProps.m_HeatingControlDSUID = dsuid1;
-  apt.getZone(42)->setHeatingProperties(hProps);
-
   // try to set configuration through javascript
   ctx->evaluate<void>(R"(getZoneByID(42).setTemperatureControlConfiguration2(JSON.parse('{"mode":"control","controlMode":{"emergencyValue":100,"ctrlKp":1,"ctrlTs":2,"ctrlTi":3,"ctrlKd":4,"ctrlImin":5,"ctrlImax":6,"ctrlYmin":7,"ctrlYmax":8,"ctrlAntiWindUp":true},"zoneFollowerMode":{"referenceZone":1,"ctrlOffset":15},"manualMode":{"controlValue":25}}')))");
   // check that the settings were applied in model
