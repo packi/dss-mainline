@@ -286,23 +286,6 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // setButtonCallsPresent
 
-
-  // set heating controller value without invoking model maintenance
-  // used this function to set the configuration to dsMeters according to the setup in dss.
-  void DSStructureModifyingBusInterface::synchronizeZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec)
-  {
-    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
-      throw BusApiError("Bus not ready");
-    }
-    int ret =
-        ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
-            _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
-            _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
-    DSBusInterface::checkResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
-  } /* synchronizeZoneHeatingConfig */
-
   void DSStructureModifyingBusInterface::setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec)
   {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
