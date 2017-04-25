@@ -151,10 +151,7 @@ namespace dss {
     void sensorInvalid(SensorType _type);
 
     /// Get status object for the group. nullptr if the group does not support status.
-    ///
-    /// TODO(someday): return ds::Result<Status&> to make it explicit that nullptr means failure
-    /// and to provide exception for callers that want it.
-    Status* getStatus() { return m_status.get(); }
+    Status* tryGetStatus() { return m_status.get(); }
 
     /// Convenient scripting support method calling `getStatus()->getField(field).setValueAndPush(value)`.
     /// Throws on any error.

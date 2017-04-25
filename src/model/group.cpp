@@ -380,7 +380,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
   }
 
   void Group::setStatusField(const std::string& fieldName, const std::string& valueName) {
-    auto&& status = getStatus();
+    auto&& status = tryGetStatus();
     DS_REQUIRE(status, "Group ", *this, " does not support status.");
 
     auto&& fieldType = statusFieldTypeFromName(fieldName);
