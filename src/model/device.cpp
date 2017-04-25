@@ -219,7 +219,7 @@ namespace dss {
       if (auto type = statusFieldTypeForBinaryInputType(m_inputType)) {
         // TODO(soon): status sensor fixed to apartment groups for now --> zone 0
         if ((targetGroup = m_device.getApartment().getZone(0)->tryGetGroup(m_targetGroupId).lock())) {
-          if (auto&& status = targetGroup->getStatus()) {
+          if (auto&& status = targetGroup->tryGetStatus()) {
             statusField = &status->getField(*type);
           } else {
             log(ds::str("updateStatusFieldHandle Group does not support status. this:", m_name,
