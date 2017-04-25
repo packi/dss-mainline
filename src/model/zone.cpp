@@ -668,9 +668,9 @@ namespace dss {
     // try to get all valid passed values
     for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
       std::string strIdx = ds::str(i);
-      if (d.HasMember(strIdx)) {
-        DS_REQUIRE(d[strIdx].IsNumber());
-        hOpValues.opModes[i] = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d[strIdx].GetDouble());
+      if (d.HasMember(strIdx.c_str())) {
+        DS_REQUIRE(d[strIdx.c_str()].IsNumber());
+        hOpValues.opModes[i] = doubleToSensorValue(SensorType::RoomTemperatureSetpoint, d[strIdx.c_str()].GetDouble());
       }
     }
   }
@@ -685,9 +685,9 @@ namespace dss {
     // try to get all valid passed values
     for (int i = 0; i <= HeatingOperationModeIDMax; ++i) {
       std::string strIdx = ds::str(i);
-      if (d.HasMember(strIdx)) {
-        DS_REQUIRE(d[strIdx].IsNumber());
-        hOpValues.opModes[i] = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d[strIdx].GetDouble());
+      if (d.HasMember(strIdx.c_str())) {
+        DS_REQUIRE(d[strIdx.c_str()].IsNumber());
+        hOpValues.opModes[i] = doubleToSensorValue(SensorType::RoomTemperatureControlVariable, d[strIdx.c_str()].GetDouble());
       }
     }
   }
