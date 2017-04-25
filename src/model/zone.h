@@ -45,60 +45,16 @@ namespace dss {
   class DateTime;
 
   typedef struct ZoneHeatingProperties {
-    ZoneHeatingProperties()
-        : m_HeatingControlMode(HeatingControlMode::OFF),
-          m_Kp(0),
-          m_Ts(0),
-          m_Ti(0),
-          m_Kd(0),
-          m_Imin(0),
-          m_Imax(0),
-          m_Ymin(0),
-          m_Ymax(0),
-          m_AntiWindUp(0),
-          m_KeepFloorWarm(0),
-          m_HeatingControlState(0),
-          m_HeatingMasterZone(0),
-          m_CtrlOffset(0),
-          m_EmergencyValue(175),
-          m_ManualValue(0),
-          m_HeatingControlDSUID(DSUID_NULL) {}
-    void reset() {
-      m_HeatingControlMode = HeatingControlMode::OFF;
-      m_Kp = 0;
-      m_Ts = 0;
-      m_Ti = 0;
-      m_Kd = 0;
-      m_Imin = 0;
-      m_Imax = 0;
-      m_Ymin =0;
-      m_Ymax = 0;
-      m_AntiWindUp =0;
-      m_KeepFloorWarm =0;
-      m_HeatingControlState = 0;
-      m_HeatingMasterZone = 0;
-      m_CtrlOffset = 0;
-      m_EmergencyValue = 175;
-      m_ManualValue = 0;
-      m_HeatingControlDSUID = DSUID_NULL;
-    }
-    bool isEqual(const ZoneHeatingConfigSpec_t& _config) {
-      return ((_config.ControllerMode == m_HeatingControlMode) &&
-              (_config.Kp == m_Kp) &&
-              (_config.Ts == m_Ts) &&
-              (_config.Ti == m_Ti) &&
-              (_config.Kd == m_Kd) &&
-              (_config.Imin == m_Imin) &&
-              (_config.Imax == m_Imax) &&
-              (_config.Ymin == m_Ymin) &&
-              (_config.Ymax == m_Ymax) &&
-              (_config.AntiWindUp == m_AntiWindUp) &&
-              (_config.KeepFloorWarm == m_KeepFloorWarm) &&
-              (_config.SourceZoneId == m_HeatingMasterZone) &&
-              (_config.Offset == m_CtrlOffset) &&
-              (_config.EmergencyValue == m_EmergencyValue) &&
-              (_config.ManualValue == m_ManualValue));
-    }
+    ZoneHeatingProperties();
+    void reset();
+    bool isEqual(const ZoneHeatingConfigSpec_t& config, const ZoneHeatingOperationModeSpec_t& operationMode) const;
+
+    static void parseTargetTemperatures(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
+    static void parseFixedValues(const std::string& jsonObject, ZoneHeatingOperationModeSpec_t& hOpValues);
+    static void parseControlMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+    static void parseFollowerMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+    static void parseManualMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
+
     HeatingControlMode m_HeatingControlMode;
     uint16_t m_Kp;
     uint8_t  m_Ts;
@@ -115,7 +71,8 @@ namespace dss {
     int m_CtrlOffset;              // only used for mode 2
     uint8_t  m_EmergencyValue;
     int m_ManualValue;             // only used for mode 4
-    dsuid_t m_HeatingControlDSUID; // DSUID of the meter or device or service running a controller for this zone
+    double m_TeperatureSetpoints[16]; // temperature set points used in mode 1
+    double m_FixedControlValues[16];  // control values used in mode 3
   } ZoneHeatingProperties_t;
 
   typedef struct ZoneHeatingStatus {
@@ -233,16 +190,22 @@ namespace dss {
     std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }
 
     /** Returns the heating  and sensor properties */
-    ZoneHeatingProperties_t getHeatingProperties() const;
-    ZoneHeatingStatus_t getHeatingStatus() const;
-    ZoneSensorStatus_t getSensorStatus() const;
+    const ZoneHeatingProperties_t& getHeatingProperties() const;
+    const ZoneHeatingStatus_t& getHeatingStatus() const;
+    const ZoneSensorStatus_t& getSensorStatus() const;
     bool isHeatingEnabled() const;
 
     /** Set heating properties and runtime values */
-    void setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec, dsuid_t ctrlDevice);
+    void setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec);
     ZoneHeatingConfigSpec_t getHeatingControlMode();
     void clearHeatingControlMode();
     void setHeatingControlState(int _ctrlState);
+    void setHeatingControlOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues);
+    void setHeatingFixedOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues);
+    void setHeatingOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues);
+    ZoneHeatingOperationModeSpec_t getHeatingControlOperationModeValues() const;
+    ZoneHeatingOperationModeSpec_t getHeatingFixedOperationModeValues() const;
+    ZoneHeatingOperationModeSpec_t getHeatingOperationModeValues() const;
     void setHeatingOperationMode(int _operationMode);
     int getHeatingOperationMode() const;
     void setTemperature(double _value, DateTime& _ts);

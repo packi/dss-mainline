@@ -286,43 +286,31 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // setButtonCallsPresent
 
-
-  // set heating controller value without invoking model maintenance
-  // used this function to set the configuration to dsMeters according to the setup in dss.
-  void DSStructureModifyingBusInterface::synchronizeZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec)
-  {
-    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
-      throw BusApiError("Bus not ready");
-    }
-    int ret =
-        ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
-            _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
-            _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
-    DSBusInterface::checkResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
-  } /* synchronizeZoneHeatingConfig */
-
   void DSStructureModifyingBusInterface::setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec)
   {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ControllerHeating_set_config(m_DSMApiHandle, DSUID_BROADCAST, _ZoneID,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            (_spec.EmergencyValue >= 100) ? _spec.EmergencyValue : 150);
-    DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
-    ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
-        _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
-        _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
-    if (_dsMeterID == DSUID_BROADCAST) {
-      DSBusInterface::checkBroadcastResultCode(ret);
+    if (1) {
+      // Disabled until dsms support temperature control master election
+      Logger::getInstance()->log("Skipping call to ControllerHeating_set_config", lsWarning);
     } else {
-      DSBusInterface::checkResultCode(ret);
+      int ret = ControllerHeating_set_config(m_DSMApiHandle, DSUID_BROADCAST, _ZoneID,
+              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+              (_spec.EmergencyValue >= 100) ? _spec.EmergencyValue : 150);
+      DSBusInterface::checkBroadcastResultCode(ret);
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
+      ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
+          _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
+          _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
+      if (_dsMeterID == DSUID_BROADCAST) {
+        DSBusInterface::checkBroadcastResultCode(ret);
+      } else {
+        DSBusInterface::checkResultCode(ret);
+      }
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
     }
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
 
     if (m_pModelMaintenance) {
       boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
@@ -343,7 +331,12 @@ namespace dss {
     }
     int ret = ControllerHeating_set_state(m_DSMApiHandle, _dsMeterID, _ZoneID,
         _spec.State);
-    DSBusInterface::checkResultCode(ret);
+    if (_dsMeterID == DSUID_BROADCAST) {
+      DSBusInterface::checkBroadcastResultCode(ret);
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
+    } else {
+      DSBusInterface::checkResultCode(ret);
+    }
 
     if (m_pModelMaintenance) {
       ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerState, _dsMeterID);
@@ -360,12 +353,17 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     int ret = ControllerHeating_set_operation_modes(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        _spec.OpMode0, _spec.OpMode1, _spec.OpMode2, _spec.OpMode3,
-        _spec.OpMode4, _spec.OpMode5, _spec.OpMode6, _spec.OpMode7,
-        _spec.OpMode8, _spec.OpMode9, _spec.OpModeA, _spec.OpModeB,
-        _spec.OpModeC, _spec.OpModeD, _spec.OpModeE, _spec.OpModeF
+        _spec.opModes[0], _spec.opModes[1], _spec.opModes[2], _spec.opModes[3],
+        _spec.opModes[4], _spec.opModes[5], _spec.opModes[6], _spec.opModes[7],
+        _spec.opModes[8], _spec.opModes[9], _spec.opModes[10], _spec.opModes[11],
+        _spec.opModes[12], _spec.opModes[13], _spec.opModes[14], _spec.opModes[15]
         );
-    DSBusInterface::checkResultCode(ret);
+    if (_dsMeterID == DSUID_BROADCAST) {
+      DSBusInterface::checkBroadcastResultCode(ret);
+      usleep(BROADCAST_SLEEP_MICROSECONDS);
+    } else {
+      DSBusInterface::checkResultCode(ret);
+    }
 
     if (m_pModelMaintenance) {
       boost::shared_ptr<ZoneHeatingOperationModeSpec_t> spec = boost::make_shared<ZoneHeatingOperationModeSpec_t>();

@@ -248,6 +248,53 @@ namespace dss {
     throw ScriptException("Value is not of type number");
   }
 
+  namespace {
+    class Stringifier
+    {
+      std::stringstream m_Stream;
+      ScriptContext& m_Context;
+
+    public:
+
+      Stringifier(ScriptContext& context) : m_Context(context) { }
+
+      static int callback(const jschar *buf, uint32 len, void *data)
+      {
+        auto cx = static_cast<Stringifier*>(data)->m_Context.getJSContext();
+
+        /* Determine how many bytes to allocate. */
+        size_t dstlen = 0;
+        if (!JS_EncodeCharacters(cx, buf, len, NULL, &dstlen))
+            return JS_FALSE;
+
+        /* Create tmp buffer. */
+        char dst[dstlen + 1];
+        memset(dst, 0, sizeof(dst));
+
+        /* Convert js characters to C chars. */
+        JS_EncodeCharacters(cx, buf, len, dst, &dstlen);
+
+        /* Copy the converted characters to output stream. */
+        static_cast<Stringifier*>(data)->m_Stream << dst;
+
+        return JS_TRUE;
+      }
+
+      std::string getOutput() { return m_Stream.str(); }
+    };
+  }
+
+  std::string ScriptContext::jsonStringify(jsval& val) {
+    Stringifier stringifier(*this);
+
+    if (!JS_Stringify(getJSContext(), &val, nullptr, 0, & Stringifier::callback, &stringifier))
+    {
+      return std::string();
+    }
+
+    return stringifier.getOutput();
+  }
+
   void ScriptContext::jsErrorHandler(JSContext *ctx, const char *msg, JSErrorReport *er) {
     char *pointer=NULL;
     char *line=NULL;

@@ -197,7 +197,7 @@ __DEFINE_LOG_CHANNEL__(Group, lsNotice);
       case GroupIDControlTemperature:
         {
           boost::shared_ptr<Zone> pZone = m_pApartment->getZone(m_ZoneID);
-          if (_sceneNr <= 15) {
+          if (_sceneNr <= HeatingOperationModeIDMax) {
             pZone->setHeatingOperationMode(_sceneNr);
           }
         }

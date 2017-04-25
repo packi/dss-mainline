@@ -179,22 +179,7 @@ namespace dss {
   } ZoneHeatingStateSpec_t;
 
   typedef struct {
-    uint16_t OpMode0;
-    uint16_t OpMode1;
-    uint16_t OpMode2;
-    uint16_t OpMode3;
-    uint16_t OpMode4;
-    uint16_t OpMode5;
-    uint16_t OpMode6;
-    uint16_t OpMode7;
-    uint16_t OpMode8;
-    uint16_t OpMode9;
-    uint16_t OpModeA;
-    uint16_t OpModeB;
-    uint16_t OpModeC;
-    uint16_t OpModeD;
-    uint16_t OpModeE;
-    uint16_t OpModeF;
+    uint16_t opModes[16];
   } ZoneHeatingOperationModeSpec_t;
 
   class DeviceBusInterface {
@@ -378,7 +363,6 @@ namespace dss {
     virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) = 0;
 
     /** Create and manage heating controller */
-    virtual void synchronizeZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) = 0;
     virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) = 0;
     virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) = 0;
     virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) = 0;
