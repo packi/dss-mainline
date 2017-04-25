@@ -814,7 +814,7 @@ namespace dss {
 
     ws->connection = (struct mg_connection *)_connection;
     ws->state = ws_connected;
-    mg_set_user_connection_data(_connection, (void *)ws.get());
+    mg_set_user_connection_data(ws->connection, (void *)ws.get());
     m_websockets.push_back(ws);
     mg_unlock_context(ctx);
 
@@ -847,7 +847,7 @@ namespace dss {
     while (i != m_websockets.end()) {
       if ((*i).get() == client) {
         mg_lock_context(ctx);
-        mg_set_user_connection_data(_connection, NULL);
+        mg_set_user_connection_data((struct mg_connection*)_connection, NULL);
         m_websockets.erase(i);
         mg_unlock_context(ctx);
         return;

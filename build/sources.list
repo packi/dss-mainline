@@ -258,6 +258,9 @@ libdsscore_a_SOURCES =  \
 libcivetweb_a_SOURCES = \
 	../external/civetweb/civetweb.c \
 	../external/civetweb/civetweb.h \
+	../external/civetweb/file_ops.inl \
+	../external/civetweb/handle_form.inl \
+	../external/civetweb/sha1.inl \
 	../external/civetweb/md5.inl
 
 libunix_a_SOURCES = \
