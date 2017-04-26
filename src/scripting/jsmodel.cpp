@@ -4210,6 +4210,9 @@ namespace dss {
           *ext->getApartment().getBusInterface()->getStructureQueryBusInterface(),
           ext->getApartment());
 
+      // make sure that the input parameter is valid
+      DS_REQUIRE((argc == 1) && (JSVAL_IS_OBJECT(JS_ARGV(cx, vp)[0])));
+
       JSObject* configObj = JSVAL_TO_OBJECT(JS_ARGV(cx, vp) [0]);
       JSObject* propIter = JS_NewPropertyIterator(cx, configObj);
       jsid propID;

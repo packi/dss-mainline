@@ -601,6 +601,68 @@ BOOST_AUTO_TEST_CASE(testApartmentGetDSMeters) {
   BOOST_CHECK_EQUAL(num, 1);
 } // testApartmentGetDSMeters
 
+BOOST_AUTO_TEST_CASE(testTemperatureControlConfiguration) {
+  Apartment apt(NULL);
+  InstanceHelper helper(&apt);
+  PropertySystem propSys;
+  apt.setPropertySystem(&propSys);
+
+  ZoneHeatingProperties_t hProps;
+  apt.allocateZone(42);
+
+  boost::scoped_ptr<ScriptEnvironment> env(new ScriptEnvironment());
+  env->initialize();
+  ScriptExtension* ext = new ModelScriptContextExtension(apt);
+  env->addExtension(ext);
+
+  boost::shared_ptr<ScriptContext> ctx(env->getContext());
+
+  // check first initial configuration
+  auto jsResponse = ctx->evaluate<std::string>("JSON.stringify(getZoneByID(42).getTemperatureControlConfiguration())");
+  BOOST_CHECK_EQUAL(jsResponse, R"({"ControlMode":0})");
+
+  // try to use the old function interface - expect exception but not crash
+  ctx->evaluate<std::string>(R"(
+    var err = 0;
+    try { 
+      getZoneByID(42).setTemperatureControlConfiguration("302ed89f43f0000000000a00000c211400", JSON.parse('{"ControlMode":1,"EmergencyValue":100,"CtrlKp":1,"CtrlTs":2,"CtrlTi":3,"CtrlKd":4,"CtrlImin":5,"CtrlImax":6,"CtrlYmin":7,"CtrlYmax":8,"CtrlAntiWindUp":true,"ReferenceZone":1,"CtrlOffset":15,"ManualValue":25}'));
+    } catch(txt) { 
+      print('Forced Exception: ' + txt); err = 1;
+    })");
+  {
+      JSContextThread thread(ctx);
+      BOOST_CHECK_EQUAL(ctx->getRootObject().getProperty<int>("err"), 1);
+  }
+
+  // try to set configuration through javascript
+  ctx->evaluate<void>(R"(getZoneByID(42).setTemperatureControlConfiguration(JSON.parse('{"ControlMode":1,"EmergencyValue":100,"CtrlKp":1,"CtrlTs":2,"CtrlTi":3,"CtrlKd":4,"CtrlImin":5,"CtrlImax":6,"CtrlYmin":7,"CtrlYmax":8,"CtrlAntiWindUp":true,"ReferenceZone":1,"CtrlOffset":15,"ManualValue":25}')))");
+
+  // check if the configuration is visible in JS
+  jsResponse = ctx->evaluate<std::string>("JSON.stringify(getZoneByID(42).getTemperatureControlConfiguration())");
+  BOOST_CHECK_EQUAL(jsResponse, R"({"ControlMode":1,"EmergencyValue":100,"CtrlKp":1,"CtrlTs":2,"CtrlTi":3,"CtrlKd":4,"CtrlImin":5,"CtrlImax":6,"CtrlYmin":7,"CtrlYmax":8,"CtrlAntiWindUp":true,"CtrlKeepFloorWarm":false})");
+
+  // check that the settings were applied in model
+  hProps = apt.getZone(42)->getHeatingProperties();
+
+  BOOST_CHECK_EQUAL(hProps.m_HeatingControlMode, HeatingControlMode::PID);
+
+  BOOST_CHECK_EQUAL(hProps.m_EmergencyValue, 100 + 100);
+  BOOST_CHECK_EQUAL(hProps.m_Kp, 1 * 40);
+  BOOST_CHECK_EQUAL(hProps.m_Ts, 2);
+  BOOST_CHECK_EQUAL(hProps.m_Ti, 3);
+  BOOST_CHECK_EQUAL(hProps.m_Kd, 4);
+  BOOST_CHECK_EQUAL(hProps.m_Imin, 5 * 40);
+  BOOST_CHECK_EQUAL(hProps.m_Imax, 6 * 40);
+  BOOST_CHECK_EQUAL(hProps.m_Ymin, 7 + 100);
+  BOOST_CHECK_EQUAL(hProps.m_Ymax, 8 + 100);
+  BOOST_CHECK_EQUAL(hProps.m_AntiWindUp, 1);
+
+  BOOST_CHECK_EQUAL(hProps.m_HeatingMasterZone, 1);
+  BOOST_CHECK_EQUAL(hProps.m_CtrlOffset, 15);
+
+  BOOST_CHECK_EQUAL(hProps.m_ManualValue, 125);
+} // testTemperatureControlConfiguration
+
 BOOST_AUTO_TEST_CASE(testTemperatureControlConfiguration2) {
   Apartment apt(NULL);
   InstanceHelper helper(&apt);
@@ -643,10 +705,7 @@ BOOST_AUTO_TEST_CASE(testTemperatureControlConfiguration2) {
   BOOST_CHECK_EQUAL(hProps.m_CtrlOffset, 15);
 
   BOOST_CHECK_EQUAL(hProps.m_ManualValue, 125);
-
-
-
-} // testConnectedDevice
+} // testTemperatureControlConfiguration2
 
 BOOST_AUTO_TEST_CASE(testGroupConfiguration) {
   Apartment apt(NULL);
