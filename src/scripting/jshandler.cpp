@@ -46,6 +46,7 @@
 #include "src/security/user.h"
 #include "src/security/security.h"
 #include "src/session.h"
+#include "src/ds/common.h"
 
 namespace dss {
 
@@ -287,7 +288,7 @@ namespace dss {
   std::string ScriptContext::jsonStringify(jsval& val) {
     Stringifier stringifier(*this);
 
-    if (!JS_Stringify(getJSContext(), &val, nullptr, 0, & Stringifier::callback, &stringifier))
+    if (!JS_Stringify(getJSContext(), &val, DS_NULLPTR, 0, & Stringifier::callback, &stringifier))
     {
       return std::string();
     }
