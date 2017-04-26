@@ -380,7 +380,7 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
                       "dummyActionParam2": {
                           "title": "dummyActionParam2",
                           "tags": "",
-                          "type": "numeric",
+                          "type": "int.timespan",
                           "min": "1",
                           "max": "12",
                           "resolution": "0,01",
