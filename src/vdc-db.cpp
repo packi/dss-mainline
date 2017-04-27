@@ -314,6 +314,9 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
       actions.back().params.back().resolution = query0.getColumn<std::string>(6);
       actions.back().params.back().siUnit = query0.getColumn<std::string>(7);
       actions.back().params.back().tags = query0.getColumn<std::string>(8);
+      if (sqlite3_column_type(query0, 10) != SQLITE_NULL) {
+        actions.back().params.back().typePostfix = query0.getColumn<std::string>(10);
+      }
     }
   }
 
