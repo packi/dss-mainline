@@ -24,6 +24,29 @@
 
 namespace ds {
 namespace log {
+
+static __thread Context* t_context;
+
+Context::Context() : m_next(t_context) {
+    t_context = this;
+}
+
+Context::~Context() {
+    DS_ASSERT(t_context == this);
+    t_context = m_next;
+}
+
+std::ostream& operator<<(std::ostream& stream, Context* context) {
+    for (; context; context = context->m_next) {
+        context->ostream(stream);
+    }
+    return stream;
+}
+
+Context* getContext() {
+    return t_context;
+}
+
 namespace _private {
 
 static std::string trimFileToLastSrc(std::string file) {

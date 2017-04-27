@@ -49,4 +49,31 @@ TEST_CASE("DS_WARN_UNUSED_RESULT", TAGS) {
     auto x = Base::staticWarnUnusedResult();
 }
 
+TEST_CASE("DS_CONCAT", TAGS) {
+    SECTION("concatenates two identifiers into one") {
+        int ab = 7;
+        CHECK(DS_CONCAT(a, b) == 7);
+    }
+}
+
+TEST_CASE("DS_UNIQUE_NAME", TAGS) {
+    SECTION("generates the same identifiers in the same line / macro") {
+// Macro to force compilation into one line
+#define MACRO                            \
+    do {                                 \
+        auto DS_UNIQUE_NAME(foo) = 7;    \
+        CHECK(DS_UNIQUE_NAME(foo) == 7); \
+        DS_UNIQUE_NAME(foo) = 8;         \
+        CHECK(DS_UNIQUE_NAME(foo) == 8); \
+    } while (0)
+        MACRO;
+#undef MACRO_CHECK
+    }
+
+    SECTION("generates unique identifiers on different lines") {
+        auto DS_UNIQUE_NAME(foo) = 7;
+        auto DS_UNIQUE_NAME(foo) = 8;
+    }
+}
+
 } // namespace

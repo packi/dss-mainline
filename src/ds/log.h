@@ -18,6 +18,7 @@
 */
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <stdexcept>
 #include "str.h"
 
@@ -66,14 +67,49 @@ namespace log {
 /// Return passed stringified argument if it is worth to log or an empty string othwerwise.
 ///
 /// Example:
-/// trimArg(##hello) -> "hello"
-/// trimArg(##"hello") -> ""
-constexpr const char *trimArg(const char *x) {
+/// trimArgName(##hello) -> "hello"
+/// trimArgName(##"hello") -> ""
+constexpr const char* trimArgName(const char* x) {
     return (x[0] != '"') ? x : "";
 }
 
-#define DS_LOG_ARG(x) , ::ds::log::trimArg(#x ":"), x, " "
-#define DS_LOG_FILE_CONTEXT "file:", ::ds::log::_private::trimFile(__FILE__), ':', __LINE__
+/// `DS_CONTEXT(...)`:  Adds additional contextual information
+/// to logs and exceptions thrown from within the current scope.
+/// Note that the parameters to DS_CONTEXT() are evaluated lazily,
+/// any variables used must remain valid until the end of the scope.
+///
+#define DS_CONTEXT(...)                                                                                    \
+    auto DS_UNIQUE_NAME(_dsContextFunc) = [&](std::ostream& ostream) {                                     \
+        ::ds::_private::strRecursive(ostream, "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__));            \
+    };                                                                                                     \
+    ::ds::log::_private::ContextImpl<decltype(DS_UNIQUE_NAME(_dsContextFunc))> DS_UNIQUE_NAME(_dsContext)( \
+            DS_UNIQUE_NAME(_dsContextFunc))
+
+/// Linked list of thread local contexts.
+/// Use `DS_CONTEXT` macro to make new context in current scope
+/// Use `getContext()` to get current context.
+class Context : boost::noncopyable {
+protected:
+    /// Adds the instance to the thread local linked list of contexts
+    Context();
+
+    /// Removes the instance from the thread local linked list of contexts
+    ~Context();
+
+    // Serializes this context item
+    virtual void ostream(std::ostream&) = 0;
+
+private:
+    Context* m_next;
+    friend std::ostream& operator<<(std::ostream&, Context*);
+};
+std::ostream& operator<<(std::ostream&, Context*);
+
+/// Get current context. Can be serialized by `ostream <<`.
+Context* getContext();
+
+#define DS_LOG_ARG(x) , ::ds::log::trimArgName(#x ":"), x, " "
+#define DS_LOG_CONTEXT ::ds::log::getContext(), "file:", ::ds::log::_private::trimFile(__FILE__), ':', __LINE__
 
 // * `DS_REQUIRE(condition)`:  Check external input and preconditions
 // e.g. to validate parameters passed from a caller.
@@ -84,16 +120,16 @@ constexpr const char *trimArg(const char *x) {
 // DS_REQUIRE(value >= 0, "Value cannot be negative.", value);
 // DS_FAIL_REQUIRE("Unknown", value);
 //
-#define DS_REQUIRE(condition, ...)                                                                          \
-    do {                                                                                                    \
-        if (DS_LIKELY(condition)) {                                                                         \
-        } else {                                                                                            \
-            throw std::runtime_error(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), "condition:", \
-                    #condition, " ", DS_LOG_FILE_CONTEXT));                                                 \
-        }                                                                                                   \
+#define DS_REQUIRE(condition, ...)                                                                                    \
+    do {                                                                                                              \
+        if (DS_LIKELY(condition)) {                                                                                   \
+        } else {                                                                                                      \
+            throw std::runtime_error(ds::str(                                                                         \
+                    "" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), "condition:", #condition, " ", DS_LOG_CONTEXT)); \
+        }                                                                                                             \
     } while (0)
 #define DS_FAIL_REQUIRE(...) \
-    throw std::runtime_error(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), DS_LOG_FILE_CONTEXT))
+    throw std::runtime_error(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), DS_LOG_CONTEXT))
 
 // Assert the `condition` is true.
 // This macro should be used to check for bugs in the surrounding code (broken invariant, ...)
@@ -103,26 +139,38 @@ constexpr const char *trimArg(const char *x) {
 // DS_ASSERT(m_state == State::CONNECTED, m_state);
 // DS_FAIL_ASSERT("Invalid", m_state);
 //
-#define DS_ASSERT(condition, ...)                                                                               \
-    do {                                                                                                        \
-        if (DS_LIKELY(condition)) {                                                                             \
-        } else {                                                                                                \
-            ::ds::log::_private::assert_(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), "condition:", \
-                    #condition, " ", DS_LOG_FILE_CONTEXT));                                                     \
-        }                                                                                                       \
+#define DS_ASSERT(condition, ...)                                                                                   \
+    do {                                                                                                            \
+        if (DS_LIKELY(condition)) {                                                                                 \
+        } else {                                                                                                    \
+            ::ds::log::_private::assert_(ds::str("Assertion failed. " DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), \
+                    "condition:", #condition, " ", DS_LOG_CONTEXT));                                                \
+        }                                                                                                           \
     } while (0)
 
-#define DS_FAIL_ASSERT(...) \
-    ::ds::log::_private::assert_(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), DS_LOG_FILE_CONTEXT))
+#define DS_FAIL_ASSERT(...)       \
+    ::ds::log::_private::assert_( \
+            ds::str("Assertion failed. " DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), DS_LOG_CONTEXT))
 
 namespace _private {
 /// Trim file for logging purporses.
 std::string trimFile(std::string file);
 
+template <typename Func>
+class ContextImpl : public Context {
+public:
+    ContextImpl(Func& func) : m_func(func) {}
+
+private:
+    Func& m_func;
+    void ostream(std::ostream& s) DS_OVERRIDE { m_func(s); }
+};
+
 /// Assert (abort or throw) with given message.
 ///
 /// assert is macro, so we cannot reuse its name here
-DS_NORETURN void assert_(const std::string &message);
+DS_NORETURN void assert_(const std::string& message);
+
 } // namespace _private
 
 } // namespace log

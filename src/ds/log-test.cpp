@@ -18,29 +18,81 @@
 */
 #include "log.h"
 #include <ds/catch/catch.h>
+#include <thread>
 
 static const char* TAGS = "[dsLog][ds]";
 
-TEST_CASE("DS_REQUIRE", TAGS) {
-    int x = 5;
+TEST_CASE("dsLogTrimArgName", TAGS) {
+    SECTION("discards string constants") { CHECK(ds::str(ds::log::trimArgName("\"str\":")) == ""); }
+    SECTION("passes variable names") { CHECK(ds::str(ds::log::trimArgName("variable:")) == "variable:"); }
+}
 
-    SECTION("Success does not throw") {
-        DS_REQUIRE(x == 5);
-        DS_REQUIRE(x == 5, "should not happen");
-        DS_REQUIRE(x == 5, "should not happen", x);
+TEST_CASE("DS_CONTEXT", TAGS) {
+    SECTION("is empty at start") { CHECK(ds::str(ds::log::getContext()) == ""); }
+
+    SECTION("is stacked and scope limited") {
+        DS_CONTEXT("a");
+        CHECK(ds::str(ds::log::getContext()) == "a ");
+        {
+            int x = 7;
+            DS_CONTEXT(x);
+            CHECK(ds::str(ds::log::getContext()) == "x:7 a ");
+        }
+        CHECK(ds::str(ds::log::getContext()) == "a ");
     }
 
-    SECTION("Failure throws") {
-        int line = 0;
-        auto f = [&] {
-            line = __LINE__ + 1;
-            DS_REQUIRE(x == 4, "Variable x must be 4.", x);
+    SECTION("is thread local") {
+        DS_CONTEXT("a");
+        std::thread thread([&]() {
+            DS_CONTEXT("b");
+            CHECK(ds::str(ds::log::getContext()) == "b ");
+        });
+        thread.join();
+        CHECK(ds::str(ds::log::getContext()) == "a ");
+    }
+}
+
+TEST_CASE("DS_REQUIRE", TAGS) {
+    SECTION("does nothing on success") { DS_REQUIRE(true); }
+
+    SECTION("accepts context arguments on success but does not evaluate them") {
+        bool evaluated = false;
+        auto evaluate = [&]() {
+            evaluated = true;
+            return 0;
         };
-        CHECK_THROWS_FIND(f(), ds::str("Variable x must be 4. x:5 condition:x == 4 file:ds/log-test.cpp:", line));
+        DS_CONTEXT(evaluate());
+        int x = 5;
+        DS_REQUIRE(true, "context string", x, evaluate());
+        CHECK(!evaluated);
+    }
+
+    SECTION("throws on failure") { CHECK_THROWS(DS_REQUIRE(false)); }
+
+    SECTION("captures context on failure") {
+        auto foo = 7;
+        DS_CONTEXT(foo);
+        int line = 0;
+        auto fail = [&] {
+            int a = 1;
+            line = __LINE__ + 1; // must be one line before DS_REQUIRE macro
+            DS_REQUIRE(a == 4, "Variable a was compared to 4.", a);
+        };
+        CHECK_THROWS_FIND(fail(),
+                ds::str("Variable a was compared to 4. a:1 condition:a == 4 foo:7 file:ds/log-test.cpp:", line));
     }
 }
 
 TEST_CASE("DS_FAIL_REQUIRE", TAGS) {
+    SECTION("throws on failure") { CHECK_THROWS(DS_FAIL_REQUIRE()); }
+
+    SECTION("captures context on failure") {
+        auto foo = 7;
+        DS_CONTEXT(foo);
+        int a = 1;
+        auto line = __LINE__ + 1; // must be one line before DS_FAIL_REQUIRE macro
+        CHECK_THROWS_FIND(DS_FAIL_REQUIRE("Failed.", a), ds::str("Failed. a:1 foo:7 file:ds/log-test.cpp:", line));
+    }
     int x = 5;
     SECTION("throws") {
         int line = 0;
@@ -53,9 +105,18 @@ TEST_CASE("DS_FAIL_REQUIRE", TAGS) {
 }
 
 TEST_CASE("DS_ASSERT", TAGS) {
-    SECTION("compiles") {
-        DS_ASSERT(true);
-        DS_ASSERT(true, "hi");
+    SECTION("does nothing on success") { DS_ASSERT(true); }
+
+    SECTION("accepts context arguments on success but does not evaluate them") {
+        bool evaluated = false;
+        auto evaluate = [&]() {
+            evaluated = true;
+            return 0;
+        };
+        DS_CONTEXT(evaluate());
+        int x = 5;
+        DS_ASSERT(true, x, evaluate());
+        CHECK(!evaluated);
     }
 }
 
@@ -80,8 +141,14 @@ TEST_CASE("DS_FAIL_ASSERT", TAGS) {
             // ../../build/../src/ds/log-test.cpp:65:13: note: in expansion of macro ‘DS_FAIL_ASSERT’
             //
             // DS_FAIL_ASSERT();
-
-            DS_FAIL_ASSERT("hi");
+        }
+    }
+    SECTION("compiles with context") {
+        auto foo = 7;
+        DS_CONTEXT(foo);
+        int a = 1;
+        if (0) {
+            DS_FAIL_ASSERT(a);
         }
     }
 }
