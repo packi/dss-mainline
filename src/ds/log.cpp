@@ -79,7 +79,7 @@ std::string trimFile(std::string file) {
 }
 
 void assert_(const std::string& x) {
-    std::cerr << x;
+    std::cerr << x << std::endl;
     abort();
 }
 
