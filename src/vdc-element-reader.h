@@ -40,6 +40,8 @@ namespace dss {
     const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& childElements() const { return m_childElements; }
 
     const std::string& getName() { return m_element.name(); }
+
+    bool hasValue() const { return m_element.has_value(); }
     std::string getValueAsString(const std::string& defaultValue = std::string()) const;
     double getValueAsDouble(double defaultValue = 0) const;
     int getValueAsInt(int defaultValue = 0) const;

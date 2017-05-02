@@ -253,8 +253,14 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
     foreach (const auto &state, states) {
       if (state.name == stateName) {
         json.add("title", state.title);
-        std::string propValue = stateReader["value"].getValueAsString();
-        json.add("value", propValue);
+        json.add("value");
+        std::string propValue;
+        if (stateReader["value"].hasValue()) {
+          propValue = stateReader["value"].getValueAsString();
+          json.add(propValue);
+        } else {
+          json.addNull();
+        }
         foreach (const auto &desc, state.values) {
           if (desc.first == propValue) {
             json.add("displayValue", desc.second);
@@ -281,7 +287,14 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
       }
     }
     json.add("title", propTitle);
-    json.add("value", propReader.getValueAsString());
+    json.add("value");
+    std::string propValue;
+    if (propReader.hasValue()) {
+      propValue = propReader.getValueAsString();
+      json.add(propValue);
+    } else {
+      json.addNull();
+    }
     json.endObject();
   }
   json.endObject();
