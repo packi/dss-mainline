@@ -85,6 +85,13 @@ public:
 
   std::vector<PropertyDesc> getProperties(const std::string &gtin, const std::string &langCode = "");
 
+  struct SensorDesc {
+    PropertyDesc prop;
+    std::string sensorIndex;
+  };
+
+  std::vector<SensorDesc> getSensors(const std::string &gtin, const std::string &langCode = "");
+
   struct ActionDesc {
     std::string name;
     std::string title;

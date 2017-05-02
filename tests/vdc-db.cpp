@@ -282,6 +282,7 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
   vdcInfo::addSpec(db, dev, "", json);
   vdcInfo::addStateDescriptions(db, dev, "", json);
   vdcInfo::addPropertyDescriptions(db, dev, "", json);
+  vdcInfo::addSensorDescriptions(db, dev, "", json);
   vdcInfo::addActionDescriptions(db, dev, "", json);
   vdcInfo::addStandardActions(db, dev, "", json);
   std::string ret = json.successJSON();
@@ -367,6 +368,19 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
                   "default": ""
               }
           },
+          "sensorDescriptions": {
+              "dummySensor": {
+                  "title": "dummySensor",
+                  "tags": "",
+                  "type": "numeric.temperature",
+                  "min": "0",
+                  "max": "100",
+                  "resolution": "1",
+                  "siunit": "celsius",
+                  "default": "50",
+                  "dsIndex": 0
+              }
+          },
           "actionDescriptions": {
               "dummyAction1": {
                   "title": "dummyAction1",
@@ -380,7 +394,7 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
                       "dummyActionParam2": {
                           "title": "dummyActionParam2",
                           "tags": "",
-                          "type": "int.timespan",
+                          "type": "numeric.duration",
                           "min": "1",
                           "max": "12",
                           "resolution": "0,01",
@@ -422,6 +436,7 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, Fixture) {
   auto invalidGtin = "0000000000000";
 
   BOOST_CHECK(db.getStates(invalidGtin).empty());
+  BOOST_CHECK(db.getSensors(invalidGtin).empty());
   BOOST_CHECK(db.getProperties(invalidGtin).empty());
   BOOST_CHECK(db.getActions(invalidGtin).empty());
   BOOST_CHECK(db.getEvents(invalidGtin).empty());
@@ -434,6 +449,7 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, Fixture) {
   JSONWriter json;
   vdcInfo::addStateDescriptions(db, dev, "de_DE", json);
   vdcInfo::addPropertyDescriptions(db, dev, "de_DE", json);
+  vdcInfo::addSensorDescriptions(db, dev, "de_DE", json);
   vdcInfo::addActionDescriptions(db, dev, "de_DE", json);
   vdcInfo::addStandardActions(db, dev, "de_DE", json);
   vdcInfo::addEventDescriptions(db, dev, "de_DE", json);
@@ -445,6 +461,7 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, Fixture) {
       "result": {
           "stateDescriptions": {},
           "propertyDescriptions": {},
+          "sensorDescriptions": {},
           "actionDescriptions": {},
           "standardActions": {},
           "eventDescriptions": {}

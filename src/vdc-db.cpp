@@ -271,6 +271,68 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
   return props;
 }
 
+std::vector<VdcDb::SensorDesc> VdcDb::getSensors(const std::string &gtin, const std::string &langCode) {
+  std::vector<SensorDesc> sensors;
+  std::string lang, country;
+  extractLangAndCountry(langCode, lang, country);
+
+  try {
+    // 0 name, 1 base_type, 2 default_value, 3 min_value, 4 max_value, 5 resolution, 6 si_unit, 7 tags, 8 gtin, 9 type_name, 10 sensorIndex
+    std::string sql0("select * from callGetSensorsBase where gtin=?");
+    SqlStatement query0 = m_db.prepare(sql0);
+    SqlStatement::BindScope scope0 = query0.bind(gtin);
+
+    while (query0.step() != SqlStatement::StepResult::DONE) {
+      sensors.push_back(SensorDesc());
+      sensors.back().prop.name = query0.getColumn<std::string>(0);
+      sensors.back().prop.title = query0.getColumn<std::string>(0);
+      switch (query0.getColumn<int>(1)) {
+      case 1:
+      case 2:
+        sensors.back().prop.typeId = propertyTypeId::integer;
+        break;
+      case 3:
+        sensors.back().prop.typeId = propertyTypeId::numeric;
+        break;
+      case 4:
+        sensors.back().prop.typeId = propertyTypeId::string;
+        break;
+      case 5:
+        sensors.back().prop.typeId = propertyTypeId::enumeration;
+        break;
+      }
+      sensors.back().prop.defaultValue = query0.getColumn<std::string>(2);
+      sensors.back().prop.minValue = query0.getColumn<std::string>(3);
+      sensors.back().prop.maxValue = query0.getColumn<std::string>(4);
+      sensors.back().prop.resolution = query0.getColumn<std::string>(5);
+      sensors.back().prop.siUnit = query0.getColumn<std::string>(6);
+      sensors.back().prop.tags = query0.getColumn<std::string>(7);
+      // 8 gtin
+      sensors.back().prop.typePostfix = query0.getColumn<std::string>(9);
+      sensors.back().sensorIndex = query0.getColumn<std::string>(10);
+    }
+  } catch (std::runtime_error& e) {
+    Logger::getInstance()->log(std::string(__func__) + "database error: " + e.what(), lsError);
+    return std::vector<SensorDesc> ();
+  }
+
+  // name, alt_label, base_type, default_value, min_value, max_value, resolution, si_unit, tags, gtin, lang_code
+  std::string sql = R"sqlquery(select distinct name, alt_label, base_type from callGetSensors "
+                              "where gtin=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
+  SqlStatement query = m_db.prepare(sql);
+  SqlStatement::BindScope scope = query.bind(gtin, lang, country);
+  while (query.step() != SqlStatement::StepResult::DONE) {
+    std::string name = query.getColumn<std::string>(0);
+    foreach (auto &it, sensors) {
+      if (name == it.prop.name) {
+        it.prop.title = query.getColumn<std::string>(1);
+      }
+    }
+  }
+
+  return sensors;
+}
+
 std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const std::string &langCode) {
   std::string lang, country;
   extractLangAndCountry(langCode, lang, country);
