@@ -56,6 +56,7 @@ namespace dss {
     // End-User Info
     std::string name;
     std::string model;
+    std::string displayId;        // unique id for this device, e.g. s/n, mac address
     std::string hardwareVersion;
     std::string modelVersion;
     std::string vendorName;
@@ -81,6 +82,7 @@ namespace dss {
     std::string oemModelGuid;
     std::string configURL;
     std::string name;
+    std::string displayId;
   } VdcSpec_t;
 
   struct VdcHelper

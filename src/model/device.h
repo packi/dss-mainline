@@ -296,6 +296,7 @@ namespace dss {
 
     bool m_isVdcDevice;
     std::unique_ptr<VdsdSpec_t> m_vdcSpec;
+    std::string m_VdcDisplayID;
     std::string m_VdcHardwareModelGuid;
     std::string m_VdcModelUID;
     std::string m_VdcModelVersion;
@@ -700,6 +701,8 @@ namespace dss {
     void setVdcSpec(VdsdSpec_t &&x);
     void setVdcHardwareModelGuid(const std::string& _value) { m_VdcHardwareModelGuid = _value; }
     const std::string& getVdcHardwareModelGuid() const { return m_VdcHardwareModelGuid; }
+    void setVdcDisplayID(const std::string& _value) { m_VdcDisplayID = _value; }
+    const std::string& getVdcDisplayID() const { return m_VdcDisplayID; }
     void setVdcModelUID(const std::string& _value) { m_VdcModelUID = _value; }
     const std::string& getVdcModelUID() const { return m_VdcModelUID; }
     void setVdcModelVersion(const std::string& _value) { m_VdcModelVersion = _value; }
@@ -714,15 +717,11 @@ namespace dss {
     const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
     void setVdcHardwareGuid(const std::string& _value) { m_VdcHardwareGuid = _value; }
     const std::string& getVdcHardwareGuid() const { return m_VdcHardwareGuid; }
-    void setVdcHardwareInfo(const std::string& _value) {
-      m_VdcHardwareInfo = _value; calculateHWInfo();
-    }
+    void setVdcHardwareInfo(const std::string& _value) { m_VdcHardwareInfo = _value; calculateHWInfo(); }
     const std::string& getVdcHardwareInfo() const { return m_VdcHardwareInfo; }
     void setVdcHardwareVersion(const std::string& _value) { m_VdcHardwareVersion = _value; }
     const std::string& getVdcHardwareVersion() const { return m_VdcHardwareVersion; }
-    void setVdcIconPath(const std::string& _value) {
-      m_VdcIconPath = _value; updateIconPath();
-    }
+    void setVdcIconPath(const std::string& _value) { m_VdcIconPath = _value; updateIconPath(); }
     const std::string& getVdcIconPath() const { return m_VdcIconPath; }
     void setVdcModelFeatures(const boost::shared_ptr<std::vector<ModelFeatureId> >& _value) { m_VdcModelFeatures = _value; }
     const boost::shared_ptr<std::vector<ModelFeatureId> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }

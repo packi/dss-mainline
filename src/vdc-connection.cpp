@@ -70,6 +70,8 @@ namespace dss {
     el = query.Add();
     el->set_name("name");
     el = query.Add();
+    el->set_name("displayId");
+    el = query.Add();
     el->set_name("deviceClass");
     el = query.Add();
     el->set_name("deviceClassVersion");
@@ -91,6 +93,7 @@ namespace dss {
     ret.vendorId = rootReader["vendorId"].getValueAsString();
     ret.vendorName = rootReader["vendorName"].getValueAsString();
     ret.modelVersion = rootReader["modelVersion"].getValueAsString();
+    ret.displayId = rootReader["displayId"].getValueAsString();
     ret.deviceClass = rootReader["deviceClass"].getValueAsString();
     ret.deviceClassVersion = rootReader["deviceClassVersion"].getValueAsString();
 
@@ -142,6 +145,8 @@ namespace dss {
     el->set_name("hardwareGuid");
     el = query.Add();
     el->set_name("name");
+    el = query.Add();
+    el->set_name("displayId");
 
     vdcapi::Message message = VdcConnection::getProperty(_vdsm, _vdsm, query);
 
@@ -206,6 +211,10 @@ namespace dss {
       } else if (el.name() == "name") {
         try {
           ret->name = st.convert(val.v_string());
+        } catch (std::exception& e) {}
+      } else if (el.name() == "displayId") {
+        try {
+          ret->displayId = st.convert(val.v_string());
         } catch (std::exception& e) {}
       }
     }

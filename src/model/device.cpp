@@ -390,6 +390,8 @@ namespace dss {
     if (m_isVdcDevice && (m_pPropertyNode != NULL)) {
       PropertyNodePtr propNode = m_pPropertyNode->createProperty("properties");
 
+      propNode->createProperty("DisplayId")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcDisplayID, false));
       propNode->createProperty("HardwareModelGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareModelGuid, false));
       propNode->createProperty("ModelUID")
@@ -1855,6 +1857,8 @@ namespace dss {
     // HWInfo - Priorities: 1. OEM Data, 2. Device Product Data, 3. Device EEPROM Data (Vendor independent)
     if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductName.empty()) {
       m_HWInfo = m_OemProductName;
+    } else if (!m_VdcDisplayID.empty()) {
+      m_HWInfo = m_VdcDisplayID;
     } else if (!m_VdcHardwareInfo.empty()) {
       m_HWInfo = m_VdcHardwareInfo;
     } else if (displayName != NULL) {
