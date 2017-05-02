@@ -34,6 +34,7 @@
 #include "ds485types.h"
 #include "model/behavior.h"
 #include "sceneaccess.h"
+#include "datetools.h"
 #include "model/deviceinterface.h"
 
 namespace google {
@@ -109,6 +110,20 @@ namespace dss {
     uint8_t usage;
     std::string name;
   } DeviceSensorSpec_t;
+
+  typedef struct DeviceSensorValue {
+    SensorType sensorType;
+    uint8_t sensorIndex;
+    double value;
+    uint32_t valueAge;
+    uint32_t contextId;
+    std::string contextMsg;
+    DateTime timestamp;
+    DeviceSensorValue() :
+      sensorType(SensorType::UnknownType), sensorIndex(0), value(0), valueAge(0),
+      contextId(0), timestamp(0)
+    {}
+  } DeviceSensorValue_t;
 
   struct DeviceSpec_t {
     devid_t ShortAddress;
@@ -253,8 +268,11 @@ namespace dss {
     /** Set generic device output value */
     virtual void setValue(const Device& _device, uint8_t _value) = 0;
 
-    /** Queries sensor value & type from a device */
-    virtual uint32_t getSensorValue(const Device& _device, const int _sensorIndex) = 0;
+    /** Queries sensor value from a device -> returns the dsmapi normalized value */
+    virtual uint16_t getSensorValue(const Device& _device, const int _sensorIndex) = 0;
+
+    /** Queries extended sensor value from a device */
+    virtual DeviceSensorValue_t getSensorValueEx(const Device& _device, const int _sensorIndex) = 0;
 
     /** add device to a user group */
     virtual void addGroup(const Device& _device, const int _groupId) = 0;

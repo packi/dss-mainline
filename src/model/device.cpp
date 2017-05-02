@@ -1176,9 +1176,23 @@ namespace dss {
     return result;
   } // getDeviceOutputValue (offset)
 
-  uint32_t Device::getDeviceSensorValue(const int _sensorIndex) {
+  uint16_t Device::getDeviceSensorValue(const int _sensorIndex) {
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this, _sensorIndex);
   } // getDeviceSensorValue
+
+  DeviceSensorValue_t Device::getDeviceSensorValueEx(const int _sensorIndex) {
+    DeviceSensorValue_t result;
+    if (m_isVdcDevice) {
+      result = m_pApartment->getDeviceBusInterface()->getSensorValueEx(*this, _sensorIndex);
+    } else {
+      // TODO(some day): support age and double value on power line
+      result.sensorIndex = _sensorIndex;
+      result.sensorType = getSensor(_sensorIndex)->m_sensorType;
+      result.value = static_cast<double> (m_pApartment->getDeviceBusInterface()->getSensorValue(*this, _sensorIndex));
+      result.timestamp = DateTime();
+    }
+    return result;
+  } // getDeviceSensorValueEx
 
   unsigned long Device::getPowerConsumption() {
     return m_Consumption;

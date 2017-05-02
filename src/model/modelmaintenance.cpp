@@ -3207,7 +3207,7 @@ namespace dss {
         }
         try {
           if (zone->isZoneSensor(*device, sensor->m_sensorType)) {
-            busItf->getSensorValue(*device.get(), sensor->m_sensorIndex);
+            busItf->getSensorValueEx(*device.get(), sensor->m_sensorIndex);
           }
         } catch (std::runtime_error& e) {
           Logger::getInstance()->log("pollSensors: could not query sensor from " +
