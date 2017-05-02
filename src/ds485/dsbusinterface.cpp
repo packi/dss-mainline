@@ -380,6 +380,13 @@ namespace dss {
                         EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_BINARYINPUTEVENT,
                         &callback_struct, NULL);
 
+      EventDeviceSensor_value_extended_event_callback_t sensorValueExtendedCallback = DSBusInterface::handleSensorValueExCallback;
+      callback_struct.function = (void*)sensorValueExtendedCallback;
+      callback_struct.arg = this;
+      DsmApiSetCallback(m_dsmApiHandle, DS485_CONTAINER_EVENT,
+                        EVENT_DEVICE_SENSOR, EVENT_DEVICE_SENSOR_VALUE_EXTENDED,
+                        &callback_struct, NULL);
+
       EventDeviceSensor_value_event_callback_t sensorValueCallback = DSBusInterface::handleSensorValueCallback;
       callback_struct.function = (void*)sensorValueCallback;
       callback_struct.arg = this;
@@ -962,6 +969,38 @@ namespace dss {
       static_cast<DSBusInterface*>(_userData)->
         handleSensorValueEvent(_errorCode, _sourceID, _destinationID,
                                _deviceID, _sensorIndex, _sensorValue);
+    }
+  }
+
+  void DSBusInterface::handleSensorValueExEvent(uint8_t _errorCode, dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _deviceID, uint8_t _sensorIndex,
+      uint64_t _sensorValue, uint32_t _sensorAge,
+      uint32_t _contextId, const uint8_t *_contextMsg) {
+    loginFromCallback();
+    ModelEventWithSensorEx* pEvent = new ModelEventWithSensorEx();
+    pEvent->m_deviceDSID = _sourceID;
+    pEvent->addParameter(_deviceID);
+    pEvent->addParameter(_sensorIndex);
+    pEvent->addParameter(_sensorAge);
+    pEvent->addParameter(_contextId);
+    pEvent->setSingleStringParameter(std::string((const char*)(_contextMsg)));
+    // TODO(oneday with network byte order on dsmapi): i64 = (ntohT(uint64_t(_sensorValue)));
+    int64_t i64 = (int64_t) _sensorValue;
+    pEvent->m_sensorValue = *((double*)(void*)&i64);
+    m_pModelMaintenance->addModelEvent(pEvent);
+  } // handleSensorValueEx
+
+  void DSBusInterface::handleSensorValueExCallback(uint8_t _errorCode, void* _userData,
+      dsuid_t _sourceID, dsuid_t _destinationID,
+      uint16_t _deviceID, uint8_t _sensorIndex,
+      uint64_t _sensorValue, uint32_t _sensorAge,
+      uint32_t _contextId, const uint8_t *_contextMsg) {
+    if (_errorCode == 0) {
+      static_cast<DSBusInterface*>(_userData)->
+        handleSensorValueExEvent(_errorCode, _sourceID, _destinationID,
+            _deviceID, _sensorIndex,
+            _sensorValue, _sensorAge,
+            _contextId, _contextMsg);
     }
   }
 

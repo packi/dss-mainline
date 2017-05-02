@@ -1038,6 +1038,17 @@ namespace dss {
         onSensorValue(pEventWithDSID->getDSID(), event->getParameter(0), event->getParameter(1), event->getParameter(2));
       }
       break;
+    case ModelEvent::etDeviceSensorValueEx: {
+      auto evtSensorEx = dynamic_cast<ModelEventWithSensorEx*>(event.get());
+      assert(evtSensorEx != 0);
+      onSensorValueEx(evtSensorEx->m_deviceDSID, evtSensorEx->getParameter(0),
+          /* sensorIndex */ evtSensorEx->getParameter(1),
+          /* sensorValue */ evtSensorEx->m_sensorValue,
+          /* Age */         evtSensorEx->getParameter(2),
+          /* Context ID */  evtSensorEx->getParameter(3),
+          /* Context Msg */ evtSensorEx->getSingleStringParameter());
+      }
+      break;
     case ModelEvent::etCircuitPowerStateChange:
       assert(pEventWithDSID != NULL);
       if (event->getParameterCount() < 3) {
@@ -2121,6 +2132,31 @@ namespace dss {
       log("onSensorValue: Datamodel failure: " + std::string(e.what()), lsWarning);
     }
   } // onSensorValue
+
+  void ModelMaintenance::onSensorValueEx(dsuid_t _meterID, const devid_t _deviceID,
+      const int& _sensorIndex, const double& _sensorValue, const uint32_t& _sensorAge,
+      const uint32_t& _contextId, const std::string& _contextMsg) {
+    try {
+      boost::shared_ptr<DSMeter> pMeter = m_pApartment->getDSMeterByDSID(_meterID);
+      DeviceReference devRef = pMeter->getDevices().getByBusID(_deviceID, pMeter);
+      boost::shared_ptr<DeviceReference> pDevRev = boost::make_shared<DeviceReference>(devRef);
+      boost::shared_ptr<Device> pDev = devRef.getDevice();
+
+      auto sensorType = SensorType::UnknownType;
+      try {
+        pDev->setSensorValue(_sensorIndex, _sensorValue, _sensorAge);
+        boost::shared_ptr<DeviceSensor_t> pdSensor = pDev->getSensor(_sensorIndex);
+        sensorType = pdSensor->m_sensorType;
+      } catch (ItemNotFoundException& e) {
+        log(std::string("onSensorValueEx: sensor index failure: ") + e.what(), lsNotice);
+      }
+      raiseEvent(createDeviceSensorValueExEvent(pDevRev, _sensorIndex, sensorType,
+          _sensorValue, _sensorAge, _contextId, _contextMsg));
+
+    } catch(ItemNotFoundException& e) {
+      log("onSensorValueEx: Datamodel failure: " + std::string(e.what()), lsWarning);
+    }
+  }
 
   void ModelMaintenance::onZoneSensorValue(const dsuid_t& _meterID,
                                            const dsuid_t& _sourceDevice,

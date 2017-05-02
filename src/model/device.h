@@ -755,7 +755,7 @@ namespace dss {
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
     const boost::shared_ptr<DeviceSensor_t> getSensorByType(SensorType _sensorType) const;
     void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
-    void setSensorValue(int _sensorIndex, double _sensorValue) const;
+    void setSensorValue(int _sensorIndex, double _sensorValue, uint32_t _age = 0) const;
     void setSensorDataValidity(int _sensorIndex, bool _valid) const;
     bool isSensorDataValid(int _sensorIndex) const;
 
