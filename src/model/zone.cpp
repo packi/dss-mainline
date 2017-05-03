@@ -595,6 +595,17 @@ namespace dss {
     }
   }
 
+  boost::shared_ptr<const DSMeter> Zone::tryGetTemperatureControlDsm() const {
+    // Select first temperature control capable DSM as the master.
+    foreach (auto&& dsm, m_DSMeters) {
+      if (!dsm->getCapability_HasTemperatureControl()) {
+        continue;
+      }
+      return dsm;
+    }
+    return boost::shared_ptr<DSMeter>();
+  }
+
   ZoneHeatingProperties::ZoneHeatingProperties() {
     reset();
   }
