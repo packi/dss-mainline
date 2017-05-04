@@ -992,7 +992,6 @@ namespace dss {
 
           // resend the current settings to all DSMs
           manip.setZoneHeatingConfig(_zone, _zone->getHeatingControlMode());
-          manip.setZoneHeatingOperationModeValues(_zone);
         }
       } else {
         // dSS has no configuration for this zone, take the first valid configuration

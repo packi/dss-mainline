@@ -343,7 +343,6 @@ std::string ZoneRequestHandler::setTemperatureControlConfig2(
 
   StructureManipulator manipulator(*m_pStructureBusInterface, *m_pStructureQueryBusInterface, m_Apartment);
   manipulator.setZoneHeatingConfig(pZone, hConfig);
-  manipulator.setZoneHeatingOperationModeValues(pZone);
 
   return json.successJSON();
 }

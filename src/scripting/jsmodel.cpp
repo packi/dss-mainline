@@ -4367,7 +4367,6 @@ namespace dss {
 
       // set data in model and dsms
       manipulator.setZoneHeatingConfig(pZone, hConfig);
-      manipulator.setZoneHeatingOperationModeValues(pZone);
 
       JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
       return JS_TRUE;

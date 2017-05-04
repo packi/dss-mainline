@@ -811,14 +811,13 @@ namespace dss {
     if (auto dsm = zone->tryGetTemperatureControlDsm()) {
       // disable temperature controller in all (V)DSMs, enable in this one
       m_Interface.setZoneHeatingConfig(dsm->getDSID(), zone->getID(), spec);
-    }
-  } // setZoneHeatingConfig
-
-  void StructureManipulator::setZoneHeatingOperationModeValues(boost::shared_ptr<Zone> zone) {
-    if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::PID) {
-      m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), zone->getHeatingControlOperationModeValues());
-    } else if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::FIXED) {
-      m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
+      if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::PID) {
+        m_Interface.setZoneHeatingOperationModes(
+            DSUID_BROADCAST, zone->getID(), zone->getHeatingControlOperationModeValues());
+      } else if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::FIXED) {
+        m_Interface.setZoneHeatingOperationModes(
+            DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
+      }
     }
   }
 
