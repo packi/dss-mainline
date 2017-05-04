@@ -676,6 +676,36 @@ void toJson(const boost::shared_ptr<Event> &event, JSONWriter& json) {
       json.add("SensorType", (int) (event->getPropertyByName<SensorType>("sensorType")));
       json.add("SensorValue", event->getPropertyByName("sensorValueFloat"));
       json.add("DeviceID", pDeviceRef->getDSID());
+      propValue = event->getPropertyByName(ef_sensorIndex);
+      if (!propValue.empty()) {
+        json.add("SensorIndex", propValue);
+        uint8_t sensorIndex = strToUInt(propValue);
+        uint8_t sensorUsage = 0;
+        if (pDeviceRef->getDevice()->getSensorCount() > sensorIndex) {
+          boost::shared_ptr<DeviceSensor_t> pDevSensor = pDeviceRef->getDevice()->getSensor(sensorIndex);
+          sensorUsage = pDevSensor->m_sensorUsage;
+        }
+        switch (sensorUsage) {
+        default:
+          json.add("DeviceMeasurementContextType", 1);
+          break;
+        case 5: // device level last run
+          json.add("DeviceMeasurementContextType", 2);
+          break;
+        case 6: // device level average value
+          json.add("DeviceMeasurementContextType", 3);
+          break;
+        }
+      }
+      if (event->hasPropertySet("contextId")) {
+        json.add("ContextRefId", event->getPropertyByName("contextId"));
+      }
+      if (event->hasPropertySet("contextMsg")) {
+        json.add("ContextRefString", event->getPropertyByName("contextMsg"));
+      }
+      if (event->hasPropertySet("contextTimestamp")) {
+        json.add("ContextTimestamp", event->getPropertyByName("contextTimestamp"));
+      }
       json.endObject();
     } else if ((event->getName() == EventName::DeviceInvalidSensor) && (event->getRaiseLocation() == erlDevice)) {
       pDeviceRef = event->getRaisedAtDevice();

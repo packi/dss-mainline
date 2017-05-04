@@ -61,6 +61,11 @@ boost::shared_ptr<Event>
                                int _index, SensorType _type, int _value);
 
 boost::shared_ptr<Event>
+  createDeviceSensorValueExEvent(boost::shared_ptr<DeviceReference> _devRef,
+                             int _index, SensorType _type, double _value, uint32_t _age,
+                             uint32_t _contextId, const std::string& _contextMsg);
+
+boost::shared_ptr<Event>
   createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> _devRef,
                                  int _index, SensorType _type, const DateTime& _ts);
 

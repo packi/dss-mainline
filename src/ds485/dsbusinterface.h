@@ -215,12 +215,25 @@ namespace dss {
     static void handleBinaryInputEventCallback(uint8_t _errorCode, void* _userData,
         dsuid_t _sourceID, dsuid_t _destinationID,
         uint16_t _deviceID, uint8_t _eventIndex, uint8_t _eventType, uint8_t _state);
+
     void handleSensorValueEvent(uint8_t _errorCode,
         dsuid_t _sourceID, dsuid_t _destinationID,
         uint16_t _deviceID, uint8_t _sensorIndex, uint16_t _sensorValue);
     static void handleSensorValueCallback(uint8_t _errorCode, void* _userData,
         dsuid_t _sourceID, dsuid_t _destinationID,
         uint16_t _deviceID, uint8_t _sensorIndex, uint16_t _sensorValue);
+
+    void handleSensorValueExEvent(uint8_t _errorCode,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _deviceID, uint8_t _sensorIndex,
+        uint64_t _sensorValue, uint32_t _sensorAge,
+        uint32_t _contextId, const uint8_t *_contextMsg);
+    static void handleSensorValueExCallback(uint8_t _errorCode, void* _userData,
+        dsuid_t _sourceID, dsuid_t _destinationID,
+        uint16_t _deviceID, uint8_t _sensorIndex,
+        uint64_t _sensorValue, uint32_t _sensorAge,
+        uint32_t _contextId, const uint8_t *_contextMsg);
+
     void handleZoneSensorValueEvent(uint8_t _errorCode,
         dsuid_t _sourceID, dsuid_t _destinationID,
         uint16_t _ZoneId, uint8_t _GroupId, dsuid_t _dSUID,

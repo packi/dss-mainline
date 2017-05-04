@@ -173,7 +173,9 @@ namespace dss {
 
   typedef struct {
     int m_sensorIndex;       // sensor index
+    std::string m_sensorName;
     SensorType m_sensorType;
+    uint8_t m_sensorUsage;
     uint32_t m_sensorPollInterval;
     bool m_sensorBroadcastFlag;
     bool m_sensorPushConversionFlag;
@@ -460,7 +462,8 @@ namespace dss {
     uint16_t getDeviceOutputValue(uint8_t _offset);
 
     /** query device sensor values */
-    uint32_t getDeviceSensorValue(const int _sensorIndex);
+    uint16_t getDeviceSensorValue(const int _sensorIndex);
+    DeviceSensorValue_t getDeviceSensorValueEx(const int _sensorIndex);
 
     /** query cached last known values */
     virtual unsigned long getPowerConsumption();
@@ -752,7 +755,7 @@ namespace dss {
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
     const boost::shared_ptr<DeviceSensor_t> getSensorByType(SensorType _sensorType) const;
     void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
-    void setSensorValue(int _sensorIndex, double _sensorValue) const;
+    void setSensorValue(int _sensorIndex, double _sensorValue, uint32_t _age = 0) const;
     void setSensorDataValidity(int _sensorIndex, bool _valid) const;
     bool isSensorDataValid(int _sensorIndex) const;
 

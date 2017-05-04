@@ -22,6 +22,7 @@
 
 #include "vdc-info.h"
 #include "src/model/device.h"
+#include "src/model/apartment.h"
 #include "src/vdc-db.h"
 #include "src/protobufjson.h"
 #include "src/messages/vdc-messages.pb.h"
@@ -146,6 +147,24 @@ void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string&
   json.endObject();
 }
 
+void addSensorDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+  const std::string& oemEan = device.getOemEanAsString();
+  auto sensors = db.getSensors(oemEan, langCode); // throws
+  json.startObject("sensorDescriptions");
+  foreach (auto &sensor, sensors) {
+    json.startObject(sensor.prop.name);
+    json.add("title", sensor.prop.title);
+    json.add("tags", sensor.prop.tags);
+    addParameterDescriptions(db, sensor.prop, json);
+    json.add("dsIndex", strToInt(sensor.sensorIndex));
+    try {
+      json.add("dsType", static_cast<int> (device.getSensor(strToInt(sensor.sensorIndex))->m_sensorType));
+    } catch (ItemNotFoundException& e) {}
+    json.endObject();
+  }
+  json.endObject();
+}
+
 void addActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
   auto actions = db.getActions(oemEan, langCode);
@@ -207,6 +226,8 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
     json.endObject();
     json.startObject("properties");
     json.endObject();
+    json.startObject("sensors");
+    json.endObject();
     json.endObject();
     return;
   }
@@ -220,6 +241,7 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
   const std::string& oemEan = device.getOemEanAsString();
   auto states = db.getStates(oemEan, langCode);
   auto props = db.getProperties(oemEan, langCode);
+  auto sensors = db.getSensors(oemEan, langCode);
 
   json.startObject("operational");
   json.startObject("states");
@@ -231,8 +253,14 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
     foreach (const auto &state, states) {
       if (state.name == stateName) {
         json.add("title", state.title);
-        std::string propValue = stateReader["value"].getValueAsString();
-        json.add("value", propValue);
+        json.add("value");
+        std::string propValue;
+        if (stateReader["value"].hasValue()) {
+          propValue = stateReader["value"].getValueAsString();
+          json.add(propValue);
+        } else {
+          json.addNull();
+        }
         foreach (const auto &desc, state.values) {
           if (desc.first == propValue) {
             json.add("displayValue", desc.second);
@@ -259,7 +287,32 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
       }
     }
     json.add("title", propTitle);
-    json.add("value", propReader.getValueAsString());
+    json.add("value");
+    std::string propValue;
+    if (propReader.hasValue()) {
+      propValue = propReader.getValueAsString();
+      json.add(propValue);
+    } else {
+      json.addNull();
+    }
+    json.endObject();
+  }
+  json.endObject();
+
+  json.startObject("sensors");
+  foreach (const auto &sensor, sensors) {
+    DeviceSensorValue_t value;
+    int sIndex = strToInt(sensor.sensorIndex);
+    json.startObject(sensor.prop.name);
+    json.add("title", sensor.prop.title);
+    json.add("value");
+    try {
+      value = device.getDeviceSensorValueEx(sIndex);
+      json.add(value.value);
+    } catch(std::runtime_error& e) {
+      json.addNull();
+    }
+    json.add("timestamp", value.timestamp.toISO8601_ms());
     json.endObject();
   }
   json.endObject();
@@ -274,6 +327,7 @@ Filter parseFilter(const std::string& filterParam) {
     filter.stateDesc = 1;
     filter.eventDesc = 1;
     filter.propertyDesc = 1;
+    filter.sensorDesc = 1;
     filter.actionDesc = 1;
     filter.stdActions = 1;
     filter.customActions = 1;
@@ -290,6 +344,8 @@ Filter parseFilter(const std::string& filterParam) {
       filter.eventDesc = 1;
     } else if (item == "propertyDesc") {
       filter.propertyDesc = 1;
+    } else if (item == "sensorDesc") {
+      filter.sensorDesc = 1;
     } else if (item == "actionDesc") {
       filter.actionDesc = 1;
     } else if (item == "standardActions") {
@@ -316,6 +372,9 @@ void addByFilter(VdcDb& db, Device& device, Filter filter,
   }
   if (filter.propertyDesc) {
     addPropertyDescriptions(db, device, langCode, json);
+  }
+  if (filter.sensorDesc) {
+    addSensorDescriptions(db, device, langCode, json);
   }
   if (filter.actionDesc) {
     addActionDescriptions(db, device, langCode, json);

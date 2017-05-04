@@ -100,7 +100,9 @@ namespace dss {
     virtual void addGroup(const Device& _device, const int _groupId);
     virtual void removeGroup(const Device& _device, const int _groupId);
 
-    virtual uint32_t getSensorValue(const Device& _device, const int _sensorIndex);
+    virtual uint16_t getSensorValue(const Device& _device, const int _sensorIndex);
+    virtual DeviceSensorValue_t getSensorValueEx(const Device& _device, const int _sensorIndex);
+
     virtual void lockOrUnlockDevice(const Device& _device, const bool _lock);
 
     virtual std::pair<uint8_t, uint16_t> getTransmissionQuality(const Device& _device);

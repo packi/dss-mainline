@@ -1086,13 +1086,33 @@ namespace dss {
       return json.successJSON();
     } else if (_request.getMethod() == "getSensorValue") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
-      if((id < 0) || (id > 255)) {
+      if (id < 0 || id >= pDevice->getSensorCount()) {
         return JSONWriter::failure("Invalid or missing parameter 'sensorIndex'");
       }
-      int value = pDevice->getDeviceSensorValue(id);
+      DeviceSensorValue_t result = pDevice->getDeviceSensorValueEx(id);
       JSONWriter json;
       json.add("sensorIndex", id);
-      json.add("sensorValue", value);
+      json.add("sensorValue", result.value);
+      return json.successJSON();
+    } else if (_request.getMethod() == "getSensorValue2") {
+      int type = strToIntDef(_request.getParameter("sensorType"), -1);
+      int id = strToIntDef(_request.getParameter("sensorIndex"), -1);
+      if (id < 0) {
+        if (type > 0) {
+          boost::shared_ptr<DeviceSensor_t> pSensor = pDevice->getSensorByType(static_cast<SensorType>(type));
+          id = pSensor->m_sensorIndex;
+        } else {
+          return JSONWriter::failure("Invalid or missing parameter 'sensorIndex'");
+        }
+      }
+      DeviceSensorValue_t value = pDevice->getDeviceSensorValueEx(id);
+      JSONWriter json;
+      json.add("sensorIndex", id);
+      json.add("value", value.value);
+      json.add("age", value.valueAge);
+      json.add("timestamp", value.timestamp.toISO8601_ms());
+      json.add("contextId", value.contextId);
+      json.add("contextMsg", value.contextMsg);
       return json.successJSON();
     } else if (_request.getMethod() == "getSensorType") {
       int id = strToIntDef(_request.getParameter("sensorIndex"), -1);

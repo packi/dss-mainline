@@ -101,6 +101,26 @@ BOOST_AUTO_TEST_CASE(testAddingHour) {
   BOOST_CHECK(!(dt >= dt2));
 }
 
+BOOST_AUTO_TEST_CASE(testAddingMilliseconds) {
+  DateTime dt;
+  DateTime dt2 = dt.addMilliSeconds(2000);
+
+  BOOST_CHECK(dt2 > dt);
+  BOOST_CHECK(!(dt2 < dt));
+  BOOST_CHECK(!(dt2 <= dt));
+  BOOST_CHECK(dt < dt2);
+  BOOST_CHECK(!(dt > dt2));
+  BOOST_CHECK(!(dt >= dt2));
+
+  dt2 = dt.addMilliSeconds(-5000);
+  BOOST_CHECK(dt2 < dt);
+  BOOST_CHECK(dt2 <= dt);
+  BOOST_CHECK(!(dt2 > dt));
+
+  dt2 = dt.addMilliSeconds(-2000);
+  BOOST_CHECK(dt2.difference(dt) == -2);
+}
+
 BOOST_AUTO_TEST_CASE(testDifference) {
   DateTime dt, dt2;
 
