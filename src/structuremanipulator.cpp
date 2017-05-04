@@ -814,29 +814,13 @@ namespace dss {
     }
   } // setZoneHeatingConfig
 
-  void StructureManipulator::setZoneHeatingControlOperationModeValues(boost::shared_ptr<Zone> zone,
-                                                  const ZoneHeatingOperationModeSpec_t& spec) {
-    zone->setHeatingControlOperationMode(spec);
-    if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::PID) {
-      m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), spec);
-    }
-  } // setZoneHeatingControlOperationModeValues
-
-  void StructureManipulator::setZoneHeatingFixedOperationModeValues(boost::shared_ptr<Zone> zone,
-                                                  const ZoneHeatingOperationModeSpec_t& spec) {
-    zone->setHeatingFixedOperationMode(spec);
-    if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::FIXED) {
-      m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), spec);
-    }
-  } // setZoneHeatingControlOperationModeValues
-
   void StructureManipulator::setZoneHeatingOperationModeValues(boost::shared_ptr<Zone> zone) {
     if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::PID) {
       m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), zone->getHeatingControlOperationModeValues());
     } else if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::FIXED) {
       m_Interface.setZoneHeatingOperationModes(DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
     }
-  } // setZoneHeatingOperationModeValues
+  }
 
   void StructureManipulator::setZoneSensor(Zone &_zone,
                                            SensorType _sensorType,

@@ -83,8 +83,6 @@ namespace dss {
     void deviceRemoveFromGroups(boost::shared_ptr<Device> device);
 
     void setZoneHeatingConfig(boost::shared_ptr<Zone> zone, const ZoneHeatingConfigSpec_t& spec);
-    void setZoneHeatingControlOperationModeValues(boost::shared_ptr<Zone> zone, const ZoneHeatingOperationModeSpec_t& spec);
-    void setZoneHeatingFixedOperationModeValues(boost::shared_ptr<Zone> zone, const ZoneHeatingOperationModeSpec_t& spec);
     void setZoneHeatingOperationModeValues(boost::shared_ptr<Zone> zone);
     void setZoneSensor(Zone &_zone, SensorType _sensorType, boost::shared_ptr<Device> _dev);
     void resetZoneSensor(Zone &_zone, SensorType _sensorType);
