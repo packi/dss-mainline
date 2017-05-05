@@ -982,7 +982,7 @@ namespace dss {
 
       if (_zone->isHeatingPropertiesValid()) {
         // current dSMeter is active controller for this zone
-        if (!hProp.isEqual(hConfig, hOpValues)) {
+        if (_zone->tryGetTemperatureControlDsm() == _dsMeter && !hProp.isEqual(hConfig, hOpValues)) {
           // dSMeter has diverging settings, overwrite from dSS settings
           log(std::string("Heating config mismatch: Overwrite controller") + " for zone " +
                   intToString(_zone->getID()) + " on dsm " + dsuid2str(_dsMeter->getDSID()) + ": mode " +
