@@ -152,4 +152,5 @@ message vdsm_NotificationSetOutputChannelValue {
     optional bool apply_now = 2 [ default = true ];
     optional int32 channel = 3;
     optional double value = 4;
+    optional bool automatic = 5;
 }
