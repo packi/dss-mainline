@@ -508,6 +508,20 @@ namespace dss {
 
     // synchronize sensor configuration
     if (_spec.sensorInputsValid) {
+      if (dev->isVdcDevice()) {
+        try {
+          // read extended sensor info
+          auto sList = VdcHelper::getSensorDesc(dev->getDSMeterDSID(), dev->getDSID());
+          for (auto it = sList.begin(); it != sList.end(); it ++) {
+            int index = it->first;
+            VdcHelper::SensorDesc sDesc = it->second;
+            _spec.sensorInputs[index].usage = sDesc.sensorUsage;
+            _spec.sensorInputs[index].name = sDesc.sensorName;
+          }
+        } catch (const std::runtime_error& e) {
+          log(std::string("initializeDeviceFromSpec() sensor read error:") + e.what(), lsError);
+        }
+      }
       dev->setSensors(_spec.sensorInputs);
     }
 
@@ -968,7 +982,7 @@ namespace dss {
 
       if (_zone->isHeatingPropertiesValid()) {
         // current dSMeter is active controller for this zone
-        if (!hProp.isEqual(hConfig, hOpValues)) {
+        if (_zone->tryGetTemperatureControlDsm() == _dsMeter && !hProp.isEqual(hConfig, hOpValues)) {
           // dSMeter has diverging settings, overwrite from dSS settings
           log(std::string("Heating config mismatch: Overwrite controller") + " for zone " +
                   intToString(_zone->getID()) + " on dsm " + dsuid2str(_dsMeter->getDSID()) + ": mode " +

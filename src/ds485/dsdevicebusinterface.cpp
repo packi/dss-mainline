@@ -164,8 +164,7 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
   } // setValue
 
-  uint32_t DSDeviceBusInterface::getSensorValue(const Device& _device,
-                                                     const int _sensorIndex) {
+  uint16_t DSDeviceBusInterface::getSensorValue(const Device& _device, const int _sensorIndex) {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
     uint16_t retVal;
 
@@ -188,6 +187,38 @@ namespace dss {
 
     return retVal;
   } // getSensorValue
+
+  DeviceSensorValue_t DSDeviceBusInterface::getSensorValueEx(const Device& _device, const int _sensorIndex) {
+    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
+    uint8_t contextMsg[64];
+    DeviceSensorValue_t retVal;
+
+    int ret = DeviceSensor_get_value_extended_sync(m_DSMApiHandle, _device.getDSMeterDSID(), _device.getShortAddress(),
+        _sensorIndex, kDSM_API_TIMEOUT,
+        &retVal.value, &retVal.valueAge,
+        &retVal.contextId, contextMsg);
+    DSBusInterface::checkResultCode(ret);
+
+    retVal.contextMsg = std::string((const char*)(contextMsg));
+    retVal.timestamp = DateTime().addMilliSeconds((int)retVal.valueAge * (-1));
+
+    ModelEventWithSensorEx* pEvent = new ModelEventWithSensorEx();
+    pEvent->m_deviceDSID = _device.getDSID();
+    pEvent->addParameter(_device.getShortAddress());
+    pEvent->addParameter(_sensorIndex);
+    pEvent->addParameter(retVal.valueAge);
+    pEvent->addParameter(retVal.contextId);
+    pEvent->setSingleStringParameter(retVal.contextMsg);
+    pEvent->m_sensorValue = retVal.value;
+
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getModelMaintenance().addModelEvent(pEvent);
+    } else {
+      delete pEvent;
+    }
+
+    return retVal;
+  } // getSensorValueEx
 
   void DSDeviceBusInterface::addGroup(const Device& _device, const int _groupID) {
 

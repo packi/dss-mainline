@@ -37,6 +37,7 @@ namespace dss {
       bool stateDesc : 1;
       bool eventDesc : 1;
       bool propertyDesc : 1;
+      bool sensorDesc : 1;
       bool actionDesc : 1;
       bool stdActions : 1;
       bool customActions : 1;
@@ -47,6 +48,7 @@ namespace dss {
     void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addEventDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addSensorDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addCustomActions(Device& device, JSONWriter& json);

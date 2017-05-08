@@ -60,6 +60,7 @@ namespace dss {
                     etZoneSensorValue, /**< A zone sensor value has changed */
                     etDeviceSensorEvent, /**< A device has sent a sensor event */
                     etDeviceSensorValue, /**< A device has sent a new sensor value */
+                    etDeviceSensorValueEx, /**< A device has sent a new sensor value - extended data with double precision value */
                     etDeviceBinaryStateEvent, /**< A device has sent a new binary input state */
                     etDeviceEANReady, /** OEM data has finished reading out from device */
                     etDeviceOEMDataReady, /** OEM data has been retrieved from webservice */
@@ -138,6 +139,14 @@ namespace dss {
     int getStringParameterCount() const { return m_StringParameter.size(); }
   private:
     std::vector<std::string> m_StringParameter;
+  };
+
+  class ModelEventWithSensorEx : public ModelEvent {
+  public:
+    ModelEventWithSensorEx() : ModelEvent(ModelEvent::etDeviceSensorValueEx), m_sensorValue(0) {}
+
+    dsuid_t m_deviceDSID;
+    double m_sensorValue;
   };
 
   class VdceModelEvent : public ModelEvent {

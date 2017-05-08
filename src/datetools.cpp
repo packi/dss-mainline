@@ -136,6 +136,20 @@ namespace dss {
     return DateTime(tv);
   } // addSeconds
 
+  DateTime DateTime::addMilliSeconds(const int _milliseconds) const {
+    struct timeval tv = m_timeval;
+    struct timeval add;
+    struct timeval result;
+    add.tv_sec = abs(_milliseconds) / 1000;
+    add.tv_usec = (abs(_milliseconds) - add.tv_sec * 1000) * 1000;
+    if (_milliseconds < 0) {
+      timersub(&tv, &add, &result);
+    } else {
+      timeradd(&tv, &add, &result);
+    }
+    return DateTime(result);
+  } // addMilliSeconds
+
   DateTime DateTime::addMonth(const int _month) const {
     struct timeval tv = m_timeval;
     struct tm tm;

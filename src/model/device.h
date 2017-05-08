@@ -173,7 +173,9 @@ namespace dss {
 
   typedef struct {
     int m_sensorIndex;       // sensor index
+    std::string m_sensorName;
     SensorType m_sensorType;
+    uint8_t m_sensorUsage;
     uint32_t m_sensorPollInterval;
     bool m_sensorBroadcastFlag;
     bool m_sensorPushConversionFlag;
@@ -296,6 +298,7 @@ namespace dss {
 
     bool m_isVdcDevice;
     std::unique_ptr<VdsdSpec_t> m_vdcSpec;
+    std::string m_VdcDisplayID;
     std::string m_VdcHardwareModelGuid;
     std::string m_VdcModelUID;
     std::string m_VdcModelVersion;
@@ -459,7 +462,8 @@ namespace dss {
     uint16_t getDeviceOutputValue(uint8_t _offset);
 
     /** query device sensor values */
-    uint32_t getDeviceSensorValue(const int _sensorIndex);
+    uint16_t getDeviceSensorValue(const int _sensorIndex);
+    DeviceSensorValue_t getDeviceSensorValueEx(const int _sensorIndex);
 
     /** query cached last known values */
     virtual unsigned long getPowerConsumption();
@@ -700,6 +704,8 @@ namespace dss {
     void setVdcSpec(VdsdSpec_t &&x);
     void setVdcHardwareModelGuid(const std::string& _value) { m_VdcHardwareModelGuid = _value; }
     const std::string& getVdcHardwareModelGuid() const { return m_VdcHardwareModelGuid; }
+    void setVdcDisplayID(const std::string& _value) { m_VdcDisplayID = _value; }
+    const std::string& getVdcDisplayID() const { return m_VdcDisplayID; }
     void setVdcModelUID(const std::string& _value) { m_VdcModelUID = _value; }
     const std::string& getVdcModelUID() const { return m_VdcModelUID; }
     void setVdcModelVersion(const std::string& _value) { m_VdcModelVersion = _value; }
@@ -714,15 +720,11 @@ namespace dss {
     const std::string& getVdcConfigURL() const { return m_VdcConfigURL; }
     void setVdcHardwareGuid(const std::string& _value) { m_VdcHardwareGuid = _value; }
     const std::string& getVdcHardwareGuid() const { return m_VdcHardwareGuid; }
-    void setVdcHardwareInfo(const std::string& _value) {
-      m_VdcHardwareInfo = _value; calculateHWInfo();
-    }
+    void setVdcHardwareInfo(const std::string& _value) { m_VdcHardwareInfo = _value; calculateHWInfo(); }
     const std::string& getVdcHardwareInfo() const { return m_VdcHardwareInfo; }
     void setVdcHardwareVersion(const std::string& _value) { m_VdcHardwareVersion = _value; }
     const std::string& getVdcHardwareVersion() const { return m_VdcHardwareVersion; }
-    void setVdcIconPath(const std::string& _value) {
-      m_VdcIconPath = _value; updateIconPath();
-    }
+    void setVdcIconPath(const std::string& _value) { m_VdcIconPath = _value; updateIconPath(); }
     const std::string& getVdcIconPath() const { return m_VdcIconPath; }
     void setVdcModelFeatures(const boost::shared_ptr<std::vector<ModelFeatureId> >& _value) { m_VdcModelFeatures = _value; }
     const boost::shared_ptr<std::vector<ModelFeatureId> >& getVdcModelFeatures() const { return m_VdcModelFeatures; }
@@ -753,7 +755,7 @@ namespace dss {
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
     const boost::shared_ptr<DeviceSensor_t> getSensorByType(SensorType _sensorType) const;
     void setSensorValue(int _sensorIndex, unsigned int _sensorValue) const;
-    void setSensorValue(int _sensorIndex, double _sensorValue) const;
+    void setSensorValue(int _sensorIndex, double _sensorValue, uint32_t _age = 0) const;
     void setSensorDataValidity(int _sensorIndex, bool _valid) const;
     bool isSensorDataValid(int _sensorIndex) const;
 

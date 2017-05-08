@@ -70,6 +70,8 @@ namespace dss {
     el = query.Add();
     el->set_name("name");
     el = query.Add();
+    el->set_name("displayId");
+    el = query.Add();
     el->set_name("deviceClass");
     el = query.Add();
     el->set_name("deviceClassVersion");
@@ -91,6 +93,7 @@ namespace dss {
     ret.vendorId = rootReader["vendorId"].getValueAsString();
     ret.vendorName = rootReader["vendorName"].getValueAsString();
     ret.modelVersion = rootReader["modelVersion"].getValueAsString();
+    ret.displayId = rootReader["displayId"].getValueAsString();
     ret.deviceClass = rootReader["deviceClass"].getValueAsString();
     ret.deviceClassVersion = rootReader["deviceClassVersion"].getValueAsString();
 
@@ -142,6 +145,8 @@ namespace dss {
     el->set_name("hardwareGuid");
     el = query.Add();
     el->set_name("name");
+    el = query.Add();
+    el->set_name("displayId");
 
     vdcapi::Message message = VdcConnection::getProperty(_vdsm, _vdsm, query);
 
@@ -206,6 +211,10 @@ namespace dss {
       } else if (el.name() == "name") {
         try {
           ret->name = st.convert(val.v_string());
+        } catch (std::exception& e) {}
+      } else if (el.name() == "displayId") {
+        try {
+          ret->displayId = st.convert(val.v_string());
         } catch (std::exception& e) {}
       }
     }
@@ -315,6 +324,43 @@ namespace dss {
           ": " + it->first + "=" + it->second, lsDebug);
     }
     return state;
+  }
+
+  std::map<int,VdcHelper::SensorDesc> VdcHelper::getSensorDesc(dsuid_t _vdsm, dsuid_t _device)
+  {
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+    vdcapi::PropertyElement* el = query.Add();
+    el->set_name("sensorDescriptions");
+
+    vdcapi::Message message = VdcConnection::getProperty(_vdsm, _device, query);
+
+    Logger::getInstance()->log("VdcHelper::getSensorDesc: message " + message.DebugString(), lsDebug);
+    vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
+    VdcElementReader reader(message.vdc_response_get_property().properties());
+
+    std::map<int,SensorDesc> sensorList;
+    VdcElementReader sensorDescReader = reader["sensorDescriptions"];
+    for (VdcElementReader::iterator it = sensorDescReader.begin(); it != sensorDescReader.end(); it++) {
+      SensorDesc sDesc;
+      VdcElementReader sensorReader = *it;
+      const std::string& sSensorName = sensorReader.getName();
+      int sSensorIndex = strToInt(sSensorName);
+      for (VdcElementReader::iterator it = sensorReader.begin(); it != sensorReader.end(); it++) {
+        VdcElementReader sensorFieldProp = *it;
+        const std::string& sensorField = sensorFieldProp.getName();
+        if (sensorField == "name") {
+          sDesc.sensorName = sensorFieldProp.getValueAsString();
+        } else if (sensorField == "sensorType") {
+          sDesc.sensorType = static_cast<SensorType>(sensorFieldProp.getValueAsInt());
+        } else if (sensorField == "sensorUsage") {
+          sDesc.sensorUsage = sensorFieldProp.getValueAsInt();
+        } else if (sensorField == "updateInterval") {
+          sDesc.updateInterval = sensorFieldProp.getValueAsDouble();
+        }
+      }
+      sensorList[sSensorIndex] = sDesc;
+    }
+    return sensorList;
   }
 
   vdcapi::Message VdcHelper::callLearningFunction(dsuid_t vdc, bool establish, int64_t timeout, const vdcapi::PropertyElement& params)

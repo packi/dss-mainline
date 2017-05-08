@@ -234,6 +234,8 @@ namespace dss {
     void setHeatingProperties(ZoneHeatingProperties_t& config);
     bool isHeatingPropertiesValid() const;
 
+    boost::shared_ptr<const DSMeter> tryGetTemperatureControlDsm() const;
+
   protected:
     virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
     bool isAllowedSensorType(SensorType _sensorType);

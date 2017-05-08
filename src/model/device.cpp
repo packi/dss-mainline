@@ -390,6 +390,8 @@ namespace dss {
     if (m_isVdcDevice && (m_pPropertyNode != NULL)) {
       PropertyNodePtr propNode = m_pPropertyNode->createProperty("properties");
 
+      propNode->createProperty("DisplayId")
+        ->linkToProxy(PropertyProxyReference<std::string>(m_VdcDisplayID, false));
       propNode->createProperty("HardwareModelGuid")
         ->linkToProxy(PropertyProxyReference<std::string>(m_VdcHardwareModelGuid, false));
       propNode->createProperty("ModelUID")
@@ -1176,9 +1178,23 @@ namespace dss {
     return result;
   } // getDeviceOutputValue (offset)
 
-  uint32_t Device::getDeviceSensorValue(const int _sensorIndex) {
+  uint16_t Device::getDeviceSensorValue(const int _sensorIndex) {
     return m_pApartment->getDeviceBusInterface()->getSensorValue(*this, _sensorIndex);
   } // getDeviceSensorValue
+
+  DeviceSensorValue_t Device::getDeviceSensorValueEx(const int _sensorIndex) {
+    DeviceSensorValue_t result;
+    if (m_isVdcDevice) {
+      result = m_pApartment->getDeviceBusInterface()->getSensorValueEx(*this, _sensorIndex);
+    } else {
+      // TODO(some day): support age and double value on power line
+      result.sensorIndex = _sensorIndex;
+      result.sensorType = getSensor(_sensorIndex)->m_sensorType;
+      result.value = static_cast<double> (m_pApartment->getDeviceBusInterface()->getSensorValue(*this, _sensorIndex));
+      result.timestamp = DateTime();
+    }
+    return result;
+  } // getDeviceSensorValueEx
 
   unsigned long Device::getPowerConsumption() {
     return m_Consumption;
@@ -1855,6 +1871,8 @@ namespace dss {
     // HWInfo - Priorities: 1. OEM Data, 2. Device Product Data, 3. Device EEPROM Data (Vendor independent)
     if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductName.empty()) {
       m_HWInfo = m_OemProductName;
+    } else if (!m_VdcDisplayID.empty()) {
+      m_HWInfo = m_VdcDisplayID;
     } else if (!m_VdcHardwareInfo.empty()) {
       m_HWInfo = m_VdcHardwareInfo;
     } else if (displayName != NULL) {
@@ -2518,6 +2536,8 @@ namespace dss {
       boost::shared_ptr<DeviceSensor_t> binput = boost::make_shared<DeviceSensor_t>();
       binput->m_sensorIndex = m_sensorInputCount;
       binput->m_sensorType = it->sensorType;
+      binput->m_sensorUsage = it->usage;
+      binput->m_sensorName = it->name;
       binput->m_sensorPollInterval = it->SensorPollInterval;
       binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
       binput->m_sensorPushConversionFlag = it->SensorConversionFlag;
@@ -2534,6 +2554,10 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int, SensorType>(m_sensorInputs[m_sensorInputCount]->m_sensorType));
         entry->createProperty("index")
                 ->linkToProxy(PropertyProxyReference<int>(m_sensorInputs[m_sensorInputCount]->m_sensorIndex));
+        entry->createProperty("usage")
+                ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_sensorInputs[m_sensorInputCount]->m_sensorUsage));
+        entry->createProperty("name")
+                ->linkToProxy(PropertyProxyReference<std::string>(m_sensorInputs[m_sensorInputCount]->m_sensorName));
         entry->createProperty("valid")
                 ->linkToProxy(PropertyProxyReference<bool>(m_sensorInputs[m_sensorInputCount]->m_sensorValueValidity));
         entry->createProperty("value")
@@ -2542,6 +2566,8 @@ namespace dss {
                 ->linkToProxy(PropertyProxyReference<int, unsigned int>(m_sensorInputs[m_sensorInputCount]->m_sensorValue));
         entry->createProperty("timestamp")
                 ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toString));
+        entry->createProperty("timeISO8601")
+                ->linkToProxy(PropertyProxyMemberFunction<DateTime, std::string, false>(m_sensorInputs[m_sensorInputCount]->m_sensorValueTS, &DateTime::toISO8601_ms));
       }
 
       m_sensorInputCount ++;
@@ -2646,14 +2672,16 @@ namespace dss {
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }
 
-  void Device::setSensorValue(int _sensorIndex, double _sensorValue) const {
+  void Device::setSensorValue(int _sensorIndex, double _sensorValue, uint32_t _age) const {
     if (_sensorIndex >= getSensorCount()) {
       throw ItemNotFoundException(std::string("Device::setSensorValue: index out of bounds"));
     }
     DateTime now;
+    if (_age > 0) {
+      now.addMilliSeconds((int) _age * (-1));
+    }
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat = _sensorValue;
-    m_sensorInputs[_sensorIndex]->m_sensorValue =
-            doubleToSensorValue(m_sensorInputs[_sensorIndex]->m_sensorType, _sensorValue);
+    m_sensorInputs[_sensorIndex]->m_sensorValue = 0;
     m_sensorInputs[_sensorIndex]->m_sensorValueTS = now;
     m_sensorInputs[_sensorIndex]->m_sensorValueValidity = true;
   }

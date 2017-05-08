@@ -196,6 +196,27 @@ createDeviceSensorValueEvent(boost::shared_ptr<DeviceReference> _devRef,
 }
 
 boost::shared_ptr<Event>
+createDeviceSensorValueExEvent(boost::shared_ptr<DeviceReference> _devRef,
+                             int _index, SensorType _type, double _value, uint32_t _age,
+                             uint32_t _contextId, const std::string& _contextMsg)
+{
+  boost::shared_ptr<Event> event;
+  DateTime now;
+
+  event = boost::make_shared<Event>(EventName::DeviceSensorValue, _devRef);
+  event->setProperty(ef_sensorIndex, intToString(_index));
+  event->setProperty("sensorType", _type);
+  event->setProperty("sensorValueFloat", doubleToString(_value));
+  event->setProperty("contextId", intToString(_contextId));
+  event->setProperty("contextMsg", _contextMsg);
+  if (_age > 0) {
+    now.addMilliSeconds((int) _age * (-1));
+    event->setProperty("contextTimestamp", now.toISO8601_ms());
+  }
+  return event;
+}
+
+boost::shared_ptr<Event>
 createDeviceInvalidSensorEvent(boost::shared_ptr<DeviceReference> _devRef,
                                int _index, SensorType _type, const DateTime& _ts)
 {
