@@ -487,6 +487,7 @@ namespace dss {
         dev->setVdcHardwareInfo(props.model);
         dev->setVdcHardwareVersion(props.hardwareVersion);
         dev->setVdcModelFeatures(props.modelFeatures);
+        dev->setVdcDisplayID(props.displayId);
         dev->setVdcSpec(std::move(props));
 
         // cannot use getOemEanNumber here, the OEM/Data is not available/valid at this point
