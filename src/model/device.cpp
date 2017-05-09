@@ -1871,8 +1871,6 @@ namespace dss {
     // HWInfo - Priorities: 1. OEM Data, 2. Device Product Data, 3. Device EEPROM Data (Vendor independent)
     if ((m_OemProductInfoState == DEVICE_OEM_VALID) && !m_OemProductName.empty()) {
       m_HWInfo = m_OemProductName;
-    } else if (!m_VdcDisplayID.empty()) {
-      m_HWInfo = m_VdcDisplayID;
     } else if (!m_VdcHardwareInfo.empty()) {
       m_HWInfo = m_VdcHardwareInfo;
     } else if (displayName != NULL) {
@@ -2742,6 +2740,8 @@ namespace dss {
     if (dsuid_to_dsid(m_DSID, &dsid)) {
       displayID = dsid2str(dsid);
       displayID = displayID.substr(displayID.size() - 8);
+    } else if (!m_VdcDisplayID.empty()) {
+      displayID = m_VdcDisplayID;
     } else if (!m_VdcHardwareGuid.empty()) {
       displayID = m_VdcHardwareGuid.substr(m_VdcHardwareGuid.find(":") + 1);
     } else {
