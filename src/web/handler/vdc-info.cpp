@@ -221,13 +221,11 @@ void addCustomActions(Device& device, JSONWriter& json) {
 
 void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode, JSONWriter& json) {
   if (!device.isPresent() || !device.isVdcDevice()) {
-    json.startObject("operational");
     json.startObject("states");
     json.endObject();
     json.startObject("properties");
     json.endObject();
     json.startObject("sensors");
-    json.endObject();
     json.endObject();
     return;
   }
@@ -243,7 +241,6 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
   auto props = db.getProperties(oemEan, langCode);
   auto sensors = db.getSensors(oemEan, langCode);
 
-  json.startObject("operational");
   json.startObject("states");
   VdcElementReader deviceStatesReader = reader["deviceStates"];
   for (VdcElementReader::iterator it = deviceStatesReader.begin(); it != deviceStatesReader.end(); it++) {
@@ -316,7 +313,11 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
     json.endObject();
   }
   json.endObject();
+}
 
+void addOperationalValuesIntern(VdcDb& db, Device& device, const std::string& langCode, JSONWriter& json) {
+  json.startObject("operational");
+  addOperationalValues(db, device, langCode, json);
   json.endObject();
 }
 
@@ -386,7 +387,7 @@ void addByFilter(VdcDb& db, Device& device, Filter filter,
     addCustomActions(device, json);
   }
   if (filter.operational) {
-    addOperationalValues(db, device, langCode, json);
+    addOperationalValuesIntern(db, device, langCode, json);
   }
 }
 
