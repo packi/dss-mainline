@@ -786,6 +786,7 @@ namespace dss {
           ((m_ButtonID >= ButtonId_Area1_Extended) && (m_ButtonID <= ButtonId_Area4_Extended));
       if (isAreaButton &&
           ((_buttonActiveGroup < GroupIDYellow) || (_buttonActiveGroup > GroupIDGray))) {
+        setButtonGroupMembership(_buttonActiveGroup);
         setDeviceButtonID(ButtonId_Zone);
       }
       /* tell dsm to change button active group */
