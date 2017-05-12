@@ -290,7 +290,7 @@ namespace dss {
     dirty();
   }
 
-  ZoneHeatingConfigSpec_t Zone::getHeatingControlMode() {
+  ZoneHeatingConfigSpec_t Zone::getHeatingConfig() {
     ZoneHeatingConfigSpec_t spec;
     spec.ControllerMode = m_HeatingProperties.m_HeatingControlMode;
     spec.Kp = m_HeatingProperties.m_Kp;

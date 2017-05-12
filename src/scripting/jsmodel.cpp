@@ -4203,7 +4203,7 @@ namespace dss {
         return JS_FALSE;
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
-      ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
+      ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingConfig();
 
       StructureManipulator manipulator(
           *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
@@ -4303,7 +4303,7 @@ namespace dss {
         return JS_FALSE;
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
-      ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
+      ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingConfig();
 
       auto structureModifyingBusInterface = ext->getApartment().getBusInterface()->getStructureModifyingBusInterface();
       auto structureQueryBusInterface = ext->getApartment().getBusInterface()->getStructureQueryBusInterface();

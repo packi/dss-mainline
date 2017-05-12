@@ -999,7 +999,7 @@ namespace dss {
             lsInfo);
 
         // resend the current settings to all DSMs
-        manip.setZoneHeatingConfig(_zone, _zone->getHeatingControlMode());
+        manip.setZoneHeatingConfig(_zone, _zone->getHeatingConfig());
       }
     } else {
       // dSS has no configuration for this zone, take the first valid configuration

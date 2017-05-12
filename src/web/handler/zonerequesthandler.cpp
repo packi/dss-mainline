@@ -238,7 +238,7 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   }
 
   JSONWriter json;
-  ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
+  ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingConfig();
 
   if (_request.hasParameter("ControlMode")) {
     uint8_t x;
@@ -299,7 +299,7 @@ std::string ZoneRequestHandler::setTemperatureControlConfig2(
   }
 
   JSONWriter json;
-  ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
+  ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingConfig();
 
   if (_request.hasParameter("mode")) {
     if (auto controlMode = heatingControlModeFromName(_request.getParameter("mode"))) {
