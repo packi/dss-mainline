@@ -1996,18 +1996,10 @@ namespace dss {
       // if anything goes wrong, as it was done in the previous version
 
       std::string filterParam;
-      // "filter" can be a comma separated combination of:
-      // spec
-      // stateDesc
-      // propertyDesc
-      // actionDesc
-      // standardActions
-      // customActions
       _request.getParameter("filter", filterParam);
 
       std::string langCode("");
       _request.getParameter("lang", langCode);
-
 
       VdcDb db(*DSS::getInstance());
       JSONWriter json;
@@ -2016,16 +2008,11 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
-      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
-      query.Add()->set_name("deviceStates");
-      query.Add()->set_name("deviceProperties");
-      vdcapi::Message message = pDevice->getVdcProperty(query);
-      VdcElementReader reader(message.vdc_response_get_property().properties());
+      VdcDb db(*DSS::getInstance());
       JSONWriter json;
-      json.add("states");
-      ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
-      json.add("properties");
-      ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
+      std::string langCode("");
+      _request.getParameter("lang", langCode);
+      vdcInfo::addOperationalValues(db, *pDevice, langCode, json);
       return json.successJSON();
     } else if (_request.getMethod() == "setProperty") {
       // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=waterhardness&value=5.55
