@@ -270,7 +270,7 @@ namespace dss {
     return m_HeatingPropValid;
   }
 
-  void Zone::setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec) {
+  void Zone::setHeatingConfig(const ZoneHeatingConfigSpec_t _spec) {
     m_HeatingProperties.m_HeatingControlMode = _spec.ControllerMode;
     m_HeatingProperties.m_Kp = _spec.Kp;
     m_HeatingProperties.m_Ts = _spec.Ts;

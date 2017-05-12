@@ -806,7 +806,7 @@ namespace dss {
 
   void StructureManipulator::setZoneHeatingConfig(boost::shared_ptr<Zone> zone,
                                                   const ZoneHeatingConfigSpec_t& spec) {
-    zone->setHeatingControlMode(spec);
+    zone->setHeatingConfig(spec);
 
     if (auto dsm = zone->tryGetTemperatureControlDsm()) {
       // disable temperature controller in all (V)DSMs, enable in this one

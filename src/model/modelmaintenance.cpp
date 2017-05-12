@@ -2289,7 +2289,7 @@ namespace dss {
 
     try {
       boost::shared_ptr<Zone> zone = m_pApartment->getZone(_zoneID);
-      zone->setHeatingControlMode(*config.get());
+      zone->setHeatingConfig(*config.get());
     } catch(ItemNotFoundException& e) {
       log(std::string("Error on heating control config event, item not found: ") + e.what(), lsWarning);
       return;

@@ -196,7 +196,7 @@ namespace dss {
     bool isHeatingEnabled() const;
 
     /** Set heating properties and runtime values */
-    void setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec);
+    void setHeatingConfig(const ZoneHeatingConfigSpec_t _spec);
     ZoneHeatingConfigSpec_t getHeatingConfig();
     void clearHeatingControlMode();
     void setHeatingControlState(int _ctrlState);

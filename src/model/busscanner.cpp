@@ -1009,7 +1009,7 @@ namespace dss {
           log(std::string("Store heating configuration") +
               " for zone " + intToString(_zone->getID()) +
               " from dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
-          _zone->setHeatingControlMode(hConfig);
+          _zone->setHeatingConfig(hConfig);
           _zone->setHeatingOperationMode(hOpValues);
         }
       }
