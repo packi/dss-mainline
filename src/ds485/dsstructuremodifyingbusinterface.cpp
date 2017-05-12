@@ -318,29 +318,6 @@ namespace dss {
     }
   } // setZoneHeatingConfig
 
-  void DSStructureModifyingBusInterface::setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec)
-  {
-    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
-      throw BusApiError("Bus not ready");
-    }
-    int ret = ControllerHeating_set_state(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        _spec.State);
-    if (_dsMeterID == DSUID_BROADCAST) {
-      DSBusInterface::checkBroadcastResultCode(ret);
-      usleep(BROADCAST_SLEEP_MICROSECONDS);
-    } else {
-      DSBusInterface::checkResultCode(ret);
-    }
-
-    if (m_pModelMaintenance) {
-      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerState, _dsMeterID);
-      pEvent->addParameter(_ZoneID);
-      pEvent->addParameter(_spec.State);
-      m_pModelMaintenance->addModelEvent(pEvent);
-    }
-  } // setZoneHeatingState
-
   void DSStructureModifyingBusInterface::setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec)
   {
     boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
