@@ -960,22 +960,22 @@ namespace dss {
     uint32_t sensorAge;
     DateTime now;
     ZoneHeatingConfigSpec_t config = {};
-    ZoneHeatingStateSpec_t hState = {};
-    ZoneHeatingOperationModeSpec_t hOpValues = {};
-    const ZoneHeatingProperties_t& hProp = _zone->getHeatingProperties();
+    ZoneHeatingStateSpec_t state = {};
+    ZoneHeatingOperationModeSpec_t operationModes = {};
+    const ZoneHeatingProperties_t& properties = _zone->getHeatingProperties();
 
     try {
       config = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
-      hState = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
-      hOpValues = m_Interface.getZoneHeatingOperationModes(_dsMeter->getDSID(), _zone->getID());
+      state = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
+      operationModes = m_Interface.getZoneHeatingOperationModes(_dsMeter->getDSID(), _zone->getID());
 
       log(std::string("Heating properties") + " for zone " + intToString(_zone->getID()) + ", mode " +
-              intToString(static_cast<uint8_t>(hProp.m_HeatingControlMode)) + ", state " +
-              intToString(hProp.m_HeatingControlState),
+              intToString(static_cast<uint8_t>(properties.m_HeatingControlMode)) + ", state " +
+              intToString(properties.m_HeatingControlState),
           lsInfo);
       log(std::string("Heating configuration") + " for zone " + intToString(_zone->getID()) + " on dsm " +
-              dsuid2str(_dsMeter->getDSID()) + ": mode " + intToString(static_cast<uint8_t>(hConfig.ControllerMode)) +
-              ", state " + intToString(hState.State),
+              dsuid2str(_dsMeter->getDSID()) + ": mode " + intToString(static_cast<uint8_t>(config.ControllerMode)) +
+              ", state " + intToString(state.State),
           lsInfo);
 
     } catch (std::runtime_error& e) {
@@ -991,11 +991,11 @@ namespace dss {
 
     if (_zone->isHeatingPropertiesValid()) {
       // current dSMeter is active controller for this zone
-      if (_zone->tryGetTemperatureControlDsm() == _dsMeter && !hProp.isEqual(hConfig, hOpValues)) {
+      if (_zone->tryGetTemperatureControlDsm() == _dsMeter && !properties.isEqual(config, operationModes)) {
         // dSMeter has diverging settings, overwrite from dSS settings
-        log(std::string("Heating config mismatch: Overwrite controller") + " for zone " +
-                intToString(_zone->getID()) + " on dsm " + dsuid2str(_dsMeter->getDSID()) + ": mode " +
-                intToString(static_cast<uint8_t>(hConfig.ControllerMode)),
+        log(std::string("Heating config mismatch: Overwrite controller") + " for zone " + intToString(_zone->getID()) +
+                " on dsm " + dsuid2str(_dsMeter->getDSID()) + ": mode " +
+                intToString(static_cast<uint8_t>(config.ControllerMode)),
             lsInfo);
 
         // resend the current settings to all DSMs
@@ -1003,14 +1003,13 @@ namespace dss {
       }
     } else {
       // dSS has no configuration for this zone, take the first valid configuration
-      if ((hState.State == HeatingControlStateIDInternal) ||
-          (hState.State == HeatingControlStateIDEmergency)) {
-        if (hConfig.ControllerMode != HeatingControlMode::OFF) {
+      if ((state.State == HeatingControlStateIDInternal) || (state.State == HeatingControlStateIDEmergency)) {
+        if (config.ControllerMode != HeatingControlMode::OFF) {
           log(std::string("Store heating configuration") +
               " for zone " + intToString(_zone->getID()) +
               " from dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
-          _zone->setHeatingConfig(hConfig);
-          _zone->setHeatingOperationMode(hOpValues);
+          _zone->setHeatingConfig(config);
+          _zone->setHeatingOperationMode(operationModes);
         }
       }
     }
