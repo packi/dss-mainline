@@ -243,7 +243,7 @@ std::string ZoneRequestHandler::setTemperatureControlConfig(
   if (_request.hasParameter("ControlMode")) {
     uint8_t x;
     (void)_request.getParameter("ControlMode", x);
-    hConfig.ControllerMode = static_cast<HeatingControlMode>(x);
+    hConfig.mode = static_cast<HeatingControlMode>(x);
   }
   if (_request.hasParameter("ReferenceZone")) {
     (void)_request.getParameter("ReferenceZone", hConfig.SourceZoneId);
@@ -303,7 +303,7 @@ std::string ZoneRequestHandler::setTemperatureControlConfig2(
 
   if (_request.hasParameter("mode")) {
     if (auto controlMode = heatingControlModeFromName(_request.getParameter("mode"))) {
-      hConfig.ControllerMode = *controlMode;
+      hConfig.mode = *controlMode;
     } else {
       return JSONWriter::failure("Mode is invalid!");
     }
@@ -372,9 +372,9 @@ std::string ZoneRequestHandler::setTemperatureControlValues(
   int iValue;
   double fValue;
 
-  if (hProp.m_HeatingControlMode == HeatingControlMode::PID) {
+  if (hProp.m_mode == HeatingControlMode::PID) {
     SensorConversion = SensorType::RoomTemperatureSetpoint;
-  } else if (hProp.m_HeatingControlMode == HeatingControlMode::FIXED) {
+  } else if (hProp.m_mode == HeatingControlMode::FIXED) {
     SensorConversion = SensorType::RoomTemperatureControlVariable;
   } else {
     return JSONWriter::failure("Cannot set control values in current mode");
@@ -505,10 +505,10 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
       // start the response for this dsm
       json.startObject(dsuid2str(dsm->getDSID()));
 
-      json.add("ControlMode", static_cast<int>(hProp.m_HeatingControlMode));
+      json.add("ControlMode", static_cast<int>(hProp.m_mode));
       json.add("ControlState", hProp.m_HeatingControlState);
 
-      if (hProp.m_HeatingControlMode != HeatingControlMode::PID) {
+      if (hProp.m_mode != HeatingControlMode::PID) {
         return JSONWriter::failure("Not a PID controller");
       }
       if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {
@@ -804,9 +804,9 @@ void ZoneRequestHandler::addTemperatureControlStatus(JSONWriter& json, boost::sh
   ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
   ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
 
-  json.add("ControlMode", static_cast<int>(hProp.m_HeatingControlMode));
+  json.add("ControlMode", static_cast<int>(hProp.m_mode));
 
-  switch (hProp.m_HeatingControlMode) {
+  switch (hProp.m_mode) {
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:
@@ -833,8 +833,8 @@ void ZoneRequestHandler::addTemperatureControlStatus(JSONWriter& json, boost::sh
 void ZoneRequestHandler::addTemperatureControlConfig(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
   const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
-  json.add("ControlMode", static_cast<int>(hProp.m_HeatingControlMode));
-  switch (hProp.m_HeatingControlMode) {
+  json.add("ControlMode", static_cast<int>(hProp.m_mode));
+  switch (hProp.m_mode) {
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:
@@ -864,13 +864,13 @@ void ZoneRequestHandler::addTemperatureControlConfig(JSONWriter& json, boost::sh
 void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
   const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
-  if (auto&& name = heatingControlModeName(hProp.m_HeatingControlMode)) {
+  if (auto&& name = heatingControlModeName(hProp.m_mode)) {
     json.add("mode", *name);
   } else {
     json.add("mode", "unknown");
   }
 
-  switch (hProp.m_HeatingControlMode) {
+  switch (hProp.m_mode) {
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:
@@ -919,7 +919,7 @@ void ZoneRequestHandler::addTemperatureControlConfig2(JSONWriter& json, boost::s
 void ZoneRequestHandler::addTemperatureControlValues(JSONWriter& json, boost::shared_ptr<Zone> pZone) {
   const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
-  switch (hProp.m_HeatingControlMode) {
+  switch (hProp.m_mode) {
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:

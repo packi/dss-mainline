@@ -415,7 +415,7 @@ namespace dss {
         const char *tempVal = 0;
         tempVal = _attrs[i + 1];
         if (strcmp(_attrs[i], "Mode") == 0) {
-          config.m_HeatingControlMode = static_cast<HeatingControlMode>(strToUIntDef(tempVal, 0));
+          config.m_mode = static_cast<HeatingControlMode>(strToUIntDef(tempVal, 0));
         } else if (strcmp(_attrs[i], "Kp") == 0) {
           config.m_Kp = strToUIntDef(tempVal, 0);
         } else if (strcmp(_attrs[i], "Ts") == 0) {
@@ -1233,7 +1233,7 @@ namespace dss {
   void heatingConfigToXML(const ZoneHeatingProperties_t& heatingConfig, std::ofstream& _ofs, const int _indent)
   {
     _ofs << doIndent(_indent) << "<heatingConfig";
-    addAttribute(_ofs, "Mode", uintToString(static_cast<uint8_t>(heatingConfig.m_HeatingControlMode)));
+    addAttribute(_ofs, "Mode", uintToString(static_cast<uint8_t>(heatingConfig.m_mode)));
     addAttribute(_ofs, "Kp", uintToString(heatingConfig.m_Kp));
     addAttribute(_ofs, "Ts", uintToString(heatingConfig.m_Ts));
     addAttribute(_ofs, "Ti", uintToString(heatingConfig.m_Ti));

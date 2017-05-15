@@ -55,7 +55,7 @@ namespace dss {
     static void parseFollowerMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
     static void parseManualMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
 
-    HeatingControlMode m_HeatingControlMode;
+    HeatingControlMode m_mode;
     uint16_t m_Kp;
     uint8_t  m_Ts;
     uint16_t m_Ti;

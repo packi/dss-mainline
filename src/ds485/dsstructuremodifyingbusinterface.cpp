@@ -293,7 +293,7 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     int ret =
-        ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
+        ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.mode),
             _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
             _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
     if (_dsMeterID == DSUID_BROADCAST) {

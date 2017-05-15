@@ -970,11 +970,11 @@ namespace dss {
       operationModes = m_Interface.getZoneHeatingOperationModes(_dsMeter->getDSID(), _zone->getID());
 
       log(std::string("Heating properties") + " for zone " + intToString(_zone->getID()) + ", mode " +
-              intToString(static_cast<uint8_t>(properties.m_HeatingControlMode)) + ", state " +
+              intToString(static_cast<uint8_t>(properties.m_mode)) + ", state " +
               intToString(properties.m_HeatingControlState),
           lsInfo);
       log(std::string("Heating configuration") + " for zone " + intToString(_zone->getID()) + " on dsm " +
-              dsuid2str(_dsMeter->getDSID()) + ": mode " + intToString(static_cast<uint8_t>(config.ControllerMode)) +
+              dsuid2str(_dsMeter->getDSID()) + ": mode " + intToString(static_cast<uint8_t>(config.mode)) +
               ", state " + intToString(state.State),
           lsInfo);
 
@@ -995,7 +995,7 @@ namespace dss {
         // dSMeter has diverging settings, overwrite from dSS settings
         log(std::string("Heating config mismatch: Overwrite controller") + " for zone " + intToString(_zone->getID()) +
                 " on dsm " + dsuid2str(_dsMeter->getDSID()) + ": mode " +
-                intToString(static_cast<uint8_t>(config.ControllerMode)),
+                intToString(static_cast<uint8_t>(config.mode)),
             lsInfo);
 
         // resend the current settings to all DSMs
@@ -1004,7 +1004,7 @@ namespace dss {
     } else {
       // dSS has no configuration for this zone, take the first valid configuration
       if ((state.State == HeatingControlStateIDInternal) || (state.State == HeatingControlStateIDEmergency)) {
-        if (config.ControllerMode != HeatingControlMode::OFF) {
+        if (config.mode != HeatingControlMode::OFF) {
           log(std::string("Store heating configuration") +
               " for zone " + intToString(_zone->getID()) +
               " from dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);

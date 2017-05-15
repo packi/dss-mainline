@@ -273,7 +273,7 @@ namespace dss {
   }
 
   void Zone::setHeatingConfig(const ZoneHeatingConfigSpec_t _spec) {
-    m_HeatingProperties.m_HeatingControlMode = _spec.ControllerMode;
+    m_HeatingProperties.m_mode = _spec.mode;
     m_HeatingProperties.m_Kp = _spec.Kp;
     m_HeatingProperties.m_Ts = _spec.Ts;
     m_HeatingProperties.m_Ti = _spec.Ti;
@@ -294,7 +294,7 @@ namespace dss {
 
   ZoneHeatingConfigSpec_t Zone::getHeatingConfig() {
     ZoneHeatingConfigSpec_t spec;
-    spec.ControllerMode = m_HeatingProperties.m_HeatingControlMode;
+    spec.mode = m_HeatingProperties.m_mode;
     spec.Kp = m_HeatingProperties.m_Kp;
     spec.Ts = m_HeatingProperties.m_Ts;
     spec.Ti = m_HeatingProperties.m_Ti;
@@ -334,7 +334,7 @@ namespace dss {
   }
 
   void Zone::setHeatingOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues) {
-    switch (m_HeatingProperties.m_HeatingControlMode) {
+    switch (m_HeatingProperties.m_mode) {
       case HeatingControlMode::PID:
         setHeatingControlOperationMode(operationModeValues);
         break;
@@ -369,7 +369,7 @@ namespace dss {
   }
 
   ZoneHeatingOperationModeSpec_t Zone::getHeatingOperationModeValues() const {
-    switch (m_HeatingProperties.m_HeatingControlMode) {
+    switch (m_HeatingProperties.m_mode) {
       case HeatingControlMode::PID:
         return getHeatingControlOperationModeValues();
       case HeatingControlMode::FIXED:
@@ -609,7 +609,7 @@ namespace dss {
   }
 
   void ZoneHeatingProperties::reset() {
-    m_HeatingControlMode = HeatingControlMode::OFF;
+    m_mode = HeatingControlMode::OFF;
     m_Kp = 0;
     m_Ts = 0;
     m_Ti = 0;
@@ -630,7 +630,7 @@ namespace dss {
   }
 
   bool ZoneHeatingProperties::isEqual(const ZoneHeatingConfigSpec_t& config, const ZoneHeatingOperationModeSpec_t& operationMode) const {
-    bool configEqual = ((config.ControllerMode == m_HeatingControlMode) &&
+    bool configEqual = ((config.mode == m_mode) &&
             (config.Kp == m_Kp) &&
             (config.Ts == m_Ts) &&
             (config.Ti == m_Ti) &&
@@ -648,14 +648,14 @@ namespace dss {
 
     // the operation mode is important only in control and fixed mode
     bool operationModeEqual = true;
-    if (m_HeatingControlMode == HeatingControlMode::PID) {
+    if (m_mode == HeatingControlMode::PID) {
       for (int i = 0; i < 16; ++i) {
         if ( doubleToSensorValue(SensorType::RoomTemperatureSetpoint, m_TeperatureSetpoints[i]) != operationMode.opModes[i]) {
           operationModeEqual = false;
           break;
         }
       }
-    } else if (m_HeatingControlMode == HeatingControlMode::FIXED) {
+    } else if (m_mode == HeatingControlMode::FIXED) {
       for (int i = 0; i < 16; ++i) {
         if ( doubleToSensorValue(SensorType::RoomTemperatureControlVariable, m_FixedControlValues[i]) != operationMode.opModes[i]) {
           operationModeEqual = false;

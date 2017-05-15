@@ -805,10 +805,10 @@ namespace dss {
     if (auto dsm = zone->tryGetTemperatureControlDsm()) {
       // disable temperature controller in all (V)DSMs, enable in this one
       m_Interface.setZoneHeatingConfig(dsm->getDSID(), zone->getID(), spec);
-      if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::PID) {
+      if (zone->getHeatingProperties().m_mode == HeatingControlMode::PID) {
         m_Interface.setZoneHeatingOperationModes(
             DSUID_BROADCAST, zone->getID(), zone->getHeatingControlOperationModeValues());
-      } else if (zone->getHeatingProperties().m_HeatingControlMode == HeatingControlMode::FIXED) {
+      } else if (zone->getHeatingProperties().m_mode == HeatingControlMode::FIXED) {
         m_Interface.setZoneHeatingOperationModes(
             DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
       }

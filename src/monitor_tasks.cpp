@@ -234,7 +234,7 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
     ZoneSensorStatus_t hSensors = pZone->getSensorStatus();
     const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
-    switch (hProp.m_HeatingControlMode) {
+    switch (hProp.m_mode) {
       case HeatingControlMode::PID:
         if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
           pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
