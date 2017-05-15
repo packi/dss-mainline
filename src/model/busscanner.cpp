@@ -955,32 +955,32 @@ namespace dss {
     return true;
   }
 
-  bool BusScanner::scanTemperatureControl(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone) {
+  bool BusScanner::scanTemperatureControl(boost::shared_ptr<DSMeter> meter, boost::shared_ptr<Zone> zone) {
     uint16_t sensorValue;
     uint32_t sensorAge;
     DateTime now;
     ZoneHeatingConfigSpec_t config = {};
     ZoneHeatingStateSpec_t state = {};
     ZoneHeatingOperationModeSpec_t operationModes = {};
-    const ZoneHeatingProperties_t& properties = _zone->getHeatingProperties();
+    const ZoneHeatingProperties_t& properties = zone->getHeatingProperties();
 
     try {
-      config = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
-      state = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
-      operationModes = m_Interface.getZoneHeatingOperationModes(_dsMeter->getDSID(), _zone->getID());
+      config = m_Interface.getZoneHeatingConfig(meter->getDSID(), zone->getID());
+      state = m_Interface.getZoneHeatingState(meter->getDSID(), zone->getID());
+      operationModes = m_Interface.getZoneHeatingOperationModes(meter->getDSID(), zone->getID());
 
-      log(std::string("Heating properties") + " for zone " + intToString(_zone->getID()) + ", mode " +
+      log(std::string("Heating properties") + " for zone " + intToString(zone->getID()) + ", mode " +
               intToString(static_cast<uint8_t>(properties.m_mode)) + ", state " +
               intToString(properties.m_HeatingControlState),
           lsInfo);
-      log(std::string("Heating configuration") + " for zone " + intToString(_zone->getID()) + " on dsm " +
-              dsuid2str(_dsMeter->getDSID()) + ": mode " + intToString(static_cast<uint8_t>(config.mode)) +
+      log(std::string("Heating configuration") + " for zone " + intToString(zone->getID()) + " on meter " +
+              dsuid2str(meter->getDSID()) + ": mode " + intToString(static_cast<uint8_t>(config.mode)) +
               ", state " + intToString(state.State),
           lsInfo);
 
     } catch (std::runtime_error& e) {
-      log("Error getting heating config from dsm " +
-          dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+      log("Error getting heating config from meter " +
+          dsuid2str(meter->getDSID()) + ": " + e.what(), lsWarning);
       return false;
     }
 
@@ -989,82 +989,82 @@ namespace dss {
                       m_Interface,
                       m_Apartment);
 
-    if (_zone->isHeatingPropertiesValid()) {
+    if (zone->isHeatingPropertiesValid()) {
       // current dSMeter is active controller for this zone
-      if (_zone->tryGetTemperatureControlDsm() == _dsMeter && !properties.isEqual(config, operationModes)) {
+      if (zone->tryGetTemperatureControlDsm() == meter && !properties.isEqual(config, operationModes)) {
         // dSMeter has diverging settings, overwrite from dSS settings
-        log(std::string("Heating config mismatch: Overwrite controller") + " for zone " + intToString(_zone->getID()) +
-                " on dsm " + dsuid2str(_dsMeter->getDSID()) + ": mode " +
+        log(std::string("Heating config mismatch: Overwrite controller") + " for zone " + intToString(zone->getID()) +
+                " on meter " + dsuid2str(meter->getDSID()) + ": mode " +
                 intToString(static_cast<uint8_t>(config.mode)),
             lsInfo);
 
         // resend the current settings to all DSMs
-        manip.setZoneHeatingConfig(_zone, _zone->getHeatingConfig());
+        manip.setZoneHeatingConfig(zone, zone->getHeatingConfig());
       }
     } else {
       // dSS has no configuration for this zone, take the first valid configuration
       if ((state.State == HeatingControlStateIDInternal) || (state.State == HeatingControlStateIDEmergency)) {
         if (config.mode != HeatingControlMode::OFF) {
           log(std::string("Store heating configuration") +
-              " for zone " + intToString(_zone->getID()) +
-              " from dsm " + dsuid2str(_dsMeter->getDSID()), lsInfo);
-          _zone->setHeatingConfig(config);
-          _zone->setHeatingOperationMode(operationModes);
+              " for zone " + intToString(zone->getID()) +
+              " from meter " + dsuid2str(meter->getDSID()), lsInfo);
+          zone->setHeatingConfig(config);
+          zone->setHeatingOperationMode(operationModes);
         }
       }
     }
 
     // sync zone sensors only if they are not valid
-    ZoneHeatingStatus_t zValues = _zone->getHeatingStatus();
-    ZoneSensorStatus_t zSensors = _zone->getSensorStatus();
+    ZoneHeatingStatus_t zValues = zone->getHeatingStatus();
+    ZoneSensorStatus_t zSensors = zone->getSensorStatus();
 
-    // TODO (soon): adapt this code to logic found in the new synchronization between dsms
-    // get the temperature from this dsm if we do not have already a valid one
+    // TODO (soon): adapt this code to logic found in the new synchronization between meters
+    // get the temperature from this meter if we do not have already a valid one
     if (zSensors.m_TemperatureValueTS == 0) {
       try {
-        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::TemperatureIndoors,
+        m_Interface.getZoneSensorValue(meter->getDSID(), zone->getID(), SensorType::TemperatureIndoors,
             &sensorValue, &sensorAge);
         if (sensorAge <= HEATING_MAX_SENSOR_AGE) {
           DateTime age = now.addSeconds(-1 * sensorAge);
-          _zone->setTemperature(
+          zone->setTemperature(
               sensorValueToDouble(SensorType::TemperatureIndoors, sensorValue), age);
         }
       } catch (BusApiError& e) {
-        log("Error getting heating temperature value on zone " + intToString(_zone->getID()) +
-            " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+        log("Error getting heating temperature value on zone " + intToString(zone->getID()) +
+            " from " + dsuid2str(meter->getDSID()) + ": " + e.what(), lsWarning);
       }
     }
 
-    // get the nominal value from this dsm if we do not have already a valid one
+    // get the nominal value from this meter if we do not have already a valid one
     if (zValues.m_NominalValueTS == 0) {
       try {
-        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::RoomTemperatureSetpoint,
+        m_Interface.getZoneSensorValue(meter->getDSID(), zone->getID(), SensorType::RoomTemperatureSetpoint,
             &sensorValue, &sensorAge);
         // set the nominal value only when it is valid
         if (sensorAge <= SENSOR_MAX_AGE) {
           DateTime age = now.addSeconds(-1 * sensorAge);
-          _zone->setNominalValue(
+          zone->setNominalValue(
               sensorValueToDouble(SensorType::RoomTemperatureSetpoint, sensorValue), age);
         }
       } catch (BusApiError& e) {
-        log("Error reading heating nominal temperature value on zone " + intToString(_zone->getID()) +
-            " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+        log("Error reading heating nominal temperature value on zone " + intToString(zone->getID()) +
+            " from " + dsuid2str(meter->getDSID()) + ": " + e.what(), lsWarning);
       }
     }
 
-    // get the control value from this dsm if we do not have already a valid one
+    // get the control value from this meter if we do not have already a valid one
     if (zValues.m_ControlValueTS == 0) {
       try {
-        m_Interface.getZoneSensorValue(_dsMeter->getDSID(), _zone->getID(), SensorType::RoomTemperatureControlVariable,
+        m_Interface.getZoneSensorValue(meter->getDSID(), zone->getID(), SensorType::RoomTemperatureControlVariable,
             &sensorValue, &sensorAge);
         if (sensorAge <= HEATING_MAX_SENSOR_AGE) {
           DateTime age = now.addSeconds(-1 * sensorAge);
-          _zone->setControlValue(
+          zone->setControlValue(
               sensorValueToDouble(SensorType::RoomTemperatureControlVariable, sensorValue), age);
         }
       } catch (BusApiError& e) {
-        log("Error reading heating control value on zone " + intToString(_zone->getID()) +
-            " from " + dsuid2str(_dsMeter->getDSID()) + ": " + e.what(), lsWarning);
+        log("Error reading heating control value on zone " + intToString(zone->getID()) +
+            " from " + dsuid2str(meter->getDSID()) + ": " + e.what(), lsWarning);
       }
     }
 
