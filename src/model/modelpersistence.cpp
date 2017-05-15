@@ -1294,7 +1294,7 @@ namespace dss {
 
     // heating controller
     if (_pZone->getID() != 0) {
-      if (_pZone->isHeatingEnabled()) {
+      if (_pZone->isHeatingPropertiesValid()) {
         const ZoneHeatingProperties_t& config =_pZone->getHeatingProperties();
         heatingConfigToXML(config, _ofs, _indent+1);
       }
