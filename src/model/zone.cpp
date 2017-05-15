@@ -69,6 +69,10 @@ namespace dss {
     m_DSMeters.clear();
   } // dtor
 
+  ModelMaintenance* Zone::tryGetModelMaintenance() {
+    return m_pApartment ? m_pApartment->getModelMaintenance() : DS_NULLPTR;
+  }
+
   Set Zone::getDevices() const {
     return Set(m_Devices);
   } // getDevices
@@ -584,8 +588,8 @@ namespace dss {
   }
 
   void Zone::dirty() {
-    if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-      m_pApartment->getModelMaintenance()->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
+    if (auto&& modelMaintenance = tryGetModelMaintenance()) {
+      modelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
     }
   }
 

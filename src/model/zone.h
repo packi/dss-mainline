@@ -141,6 +141,7 @@ namespace dss {
     Set getDevices() const DS_OVERRIDE;
 
     Apartment& getApartment() { return *m_pApartment; }
+    ModelMaintenance* tryGetModelMaintenance();
 
     /** Adds the Zone to a dsMeter. */
     void addToDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
