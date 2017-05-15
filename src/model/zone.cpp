@@ -310,10 +310,6 @@ namespace dss {
     return spec;
   }
 
-  void Zone::clearHeatingControlMode() {
-    m_HeatingProperties.reset();
-  }
-
   void Zone::setHeatingControlState(int _ctrlState) {
     m_HeatingProperties.m_HeatingControlState = _ctrlState;
     dirty();

@@ -198,7 +198,6 @@ namespace dss {
     /** Set heating properties and runtime values */
     void setHeatingConfig(const ZoneHeatingConfigSpec_t _spec);
     ZoneHeatingConfigSpec_t getHeatingConfig();
-    void clearHeatingControlMode();
     void setHeatingControlState(int _ctrlState);
     void setHeatingControlOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues);
     void setHeatingFixedOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues);
