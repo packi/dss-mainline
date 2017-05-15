@@ -137,8 +137,8 @@ namespace dss {
 
   public:
     Zone(const int _id, Apartment* _pApartment);
-    virtual ~Zone();
-    virtual Set getDevices() const;
+    ~Zone() DS_OVERRIDE;
+    Set getDevices() const DS_OVERRIDE;
 
     Apartment& getApartment() { return *m_pApartment; }
 
@@ -177,14 +177,14 @@ namespace dss {
     bool isRegisteredOnAnyMeter() const;
     std::vector<boost::shared_ptr<const DSMeter> > getDSMeters() { return m_DSMeters; }
 
-    virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category);
-    virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category);
+    void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) DS_OVERRIDE;
+    void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) DS_OVERRIDE;
 
     void publishToPropertyTree();
     void removeFromPropertyTree();
     PropertyNodePtr getPropertyNode() {  return m_pPropertyNode; }
 
-    virtual unsigned long getPowerConsumption();
+    unsigned long getPowerConsumption() DS_OVERRIDE;
 
     /** Returns a vector of groups present on the zone. */
     std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }
@@ -237,7 +237,7 @@ namespace dss {
     boost::shared_ptr<const DSMeter> tryGetTemperatureControlDsm() const;
 
   protected:
-    virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
+    std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems() DS_OVERRIDE;
     bool isAllowedSensorType(SensorType _sensorType);
     void dirty();
   }; // Zone
