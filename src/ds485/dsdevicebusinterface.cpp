@@ -203,7 +203,7 @@ namespace dss {
     retVal.timestamp = DateTime().addMilliSeconds((int)retVal.valueAge * (-1));
 
     ModelEventWithSensorEx* pEvent = new ModelEventWithSensorEx();
-    pEvent->m_deviceDSID = _device.getDSID();
+    pEvent->m_deviceDSID = _device.getDSMeterDSID();
     pEvent->addParameter(_device.getShortAddress());
     pEvent->addParameter(_sensorIndex);
     pEvent->addParameter(retVal.valueAge);
