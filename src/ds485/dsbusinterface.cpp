@@ -1129,6 +1129,12 @@ namespace dss {
       uint16_t _Offset, uint8_t _ManualValue, uint8_t _EmergencyValue) {
     loginFromCallback();
 
+    if (_destinationID == DSUID_BROADCAST) {
+      // The setConfig calls to broadcast address do not carry real config.
+      // They just disable heating controller in all dsms.
+      return;
+    }
+
     boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
     spec->ControllerMode = static_cast<HeatingControlMode>(_ControllerMode);
     spec->Kp = _Kp;
