@@ -242,14 +242,7 @@ namespace dss {
       }
 
       // the dSM removes the zone only, if the controller is disabled.
-      ZoneHeatingConfigSpec_t disableConfig;
-      memset(&disableConfig, 0, sizeof(ZoneHeatingConfigSpec_t));
-      disableConfig.ControllerMode = HeatingControlMode::OFF;
-      m_Interface.setZoneHeatingConfig(
-        DSUID_BROADCAST,
-        _zone->getID(),
-        disableConfig
-      );
+      m_Interface.disableZoneHeatingConfig(DSUID_BROADCAST, _zone->getID());
 
       for (size_t s = 0; s < meters.size(); s++) {
         try {
@@ -808,6 +801,7 @@ namespace dss {
                                                   const ZoneHeatingConfigSpec_t& spec) {
     zone->setHeatingConfig(spec);
 
+    m_Interface.disableZoneHeatingConfig(DSUID_BROADCAST, zone->getID());
     if (auto dsm = zone->tryGetTemperatureControlDsm()) {
       // disable temperature controller in all (V)DSMs, enable in this one
       m_Interface.setZoneHeatingConfig(dsm->getDSID(), zone->getID(), spec);
@@ -818,6 +812,13 @@ namespace dss {
         m_Interface.setZoneHeatingOperationModes(
             DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
       }
+    }
+
+    if (auto&& modelMaintenance = zone->tryGetModelMaintenance()) {
+      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerConfig, DSUID_BROADCAST);
+      pEvent->addParameter(zone->getID());
+      pEvent->setSingleObjectParameter(boost::make_shared<ZoneHeatingConfigSpec_t>(spec));
+      modelMaintenance->addModelEvent(pEvent);
     }
   }
 
