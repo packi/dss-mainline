@@ -259,8 +259,6 @@ namespace dss {
     return m_SensorStatus;
   }
 
-  bool Zone::isHeatingEnabled() const { return m_HeatingProperties.m_HeatingControlMode != HeatingControlMode::OFF; }
-
   void Zone::setHeatingProperties(ZoneHeatingProperties_t& config) {
     m_HeatingProperties = config;
     m_HeatingPropValid = true;

@@ -193,7 +193,6 @@ namespace dss {
     const ZoneHeatingProperties_t& getHeatingProperties() const;
     const ZoneHeatingStatus_t& getHeatingStatus() const;
     const ZoneSensorStatus_t& getSensorStatus() const;
-    bool isHeatingEnabled() const;
 
     /** Set heating properties and runtime values */
     void setHeatingConfig(const ZoneHeatingConfigSpec_t _spec);
