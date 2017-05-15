@@ -959,13 +959,13 @@ namespace dss {
     uint16_t sensorValue;
     uint32_t sensorAge;
     DateTime now;
-    ZoneHeatingConfigSpec_t hConfig = {};
+    ZoneHeatingConfigSpec_t config = {};
     ZoneHeatingStateSpec_t hState = {};
     ZoneHeatingOperationModeSpec_t hOpValues = {};
     const ZoneHeatingProperties_t& hProp = _zone->getHeatingProperties();
 
     try {
-      hConfig = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
+      config = m_Interface.getZoneHeatingConfig(_dsMeter->getDSID(), _zone->getID());
       hState = m_Interface.getZoneHeatingState(_dsMeter->getDSID(), _zone->getID());
       hOpValues = m_Interface.getZoneHeatingOperationModes(_dsMeter->getDSID(), _zone->getID());
 
