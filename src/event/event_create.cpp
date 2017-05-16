@@ -74,6 +74,7 @@ namespace EventName {
   const std::string CheckSensorValues = "check_sensor_values";
   const std::string DeviceEvent = "DeviceEvent";
   const std::string CheckHeatingGroups = "check_heating_groups";
+  const std::string UpdateTemperatureControlMeters = "updateTemperatureControlMeters";
   const std::string Signal = "SIGNAL";
   const std::string WebSessionCleanup = "webSessionCleanup";
   const std::string SendMail = "sendmail";

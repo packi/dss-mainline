@@ -134,6 +134,7 @@ namespace dss {
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
     bool m_HeatingPropValid;
+    boost::shared_ptr<const DSMeter> m_temperatureControlMeter;
 
   public:
     Zone(const int _id, Apartment* _pApartment);
@@ -233,7 +234,9 @@ namespace dss {
     void setHeatingProperties(ZoneHeatingProperties_t& config);
     bool isHeatingPropertiesValid() const;
 
-    boost::shared_ptr<const DSMeter> tryGetTemperatureControlDsm() const;
+    boost::shared_ptr<const DSMeter> tryGetPresentTemperatureControlMeter() const;
+    void setTemperatureControlMeter(const boost::shared_ptr<const DSMeter>& meter);
+    void updateTemperatureControlMeter();
 
   protected:
     std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems() DS_OVERRIDE;

@@ -253,6 +253,7 @@ namespace dss {
           }
         }
       }
+
       if(!_zone->isRegisteredOnAnyMeter()) {
         _zone->setIsConnected(false);
       }
@@ -797,21 +798,31 @@ namespace dss {
     return modified;
   }
 
-  void StructureManipulator::setZoneHeatingConfig(boost::shared_ptr<Zone> zone,
-                                                  const ZoneHeatingConfigSpec_t& spec) {
+  void StructureManipulator::setZoneHeatingConfigImpl(
+      const boost::shared_ptr<const DSMeter>& meter, const boost::shared_ptr<Zone>& zone) {
+    Logger::getInstance()->log(ds::str("setZoneHeatingConfigImpl meter:", meter->getDSID(), " zone:", zone->getID(),
+                                   " mode:", zone->getHeatingConfig().mode),
+        lsNotice);
+    // disable temperature controller in all (V)DSMs, enable on temperature controller
+    m_Interface.disableZoneHeatingConfig(DSUID_BROADCAST, zone->getID());
+    m_Interface.setZoneHeatingConfig(meter->getDSID(), zone->getID(), zone->getHeatingConfig());
+    if (zone->getHeatingProperties().m_mode == HeatingControlMode::PID) {
+      m_Interface.setZoneHeatingOperationModes(
+          DSUID_BROADCAST, zone->getID(), zone->getHeatingControlOperationModeValues());
+    } else if (zone->getHeatingProperties().m_mode == HeatingControlMode::FIXED) {
+      m_Interface.setZoneHeatingOperationModes(
+          DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
+    }
+  }
+
+  void StructureManipulator::setZoneHeatingConfig(boost::shared_ptr<Zone> zone, const ZoneHeatingConfigSpec_t& spec) {
     zone->setHeatingConfig(spec);
 
-    m_Interface.disableZoneHeatingConfig(DSUID_BROADCAST, zone->getID());
-    if (auto dsm = zone->tryGetTemperatureControlDsm()) {
-      // disable temperature controller in all (V)DSMs, enable in this one
-      m_Interface.setZoneHeatingConfig(dsm->getDSID(), zone->getID(), spec);
-      if (zone->getHeatingProperties().m_mode == HeatingControlMode::PID) {
-        m_Interface.setZoneHeatingOperationModes(
-            DSUID_BROADCAST, zone->getID(), zone->getHeatingControlOperationModeValues());
-      } else if (zone->getHeatingProperties().m_mode == HeatingControlMode::FIXED) {
-        m_Interface.setZoneHeatingOperationModes(
-            DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
-      }
+    zone->updateTemperatureControlMeter();
+    if (auto&& meter = zone->tryGetPresentTemperatureControlMeter()) {
+      setZoneHeatingConfigImpl(meter, zone);
+    } else {
+      Logger::getInstance()->log(ds::str("setZoneHeatingConfig No meter present. zone:", zone->getID()), lsWarning);
     }
 
     if (auto&& modelMaintenance = zone->tryGetModelMaintenance()) {
@@ -819,6 +830,30 @@ namespace dss {
       pEvent->addParameter(zone->getID());
       pEvent->setSingleObjectParameter(boost::make_shared<ZoneHeatingConfigSpec_t>(spec));
       modelMaintenance->addModelEvent(pEvent);
+    }
+  }
+
+  void StructureManipulator::updateZoneTemperatureControlMeters() {
+    foreach (auto&& zone, m_Apartment.getZones()) {
+      if (zone->getID() == 0) {
+        continue;
+      }
+
+      if (auto meter = zone->tryGetPresentTemperatureControlMeter()) {
+        Logger::getInstance()->log(
+            ds::str("updateZoneTemperatureControlMeters zone->tryGetPresentTemperatureControlMeter() zone:",
+                zone->getID(), " meter:", meter->getDSID()),
+            lsDebug);
+        continue;
+      }
+
+      zone->updateTemperatureControlMeter();
+      if (auto&& meter = zone->tryGetPresentTemperatureControlMeter()) {
+        setZoneHeatingConfigImpl(meter, zone);
+      } else {
+        Logger::getInstance()->log(
+            ds::str("updateZoneTemperatureControlMeters !meter after update zone:", zone->getID()), lsDebug);
+      }
     }
   }
 

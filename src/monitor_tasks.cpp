@@ -25,20 +25,21 @@
   #include "config.h"
 #endif
 
-#include "logger.h"
 #include "event.h"
 #include "event/event_create.h"
-#include "monitor_tasks.h"
-#include "security/security.h"
+#include "logger.h"
+#include "model/autoclustermaintenance.h"
 #include "model/device.h"
 #include "model/group.h"
-#include "model/modulator.h"
-#include "model/zone.h"
-#include "model/set.h"
-#include "model/state.h"
 #include "model/modelconst.h"
 #include "model/modelmaintenance.h"
-#include "model/autoclustermaintenance.h"
+#include "model/modulator.h"
+#include "model/set.h"
+#include "model/state.h"
+#include "model/zone.h"
+#include "monitor_tasks.h"
+#include "security/security.h"
+#include "structuremanipulator.h"
 
 namespace dss {
 
@@ -280,6 +281,15 @@ void HeatingMonitorTask::run() {
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
     }
+
+    {
+      auto event = boost::make_shared<Event>(EventName::UpdateTemperatureControlMeters);
+      event->setProperty("time", "+60");
+      if (DSS::hasInstance()) {
+        DSS::getInstance()->getEventQueue().pushEvent(event);
+      }
+    }
+
     return;
   }
 
@@ -322,6 +332,23 @@ void HeatingMonitorTask::run() {
     pEvent->setProperty("time", "+3600");
     if (DSS::hasInstance()) {
       DSS::getInstance()->getEventQueue().pushEvent(pEvent);
+    }
+    return;
+  }
+
+  if (m_event->getName() == EventName::UpdateTemperatureControlMeters) {
+    try {
+      StructureManipulator manipulator(*m_Apartment->getBusInterface()->getStructureModifyingBusInterface(),
+          *m_Apartment->getBusInterface()->getStructureQueryBusInterface(), *m_Apartment);
+      manipulator.updateZoneTemperatureControlMeters();
+    } catch (const std::exception& e) {
+      Logger::getInstance()->log("UpdateTemperatureControlMeters: exception: " + std::string(e.what()), lsError);
+    }
+
+    auto event = boost::make_shared<Event>(EventName::UpdateTemperatureControlMeters);
+    event->setProperty("time", "+60");
+    if (DSS::hasInstance()) {
+      DSS::getInstance()->getEventQueue().pushEvent(event);
     }
     return;
   }

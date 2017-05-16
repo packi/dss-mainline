@@ -46,6 +46,8 @@ namespace dss {
     class StructureQueryBusInterface& m_QueryInterface;
     void checkSensorsOnDeviceRemoval(Zone &_zone, Device &_device);
     void wipeZoneOnMeter(dsuid_t _meterDSUID, int _zoneID);
+    void setZoneHeatingConfigImpl(const boost::shared_ptr<const DSMeter>& meter, const boost::shared_ptr<Zone>& zone);
+
   public:
     StructureManipulator(StructureModifyingBusInterface& _interface,
                          StructureQueryBusInterface& _queryInterface , Apartment& _apartment)
@@ -83,6 +85,7 @@ namespace dss {
     void deviceRemoveFromGroups(boost::shared_ptr<Device> device);
 
     void setZoneHeatingConfig(boost::shared_ptr<Zone> zone, const ZoneHeatingConfigSpec_t& spec);
+    void updateZoneTemperatureControlMeters();
     void setZoneSensor(Zone &_zone, SensorType _sensorType, boost::shared_ptr<Device> _dev);
     void resetZoneSensor(Zone &_zone, SensorType _sensorType);
     void autoAssignZoneSensors(Zone &_zone);

@@ -192,6 +192,33 @@ namespace dss {
     }
   } // addToDSMeter
 
+  boost::shared_ptr<const DSMeter> Zone::tryGetPresentTemperatureControlMeter() const {
+    if (m_temperatureControlMeter && m_temperatureControlMeter->isPresent()) {
+      DS_ASSERT(m_temperatureControlMeter->getCapability_HasTemperatureControl());
+      return m_temperatureControlMeter;
+    }
+    return boost::shared_ptr<const DSMeter>();
+  }
+
+  void Zone::setTemperatureControlMeter(const boost::shared_ptr<const DSMeter>& meter) {
+    DS_REQUIRE(meter->getCapability_HasTemperatureControl());
+    DS_REQUIRE(meter->isPresent());
+    m_temperatureControlMeter = meter;
+  }
+
+  void Zone::updateTemperatureControlMeter() {
+    if (tryGetPresentTemperatureControlMeter()) {
+      return;
+    }
+
+    foreach (const auto& meter, m_DSMeters) {
+      if (meter->getCapability_HasTemperatureControl() && meter->isPresent()) {
+        setTemperatureControlMeter(meter);
+        break;
+      }
+    }
+  }
+
   void Zone::removeFromDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     m_DSMeters.erase(find(m_DSMeters.begin(), m_DSMeters.end(), _dsMeter));
     if(_dsMeter->getPropertyNode() != NULL) {
@@ -199,6 +226,9 @@ namespace dss {
       if(alias != NULL) {
         alias->getParentNode()->removeChild(alias);
       }
+    }
+    if (m_temperatureControlMeter == _dsMeter) {
+      m_temperatureControlMeter.reset();
     }
   } // removeFromDSMeter
 
@@ -591,17 +621,6 @@ namespace dss {
     if (auto&& modelMaintenance = tryGetModelMaintenance()) {
       modelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
     }
-  }
-
-  boost::shared_ptr<const DSMeter> Zone::tryGetTemperatureControlDsm() const {
-    // Select first temperature control capable DSM as the master.
-    foreach (auto&& dsm, m_DSMeters) {
-      if (!dsm->getCapability_HasTemperatureControl()) {
-        continue;
-      }
-      return dsm;
-    }
-    return boost::shared_ptr<DSMeter>();
   }
 
   ZoneHeatingProperties::ZoneHeatingProperties() {

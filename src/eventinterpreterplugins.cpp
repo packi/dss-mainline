@@ -1333,6 +1333,7 @@ Sample: {
     interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::DSMeterReady));
     interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::HeatingControllerState));
     interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::CheckHeatingGroups));
+    interpreter.subscribe(boost::make_shared<EventSubscription>(*this, EventName::UpdateTemperatureControlMeters));
   }
 
   void EventInterpreterHeatingMonitorPlugin::handleEvent(Event& _event, const EventSubscription& _subscription)
