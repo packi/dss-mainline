@@ -118,7 +118,8 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::ftwtempcontrolventilationselect,
   ModelFeatureId::ftwdisplaysettings,
   ModelFeatureId::ftwbacklighttimeout,
-  ModelFeatureId::ventconfig
+  ModelFeatureId::ventconfig,
+  ModelFeatureId::fcu
 };
 
 // model features
