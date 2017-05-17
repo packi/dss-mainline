@@ -803,16 +803,18 @@ namespace dss {
     Logger::getInstance()->log(ds::str("setZoneHeatingConfigImpl meter:", meter->getDSID(), " zone:", zone->getID(),
                                    " mode:", zone->getHeatingConfig().mode),
         lsNotice);
-    // disable temperature controller in all (V)DSMs, enable on temperature controller
+    // disable temperature controller on all meters
     m_Interface.disableZoneHeatingConfig(DSUID_BROADCAST, zone->getID());
-    m_Interface.setZoneHeatingConfig(meter->getDSID(), zone->getID(), zone->getHeatingConfig());
+
+    // enable temperature controller on selected meter
     if (zone->getHeatingProperties().m_mode == HeatingControlMode::PID) {
       m_Interface.setZoneHeatingOperationModes(
-          DSUID_BROADCAST, zone->getID(), zone->getHeatingControlOperationModeValues());
+          meter->getDSID(), zone->getID(), zone->getHeatingControlOperationModeValues());
     } else if (zone->getHeatingProperties().m_mode == HeatingControlMode::FIXED) {
       m_Interface.setZoneHeatingOperationModes(
-          DSUID_BROADCAST, zone->getID(), zone->getHeatingFixedOperationModeValues());
+          meter->getDSID(), zone->getID(), zone->getHeatingFixedOperationModeValues());
     }
+    m_Interface.setZoneHeatingConfig(meter->getDSID(), zone->getID(), zone->getHeatingConfig());
   }
 
   void StructureManipulator::setZoneHeatingConfig(boost::shared_ptr<Zone> zone, const ZoneHeatingConfigSpec_t& spec) {
