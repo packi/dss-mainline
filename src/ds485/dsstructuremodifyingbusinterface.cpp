@@ -292,10 +292,19 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret =
-        ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.mode),
-            _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
-            _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
+
+    // A lot of code expects that 0 initialized config is valid configuration for OFF mode.
+    // But (v)dsm refuse to accept the config if `emergencyValue`
+    // is not in range <100, 200> even in OFF mode.
+    // Although (v)dsm never uses `emergencyValue` in OFF mde.
+    auto emergencyValue = _spec.EmergencyValue;
+    if (emergencyValue < 100 || emergencyValue > 200) {
+      emergencyValue = 150;
+    }
+
+    int ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.mode),
+        _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
+        _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, emergencyValue);
     if (_dsMeterID == DSUID_BROADCAST) {
       DSBusInterface::checkBroadcastResultCode(ret);
     } else {
