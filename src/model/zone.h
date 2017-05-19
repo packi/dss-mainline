@@ -55,7 +55,7 @@ namespace dss {
     static void parseFollowerMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
     static void parseManualMode(const std::string& jsonObject, ZoneHeatingConfigSpec_t& hConfig);
 
-    HeatingControlMode m_HeatingControlMode;
+    HeatingControlMode m_mode;
     uint16_t m_Kp;
     uint8_t  m_Ts;
     uint16_t m_Ti;
@@ -134,13 +134,15 @@ namespace dss {
     Apartment* m_pApartment;
     PropertyNodePtr m_pPropertyNode;
     bool m_HeatingPropValid;
+    boost::shared_ptr<const DSMeter> m_temperatureControlMeter;
 
   public:
     Zone(const int _id, Apartment* _pApartment);
-    virtual ~Zone();
-    virtual Set getDevices() const;
+    ~Zone() DS_OVERRIDE;
+    Set getDevices() const DS_OVERRIDE;
 
     Apartment& getApartment() { return *m_pApartment; }
+    ModelMaintenance* tryGetModelMaintenance();
 
     /** Adds the Zone to a dsMeter. */
     void addToDSMeter(boost::shared_ptr<DSMeter> _dsMeter);
@@ -177,14 +179,14 @@ namespace dss {
     bool isRegisteredOnAnyMeter() const;
     std::vector<boost::shared_ptr<const DSMeter> > getDSMeters() { return m_DSMeters; }
 
-    virtual void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category);
-    virtual void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category);
+    void nextScene(const callOrigin_t _origin, const SceneAccessCategory _category) DS_OVERRIDE;
+    void previousScene(const callOrigin_t _origin, const SceneAccessCategory _category) DS_OVERRIDE;
 
     void publishToPropertyTree();
     void removeFromPropertyTree();
     PropertyNodePtr getPropertyNode() {  return m_pPropertyNode; }
 
-    virtual unsigned long getPowerConsumption();
+    unsigned long getPowerConsumption() DS_OVERRIDE;
 
     /** Returns a vector of groups present on the zone. */
     std::vector<boost::shared_ptr<Group> > getGroups() { return m_Groups; }
@@ -193,12 +195,10 @@ namespace dss {
     const ZoneHeatingProperties_t& getHeatingProperties() const;
     const ZoneHeatingStatus_t& getHeatingStatus() const;
     const ZoneSensorStatus_t& getSensorStatus() const;
-    bool isHeatingEnabled() const;
 
     /** Set heating properties and runtime values */
-    void setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec);
-    ZoneHeatingConfigSpec_t getHeatingControlMode();
-    void clearHeatingControlMode();
+    void setHeatingConfig(const ZoneHeatingConfigSpec_t _spec);
+    ZoneHeatingConfigSpec_t getHeatingConfig();
     void setHeatingControlState(int _ctrlState);
     void setHeatingControlOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues);
     void setHeatingFixedOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues);
@@ -234,10 +234,12 @@ namespace dss {
     void setHeatingProperties(ZoneHeatingProperties_t& config);
     bool isHeatingPropertiesValid() const;
 
-    boost::shared_ptr<const DSMeter> tryGetTemperatureControlDsm() const;
+    boost::shared_ptr<const DSMeter> tryGetPresentTemperatureControlMeter() const;
+    void setTemperatureControlMeter(const boost::shared_ptr<const DSMeter>& meter);
+    void updateTemperatureControlMeter();
 
   protected:
-    virtual std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems();
+    std::vector<boost::shared_ptr<AddressableModelItem> > splitIntoAddressableItems() DS_OVERRIDE;
     bool isAllowedSensorType(SensorType _sensorType);
     void dirty();
   }; // Zone

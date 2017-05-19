@@ -38,48 +38,58 @@ namespace dss {
     {
     }
 
-    virtual void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID);
-    virtual void createZone(const dsuid_t& _dsMeterID, const int _zoneID);
-    virtual void removeZone(const dsuid_t& _dsMeterID, const int _zoneID);
+    void setZoneID(const dsuid_t& _dsMeterID, const devid_t _deviceID, const int _zoneID) DS_OVERRIDE;
+    void createZone(const dsuid_t& _dsMeterID, const int _zoneID) DS_OVERRIDE;
+    void removeZone(const dsuid_t& _dsMeterID, const int _zoneID) DS_OVERRIDE;
 
-    virtual void addToGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID);
-    virtual void removeFromGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID);
-    virtual void removeDeviceFromDSMeter(const dsuid_t& _dsMeterID, const int _deviceID);
-    virtual void removeDeviceFromDSMeters(const dsuid_t& _DeviceDSID);
+    void addToGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) DS_OVERRIDE;
+    void removeFromGroup(const dsuid_t& _dsMeterID, const int _groupID, const int _deviceID) DS_OVERRIDE;
+    void removeDeviceFromDSMeter(const dsuid_t& _dsMeterID, const int _deviceID) DS_OVERRIDE;
+    void removeDeviceFromDSMeters(const dsuid_t& _DeviceDSID) DS_OVERRIDE;
 
-    virtual void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name);
-    virtual void deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name);
-    virtual void meterSetName(dsuid_t _meterDSID, const std::string& _name);
+    void sceneSetName(uint16_t _zoneID, uint8_t _groupID, uint8_t _sceneNumber, const std::string& _name) DS_OVERRIDE;
+    void deviceSetName(dsuid_t _meterDSID, devid_t _deviceID, const std::string& _name) DS_OVERRIDE;
+    void meterSetName(dsuid_t _meterDSID, const std::string& _name) DS_OVERRIDE;
 
-    virtual void createGroup(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig, const std::string& _name);
-    virtual void removeGroup(uint16_t _zoneID, uint8_t _groupID);
-    virtual void groupSetApplication(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig);
-    virtual void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name);
+    void createGroup(uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig,
+        const std::string& _name) DS_OVERRIDE;
+    void removeGroup(uint16_t _zoneID, uint8_t _groupID) DS_OVERRIDE;
+    void groupSetApplication(
+        uint16_t _zoneID, uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig) DS_OVERRIDE;
+    void groupSetName(uint16_t _zoneID, uint8_t _groupID, const std::string& _name) DS_OVERRIDE;
 
-    virtual void createCluster(uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig, const std::string& _name);
-    virtual void removeCluster(uint8_t _clusterID);
-    virtual void clusterSetName(uint8_t _clusterID, const std::string& _name);
-    virtual void clusterSetApplication(uint8_t _clusterID, ApplicationType applicationType, uint32_t applicationConfig);
-    virtual void clusterSetProperties(uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass);
-    virtual void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes);
-    virtual void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock);
+    void createCluster(uint8_t _groupID, ApplicationType applicationType, uint32_t applicationConfig,
+        const std::string& _name) DS_OVERRIDE;
+    void removeCluster(uint8_t _clusterID) DS_OVERRIDE;
+    void clusterSetName(uint8_t _clusterID, const std::string& _name) DS_OVERRIDE;
+    void clusterSetApplication(
+        uint8_t _clusterID, ApplicationType applicationType, uint32_t applicationConfig) DS_OVERRIDE;
+    void clusterSetProperties(
+        uint8_t _clusterID, uint16_t _location, uint16_t _floor, uint16_t _protectionClass) DS_OVERRIDE;
+    void clusterSetLockedScenes(uint8_t _clusterID, const std::vector<int> _lockedScenes) DS_OVERRIDE;
+    void clusterSetConfigurationLock(uint8_t _clusterID, bool _lock) DS_OVERRIDE;
 
-    virtual void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority);
-    virtual void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent);
+    void setButtonSetsLocalPriority(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _setsPriority) DS_OVERRIDE;
+    void setButtonCallsPresent(const dsuid_t& _dsMeterID, const devid_t _deviceID, bool _callsPresent) DS_OVERRIDE;
 
-    virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec);
-    virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec);
-    virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec);
-    virtual void setZoneSensor(const uint16_t _zoneID, SensorType sensorType, const dsuid_t& sensorDSUID);
-    virtual void resetZoneSensor(const uint16_t _zoneID, SensorType sensorType);
+    void setZoneHeatingConfig(
+        const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) DS_OVERRIDE;
+    void setZoneHeatingOperationModes(
+        const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) DS_OVERRIDE;
+    void setZoneSensor(const uint16_t _zoneID, SensorType sensorType, const dsuid_t& sensorDSUID) DS_OVERRIDE;
+    void resetZoneSensor(const uint16_t _zoneID, SensorType sensorType) DS_OVERRIDE;
 
-    virtual void setCircuitPowerStateConfig(const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold);
+    void setCircuitPowerStateConfig(
+        const dsuid_t& _dsMeterID, const int _index, const int _setThreshold, const int _resetThreshold) DS_OVERRIDE;
 
     void setModelMaintenace(ModelMaintenance* _modelMaintenance);
 
-    virtual void setProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& properties);
-    virtual vdcapi::Message getProperty(const dsuid_t& _meter, const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
-private:
+    void setProperty(const dsuid_t& _meter,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement>& properties) DS_OVERRIDE;
+    vdcapi::Message getProperty(const dsuid_t& _meter,
+        const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement>& query) DS_OVERRIDE;
+
+  private:
     ModelMaintenance* m_pModelMaintenance;
   }; // DSStructureModifyingBusInterface
 

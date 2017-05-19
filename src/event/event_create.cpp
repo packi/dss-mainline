@@ -74,6 +74,7 @@ namespace EventName {
   const std::string CheckSensorValues = "check_sensor_values";
   const std::string DeviceEvent = "DeviceEvent";
   const std::string CheckHeatingGroups = "check_heating_groups";
+  const std::string UpdateTemperatureControlMeters = "updateTemperatureControlMeters";
   const std::string Signal = "SIGNAL";
   const std::string WebSessionCleanup = "webSessionCleanup";
   const std::string SendMail = "sendmail";
@@ -367,9 +368,9 @@ createHeatingControllerConfig(int _zoneID, const dsuid_t &_ctrlDsuid,
 
   event->setProperty("ZoneID", intToString(_zoneID));
   event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
-  event->setProperty("ControlMode", intToString(static_cast<uint8_t>(_config.ControllerMode)));
+  event->setProperty("ControlMode", intToString(static_cast<uint8_t>(_config.mode)));
   event->setProperty("EmergencyValue", intToString(_config.EmergencyValue - 100));
-  switch (_config.ControllerMode) {
+  switch (_config.mode) {
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:
@@ -407,7 +408,7 @@ createHeatingControllerValue(int _zoneID, const dsuid_t &_ctrlDsuid,
 
     event->setProperty("ZoneID", intToString(_zoneID));
     event->setProperty("ControlDSUID", dsuid2str(_ctrlDsuid));
-    switch (_properties.m_HeatingControlMode) {
+    switch (_properties.m_mode) {
       case HeatingControlMode::OFF:
         break;
       case HeatingControlMode::PID:
@@ -473,7 +474,7 @@ createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
   case 6: event->setProperty("OperationMode", "Cooling"); break;
   case 7: event->setProperty("OperationMode", "CoolingOff"); break;
   }
-  switch (_props.m_HeatingControlMode) {
+  switch (_props.m_mode) {
     case HeatingControlMode::OFF:
       break;
     case HeatingControlMode::PID:

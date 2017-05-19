@@ -644,7 +644,7 @@ BOOST_AUTO_TEST_CASE(testTemperatureControlConfiguration) {
   // check that the settings were applied in model
   hProps = apt.getZone(42)->getHeatingProperties();
 
-  BOOST_CHECK_EQUAL(hProps.m_HeatingControlMode, HeatingControlMode::PID);
+  BOOST_CHECK_EQUAL(hProps.m_mode, HeatingControlMode::PID);
 
   BOOST_CHECK_EQUAL(hProps.m_EmergencyValue, 100 + 100);
   BOOST_CHECK_EQUAL(hProps.m_Kp, 1 * 40);
@@ -688,7 +688,7 @@ BOOST_AUTO_TEST_CASE(testTemperatureControlConfiguration2) {
   // check that the settings were applied in model
   hProps = apt.getZone(42)->getHeatingProperties();
 
-  BOOST_CHECK_EQUAL(hProps.m_HeatingControlMode, HeatingControlMode::PID);
+  BOOST_CHECK_EQUAL(hProps.m_mode, HeatingControlMode::PID);
 
   BOOST_CHECK_EQUAL(hProps.m_EmergencyValue, 100 + 100);
   BOOST_CHECK_EQUAL(hProps.m_Kp, 1 * 40);
