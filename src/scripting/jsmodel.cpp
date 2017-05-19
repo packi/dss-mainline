@@ -3954,8 +3954,8 @@ namespace dss {
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
-      obj.setProperty<int>("ControlMode", static_cast<uint8_t>(hProp.m_HeatingControlMode));
-      switch (hProp.m_HeatingControlMode) {
+      obj.setProperty<int>("ControlMode", static_cast<uint8_t>(hProp.m_mode));
+      switch (hProp.m_mode) {
         case HeatingControlMode::OFF:
           break;
         case HeatingControlMode::PID:
@@ -4008,8 +4008,8 @@ namespace dss {
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
-      obj.setProperty<int>("ControlMode", static_cast<uint8_t>(hProp.m_HeatingControlMode));
-      switch (hProp.m_HeatingControlMode) {
+      obj.setProperty<int>("ControlMode", static_cast<uint8_t>(hProp.m_mode));
+      switch (hProp.m_mode) {
         case HeatingControlMode::OFF:
           break;
         case HeatingControlMode::PID:
@@ -4066,7 +4066,7 @@ namespace dss {
       ScriptObject obj(*ctx, NULL);
       JS_SET_RVAL(cx, vp, OBJECT_TO_JSVAL(obj.getJSObject()));
 
-      if (auto heatingName = heatingControlModeName(hProp.m_HeatingControlMode)) {
+      if (auto heatingName = heatingControlModeName(hProp.m_mode)) {
         obj.setProperty<std::string>("mode", *heatingName);
       } else {
         obj.setProperty<std::string>("mode", std::string("unknown"));
@@ -4094,7 +4094,7 @@ namespace dss {
       manualModeObj.setProperty<int>("controlValue", hProp.m_ManualValue - 100);
       obj.setProperty("manualMode", &manualModeObj);
 
-      switch (hProp.m_HeatingControlMode) {
+      switch (hProp.m_mode) {
         case HeatingControlMode::OFF:
           break;
         case HeatingControlMode::PID: {
@@ -4149,7 +4149,7 @@ namespace dss {
 
       const ZoneHeatingProperties_t& hProp = pZone->getHeatingProperties();
 
-      switch (hProp.m_HeatingControlMode) {
+      switch (hProp.m_mode) {
         case HeatingControlMode::OFF:
           break;
         case HeatingControlMode::PID:
@@ -4203,7 +4203,7 @@ namespace dss {
         return JS_FALSE;
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
-      ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
+      ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingConfig();
 
       StructureManipulator manipulator(
           *ext->getApartment().getBusInterface()->getStructureModifyingBusInterface(),
@@ -4231,7 +4231,7 @@ namespace dss {
 
         int intValue = strtol(propValue, NULL, 10);
         if (strcmp(propKey, "ControlMode") == 0) {
-          hConfig.ControllerMode = static_cast<HeatingControlMode>(intValue);
+          hConfig.mode = static_cast<HeatingControlMode>(intValue);
         } else if (strcmp(propKey, "ReferenceZone") == 0) {
           hConfig.SourceZoneId = intValue;
         } else if (strcmp(propKey, "CtrlOffset") == 0) {
@@ -4303,7 +4303,7 @@ namespace dss {
         return JS_FALSE;
       }
       boost::shared_ptr<Zone> pZone = static_cast<zone_wrapper*>(JS_GetPrivate(cx, JS_THIS_OBJECT(cx, vp)))->pZone;
-      ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingControlMode();
+      ZoneHeatingConfigSpec_t hConfig = pZone->getHeatingConfig();
 
       auto structureModifyingBusInterface = ext->getApartment().getBusInterface()->getStructureModifyingBusInterface();
       auto structureQueryBusInterface = ext->getApartment().getBusInterface()->getStructureQueryBusInterface();
@@ -4327,7 +4327,7 @@ namespace dss {
 
         if (key == "mode") {
           if (auto heatingMode = heatingControlModeFromName(ctx->convertTo<std::string>(jsvPropValue))) {
-            hConfig.ControllerMode = *heatingMode;
+            hConfig.mode = *heatingMode;
           }
         } else if (key == "targetTemperatures") {
           ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingControlOperationModeValues();
@@ -4367,7 +4367,6 @@ namespace dss {
 
       // set data in model and dsms
       manipulator.setZoneHeatingConfig(pZone, hConfig);
-      manipulator.setZoneHeatingOperationModeValues(pZone);
 
       JS_SET_RVAL(cx, vp, BOOLEAN_TO_JSVAL(false));
       return JS_TRUE;
@@ -4400,9 +4399,9 @@ namespace dss {
       ZoneHeatingOperationModeSpec_t hOpValues = pZone->getHeatingOperationModeValues();
       SensorType SensorConversion;
 
-      if (hProp.m_HeatingControlMode == HeatingControlMode::PID) {
+      if (hProp.m_mode == HeatingControlMode::PID) {
         SensorConversion = SensorType::RoomTemperatureSetpoint;
-      } else if (hProp.m_HeatingControlMode == HeatingControlMode::FIXED) {
+      } else if (hProp.m_mode == HeatingControlMode::FIXED) {
         SensorConversion = SensorType::RoomTemperatureControlVariable;
       } else {
         JS_ReportError(cx, "Model.zone_setTemperatureControlValues: cannot set control values in current mode");

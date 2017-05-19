@@ -69,6 +69,10 @@ namespace dss {
     m_DSMeters.clear();
   } // dtor
 
+  ModelMaintenance* Zone::tryGetModelMaintenance() {
+    return m_pApartment ? m_pApartment->getModelMaintenance() : DS_NULLPTR;
+  }
+
   Set Zone::getDevices() const {
     return Set(m_Devices);
   } // getDevices
@@ -188,6 +192,33 @@ namespace dss {
     }
   } // addToDSMeter
 
+  boost::shared_ptr<const DSMeter> Zone::tryGetPresentTemperatureControlMeter() const {
+    if (m_temperatureControlMeter && m_temperatureControlMeter->isPresent()) {
+      DS_ASSERT(m_temperatureControlMeter->getCapability_HasTemperatureControl());
+      return m_temperatureControlMeter;
+    }
+    return boost::shared_ptr<const DSMeter>();
+  }
+
+  void Zone::setTemperatureControlMeter(const boost::shared_ptr<const DSMeter>& meter) {
+    DS_REQUIRE(meter->getCapability_HasTemperatureControl());
+    DS_REQUIRE(meter->isPresent());
+    m_temperatureControlMeter = meter;
+  }
+
+  void Zone::updateTemperatureControlMeter() {
+    if (tryGetPresentTemperatureControlMeter()) {
+      return;
+    }
+
+    foreach (const auto& meter, m_DSMeters) {
+      if (meter->getCapability_HasTemperatureControl() && meter->isPresent()) {
+        setTemperatureControlMeter(meter);
+        break;
+      }
+    }
+  }
+
   void Zone::removeFromDSMeter(boost::shared_ptr<DSMeter> _dsMeter) {
     m_DSMeters.erase(find(m_DSMeters.begin(), m_DSMeters.end(), _dsMeter));
     if(_dsMeter->getPropertyNode() != NULL) {
@@ -195,6 +226,9 @@ namespace dss {
       if(alias != NULL) {
         alias->getParentNode()->removeChild(alias);
       }
+    }
+    if (m_temperatureControlMeter == _dsMeter) {
+      m_temperatureControlMeter.reset();
     }
   } // removeFromDSMeter
 
@@ -259,8 +293,6 @@ namespace dss {
     return m_SensorStatus;
   }
 
-  bool Zone::isHeatingEnabled() const { return m_HeatingProperties.m_HeatingControlMode != HeatingControlMode::OFF; }
-
   void Zone::setHeatingProperties(ZoneHeatingProperties_t& config) {
     m_HeatingProperties = config;
     m_HeatingPropValid = true;
@@ -270,8 +302,8 @@ namespace dss {
     return m_HeatingPropValid;
   }
 
-  void Zone::setHeatingControlMode(const ZoneHeatingConfigSpec_t _spec) {
-    m_HeatingProperties.m_HeatingControlMode = _spec.ControllerMode;
+  void Zone::setHeatingConfig(const ZoneHeatingConfigSpec_t _spec) {
+    m_HeatingProperties.m_mode = _spec.mode;
     m_HeatingProperties.m_Kp = _spec.Kp;
     m_HeatingProperties.m_Ts = _spec.Ts;
     m_HeatingProperties.m_Ti = _spec.Ti;
@@ -290,9 +322,9 @@ namespace dss {
     dirty();
   }
 
-  ZoneHeatingConfigSpec_t Zone::getHeatingControlMode() {
+  ZoneHeatingConfigSpec_t Zone::getHeatingConfig() {
     ZoneHeatingConfigSpec_t spec;
-    spec.ControllerMode = m_HeatingProperties.m_HeatingControlMode;
+    spec.mode = m_HeatingProperties.m_mode;
     spec.Kp = m_HeatingProperties.m_Kp;
     spec.Ts = m_HeatingProperties.m_Ts;
     spec.Ti = m_HeatingProperties.m_Ti;
@@ -308,10 +340,6 @@ namespace dss {
     spec.EmergencyValue = m_HeatingProperties.m_EmergencyValue;
     spec.ManualValue = m_HeatingProperties.m_ManualValue;
     return spec;
-  }
-
-  void Zone::clearHeatingControlMode() {
-    m_HeatingProperties.reset();
   }
 
   void Zone::setHeatingControlState(int _ctrlState) {
@@ -336,7 +364,7 @@ namespace dss {
   }
 
   void Zone::setHeatingOperationMode(const ZoneHeatingOperationModeSpec_t& operationModeValues) {
-    switch (m_HeatingProperties.m_HeatingControlMode) {
+    switch (m_HeatingProperties.m_mode) {
       case HeatingControlMode::PID:
         setHeatingControlOperationMode(operationModeValues);
         break;
@@ -371,7 +399,7 @@ namespace dss {
   }
 
   ZoneHeatingOperationModeSpec_t Zone::getHeatingOperationModeValues() const {
-    switch (m_HeatingProperties.m_HeatingControlMode) {
+    switch (m_HeatingProperties.m_mode) {
       case HeatingControlMode::PID:
         return getHeatingControlOperationModeValues();
       case HeatingControlMode::FIXED:
@@ -590,20 +618,9 @@ namespace dss {
   }
 
   void Zone::dirty() {
-    if((m_pApartment != NULL) && (m_pApartment->getModelMaintenance() != NULL)) {
-      m_pApartment->getModelMaintenance()->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
+    if (auto&& modelMaintenance = tryGetModelMaintenance()) {
+      modelMaintenance->addModelEvent(new ModelEvent(ModelEvent::etModelOperationModeChanged));
     }
-  }
-
-  boost::shared_ptr<const DSMeter> Zone::tryGetTemperatureControlDsm() const {
-    // Select first temperature control capable DSM as the master.
-    foreach (auto&& dsm, m_DSMeters) {
-      if (!dsm->getCapability_HasTemperatureControl()) {
-        continue;
-      }
-      return dsm;
-    }
-    return boost::shared_ptr<DSMeter>();
   }
 
   ZoneHeatingProperties::ZoneHeatingProperties() {
@@ -611,7 +628,7 @@ namespace dss {
   }
 
   void ZoneHeatingProperties::reset() {
-    m_HeatingControlMode = HeatingControlMode::OFF;
+    m_mode = HeatingControlMode::OFF;
     m_Kp = 0;
     m_Ts = 0;
     m_Ti = 0;
@@ -632,7 +649,7 @@ namespace dss {
   }
 
   bool ZoneHeatingProperties::isEqual(const ZoneHeatingConfigSpec_t& config, const ZoneHeatingOperationModeSpec_t& operationMode) const {
-    bool configEqual = ((config.ControllerMode == m_HeatingControlMode) &&
+    bool configEqual = ((config.mode == m_mode) &&
             (config.Kp == m_Kp) &&
             (config.Ts == m_Ts) &&
             (config.Ti == m_Ti) &&
@@ -650,14 +667,14 @@ namespace dss {
 
     // the operation mode is important only in control and fixed mode
     bool operationModeEqual = true;
-    if (m_HeatingControlMode == HeatingControlMode::PID) {
+    if (m_mode == HeatingControlMode::PID) {
       for (int i = 0; i < 16; ++i) {
         if ( doubleToSensorValue(SensorType::RoomTemperatureSetpoint, m_TeperatureSetpoints[i]) != operationMode.opModes[i]) {
           operationModeEqual = false;
           break;
         }
       }
-    } else if (m_HeatingControlMode == HeatingControlMode::FIXED) {
+    } else if (m_mode == HeatingControlMode::FIXED) {
       for (int i = 0; i < 16; ++i) {
         if ( doubleToSensorValue(SensorType::RoomTemperatureControlVariable, m_FixedControlValues[i]) != operationMode.opModes[i]) {
           operationModeEqual = false;

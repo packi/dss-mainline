@@ -717,12 +717,12 @@ namespace dss {
       throw BusApiError("Bus not ready");
     }
     ZoneHeatingConfigSpec_t result;
-    uint8_t controllerMode;
-    int ret = ControllerHeating_get_config(m_DSMApiHandle, _dsMeterID, _ZoneID, &controllerMode, (uint16_t*)&result.Kp,
+    uint8_t mode;
+    int ret = ControllerHeating_get_config(m_DSMApiHandle, _dsMeterID, _ZoneID, &mode, (uint16_t*)&result.Kp,
         &result.Ts, &result.Ti, &result.Kd, (uint16_t*)&result.Imin, (uint16_t*)&result.Imax, &result.Ymin,
         &result.Ymax, &result.AntiWindUp, &result.KeepFloorWarm, &result.SourceZoneId, (uint16_t*)&result.Offset,
         &result.ManualValue, &result.EmergencyValue);
-    result.ControllerMode = static_cast<HeatingControlMode>(controllerMode);
+    result.mode = static_cast<HeatingControlMode>(mode);
 
     if (result.EmergencyValue == 0) {
       result.EmergencyValue = 100;

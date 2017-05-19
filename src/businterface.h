@@ -161,7 +161,7 @@ namespace dss {
   } DSMeterHash_t;
 
   typedef struct {
-    HeatingControlMode ControllerMode;
+    HeatingControlMode mode;
     uint16_t Kp;
     uint8_t Ts;
     uint16_t Ti;
@@ -384,7 +384,9 @@ namespace dss {
 
     /** Create and manage heating controller */
     virtual void setZoneHeatingConfig(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingConfigSpec_t _spec) = 0;
-    virtual void setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec) = 0;
+    void disableZoneHeatingConfig(const dsuid_t& dsMeterId, uint16_t zoneId) {
+      setZoneHeatingConfig(dsMeterId, zoneId, ZoneHeatingConfigSpec_t{});
+    }
     virtual void setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec) = 0;
     virtual void setZoneSensor(const uint16_t _zoneID, SensorType _sensorType, const dsuid_t& _sensorDSUID) = 0;
     virtual void resetZoneSensor(const uint16_t _zoneID, SensorType _sensorType) = 0;

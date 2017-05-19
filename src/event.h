@@ -89,6 +89,7 @@ namespace dss {
     extern const std::string CheckSensorValues;
     extern const std::string DeviceEvent;
     extern const std::string CheckHeatingGroups;
+    extern const std::string UpdateTemperatureControlMeters;
     extern const std::string Signal;
     extern const std::string WebSessionCleanup;
     extern const std::string SendMail;

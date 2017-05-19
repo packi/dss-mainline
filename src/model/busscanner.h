@@ -56,6 +56,7 @@ namespace dss {
     void scanDevicesOfZoneQuick(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     bool scanGroupsOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     bool scanStatusOfZone(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
+    bool scanTemperatureControl(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone);
     void log(const std::string& _line, aLogSeverity _severity = lsDebug);
     bool initializeDeviceFromSpec(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec);
     bool initializeDeviceFromSpecQuick(boost::shared_ptr<DSMeter> _dsMeter, boost::shared_ptr<Zone> _zone, DeviceSpec_t& _spec);

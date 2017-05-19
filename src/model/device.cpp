@@ -659,13 +659,13 @@ namespace dss {
   } // getVendrID
 
   void Device::fillSensorTable(std::vector<DeviceSensorSpec_t>& _slist) {
-    DeviceSensorSpec_t sensorInputReserved1 = { SensorType::Reserved1, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInputReserved2 = { SensorType::Reserved2, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput04 = { SensorType::ActivePower, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput05 = { SensorType::OutputCurrent, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput06 = { SensorType::ElectricMeter, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput64 = { SensorType::OutputCurrent16A, 0, 0, 0 };
-    DeviceSensorSpec_t sensorInput65 = { SensorType::ActivePowerVA, 0, 0, 0 };
+    DeviceSensorSpec_t sensorInputReserved1 = {SensorType::Reserved1, 0, 0, 0, 0, ""};
+    DeviceSensorSpec_t sensorInputReserved2 = {SensorType::Reserved2, 0, 0, 0, 0, ""};
+    DeviceSensorSpec_t sensorInput04 = {SensorType::ActivePower, 0, 0, 0, 0, ""};
+    DeviceSensorSpec_t sensorInput05 = {SensorType::OutputCurrent, 0, 0, 0, 0, ""};
+    DeviceSensorSpec_t sensorInput06 = {SensorType::ElectricMeter, 0, 0, 0, 0, ""};
+    DeviceSensorSpec_t sensorInput64 = {SensorType::OutputCurrent16A, 0, 0, 0, 0, ""};
+    DeviceSensorSpec_t sensorInput65 = {SensorType::ActivePowerVA, 0, 0, 0, 0, ""};
     DeviceClasses_t deviceClass = getDeviceClass();
     int devType = (deviceClass << 16) | m_ProductID;
 
@@ -3196,6 +3196,7 @@ namespace dss {
     auto deviceReference = boost::make_shared<DeviceReference>(getDSID(), &getApartment());
     boost::shared_ptr<Event> evt = createDeviceCustomActionChangedEvent(deviceReference, id, action, title, actionParams);
     DSS::getInstance()->getEventQueue().pushEvent(evt);
+    dirty();
   }
 
   vdcapi::Message Device::getVdcProperty(

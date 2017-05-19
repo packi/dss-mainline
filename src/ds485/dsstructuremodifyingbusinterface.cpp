@@ -292,54 +292,26 @@ namespace dss {
     if(m_DSMApiHandle == NULL) {
       throw BusApiError("Bus not ready");
     }
-    int ret = ControllerHeating_set_config(m_DSMApiHandle, DSUID_BROADCAST, _ZoneID,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            (_spec.EmergencyValue >= 100) ? _spec.EmergencyValue : 150);
-    DSBusInterface::checkBroadcastResultCode(ret);
-    usleep(BROADCAST_SLEEP_MICROSECONDS);
-    ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.ControllerMode),
+
+    // A lot of code expects that 0 initialized config is valid configuration for OFF mode.
+    // But (v)dsm refuse to accept the config if `emergencyValue`
+    // is not in range <100, 200> even in OFF mode.
+    // Although (v)dsm never uses `emergencyValue` in OFF mde.
+    auto emergencyValue = _spec.EmergencyValue;
+    if (emergencyValue < 100 || emergencyValue > 200) {
+      emergencyValue = 150;
+    }
+
+    int ret = ControllerHeating_set_config(m_DSMApiHandle, _dsMeterID, _ZoneID, static_cast<uint8_t>(_spec.mode),
         _spec.Kp, _spec.Ts, _spec.Ti, _spec.Kd, _spec.Imin, _spec.Imax, _spec.Ymin, _spec.Ymax, _spec.AntiWindUp,
-        _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, _spec.EmergencyValue);
+        _spec.KeepFloorWarm, _spec.SourceZoneId, _spec.Offset, _spec.ManualValue, emergencyValue);
     if (_dsMeterID == DSUID_BROADCAST) {
       DSBusInterface::checkBroadcastResultCode(ret);
     } else {
       DSBusInterface::checkResultCode(ret);
     }
     usleep(BROADCAST_SLEEP_MICROSECONDS);
-
-    if (m_pModelMaintenance) {
-      boost::shared_ptr<ZoneHeatingConfigSpec_t> spec = boost::make_shared<ZoneHeatingConfigSpec_t>();
-      *spec = _spec;
-
-      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerConfig, _dsMeterID);
-      pEvent->addParameter(_ZoneID);
-      pEvent->setSingleObjectParameter(spec);
-      m_pModelMaintenance->addModelEvent(pEvent);
-    }
   } // setZoneHeatingConfig
-
-  void DSStructureModifyingBusInterface::setZoneHeatingState(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingStateSpec_t _spec)
-  {
-    boost::recursive_mutex::scoped_lock lock(m_DSMApiHandleMutex);
-    if(m_DSMApiHandle == NULL) {
-      throw BusApiError("Bus not ready");
-    }
-    int ret = ControllerHeating_set_state(m_DSMApiHandle, _dsMeterID, _ZoneID,
-        _spec.State);
-    if (_dsMeterID == DSUID_BROADCAST) {
-      DSBusInterface::checkBroadcastResultCode(ret);
-      usleep(BROADCAST_SLEEP_MICROSECONDS);
-    } else {
-      DSBusInterface::checkResultCode(ret);
-    }
-
-    if (m_pModelMaintenance) {
-      ModelEvent* pEvent = new ModelEventWithDSID(ModelEvent::etControllerState, _dsMeterID);
-      pEvent->addParameter(_ZoneID);
-      pEvent->addParameter(_spec.State);
-      m_pModelMaintenance->addModelEvent(pEvent);
-    }
-  } // setZoneHeatingState
 
   void DSStructureModifyingBusInterface::setZoneHeatingOperationModes(const dsuid_t& _dsMeterID, const uint16_t _ZoneID, const ZoneHeatingOperationModeSpec_t _spec)
   {

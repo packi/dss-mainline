@@ -571,6 +571,8 @@ namespace dss {
         return "ftwbacklighttimeout";
       case ModelFeatureId::ventconfig:
         return "ventconfig";
+      case ModelFeatureId::fcu:
+        return "fcu";
     }
     return boost::none;
   }
@@ -672,6 +674,8 @@ namespace dss {
       return ModelFeatureId::ftwbacklighttimeout;
     } else if (x == "ventconfig") {
       return ModelFeatureId::ventconfig;
+    } else if (x == "fcu") {
+      return ModelFeatureId::fcu;
     }
 
     return boost::none;
