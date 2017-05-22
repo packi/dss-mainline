@@ -1978,13 +1978,8 @@ namespace dss {
           device->setOutputMode(_value);
         } else if (_configIndex == CfgFunction_ButtonMode) {
           device->setButtonID(_value & 0xf);
-          // 4 most significant bits of value are only valid in case it is != 0, otherwise it is set with
-          // CfgFunction_PbGroup configuration change.
-          if (((_value >> 4) & 0xf) != 0) {
-            device->setButtonGroupMembership((_value >> 4) & 0xf);
-          }
         } else if (_configIndex == CfgFunction_PbGroup) {
-          device->setButtonGroupMembership(_value);
+          device->setButtonActiveGroup(_value);
         } else if (_configIndex == CfgFunction_LTMode) {
           device->setButtonInputMode(static_cast<ButtonInputMode>(_value));
         }
