@@ -60,7 +60,7 @@ namespace dss {
   private:
     Apartment& m_Apartment;
     StructureManipulator m_manipulator;
-    static boost::recursive_mutex m_LTMODEMutex;
+    static boost::recursive_mutex m_setConfigMutex;
   }; // DeviceRequestHandler
 
 }
