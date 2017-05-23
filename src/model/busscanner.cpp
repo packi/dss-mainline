@@ -371,7 +371,6 @@ namespace dss {
     log("InitializeDevice: ActiveGr:   " + intToString(_spec.activeGroup));
     log("InitializeDevice: DefaultGr:  " + intToString(_spec.defaultGroup));
     log("InitializeDevice: Button ID:  " + intToString(_spec.buttonID));
-    log("InitializeDevice: Button GroupMember: " + intToString(_spec.buttonGroupMembership));
     log("InitializeDevice: Button ActiveGroup: " + intToString(_spec.buttonActiveGroup));
 
     boost::shared_ptr<Device> dev;
@@ -418,7 +417,6 @@ namespace dss {
     // TODO(someday): move more setters into setSpec
 
     dev->setButtonActiveGroup(_spec.buttonActiveGroup);
-    dev->setButtonGroupMembership(_spec.buttonGroupMembership);
     dev->setButtonSetsLocalPriority(_spec.buttonSetsLocalPriority);
     dev->setButtonCallsPresent(_spec.buttonCallsPresent);
     dev->setButtonID(_spec.buttonID);

@@ -281,7 +281,6 @@ namespace dss {
     m_ButtonInputCount(0),
     m_ButtonSetsLocalPriority(false),
     m_ButtonCallsPresent(true),
-    m_ButtonGroupMembership(0),
     m_ButtonActiveGroup(0),
     m_ButtonID(0),
     m_OemEanNumber(0),
@@ -535,8 +534,9 @@ namespace dss {
       ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_ButtonInputCount, false));
     m_pPropertyNode->createProperty("button/activeGroup")
       ->linkToProxy(PropertyProxyReference<int>(m_ButtonActiveGroup, false));
-    m_pPropertyNode->createProperty("button/groupMembership")
-      ->linkToProxy(PropertyProxyReference<int>(m_ButtonGroupMembership, false));
+    m_pPropertyNode
+        ->createProperty("button/groupMembership") // deprecated
+        ->linkToProxy(PropertyProxyReference<int>(m_ButtonActiveGroup, false));
     m_pPropertyNode->createProperty("button/setsLocalPriority")
       ->linkToProxy(PropertyProxyReference<bool>(m_ButtonSetsLocalPriority));
     m_pPropertyNode->createProperty("button/callsPresent")
@@ -774,9 +774,13 @@ namespace dss {
 
   void Device::setDeviceButtonID(uint8_t _buttonId) {
     setButtonID(_buttonId);
-    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode,
-        ((m_ButtonGroupMembership & 0xf) << 4) | (m_ButtonID & 0xf));
-  } // setDeviceButtonId
+
+    uint8_t value = m_ButtonID & 0x0f;
+    if (m_ButtonActiveGroup < 16) {
+      value |= m_ButtonActiveGroup << 4;
+    }
+    setDeviceConfig(CfgClassFunction, CfgFunction_ButtonMode, value);
+  }
 
   void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
     if (m_pApartment->getDeviceBusInterface() != NULL) {
@@ -786,14 +790,12 @@ namespace dss {
           ((m_ButtonID >= ButtonId_Area1_Extended) && (m_ButtonID <= ButtonId_Area4_Extended));
       if (isAreaButton &&
           ((_buttonActiveGroup < GroupIDYellow) || (_buttonActiveGroup > GroupIDGray))) {
-        setButtonGroupMembership(_buttonActiveGroup);
         setDeviceButtonID(ButtonId_Zone);
       }
-      /* tell dsm to change button active group */
       m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
       m_ButtonActiveGroup = _buttonActiveGroup;
     }
-  } // setDeviceButtonActiveGroup
+  }
 
   void Device::setDeviceJokerGroup(uint8_t groupId) {
     if (!isDefaultGroup(groupId) && !isGlobalAppDsGroup(groupId)) {
@@ -1949,6 +1951,8 @@ namespace dss {
       }
       if ((deviceType == DEVICE_TYPE_KL) && ((getDeviceNumber() == 213) || (getDeviceNumber() == 214))) {
         m_iconPath = "ssl";
+      } else if ((deviceType == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+        m_iconPath = "zws205";
       } else if ((deviceType == DEVICE_TYPE_SDM) && ((getDeviceNumber() == 201) || (getDeviceNumber() == 202))) {
         m_iconPath = "sdm_plug";
       } else {

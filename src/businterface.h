@@ -138,7 +138,6 @@ namespace dss {
     std::vector<int> Groups;
     dsuid_t DSID;
     uint8_t buttonID;
-    uint8_t buttonGroupMembership;
     uint8_t buttonActiveGroup;
     bool buttonSetsLocalPriority;
     bool buttonCallsPresent;

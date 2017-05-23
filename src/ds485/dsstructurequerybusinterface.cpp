@@ -380,17 +380,16 @@ namespace dss {
           uint8_t reserved : 6;
         };
       } flags;
+      uint8_t deprecatedGroupIfUpTo15;
 
       ret = DeviceButtonInfo_by_device(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, &_spec.buttonID,
-                                       &_spec.buttonGroupMembership, &_spec.buttonActiveGroup,
-                                       &flags.flags, NULL, NULL);
+          &deprecatedGroupIfUpTo15, &_spec.buttonActiveGroup, &flags.flags, NULL, NULL);
       DSBusInterface::checkResultCode(ret);
       _spec.buttonSetsLocalPriority = (flags.setLocalPriority == 1);
       _spec.buttonCallsPresent = (flags.callsNoPresent == 0);
     } catch(BusApiError& e) {
       _spec.buttonID = 0xff;
       _spec.buttonActiveGroup = 0xff;
-      _spec.buttonGroupMembership = 0xff;
       _spec.buttonSetsLocalPriority = false;
       _spec.buttonCallsPresent = true;
       if (ret == ERROR_WRONG_MSGID || ret == ERROR_WRONG_MODIFIER) {
