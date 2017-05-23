@@ -137,6 +137,16 @@ dist_dssdataimages_DATA =  \
    ../data/images/umv_white.png \
    ../data/images/umv_yellow.png \
    ../data/images/unknown.png \
+   ../data/images/zws205_black_black.png \
+   ../data/images/zws205_black_blue.png \
+   ../data/images/zws205_black_cyan.png \
+   ../data/images/zws205_black_green.png \
+   ../data/images/zws205_black_grey.png \
+   ../data/images/zws205_black_magenta.png \
+   ../data/images/zws205_black.png \
+   ../data/images/zws205_black_red.png \
+   ../data/images/zws205_black_white.png \
+   ../data/images/zws205_black_yellow.png \
    ../data/images/zws_black_black.png \
    ../data/images/zws_black_blue.png \
    ../data/images/zws_black_cyan.png \
