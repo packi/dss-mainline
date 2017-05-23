@@ -139,7 +139,7 @@ namespace dss {
     _json.add("outputMode", _device.getDevice()->getOutputMode());
     _json.add("buttonID", _device.getDevice()->getButtonID());
     _json.add("buttonActiveGroup", _device.getDevice()->getButtonActiveGroup());
-    _json.add("buttonGroupMembership", _device.getDevice()->getButtonGroupMembership());
+    _json.add("buttonGroupMembership", _device.getDevice()->getButtonActiveGroup()); // deprecated
     _json.add("buttonInputMode", _device.getDevice()->getButtonInputMode());
     _json.add("buttonInputIndex", _device.getDevice()->getButtonInputIndex());
     _json.add("buttonInputCount", _device.getDevice()->getButtonInputCount());
