@@ -1,5 +1,10 @@
 #pragma once
 
+#include <boost/noncopyable.hpp>
+#include <utility>
+
+namespace ds {
+
 #if defined __GNUC__
   #if __GNUC__ <5 && ! __clang__
     // OE_CORE version
@@ -52,3 +57,36 @@
     /// name multiple times, wrap the code into macro to force
     /// compilation into one line.
 #define DS_UNIQUE_NAME(prefix) DS_CONCAT(prefix, __LINE__)
+
+    // Run the given code when the function exits, whether by return or exception.
+#define DS_DEFER(code) auto DS_UNIQUE_NAME(_dsDefer) = ::ds::defer([&]() { code; })
+
+    namespace _private {
+    template <typename Func>
+    class Deferred : boost::noncopyable {
+    public:
+        inline Deferred(Func&& func) : m_func(std::forward<Func>(func)), m_canceled(false) {}
+        inline ~Deferred() noexcept(false) {
+            if (!m_canceled)
+                m_func();
+        }
+        inline Deferred(Deferred&& x) : m_func(std::move(x.m_func)), m_canceled(false) { x.m_canceled = true; }
+
+    private:
+        Func m_func;
+        bool m_canceled;
+    };
+    } // namespace _private
+
+    // Returns an object which will invoke the given functor in its destructor.  The object is not
+    // copyable but is movable with the semantics you'd expect.  Since the return type is private,
+    // you need to assign to an `auto` variable.
+    //
+    // The DS_DEFER macro provides slightly more convenient syntax for the common case where you
+    // want some code to run at current scope exit.
+    template <typename Func>
+    _private::Deferred<Func> defer(Func&& func) {
+        return _private::Deferred<Func>(std::forward<Func>(func));
+    }
+
+    } // namespace ds

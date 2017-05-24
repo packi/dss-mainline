@@ -76,4 +76,20 @@ TEST_CASE("DS_UNIQUE_NAME", TAGS) {
     }
 }
 
+namespace {
+struct ExpectedException {};
+}
+
+TEST_CASE("DS_DEFER", TAGS) {
+    SECTION("captures by reference and is called at the end of scope") {
+        int calledCount = 0;
+        try {
+            DS_DEFER(calledCount++);
+            throw ExpectedException();
+        } catch (const ExpectedException &) {
+        }
+        CHECK(calledCount == 1);
+    }
+}
+
 } // namespace
