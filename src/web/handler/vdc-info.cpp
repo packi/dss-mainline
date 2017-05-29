@@ -251,16 +251,9 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
       if (state.name == stateName) {
         json.add("title", state.title);
 
-        std::string propValue;
-        if (stateReader["value"].hasValue()) {
-          propValue = stateReader["value"].getValueAsString();
-          const vdcapi::PropertyValue& value = stateReader["value"].getValue();
-          ProtobufToJSon::processValuePretty(value, "value", json);
-        }
-        if (stateReader["age"].hasValue()) {
-          const vdcapi::PropertyValue& value = stateReader["age"].getValue();
-          ProtobufToJSon::processValuePretty(value, "age", json);
-        }
+        std::string propValue = stateReader["value"].getValueAsString();
+        ProtobufToJSon::processValuePretty(stateReader["value"].getValue(), "value", json);
+        ProtobufToJSon::processValuePretty(stateReader["age"].getValue(), "age", json);
 
         foreach (const auto &desc, state.values) {
           if (desc.first == propValue) {
