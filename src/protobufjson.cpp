@@ -281,6 +281,25 @@ namespace dss {
     return data;
   }
 
+  void ProtobufToJSon::processValuePretty(const vdcapi::PropertyValue& value, const std::string& name, JSONWriter& _writer) {
+    if (!name.empty()) {
+      _writer.add(name);
+    }
+    if (value.has_v_bool()) {
+      _writer.add(value.v_bool());
+    } else if (value.has_v_double()) {
+      _writer.add(value.v_double());
+    } else if (value.has_v_int64()) {
+      _writer.add((long long) value.v_int64());
+    } else if (value.has_v_uint64()) {
+      _writer.add((unsigned long long) value.v_uint64());
+    } else if (value.has_v_string()) {
+      _writer.add(value.v_string().c_str());
+    } else {
+      _writer.addNull();
+    }
+  }
+
   void ProtobufToJSon::processElementsPretty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& _elements,
         JSONWriter& _writer) {
     bool isObject = _elements.size() == 0 || !_elements.Get(0).name().empty();
@@ -294,22 +313,9 @@ namespace dss {
       if (isObject) {
         _writer.add(tempElement.name().c_str());
       }
-
       if (tempElement.has_value()) {
         const vdcapi::PropertyValue& value = tempElement.value();
-        if (value.has_v_bool()) {
-          _writer.add(value.v_bool());
-        } else if (value.has_v_double()) {
-          _writer.add(value.v_double());
-        } else if (value.has_v_int64()) {
-          _writer.add((long long) value.v_int64());
-        } else if (value.has_v_uint64()) {
-          _writer.add((unsigned long long) value.v_uint64());
-        } else if (value.has_v_string()) {
-          _writer.add(value.v_string().c_str());
-        } else {
-          _writer.addNull();
-        }
+        processValuePretty(value, std::string(), _writer);
       } else if (tempElement.elements_size() == 0) {
         _writer.addNull(); // should it be null, [] or {}?
       } else {
