@@ -257,6 +257,11 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
           const vdcapi::PropertyValue& value = stateReader["value"].getValue();
           ProtobufToJSon::processValuePretty(value, "value", json);
         }
+        if (stateReader["age"].hasValue()) {
+          const vdcapi::PropertyValue& value = stateReader["age"].getValue();
+          ProtobufToJSon::processValuePretty(value, "age", json);
+        }
+
         foreach (const auto &desc, state.values) {
           if (desc.first == propValue) {
             json.add("displayValue", desc.second);
