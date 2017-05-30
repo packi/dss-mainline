@@ -2378,11 +2378,19 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
-      VdcDb db(*DSS::getInstance());
+      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+      query.Add()->set_name("deviceStates");
+      query.Add()->set_name("deviceProperties");
+      query.Add()->set_name("sensorStates");
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      VdcElementReader reader(message.vdc_response_get_property().properties());
       JSONWriter json;
-      std::string langCode("");
-      _request.getParameter("lang", langCode);
-      vdcInfo::addOperationalValues(db, *pDevice, langCode, json);
+      json.add("states");
+      ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
+      json.add("properties");
+      ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
+      json.add("sensors");
+      ProtobufToJSon::processElementsPretty(reader["sensorStates"].childElements(), json);
       return json.successJSON();
     } else if (_request.getMethod() == "setProperty") {
       boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
