@@ -45,6 +45,7 @@ namespace dss {
                                 JSONWriter& _writer);
 
     /// Converts PropertyValues to native json types, elements to json object if first element has name
+    static void processValuePretty(const vdcapi::PropertyValue& value, const std::string& name, JSONWriter& _writer);
     static void processElementsPretty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& _elements,
                                 JSONWriter& _writer);
 

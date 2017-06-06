@@ -62,7 +62,7 @@
 
 namespace dss {
 
-  boost::recursive_mutex DeviceRequestHandler::m_LTMODEMutex;
+  boost::recursive_mutex DeviceRequestHandler::m_setConfigMutex;
 
   //=========================================== DeviceRequestHandler
 
@@ -230,6 +230,7 @@ namespace dss {
       json.add("name", pDevice->getName());
       return json.successJSON();
     } else if (_request.getMethod() == "setName") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       if(_request.hasParameter("newName")) {
         std::string name = _request.getParameter("newName");
         name = escapeHTML(name);
@@ -313,6 +314,7 @@ namespace dss {
       }
       return JSONWriter::success();
     } else if (_request.getMethod() == "setConfig") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int value = strToIntDef(_request.getParameter("value"), -1);
       if((value  < 0) || (value > UCHAR_MAX)) {
         return JSONWriter::failure("Invalid or missing parameter 'value'");
@@ -348,6 +350,7 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "getConfigWord") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int configClass = strToIntDef(_request.getParameter("class"), -1);
       if((configClass < 0) || (configClass > UCHAR_MAX)) {
         return JSONWriter::failure("Invalid or missing parameter 'class'");
@@ -366,7 +369,7 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "setJokerGroup") {
-      boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
       if (!isDefaultGroup(newGroupId) && !isGlobalAppDsGroup(newGroupId)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
@@ -397,6 +400,7 @@ namespace dss {
       }
       return json.successJSON();
     } else if (_request.getMethod() == "setHeatingGroup") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int newGroupId = strToIntDef(_request.getParameter("groupID"), -1);
       if (!isDefaultGroup(newGroupId)) {
         return JSONWriter::failure("Invalid or missing parameter 'groupID'");
@@ -427,6 +431,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setButtonID") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int value = strToIntDef(_request.getParameter("buttonID"), -1);
       if((value  < 0) || (value > 15)) {
         return JSONWriter::failure("Invalid or missing parameter 'buttonID'");
@@ -444,7 +449,7 @@ namespace dss {
       }
       return JSONWriter::success();
     } else if (_request.getMethod() == "setButtonInputMode") {
-      boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       if (_request.hasParameter("modeID")) {
         return JSONWriter::failure("API has changed, parameter mode ID is no longer \
                         valid, please update your code");
@@ -560,6 +565,7 @@ namespace dss {
       }
       return json.successJSON();
     } else if (_request.getMethod() == "setButtonActiveGroup") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int value = strToIntDef(_request.getParameter("groupID"), -2);
       if ((value != BUTTON_ACTIVE_GROUP_RESET) &&
           ((value < -1) || (value > GroupIDGlobalAppMax))) {
@@ -578,6 +584,7 @@ namespace dss {
       }
       return JSONWriter::success();
     } else if (_request.getMethod() == "setOutputMode") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int value = strToIntDef(_request.getParameter("modeID"), -1);
       if((value  < 0) || (value > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'modeID'");
@@ -650,6 +657,7 @@ namespace dss {
       }
       return json.successJSON();
     } else if (_request.getMethod() == "setProgMode") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       uint8_t modeId;
       std::string pmode = _request.getParameter("mode");
       if(pmode.compare("enable") == 0) {
@@ -733,6 +741,7 @@ namespace dss {
       }
 
     } else if (_request.getMethod() == "setOutputValue") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int offset = strToIntDef(_request.getParameter("offset"), -1);
       if((offset  < 0) || (offset > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'offset'");
@@ -744,6 +753,7 @@ namespace dss {
       pDevice->setDeviceOutputValue(offset, value);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setSceneValue") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 127)) {
         return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
@@ -872,6 +882,7 @@ namespace dss {
       json.add("dimtimeIndex", config.dimtimeIndex);
       return json.successJSON();
     } else if (_request.getMethod() == "setSceneMode") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int id = strToIntDef(_request.getParameter("sceneID"), -1);
       if((id  < 0) || (id > 255)) {
         return JSONWriter::failure("Invalid or missing parameter 'sceneID'");
@@ -922,6 +933,7 @@ namespace dss {
       json.add("down", down);
       return json.successJSON();
     } else if (_request.getMethod() == "setTransitionTime") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int id = strToIntDef(_request.getParameter("dimtimeIndex"), -1);
       if((id  < 0) || (id > 2)) {
         return JSONWriter::failure("Invalid or missing parameter 'dimtimeIndex'");
@@ -947,6 +959,7 @@ namespace dss {
       json.add("groupColorMode", config.groupColorMode);
       return json.successJSON();
     } else if (_request.getMethod() == "setLedMode") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int id = strToIntDef(_request.getParameter("ledconIndex"), -1);
       if((id  < 0) || (id > 2)) {
         return JSONWriter::failure("Invalid or missing parameter 'ledconIndex'");
@@ -983,6 +996,7 @@ namespace dss {
       json.endArray();
       return json.successJSON();
     } else if (_request.getMethod() == "setBinaryInputType") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
@@ -994,6 +1008,7 @@ namespace dss {
       pDevice->setDeviceBinaryInputType(index, static_cast<BinaryInputType>(type));
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputTarget") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
@@ -1005,6 +1020,7 @@ namespace dss {
       pDevice->setDeviceBinaryInputTargetId(index, gid);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBinaryInputId") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int index = strToIntDef(_request.getParameter("index"), -1);
       if (index < 0) {
         return JSONWriter::failure("Invalid or missing parameter 'index'");
@@ -1024,6 +1040,7 @@ namespace dss {
       json.add("offdelay", offDelay);
       return json.successJSON();
     } else if (_request.getMethod() == "setAKMInputTimeouts") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int onDelay = strToIntDef(_request.getParameter("ondelay"), -1);
       if (onDelay > 6552000) { // ms
         return JSONWriter::failure("Invalid parameter 'ondelay', must be < 6552000");
@@ -1042,7 +1059,7 @@ namespace dss {
       pDevice->setDeviceAKMInputTimeouts(onDelay, offDelay);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setAKMInputProperty") {
-      boost::recursive_mutex::scoped_lock lock(m_LTMODEMutex);
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       std::string mode = _request.getParameter("mode");
       if (mode.empty()) {
         return JSONWriter::failure("Invalid or missing parameter 'mode'");
@@ -1154,6 +1171,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setSensorEventTableEntry") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int id = strToIntDef(_request.getParameter("eventIndex"), -1);
       if((id < 0) || (id > 15)) {
         return JSONWriter::failure("Invalid or missing parameter 'eventIndex'");
@@ -1251,6 +1269,7 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "setOutputChannelValue") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       bool applyNow = strToIntDef(_request.getParameter("applyNow"), 1);
       std::string vals = _request.getParameter("channelvalues");
       if (vals.empty()) {
@@ -1604,6 +1623,7 @@ namespace dss {
 
       return JSONWriter::success();
     } else if (_request.getMethod() == "setOutputChannelDontCareFlag") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       std::string str_chan = _request.getParameter("channels");
       if (str_chan.empty()) {
         return JSONWriter::failure("Missing or invalid parameter 'channels'");
@@ -1682,6 +1702,7 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "setOutputChannelSceneValue") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       std::string vals = _request.getParameter("channelvalues");
       if (vals.empty()) {
         return JSONWriter::failure("Missing or invalid parameter 'channelvalues'");
@@ -1708,6 +1729,7 @@ namespace dss {
 
       return JSONWriter::success();
     } else if (_request.getMethod() == "setValveTimerMode") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
@@ -1761,6 +1783,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setValvePwmMode") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
@@ -1850,6 +1873,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setValveControlMode") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
@@ -1885,6 +1909,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setValveType") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
@@ -1929,6 +1954,7 @@ namespace dss {
       json.add("relayValue", device->getDeviceUMVRelayValue());
       return json.successJSON();
     } else if (_request.getMethod() == "setUMVRelayValue") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
@@ -1945,6 +1971,7 @@ namespace dss {
       device->setDeviceUMVRelayValue(strToInt(value));
       return JSONWriter::success();
     } else if (_request.getMethod() == "setBlinkConfig") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       boost::shared_ptr<Device> device;
       try {
         device = getDeviceByDSID(_request);
@@ -2023,6 +2050,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setCardinalDirection") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       CardinalDirection_t direction;
       JSONWriter json;
       std::string tmp;
@@ -2042,6 +2070,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setWindProtectionClass") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       WindProtectionClass_t protection;
       JSONWriter json;
       int tmp;
@@ -2061,6 +2090,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setFloor") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int floor;
       JSONWriter json;
 
@@ -2076,6 +2106,7 @@ namespace dss {
       return json.successJSON();
 
     } else if (_request.getMethod() == "setOutputAfterImpulse") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       JSONWriter json;
 
       std::string output = _request.getParameter("output");
@@ -2152,6 +2183,7 @@ namespace dss {
       json.add("time", date);
       return json.successJSON();
     } else if (_request.getMethod() == "setMaxMotionTime") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       JSONWriter json;
 
       boost::shared_ptr<Device> device;
@@ -2194,6 +2226,7 @@ namespace dss {
       json.add("value", value);
       return json.successJSON();
     } else if (_request.getMethod() == "setVisibility") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       JSONWriter json;
       std::string param;
       if (!_request.getParameter("visibility", param)) {
@@ -2248,6 +2281,7 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "setSwitchThreshold") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       JSONWriter json;
 
       boost::shared_ptr<Device> device;
@@ -2279,6 +2313,7 @@ namespace dss {
       json.add("threshold", value);
       return json.successJSON();
     } else if (_request.getMethod() == "setTemperatureOffset") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       JSONWriter json;
 
       boost::shared_ptr<Device> device;
@@ -2343,13 +2378,22 @@ namespace dss {
 
       return json.successJSON();
     } else if (_request.getMethod() == "getInfoOperational") {
-      VdcDb db(*DSS::getInstance());
+      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+      query.Add()->set_name("deviceStates");
+      query.Add()->set_name("deviceProperties");
+      query.Add()->set_name("sensorStates");
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      VdcElementReader reader(message.vdc_response_get_property().properties());
       JSONWriter json;
-      std::string langCode("");
-      _request.getParameter("lang", langCode);
-      vdcInfo::addOperationalValues(db, *pDevice, langCode, json);
+      json.add("states");
+      ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
+      json.add("properties");
+      ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
+      json.add("sensors");
+      ProtobufToJSon::processElementsPretty(reader["sensorStates"].childElements(), json);
       return json.successJSON();
     } else if (_request.getMethod() == "setProperty") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=waterhardness&value=5.55
       // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=name&value="new name"
       std::string id;
@@ -2365,6 +2409,7 @@ namespace dss {
       pDevice->setProperty(element);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setCustomAction") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       // /json/device/setCustomAction?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=custom77&title=Action%201&action=heat&params={"duration":17}
       std::string id;
       if (!_request.getParameter("id", id)) {
@@ -2403,6 +2448,7 @@ namespace dss {
       pDevice->callAction(id, *paramsElement);
       return JSONWriter::success();
     } else if (_request.getMethod() == "setSK204Config") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       std::string mode = _request.getParameter("mode");
       if (mode.empty()) {
         return JSONWriter::failure("missing parameter: mode");
@@ -2475,6 +2521,7 @@ namespace dss {
       json.add("mode", mode);
       return json.successJSON();
     } else if (_request.getMethod() == "setSK204DisplayMode") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       int humidity = -1;
       int room_setpoint = -1;
 
@@ -2542,6 +2589,7 @@ namespace dss {
       json.add("humidity", (bool)humidity);
       return json.successJSON();
     } else if (_request.getMethod() == "setSK204BacklightTimeout") {
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       if (((pDevice->getDeviceType() != DEVICE_TYPE_SK) &&
            (pDevice->getDeviceNumber() != 204)) || !pDevice->isMainDevice()) {
         JSONWriter::failure("request not supported on this device");
