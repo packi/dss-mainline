@@ -65,12 +65,12 @@ namespace ds {
     template <typename Func>
     class Deferred : boost::noncopyable {
     public:
-        inline Deferred(Func&& func) : m_func(std::forward<Func>(func)), m_canceled(false) {}
-        inline ~Deferred() noexcept(false) {
+        Deferred(Func&& func) : m_func(std::forward<Func>(func)), m_canceled(false) {}
+        ~Deferred() {
             if (!m_canceled)
                 m_func();
         }
-        inline Deferred(Deferred&& x) : m_func(std::move(x.m_func)), m_canceled(false) { x.m_canceled = true; }
+        Deferred(Deferred&& x) : m_func(std::move(x.m_func)), m_canceled(false) { x.m_canceled = true; }
 
     private:
         Func m_func;

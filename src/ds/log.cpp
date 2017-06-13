@@ -118,7 +118,7 @@ boost::optional<Rule> tryParseRule(char* rule) {
     }
 
     auto name = std::string(rule, separator);
-    for (auto c : name) {
+    BOOST_FOREACH (const auto& c, name) {
         if (!::isalnum(c)) { // invalid character
             return boost::none;
         }
