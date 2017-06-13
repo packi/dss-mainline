@@ -372,8 +372,10 @@ private:
 template <typename... Args>
 std::string str(Args&&... args) {
     auto s = ::ds::str(std::forward<Args>(args)...);
-    if (!s.empty() && s.back() == ' ') {
-        s.pop_back(); // last character is extra ' ' due to macro expansion problems
+    if (auto size = s.size()) {
+        if (s[size - 1] == ' ') {
+            s.resize(size - 1); // last character is extra ' ' due to macro expansion problems
+        }
     }
     return s;
 }
