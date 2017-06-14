@@ -161,7 +161,7 @@ struct Logger::Impl {
 
 Logger::Logger() : m_impl(new Impl()) {
     setLogFunction(Logger::defaultLogFunction);
-    auto debugEnv = getenv("DS_DEBUG");
+    auto debugEnv = getenv("DS_LOG");
     if (debugEnv) {
         m_impl->rules = tryParseRules(debugEnv);
     }
