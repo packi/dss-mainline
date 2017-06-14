@@ -208,6 +208,7 @@ void Logger::defaultLogFunction(const char* channelName, Severity severity, std:
         size -= written;
         data += written;
     }
+    ::fsync(2);
 }
 
 void Logger::addChannel(Channel& channel) {
