@@ -1261,7 +1261,7 @@ namespace dss {
                     pDevice->getDeviceOutputChannelValue(channels->at(i).first)));
         json.endObject();
         // don't flood the bus on bulk requests
-        if ((channels->size() > 1) && (i < channels->size() - 1)) {
+        if (!pDevice->isVdcDevice() && (channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);
         }
       }
@@ -1285,7 +1285,7 @@ namespace dss {
                                              applyNow &&
                                              (i == (channels->size() - 1)));
         // don't flood the bus on bulk requests
-        if ((channels->size() > 1) && (i < channels->size() - 1)) {
+        if (!pDevice->isVdcDevice() && (channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);
         }
       }
@@ -1722,7 +1722,7 @@ namespace dss {
                                              scene,
                                              boost::get<2>(channels->at(i)));
         // don't flood the bus on bulk requests
-        if ((channels->size() > 1) && (i < channels->size() - 1)) {
+        if (!pDevice->isVdcDevice() && (channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);
         }
       }
