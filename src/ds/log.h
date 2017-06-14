@@ -56,16 +56,16 @@ std::ostream& operator<<(std::ostream& stream, Severity x);
 // parses severity at the start of the string
 boost::optional<Severity> tryParseSeverityChar(const char*);
 
-/// All logging macros accept string literals and other expressions to be logged,
-/// Expressions are logged stringified together with their value.
+/// All logging macros stringify passed expressions together with their value.
+/// String literals and expressions starting with char '_' are not stringified.
 ///
 /// Example:
 ///
-///     DS_NOTICE("Connected to server", address, port);
+///     DS_NOTICE("Connected to server.", address, port);
 ///
 /// This will log message like like:
 ///
-///     Connected to server address:128.55.2.2 port:844
+///     Connected to server. address:128.55.2.2 port:844
 ///
 /// Macros `DS_REQUIRE` and `DS_ASSERT` check for preconditions and invariants
 /// instead of `throw` and `assert`.
@@ -161,7 +161,7 @@ boost::optional<Severity> tryParseSeverityChar(const char*);
 /// trimArgName(##hello) -> "hello"
 /// trimArgName(##"hello") -> ""
 constexpr const char* trimArgName(const char* x) {
-    return (x[0] != '"') ? x : "";
+    return (x[0] != '"') && (x[0] != '_') ? x : "";
 }
 
 /// `DS_CONTEXT(...)`:  Adds additional contextual information
