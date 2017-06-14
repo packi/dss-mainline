@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_SUITE(http_client)
 
 BOOST_AUTO_TEST_CASE(testBase) {
   boost::shared_ptr<HttpClient> httpClient = boost::make_shared<HttpClient>();
-  std::string url = "http://www.digitalstrom.com";
+  std::string url = "https://www.digitalstrom.com";
   std::string result;
 
   BOOST_CHECK_EQUAL(httpClient->get(url, &result), 200);
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(testBase) {
 
 BOOST_AUTO_TEST_CASE(testReuseHandle) {
   HttpClient httpClient(true);
-  std::string url = "http://www.digitalstrom.com";
+  std::string url = "https://www.digitalstrom.com";
   std::string result;
 
   for (int i = 0; i < 20; i++) {
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(testReuseHandle) {
 }
 
 BOOST_AUTO_TEST_CASE(testEmptyHeaderMaps) {
-  std::string url = "http://www.digitalstrom.com";
+  std::string url = "https://www.digitalstrom.com";
   std::unordered_map<std::string, std::string> headers;
   HttpClient httpClient(true);
 
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(testEmptyHeaderMaps) {
 }
 
 BOOST_AUTO_TEST_CASE(testEmptyHeaderAndFormPostMaps) {
-  std::string url = "http://www.digitalstrom.com";
+  std::string url = "https://www.digitalstrom.com";
   std::unordered_map<std::string, std::string> headers;
   HttpClient httpClient(true);
 
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(testEmptyHeaderAndFormPostMaps) {
 
 BOOST_AUTO_TEST_CASE(testStructHttpRequest) {
   HttpRequest req;
-  req.url = "http://www.digitalstrom.com";
+  req.url = "https://www.digitalstrom.com";
   req.type = POST;
   HttpClient httpClient(true);
   std::string result;
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(testStructHttpRequest) {
 
 void fetcher_do() {
   HttpClient httpClient(false);
-  std::string url = "http://www.google.com";
+  std::string url = "https://www.google.com";
 
   /*
    * no BOOST_CHECK in here, it's not threadsafe
