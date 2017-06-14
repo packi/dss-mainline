@@ -55,7 +55,7 @@ TEST_CASE("DS_CONTEXT", TAGS) {
 }
 
 TEST_CASE("DS_REQUIRE", TAGS) {
-    SECTION("does nothing on success") { DS_REQUIRE(true); }
+    SECTION("does nothing on success") { DS_REQUIRE(true, ""); }
 
     SECTION("accepts context arguments on success but does not evaluate them") {
         bool evaluated = false;
@@ -69,7 +69,7 @@ TEST_CASE("DS_REQUIRE", TAGS) {
         CHECK(!evaluated);
     }
 
-    SECTION("throws on failure") { CHECK_THROWS(DS_REQUIRE(false)); }
+    SECTION("throws on failure") { CHECK_THROWS(DS_REQUIRE(false, "")); }
 
     SECTION("captures context on failure") {
         auto foo = 7;
@@ -86,7 +86,7 @@ TEST_CASE("DS_REQUIRE", TAGS) {
 }
 
 TEST_CASE("DS_FAIL_REQUIRE", TAGS) {
-    SECTION("throws on failure") { CHECK_THROWS(DS_FAIL_REQUIRE()); }
+    SECTION("throws on failure") { CHECK_THROWS(DS_FAIL_REQUIRE("")); }
 
     SECTION("captures context on failure") {
         auto foo = 7;
@@ -107,7 +107,7 @@ TEST_CASE("DS_FAIL_REQUIRE", TAGS) {
 }
 
 TEST_CASE("DS_ASSERT", TAGS) {
-    SECTION("does nothing on success") { DS_ASSERT(true); }
+    SECTION("does nothing on success") { DS_ASSERT(true, ""); }
 
     SECTION("accepts context arguments on success but does not evaluate them") {
         bool evaluated = false;
@@ -138,7 +138,8 @@ TEST_CASE("DS_FAIL_ASSERT", TAGS) {
             //      N
             //      ^
             // ../../build/../src/ds/log.h:116:45: note: in expansion of macro ‘DS_MACRO_FOR_EACH’
-            //      ::ds::log::_private::assert_(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__), DS_LOG_FILE_CONTEXT))
+            //      ::ds::log::_private::assert_(ds::str("" DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__),
+            //      DS_LOG_FILE_CONTEXT))
             //                                              ^
             // ../../build/../src/ds/log-test.cpp:65:13: note: in expansion of macro ‘DS_FAIL_ASSERT’
             //
@@ -195,7 +196,7 @@ public:
 TEST_CASE("dsLogChannel", TAGS) {
     SECTION("Default constructed channel") {
         ds::log::Channel channel("dsLogChannelTest");
-        CHECK(channel.name() == "dsLogChannelTest");
+        CHECK(channel.name() == std::string("dsLogChannelTest"));
         CHECK(channel.severity() == ds::log::Severity::NOTICE);
     }
 
@@ -219,7 +220,7 @@ TEST_CASE("dsLogChannel", TAGS) {
         bool called = true;
         MockedLoggerLogFunction logFunction(
                 [&](const char* channelName, ds::log::Severity severity, std::string message) {
-                    CHECK(channelName == "dsLogChannelTest");
+                    CHECK(channelName == std::string("dsLogChannelTest"));
                     CHECK(severity == ds::log::Severity::INFO);
                     CHECK(message == "message");
                 });
@@ -259,14 +260,14 @@ TEST_CASE("dsLogDefaultChannel macros", TAGS) {
     auto functionName = ds::str("____C_A_T_C_H____T_E_S_T____", __LINE__ - 1);
     DS_STATIC_LOG_CHANNEL(dsLogDefaultChannelTest);
 
-    CHECK(DS_STATIC_LOG_CHANNEL_IDENTIFIER.name() == "dsLogDefaultChannelTest");
+    CHECK(DS_STATIC_LOG_CHANNEL_IDENTIFIER.name() == std::string("dsLogDefaultChannelTest"));
     CHECK(DS_STATIC_LOG_CHANNEL_IDENTIFIER.severity() == ds::log::Severity::NOTICE);
 
     ds::log::Severity lastSeverity;
     std::string lastMessage;
     bool called = false;
     MockedLoggerLogFunction logFunction([&](const char* channelName, ds::log::Severity severity, std::string message) {
-        CHECK(channelName == "dsLogDefaultChannelTest");
+        CHECK(channelName == std::string("dsLogDefaultChannelTest"));
         lastSeverity = severity;
         lastMessage = std::move(message);
         called = true;
@@ -314,7 +315,7 @@ TEST_CASE("DS_PRINT", TAGS) {
     std::string expectedMessage;
     bool called = false;
     MockedLoggerLogFunction logFunction([&](const char* channelName, ds::log::Severity severity, std::string message) {
-        CHECK(channelName == "");
+        CHECK(channelName == std::string(""));
         CHECK(severity == ds::log::Severity::PRINT);
         CHECK(message == expectedMessage);
         called = true;

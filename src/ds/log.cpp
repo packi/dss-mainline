@@ -36,7 +36,7 @@ Context::Context() : m_next(t_context) {
 }
 
 Context::~Context() {
-    DS_ASSERT(t_context == this);
+    DS_ASSERT(t_context == this, "");
     t_context = m_next;
 }
 
@@ -248,7 +248,7 @@ static std::string trimFileWithDotsToMaxSize(std::string file) {
         return file;
     }
     file.erase(0, file.size() - maxSize);
-    DS_ASSERT(file.size() == maxSize);
+    DS_ASSERT(file.size() == maxSize, "");
 
     for (int i = 0; i < dotsSize; i++) {
         file[i] = '.';

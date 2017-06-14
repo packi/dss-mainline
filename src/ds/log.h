@@ -185,7 +185,7 @@ protected:
     Context();
 
     /// Removes the instance from the thread local linked list of contexts
-    ~Context();
+    virtual ~Context();
 
     // Serializes this context item
     virtual void ostream(std::ostream&) = 0;
@@ -329,7 +329,7 @@ private:
 
 /// Define default static logger for use in
 #define DS_STATIC_LOG_CHANNEL_IDENTIFIER _dsChannel
-#define DS_STATIC_LOG_CHANNEL(name) static ::ds::log::Channel DS_STATIC_LOG_CHANNEL_IDENTIFIER(#name);
+#define DS_STATIC_LOG_CHANNEL(name) static ::ds::log::Channel DS_STATIC_LOG_CHANNEL_IDENTIFIER(#name)
 
 #define DS_CHANNEL_LOG(channel, severity, ...)                                                \
     if (!channel.shouldLog(::ds::log::Severity::severity)) {                                  \
