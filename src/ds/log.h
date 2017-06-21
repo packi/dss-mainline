@@ -341,11 +341,11 @@ private:
     }
 
 #define DS_CHANNEL_DEBUG(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, ##__VA_ARGS__)
-#define DS_CHANNEL_DEBUG_ENTER(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, "Enter", __FUNCTION__, ##__VA_ARGS__)
-#define DS_CHANNEL_DEBUG_LEAVE(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, "Leave", __FUNCTION__, ##__VA_ARGS__)
+#define DS_CHANNEL_DEBUG_ENTER(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, "Enter", __PRETTY_FUNCTION__, ##__VA_ARGS__)
+#define DS_CHANNEL_DEBUG_LEAVE(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, "Leave", __PRETTY_FUNCTION__, ##__VA_ARGS__)
 #define DS_CHANNEL_INFO(channel, ...) DS_CHANNEL_LOG(channel, INFO, ##__VA_ARGS__)
-#define DS_CHANNEL_INFO_ENTER(channel, ...) DS_CHANNEL_LOG(channel, INFO, "Enter", __FUNCTION__, ##__VA_ARGS__)
-#define DS_CHANNEL_INFO_LEAVE(channel, ...) DS_CHANNEL_LOG(channel, INFO, "Leave", __FUNCTION__, ##__VA_ARGS__)
+#define DS_CHANNEL_INFO_ENTER(channel, ...) DS_CHANNEL_LOG(channel, INFO, "Enter", __PRETTY_FUNCTION__, ##__VA_ARGS__)
+#define DS_CHANNEL_INFO_LEAVE(channel, ...) DS_CHANNEL_LOG(channel, INFO, "Leave", __PRETTY_FUNCTION__, ##__VA_ARGS__)
 #define DS_CHANNEL_NOTICE(channel, ...) DS_CHANNEL_LOG(channel, NOTICE, ##__VA_ARGS__)
 #define DS_CHANNEL_WARNING(channel, ...) DS_CHANNEL_LOG(channel, WARNING, ##__VA_ARGS__)
 #define DS_CHANNEL_ERROR(channel, ...) DS_CHANNEL_LOG(channel, ERROR, ##__VA_ARGS__)
