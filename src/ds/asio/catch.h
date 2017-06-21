@@ -59,7 +59,7 @@ static constexpr boost::chrono::milliseconds LATENCY = boost::chrono::millisecon
     do {                                                                                                   \
         static_assert(std::is_base_of<::ds::asio::catch_::IoService DS_COMMA decltype(ioService)>::value,  \
                 "ioService must be if ::ds::asio::catch_::IoService type");                                \
-        auto dsAsioCatchDuration = (duration);                                                             \
+        auto dsAsioCatchDuration = boost::chrono::duration_cast<boost::chrono::milliseconds>(duration);    \
         INFO("Running even loop for " << dsAsioCatchDuration.count() << "ms and expect stop");             \
         macro(ioService.runFor(dsAsioCatchDuration) == ::ds::asio::catch_::IoService::RunResult::STOPPED); \
     } while (0)
