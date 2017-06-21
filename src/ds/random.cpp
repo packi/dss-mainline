@@ -17,8 +17,8 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "random.h"
-#include <random>
 #include <boost/thread/tss.hpp>
+#include <random>
 #include "common.h"
 
 namespace ds {

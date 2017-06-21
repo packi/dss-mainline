@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include <thread>
 #include <boost/asio/io_service.hpp>
+#include <thread>
 
 namespace ds {
 namespace asio {
@@ -28,17 +28,17 @@ namespace asio {
 /// call also the run methods.
 class IoService : public boost::asio::io_service {
 public:
-  IoService();
-  ~IoService();
+    IoService();
+    ~IoService();
 
-  std::thread::id getThreadId() const { return m_threadId; }
-  bool thisThreadMatches() const { return m_threadId == std::this_thread::get_id(); }
+    std::thread::id getThreadId() const { return m_threadId; }
+    bool thisThreadMatches() const { return m_threadId == std::this_thread::get_id(); }
 
-  /// DS_REQUIRE(thisThreadMatches()) before asio::io_service::run()
-  std::size_t run();
+    /// DS_REQUIRE(thisThreadMatches()) before asio::io_service::run()
+    std::size_t run();
 
 private:
-  std::thread::id m_threadId;
+    std::thread::id m_threadId;
 };
 
 } // namespace asio

@@ -31,8 +31,7 @@ std::default_random_engine& getRandomEngine();
 /// Poor man's std::experimental::randint
 template <class IntType>
 IntType randint(IntType a, IntType b) {
-  return std::uniform_int_distribution<IntType>(a,b)(_private::getRandomEngine());
+    return std::uniform_int_distribution<IntType>(a, b)(_private::getRandomEngine());
 }
-
 
 } // namespace ds

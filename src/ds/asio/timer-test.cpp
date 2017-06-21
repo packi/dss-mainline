@@ -68,4 +68,3 @@ TEST_CASE("dsAsioTimer", TAGS) {
         CHECK_STOP_RUN_FOR(ioService, LATENCY);
     }
 }
-
