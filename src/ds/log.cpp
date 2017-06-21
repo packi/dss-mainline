@@ -260,6 +260,27 @@ std::string trimFile(std::string file) {
     return trimFileWithDotsToMaxSize(trimFileToLastSrc(std::move(file)));
 }
 
+std::string trimFile(std::string file, const Channel& channel) {
+    file = trimFileWithDotsToMaxSize(trimFileToLastSrc(std::move(file)));
+
+    // trim common base with channel name
+    const char* filePtr = file.c_str();
+    const char* channelNamePtr = channel.name();
+    while (*filePtr) {
+        if (*filePtr == '/' || *filePtr == '-' || *filePtr == '_') {
+            filePtr++;
+            continue;
+        }
+        if (::tolower(*filePtr) == ::tolower(*channelNamePtr)) {
+            filePtr++;
+            channelNamePtr++;
+            continue;
+        }
+        break;
+    }
+    return filePtr;
+}
+
 void assert_(const std::string& x) {
     std::cerr << x << std::endl;
     abort();

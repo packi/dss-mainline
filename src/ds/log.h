@@ -201,6 +201,8 @@ Context* getContext();
 
 #define DS_LOG_ARG(x) , ::ds::log::trimArgName(#x ":"), x, " "
 #define DS_LOG_CONTEXT ::ds::log::_private::trimFile(__FILE__), ':', __LINE__, ' ', ::ds::log::getContext()
+#define DS_LOG_CHANNEL_CONTEXT(channel) \
+    ::ds::log::_private::trimFile(__FILE__, channel), ':', __LINE__, ' ', ::ds::log::getContext()
 
 // * `DS_REQUIRE(condition, ...)`:  Check external input and preconditions
 // e.g. to validate parameters passed from a caller.
@@ -331,11 +333,11 @@ private:
 #define DS_STATIC_LOG_CHANNEL_IDENTIFIER _dsChannel
 #define DS_STATIC_LOG_CHANNEL(name) static ::ds::log::Channel DS_STATIC_LOG_CHANNEL_IDENTIFIER(#name)
 
-#define DS_CHANNEL_LOG(channel, severity, ...)                                                \
-    if (!channel.shouldLog(::ds::log::Severity::severity)) {                                  \
-    } else {                                                                                  \
-        channel.log(::ds::log::Severity::severity,                                            \
-                ::ds::log::str(DS_LOG_CONTEXT DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
+#define DS_CHANNEL_LOG(channel, severity, ...)                                                                 \
+    if (!channel.shouldLog(::ds::log::Severity::severity)) {                                                   \
+    } else {                                                                                                   \
+        channel.log(::ds::log::Severity::severity,                                                             \
+                ::ds::log::str(DS_LOG_CHANNEL_CONTEXT(channel) DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
     }
 
 #define DS_CHANNEL_DEBUG(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, ##__VA_ARGS__)
@@ -383,6 +385,7 @@ std::string str(Args&&... args) {
 namespace _private {
 /// Trim file for logging purposes.
 std::string trimFile(std::string file);
+std::string trimFile(std::string file, const ds::log::Channel& channel);
 
 template <typename Func>
 class ContextImpl : public Context {

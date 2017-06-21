@@ -257,7 +257,7 @@ TEST_CASE("dsLogParseRules", TAGS) {
 }
 
 TEST_CASE("dsLogDefaultChannel macros", TAGS) {
-    auto functionName = ds::str("____C_A_T_C_H____T_E_S_T____", __LINE__ - 1);
+    auto functionName = ds::str("void ____C_A_T_C_H____T_E_S_T____", __LINE__ - 1, "()");
     DS_STATIC_LOG_CHANNEL(dsLogDefaultChannelTest);
 
     CHECK(DS_STATIC_LOG_CHANNEL_IDENTIFIER.name() == std::string("dsLogDefaultChannelTest"));
@@ -277,7 +277,7 @@ TEST_CASE("dsLogDefaultChannel macros", TAGS) {
     CHECK(called);                                      \
     called = false;                                     \
     CHECK(lastSeverity == ds::log::Severity::severity); \
-    CHECK(lastMessage == ds::str("ds/log-test.cpp:", __LINE__, " y:2 ", message));
+    CHECK(lastMessage == ds::str("test.cpp:", __LINE__, " y:2 ", message));
 
 #define CASE_NOLOG(code) \
     code;                \
