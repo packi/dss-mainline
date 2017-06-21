@@ -28,8 +28,6 @@ libds_catch_main_a_SOURCES = \
 libds_catch_main_a_LIB = \
         libds-catch-main.a
 
-### ds-asio
-
 DS_TESTS += ds-tests
 ds_tests_SOURCES = \
         ../src/ds/common-test.cpp \
@@ -39,6 +37,8 @@ ds_tests_SOURCES = \
 ds_tests_LDADD = \
         $(libds_catch_main_a_LIB) \
         $(libds_a_LIB)
+
+### ds-asio
 
 noinst_LIBRARIES += libds-asio.a
 libds_asio_a_SOURCES = \
