@@ -56,16 +56,16 @@ std::ostream& operator<<(std::ostream& stream, Severity x);
 // parses severity at the start of the string
 boost::optional<Severity> tryParseSeverityChar(const char*);
 
-/// All logging macros accept string literals and other expressions to be logged,
-/// Expressions are logged stringified together with their value.
+/// All logging macros stringify passed expressions together with their value.
+/// String literals and expressions starting with char '_' are not stringified.
 ///
 /// Example:
 ///
-///     DS_NOTICE("Connected to server", address, port);
+///     DS_NOTICE("Connected to server.", address, port);
 ///
 /// This will log message like like:
 ///
-///     Connected to server address:128.55.2.2 port:844
+///     Connected to server. address:128.55.2.2 port:844
 ///
 /// Macros `DS_REQUIRE` and `DS_ASSERT` check for preconditions and invariants
 /// instead of `throw` and `assert`.
@@ -161,7 +161,7 @@ boost::optional<Severity> tryParseSeverityChar(const char*);
 /// trimArgName(##hello) -> "hello"
 /// trimArgName(##"hello") -> ""
 constexpr const char* trimArgName(const char* x) {
-    return (x[0] != '"') ? x : "";
+    return (x[0] != '"') && (x[0] != '_') ? x : "";
 }
 
 /// `DS_CONTEXT(...)`:  Adds additional contextual information
@@ -185,7 +185,7 @@ protected:
     Context();
 
     /// Removes the instance from the thread local linked list of contexts
-    ~Context();
+    virtual ~Context();
 
     // Serializes this context item
     virtual void ostream(std::ostream&) = 0;
@@ -201,6 +201,8 @@ Context* getContext();
 
 #define DS_LOG_ARG(x) , ::ds::log::trimArgName(#x ":"), x, " "
 #define DS_LOG_CONTEXT ::ds::log::_private::trimFile(__FILE__), ':', __LINE__, ' ', ::ds::log::getContext()
+#define DS_LOG_CHANNEL_CONTEXT(channel) \
+    ::ds::log::_private::trimFile(__FILE__, channel), ':', __LINE__, ' ', ::ds::log::getContext()
 
 // * `DS_REQUIRE(condition, ...)`:  Check external input and preconditions
 // e.g. to validate parameters passed from a caller.
@@ -329,21 +331,21 @@ private:
 
 /// Define default static logger for use in
 #define DS_STATIC_LOG_CHANNEL_IDENTIFIER _dsChannel
-#define DS_STATIC_LOG_CHANNEL(name) static ::ds::log::Channel DS_STATIC_LOG_CHANNEL_IDENTIFIER(#name);
+#define DS_STATIC_LOG_CHANNEL(name) static ::ds::log::Channel DS_STATIC_LOG_CHANNEL_IDENTIFIER(#name)
 
-#define DS_CHANNEL_LOG(channel, severity, ...)                                                \
-    if (!channel.shouldLog(::ds::log::Severity::severity)) {                                  \
-    } else {                                                                                  \
-        channel.log(::ds::log::Severity::severity,                                            \
-                ::ds::log::str(DS_LOG_CONTEXT DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
+#define DS_CHANNEL_LOG(channel, severity, ...)                                                                 \
+    if (!channel.shouldLog(::ds::log::Severity::severity)) {                                                   \
+    } else {                                                                                                   \
+        channel.log(::ds::log::Severity::severity,                                                             \
+                ::ds::log::str(DS_LOG_CHANNEL_CONTEXT(channel) DS_MACRO_FOR_EACH(DS_LOG_ARG, ##__VA_ARGS__))); \
     }
 
 #define DS_CHANNEL_DEBUG(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, ##__VA_ARGS__)
-#define DS_CHANNEL_DEBUG_ENTER(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, "Enter", __FUNCTION__, ##__VA_ARGS__)
-#define DS_CHANNEL_DEBUG_LEAVE(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, "Leave", __FUNCTION__, ##__VA_ARGS__)
+#define DS_CHANNEL_DEBUG_ENTER(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, "Enter", __PRETTY_FUNCTION__, ##__VA_ARGS__)
+#define DS_CHANNEL_DEBUG_LEAVE(channel, ...) DS_CHANNEL_LOG(channel, DEBUG, "Leave", __PRETTY_FUNCTION__, ##__VA_ARGS__)
 #define DS_CHANNEL_INFO(channel, ...) DS_CHANNEL_LOG(channel, INFO, ##__VA_ARGS__)
-#define DS_CHANNEL_INFO_ENTER(channel, ...) DS_CHANNEL_LOG(channel, INFO, "Enter", __FUNCTION__, ##__VA_ARGS__)
-#define DS_CHANNEL_INFO_LEAVE(channel, ...) DS_CHANNEL_LOG(channel, INFO, "Leave", __FUNCTION__, ##__VA_ARGS__)
+#define DS_CHANNEL_INFO_ENTER(channel, ...) DS_CHANNEL_LOG(channel, INFO, "Enter", __PRETTY_FUNCTION__, ##__VA_ARGS__)
+#define DS_CHANNEL_INFO_LEAVE(channel, ...) DS_CHANNEL_LOG(channel, INFO, "Leave", __PRETTY_FUNCTION__, ##__VA_ARGS__)
 #define DS_CHANNEL_NOTICE(channel, ...) DS_CHANNEL_LOG(channel, NOTICE, ##__VA_ARGS__)
 #define DS_CHANNEL_WARNING(channel, ...) DS_CHANNEL_LOG(channel, WARNING, ##__VA_ARGS__)
 #define DS_CHANNEL_ERROR(channel, ...) DS_CHANNEL_LOG(channel, ERROR, ##__VA_ARGS__)
@@ -383,6 +385,7 @@ std::string str(Args&&... args) {
 namespace _private {
 /// Trim file for logging purposes.
 std::string trimFile(std::string file);
+std::string trimFile(std::string file, const ds::log::Channel& channel);
 
 template <typename Func>
 class ContextImpl : public Context {

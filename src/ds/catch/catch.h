@@ -20,7 +20,6 @@
 #include "catch.hpp"
 
 /// require expression to throw and exception containing given message
-#define REQUIRE_THROWS_FIND(expression, message) REQUIRE_THROWS_WITH(expression, \
-        ::Catch::Matchers::Contains(message))
+#define REQUIRE_THROWS_FIND(expression, message) REQUIRE_THROWS_WITH(expression, ::Catch::Matchers::Contains(message))
 /// check expression to throw and exception containing given message
 #define CHECK_THROWS_FIND(expression, message) CHECK_THROWS_WITH(expression, ::Catch::Matchers::Contains(message))

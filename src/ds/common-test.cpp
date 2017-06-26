@@ -19,7 +19,7 @@
 #include "common.h"
 #include <ds/catch/catch.h>
 
-static const char* TAGS = "[dsCommon][ds]";
+static const char *TAGS = "[dsCommon][ds]";
 
 namespace {
 class Base {
@@ -34,7 +34,7 @@ class Child DS_FINAL : public Base {
 };
 
 TEST_CASE("DS_NULLPTR", TAGS) {
-    CHECK((void *) 0 == DS_NULLPTR);
+    CHECK((void *)0 == DS_NULLPTR);
 }
 
 DS_NORETURN void noReturn() {

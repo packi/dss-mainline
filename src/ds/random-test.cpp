@@ -17,9 +17,9 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "random.h"
-#include <thread>
-#include <limits>
 #include <ds/catch/catch.h>
+#include <limits>
+#include <thread>
 
 static const char* TAGS = "[dsRandom][ds]";
 
@@ -52,8 +52,8 @@ TEST_CASE("dsRandomRandint distributes evenly", TAGS) {
 
 TEST_CASE("dsRandomRandint each thread is randomly seeded", TAGS) {
     auto firstValue = 0LL;
-    auto setFirstValueInNewThread = [&](){
-        std::thread thread([&](){
+    auto setFirstValueInNewThread = [&]() {
+        std::thread thread([&]() {
             firstValue = ds::randint(std::numeric_limits<long long>::min(), std::numeric_limits<long long>::max());
         });
         thread.join();

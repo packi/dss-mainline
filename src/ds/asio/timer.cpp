@@ -18,8 +18,8 @@
  */
 
 #include "timer.h"
-#include <ds/random.h>
 #include <ds/log.h>
+#include <ds/random.h>
 
 namespace ds {
 namespace asio {
