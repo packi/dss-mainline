@@ -692,7 +692,7 @@ namespace dss {
     }
   } // deviceAddToGroup
 
-  void StructureManipulator::deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group) {
+  void StructureManipulator::deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group, bool _adaptInputs) {
     assert(_device.get() != NULL);
     assert(_group.get() != NULL);
 
@@ -704,17 +704,19 @@ namespace dss {
     m_Interface.removeFromGroup(_device->getDSMeterDSID(), _group->getID(), _device->getShortAddress());
     _device->removeFromGroup(_group->getID());
 
-    if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) &&
-        (_device->getBinaryInputCount() == 1) &&
-        (_group->getID() == _device->getBinaryInputs()[0]->m_targetGroupId)) {
-      /* AKM with single input, active on removed group */
-      _device->setDeviceBinaryInputTargetId(0, GroupIDBlack);
-      _device->setBinaryInputTargetId(0, GroupIDBlack);
-    }
+    if (_adaptInputs) {
+      if ((_device->getDeviceType() == DEVICE_TYPE_AKM || _device->getDeviceType() == DEVICE_TYPE_UMR) &&
+          (_device->getBinaryInputCount() == 1) &&
+          (_group->getID() == _device->getBinaryInputs()[0]->m_targetGroupId)) {
+        /* AKM with single input, active on removed group */
+        _device->setDeviceBinaryInputTargetId(0, GroupIDBlack);
+        _device->setBinaryInputTargetId(0, GroupIDBlack);
+      }
 
-    if (_group->getID() == _device->getButtonActiveGroup()) {
-      /* device has button that is active on removed group */
-      _device->setDeviceButtonActiveGroup(_device->getActiveGroup());
+      if (_group->getID() == _device->getButtonActiveGroup()) {
+        /* device has button that is active on removed group */
+        _device->setDeviceButtonActiveGroup(_device->getActiveGroup());
+      }
     }
 
     {
@@ -757,19 +759,19 @@ namespace dss {
           continue;
         }
         if (device->isInGroup(g)) {
-          deviceRemoveFromGroup(device, m_Apartment.getZone(device->getZoneID())->getGroup(g));
+          deviceRemoveFromGroup(device, m_Apartment.getZone(device->getZoneID())->getGroup(g), false);
         }
       }
       // remove from control groups
       for (int g = GroupIDControlGroupMin; g <= GroupIDControlGroupMax; g++) {
         if (device->isInGroup(g)) {
-          deviceRemoveFromGroup(device, m_Apartment.getZone(device->getZoneID())->getGroup(g));
+          deviceRemoveFromGroup(device, m_Apartment.getZone(device->getZoneID())->getGroup(g), false);
         }
       }
       // remove also from GA groups
       for (int g = GroupIDGlobalAppMin; g <= GroupIDGlobalAppMax; g++) {
         if (device->isInGroup(g)) {
-          deviceRemoveFromGroup(device, m_Apartment.getZone(0)->getGroup(g));
+          deviceRemoveFromGroup(device, m_Apartment.getZone(0)->getGroup(g), false);
         }
       }
       // assign to new "standard" group

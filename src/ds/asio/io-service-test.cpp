@@ -17,8 +17,8 @@
     along with digitalSTROM Server. If not, see <http://www.gnu.org/licenses/>.
 */
 #include "io-service.h"
-#include <thread>
 #include <ds/asio/catch.h>
+#include <thread>
 
 static const char* TAGS = "[dsAsioIoService][dsAsio][ds]";
 
@@ -32,9 +32,7 @@ TEST_CASE("dsAsioIoService", TAGS) {
     }
 
     SECTION("run throws in non-matching thread") {
-        std::thread thread([&]{
-            CHECK_THROWS_FIND(ioService.runFor(LATENCY), "run() is called from wrong thread");
-        });
+        std::thread thread([&] { CHECK_THROWS_FIND(ioService.runFor(LATENCY), "run() is called from wrong thread"); });
         thread.join();
     }
 }

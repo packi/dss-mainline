@@ -219,6 +219,7 @@ namespace dss {
       "listening_ports", configPorts.c_str(),
       "ssl_certificate", sslCert.c_str(),
       "websocket_timeout_ms", intToString(wsTimeout * 1000).c_str(), // s to ms
+      "enable_keep_alive", "yes",
       NULL
     };
 

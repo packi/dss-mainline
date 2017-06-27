@@ -784,6 +784,8 @@ namespace dss {
 
   void Device::setDeviceButtonActiveGroup(uint8_t _buttonActiveGroup) {
     if (m_pApartment->getDeviceBusInterface() != NULL) {
+      m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
+      m_ButtonActiveGroup = _buttonActiveGroup;
       /* re-configure area or device button mode for groups other then lights and shades */
       bool isAreaButton =
           ((m_ButtonID >= ButtonId_Area1) && (m_ButtonID <= ButtonId_Area4)) ||
@@ -792,8 +794,6 @@ namespace dss {
           ((_buttonActiveGroup < GroupIDYellow) || (_buttonActiveGroup > GroupIDGray))) {
         setDeviceButtonID(ButtonId_Zone);
       }
-      m_pApartment->getDeviceBusInterface()->setDeviceButtonActiveGroup(*this, _buttonActiveGroup);
-      m_ButtonActiveGroup = _buttonActiveGroup;
     }
   }
 

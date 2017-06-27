@@ -19,9 +19,9 @@
 
 #pragma once
 
+#include <ds/common.h>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/chrono/chrono.hpp>
-#include <ds/common.h>
 #include "io-service.h"
 
 namespace ds {
@@ -37,9 +37,7 @@ class Timer : public ::boost::asio::basic_waitable_timer<boost::chrono::steady_c
 public:
     typedef ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock> Super;
     typedef duration Duration;
-    Timer(ds::asio::IoService& ioService)
-        : Super(ioService) {
-    }
+    Timer(ds::asio::IoService &ioService) : Super(ioService) {}
 
     /// Convenient method calling `expires_from_now(x)` and `asyncWait(f)`.
     template <typename F>
@@ -50,7 +48,9 @@ public:
 
     /// Convenient method calling `expiresFromNow(0, f)`.
     template <typename F>
-    void expiresNow(F &&f) { expiresFromNow(Duration(0), std::forward<F>(f)); }
+    void expiresNow(F &&f) {
+        expiresFromNow(Duration(0), std::forward<F>(f));
+    }
 
     /// Expires randomly in closed interval [a, b] relatively to now.
     template <typename F>
@@ -75,7 +75,7 @@ public:
         // TODO(c++14): move capture f
         async_wait([f](boost::system::error_code e) {
             if (e) {
-                return; //timer was aborted
+                return; // timer was aborted
             }
             f();
         });

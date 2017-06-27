@@ -36,7 +36,7 @@ Context::Context() : m_next(t_context) {
 }
 
 Context::~Context() {
-    DS_ASSERT(t_context == this);
+    DS_ASSERT(t_context == this, "");
     t_context = m_next;
 }
 
@@ -161,7 +161,7 @@ struct Logger::Impl {
 
 Logger::Logger() : m_impl(new Impl()) {
     setLogFunction(Logger::defaultLogFunction);
-    auto debugEnv = getenv("DS_DEBUG");
+    auto debugEnv = getenv("DS_LOG");
     if (debugEnv) {
         m_impl->rules = tryParseRules(debugEnv);
     }
@@ -208,6 +208,7 @@ void Logger::defaultLogFunction(const char* channelName, Severity severity, std:
         size -= written;
         data += written;
     }
+    ::fsync(2);
 }
 
 void Logger::addChannel(Channel& channel) {
@@ -247,7 +248,7 @@ static std::string trimFileWithDotsToMaxSize(std::string file) {
         return file;
     }
     file.erase(0, file.size() - maxSize);
-    DS_ASSERT(file.size() == maxSize);
+    DS_ASSERT(file.size() == maxSize, "");
 
     for (int i = 0; i < dotsSize; i++) {
         file[i] = '.';
@@ -257,6 +258,27 @@ static std::string trimFileWithDotsToMaxSize(std::string file) {
 
 std::string trimFile(std::string file) {
     return trimFileWithDotsToMaxSize(trimFileToLastSrc(std::move(file)));
+}
+
+std::string trimFile(std::string file, const Channel& channel) {
+    file = trimFileWithDotsToMaxSize(trimFileToLastSrc(std::move(file)));
+
+    // trim common base with channel name
+    const char* filePtr = file.c_str();
+    const char* channelNamePtr = channel.name();
+    while (*filePtr) {
+        if (*filePtr == '/' || *filePtr == '-' || *filePtr == '_') {
+            filePtr++;
+            continue;
+        }
+        if (::tolower(*filePtr) == ::tolower(*channelNamePtr)) {
+            filePtr++;
+            channelNamePtr++;
+            continue;
+        }
+        break;
+    }
+    return filePtr;
 }
 
 void assert_(const std::string& x) {

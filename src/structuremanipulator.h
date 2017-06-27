@@ -81,7 +81,7 @@ namespace dss {
     void clusterSetConfigurationLock(boost::shared_ptr<Cluster> _cluster, bool _locked);
 
     void deviceAddToGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
-    void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group);
+    void deviceRemoveFromGroup(boost::shared_ptr<Device> _device, boost::shared_ptr<Group> _group, bool _adaptInputs = true);
     void deviceRemoveFromGroups(boost::shared_ptr<Device> device);
 
     void setZoneHeatingConfig(boost::shared_ptr<Zone> zone, const ZoneHeatingConfigSpec_t& spec);

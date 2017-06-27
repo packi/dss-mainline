@@ -25,11 +25,13 @@ namespace {
 enum class Enum { A, B };
 std::ostream& operator<<(std::ostream& stream, Enum x) {
     switch (x) {
-      case Enum::A: return stream << "a";
-      case Enum::B: return stream << "b";
+        case Enum::A:
+            return stream << "a";
+        case Enum::B:
+            return stream << "b";
     }
     return stream << "?";
-  }
+}
 }
 
 TEST_CASE("dsStr", TAGS) {
@@ -41,9 +43,7 @@ TEST_CASE("dsStr", TAGS) {
         CHECK(ds::str("a", -4, "b") == "a-4b");
     }
 
-    SECTION("ostream operator << is used for serialization") {
-        CHECK(ds::str("-", Enum::A, Enum::B, "-") == "-ab-");
-    }
+    SECTION("ostream operator << is used for serialization") { CHECK(ds::str("-", Enum::A, Enum::B, "-") == "-ab-"); }
 
     SECTION("unsigned and signed chars are serialized as numbers") {
         CHECK(ds::str(static_cast<unsigned char>('a')) == "97");
@@ -55,5 +55,11 @@ TEST_CASE("dsStr", TAGS) {
     SECTION("chars are serialized as characters") {
         CHECK(ds::str('a') == "a");
         CHECK(ds::str(static_cast<char>('a')) == "a");
+    }
+
+    SECTION("std:exceptions references are serialized with what()") {
+        auto e = std::runtime_error("a");
+        CHECK(ds::str(static_cast<const std::exception&>(e)) == "a");
+        CHECK(ds::str(static_cast<std::exception&>(e)) == "a");
     }
 }

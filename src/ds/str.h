@@ -43,6 +43,12 @@ inline void strOne(std::ostream& ostream, unsigned char x) {
 inline void strOne(std::ostream& ostream, signed char x) {
     ostream << static_cast<int>(x);
 }
+inline void strOne(std::ostream& ostream, const std::exception& x) {
+    ostream << x.what();
+}
+inline void strOne(std::ostream& ostream, std::exception& x) {
+    ostream << x.what();
+}
 
 inline void strRecursive(std::ostream&) {}
 template <typename Arg, typename... Args>
