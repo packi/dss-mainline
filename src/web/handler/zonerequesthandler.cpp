@@ -45,6 +45,8 @@
 
 #include <algorithm>
 
+DS_STATIC_LOG_CHANNEL(dssZoneRequestHandler);
+
 namespace dss {
 
 //=========================================== ZoneRequestHandler
@@ -509,25 +511,29 @@ std::string ZoneRequestHandler::getTemperatureControlInternals(
       json.add("ControlState", hProp.m_HeatingControlState);
 
       if (hProp.m_mode != HeatingControlMode::PID) {
-        return JSONWriter::failure("Not a PID controller");
+        continue;
       }
       if (hProp.m_HeatingControlState != HeatingControlStateIDInternal) {
-        return JSONWriter::failure("PID controller not running");
+        continue;
       }
-      memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
-      hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
-          dsm->getDSID(), pZone->getID());
+      try {
+        memset(&hInternals, 0, sizeof(ZoneHeatingInternalsSpec_t));
+        hInternals = m_Apartment.getBusInterface()->getStructureQueryBusInterface()->getZoneHeatingInternals(
+            dsm->getDSID(), pZone->getID());
 
-      json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
-      json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
-      json.add("CtrlTError", (double)hInternals.TError * 0.025);
-      json.add("CtrlTErrorPrev", (double)hInternals.TErrorPrev * 0.025);
-      json.add("CtrlIntegral", (double)hInternals.Integral * 0.025);
-      json.add("CtrlYp", (double)hInternals.Yp * 0.01);
-      json.add("CtrlYi", (double)hInternals.Yi * 0.01);
-      json.add("CtrlYd", (double)hInternals.Yd * 0.01);
-      json.add("CtrlY", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hInternals.Y));
-      json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
+        json.add("CtrlTRecent", sensorValueToDouble(SensorType::TemperatureIndoors, hInternals.Trecent));
+        json.add("CtrlTReference", sensorValueToDouble(SensorType::RoomTemperatureSetpoint, hInternals.Treference));
+        json.add("CtrlTError", (double)hInternals.TError * 0.025);
+        json.add("CtrlTErrorPrev", (double)hInternals.TErrorPrev * 0.025);
+        json.add("CtrlIntegral", (double)hInternals.Integral * 0.025);
+        json.add("CtrlYp", (double)hInternals.Yp * 0.01);
+        json.add("CtrlYi", (double)hInternals.Yi * 0.01);
+        json.add("CtrlYd", (double)hInternals.Yd * 0.01);
+        json.add("CtrlY", sensorValueToDouble(SensorType::RoomTemperatureControlVariable, hInternals.Y));
+        json.add("CtrlAntiWindUp", hInternals.AntiWindUp);
+      } catch (const std::exception& e) {
+        DS_WARNING(e.what());
+      }
 
       // end current dsm object
       json.endObject();
