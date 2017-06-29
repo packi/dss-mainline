@@ -372,6 +372,7 @@ namespace dss {
     log("InitializeDevice: DefaultGr:  " + intToString(_spec.defaultGroup));
     log("InitializeDevice: Button ID:  " + intToString(_spec.buttonID));
     log("InitializeDevice: Button ActiveGroup: " + intToString(_spec.buttonActiveGroup));
+    log("InitializeDevice: Button input mode:  " + ds::str(_spec.LTMode));
 
     boost::shared_ptr<Device> dev;
     try {
