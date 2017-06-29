@@ -363,10 +363,6 @@ namespace dss {
     if (!isValid(spec.activeGroup)) {
       Logger::getInstance()->log(ds::str("Device activeGroup does not match groups. deviceDsid:", deviceDsid), lsError);
     }
-    if (!isValid(spec.defaultGroup)) {
-      Logger::getInstance()->log(
-          ds::str("Device defaultGroup does not match groups. deviceDsid:", deviceDsid), lsError);
-    }
   }
 
   void DSStructureQueryBusInterface::updateButtonGroupFromMeter(dsuid_t _dsMeterID, DeviceSpec_t& _spec) {
