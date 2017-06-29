@@ -513,6 +513,7 @@ namespace dss {
     AKM_FALLING_EDGE = 23,
     SDS_SLAVE_M1_M2 = 0xff,
   };
+  std::ostream& operator<<(std::ostream& stream, ButtonInputMode x);
 
   const uint16_t TBVersion_OemEanConfig = 0x0350;
   const uint16_t TBVersion_OemConfigLock = 0x0357;

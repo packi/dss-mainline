@@ -473,6 +473,60 @@ namespace dss {
     }() << '(' << static_cast<int>(x) << ')';
   }
 
+  std::ostream& operator<<(std::ostream& stream, ButtonInputMode x) {
+    return stream <<
+           [&] {
+             switch (x) {
+               case ButtonInputMode::STANDARD:
+                 return "standard";
+               case ButtonInputMode::TURBO:
+                 return "turbo";
+               case ButtonInputMode::SWITCHED:
+                 return "switched";
+               case ButtonInputMode::TWO_WAY_DW_WITH_INPUT1:
+                 return "twoWayDwWithInput1";
+               case ButtonInputMode::TWO_WAY_DW_WITH_INPUT2:
+                 return "twoWayDwWithInput2";
+               case ButtonInputMode::TWO_WAY_DW_WITH_INPUT3:
+                 return "twoWayDwWithInput3";
+               case ButtonInputMode::TWO_WAY_DW_WITH_INPUT4:
+                 return "twoWayDwWithInput4";
+               case ButtonInputMode::TWO_WAY_UP_WITH_INPUT1:
+                 return "twoWayUpWithInput1";
+               case ButtonInputMode::TWO_WAY_UP_WITH_INPUT2:
+                 return "twoWayUpWithInput2";
+               case ButtonInputMode::TWO_WAY_UP_WITH_INPUT3:
+                 return "twoWayUpWithInput3";
+               case ButtonInputMode::TWO_WAY_UP_WITH_INPUT4:
+                 return "twoWayUpWithInput4";
+               case ButtonInputMode::TWO_WAY:
+                 return "twoWay";
+               case ButtonInputMode::ONE_WAY:
+                 return "oneWay";
+               case ButtonInputMode::AKM_STANDARD:
+                 return "akmStandard";
+               case ButtonInputMode::AKM_INVERTED:
+                 return "akmInverted";
+               case ButtonInputMode::AKM_ON_RISING_EDGE:
+                 return "akmOnRisingEdge";
+               case ButtonInputMode::AKM_ON_FALLING_EDGE:
+                 return "akmOnFallingEdge";
+               case ButtonInputMode::AKM_OFF_RISING_EDGE:
+                 return "akmOffRisingEdge";
+               case ButtonInputMode::AKM_OFF_FALLING_EDGE:
+                 return "akmOffFallingEdge";
+               case ButtonInputMode::AKM_RISING_EDGE:
+                 return "akmRisingEdge";
+               case ButtonInputMode::AKM_FALLING_EDGE:
+                 return "akmFallingEdge";
+               case ButtonInputMode::SDS_SLAVE_M1_M2:
+                 return "sdsSlaveM1M2";
+             }
+             return "unknown";
+           }() << '('
+                  << static_cast<int>(x) << ')';
+  }
+
   boost::optional<const char*> modelFeatureName(ModelFeatureId x) {
     switch (x) {
       case ModelFeatureId::dontcare:
