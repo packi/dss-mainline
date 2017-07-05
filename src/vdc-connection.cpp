@@ -326,7 +326,7 @@ namespace dss {
     return state;
   }
 
-  std::map<int,VdcHelper::SensorDesc> VdcHelper::getSensorDesc(dsuid_t _vdsm, dsuid_t _device)
+  std::map<std::string,VdcHelper::SensorDesc> VdcHelper::getSensorDesc(dsuid_t _vdsm, dsuid_t _device)
   {
     google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
     vdcapi::PropertyElement* el = query.Add();
@@ -338,13 +338,13 @@ namespace dss {
     vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
     VdcElementReader reader(message.vdc_response_get_property().properties());
 
-    std::map<int,SensorDesc> sensorList;
+    std::map<std::string,SensorDesc> sensorList;
     VdcElementReader sensorDescReader = reader["sensorDescriptions"];
     for (VdcElementReader::iterator it = sensorDescReader.begin(); it != sensorDescReader.end(); it++) {
       SensorDesc sDesc;
       VdcElementReader sensorReader = *it;
-      const std::string& sSensorName = sensorReader.getName();
-      int sSensorIndex = strToInt(sSensorName);
+      const std::string& propertyName = sensorReader.getName();
+
       for (VdcElementReader::iterator it = sensorReader.begin(); it != sensorReader.end(); it++) {
         VdcElementReader sensorFieldProp = *it;
         const std::string& sensorField = sensorFieldProp.getName();
@@ -356,11 +356,65 @@ namespace dss {
           sDesc.sensorUsage = sensorFieldProp.getValueAsInt();
         } else if (sensorField == "updateInterval") {
           sDesc.updateInterval = sensorFieldProp.getValueAsDouble();
+        } else if (sensorField == "dsIndex") {
+          // new in vdc-api v3
+          sDesc.index = sensorFieldProp.getValueAsInt();
         }
       }
-      sensorList[sSensorIndex] = sDesc;
+      if (sDesc.index == 255) {
+        try {
+          sDesc.index = strToInt(propertyName);
+        } catch(std::exception&) {}
+      }
+      sensorList[propertyName] = sDesc;
     }
     return sensorList;
+  }
+
+  std::map<std::string,VdcHelper::ChannelDesc> VdcHelper::getChannelDesc(dsuid_t _vdsm, dsuid_t _device)
+  {
+    google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
+    vdcapi::PropertyElement* el = query.Add();
+    el->set_name("channelDescriptions");
+
+    vdcapi::Message message = VdcConnection::getProperty(_vdsm, _device, query);
+
+    Logger::getInstance()->log("VdcHelper::getChannelDesc: message " + message.DebugString(), lsDebug);
+    vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
+    VdcElementReader reader(message.vdc_response_get_property().properties());
+
+    std::map<std::string,ChannelDesc> channelList;
+    VdcElementReader channelDescReader = reader["channelDescriptions"];
+    for (VdcElementReader::iterator it = channelDescReader.begin(); it != channelDescReader.end(); it++) {
+      ChannelDesc sDesc;
+      VdcElementReader channelReader = *it;
+      std::string propertyName = channelReader.getName();
+      for (VdcElementReader::iterator it = channelReader.begin(); it != channelReader.end(); it++) {
+        VdcElementReader fieldProp = *it;
+        const std::string& fieldName = fieldProp.getName();
+        if (fieldName == "name") {
+          sDesc.name = fieldProp.getValueAsString();
+        } else if (fieldName == "channelType") {
+          sDesc.type = fieldProp.getValueAsInt();
+        } else if (fieldName == "dsIndex") {
+          // new in vdc-api v3
+          sDesc.index = fieldProp.getValueAsInt();
+        } else if (fieldName == "channelIndex") {
+          // old in vdc-api v2
+          sDesc.index = fieldProp.getValueAsInt();
+        }
+      }
+      if (sDesc.type == 255) {
+        try {
+          sDesc.type = strToInt(propertyName);
+        } catch(std::exception&) {}
+      }
+      if (sDesc.index == 255) {
+        sDesc.index = channelList.size();
+      }
+      channelList[propertyName] = sDesc;
+    }
+    return channelList;
   }
 
   vdcapi::Message VdcHelper::callLearningFunction(dsuid_t vdc, bool establish, int64_t timeout, const vdcapi::PropertyElement& params)
