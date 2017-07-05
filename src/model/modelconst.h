@@ -528,7 +528,7 @@ namespace dss {
   const uint16_t ProductID_UMV_210 = 0x2CD2;
 
   const uint8_t MinimumOutputChannelID = 1;
-  const uint8_t MaximumOutputChannelID = 19;
+  const uint8_t MaximumOutputChannelID = 21;
 
   // function id numbers
   #define Fid_105_Mask_NumButtons 0x03
