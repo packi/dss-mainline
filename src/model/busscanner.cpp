@@ -508,26 +508,55 @@ namespace dss {
 
     // synchronize sensor configuration
     if (_spec.sensorInputsValid) {
+      dev->setSensors(_spec.sensorInputs);
       if (dev->isVdcDevice()) {
         try {
           // read extended sensor info
           auto sList = VdcHelper::getSensorDesc(dev->getDSMeterDSID(), dev->getDSID());
           for (auto it = sList.begin(); it != sList.end(); it ++) {
-            int index = it->first;
-            VdcHelper::SensorDesc sDesc = it->second;
-            _spec.sensorInputs[index].usage = sDesc.sensorUsage;
-            _spec.sensorInputs[index].name = sDesc.sensorName;
+            DeviceSensor_t sensorInfo;
+            sensorInfo.m_sensorId = it->first;
+            sensorInfo.m_sensorIndex = it->second.index;
+            sensorInfo.m_sensorName = it->second.sensorName;
+            sensorInfo.m_sensorUsage = it->second.sensorUsage;
+            sensorInfo.m_sensorType = it->second.sensorType;
+            sensorInfo.m_sensorPollInterval = _spec.sensorInputs[sensorInfo.m_sensorIndex].SensorPollInterval;
+            sensorInfo.m_sensorPushConversionFlag = _spec.sensorInputs[sensorInfo.m_sensorIndex].SensorConversionFlag;
+            sensorInfo.m_sensorBroadcastFlag = _spec.sensorInputs[sensorInfo.m_sensorIndex].SensorBroadcastFlag;
+            dev->setSensorsInfo(sensorInfo.m_sensorIndex, sensorInfo);
           }
         } catch (const std::runtime_error& e) {
           log(std::string("initializeDeviceFromSpec() sensor read error:") + e.what(), lsError);
         }
       }
-      dev->setSensors(_spec.sensorInputs);
     }
 
     // synchronize output channel configuration
     if (_spec.outputChannelsValid) {
       dev->setOutputChannels(_spec.outputChannels);
+      if (dev->isVdcDevice()) {
+        try {
+          // read extended channel info
+          auto channelList = VdcHelper::getChannelDesc(dev->getDSMeterDSID(), dev->getDSID());
+          for (uint8_t i = 0; i < dev->getOutputChannelCount(); i++) {
+            for (auto it = channelList.begin(); it != channelList.end(); it ++) {
+              if (it->second.index == i) {
+                DeviceChannel_t chInfo;
+                chInfo.m_channelIndex = i;
+                chInfo.m_channelId = it->first;
+                chInfo.m_channelName = it->second.name;
+                chInfo.m_channelType = it->second.type;
+                dev->setOutputChannelInfo(i, chInfo);
+                log(std::string("initializeDeviceFromSpec(): update channel:") +
+                    chInfo.m_channelId + ", Index " + intToString(i), lsNotice);
+                break;
+              }
+            }
+          }
+        } catch (const std::runtime_error& e) {
+          log(std::string("initializeDeviceFromSpec() channel read error:") + e.what(), lsError);
+        }
+      }
     }
 
     _zone->addToDSMeter(_dsMeter);

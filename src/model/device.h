@@ -173,6 +173,7 @@ namespace dss {
 
   typedef struct {
     int m_sensorIndex;       // sensor index
+    std::string m_sensorId;
     std::string m_sensorName;
     SensorType m_sensorType;
     uint8_t m_sensorUsage;
@@ -184,6 +185,13 @@ namespace dss {
     double m_sensorValueFloat;
     DateTime m_sensorValueTS;
   } DeviceSensor_t;
+
+  typedef struct {
+    int m_channelIndex;
+    std::string m_channelId;
+    std::string m_channelName;
+    uint8_t m_channelType;
+  } DeviceChannel_t;
 
   typedef enum {
     DEVICE_TYPE_INVALID = -1,
@@ -325,7 +333,7 @@ namespace dss {
     uint8_t m_sensorInputCount;
     std::vector<boost::shared_ptr<DeviceSensor_t> > m_sensorInputs;
     uint8_t m_outputChannelCount;
-    std::vector<int> m_outputChannels;
+    std::vector<boost::shared_ptr<DeviceChannel_t> > m_outputChannels;
 
     std::string m_AKMInputProperty;
 
@@ -747,6 +755,7 @@ namespace dss {
     void setStateValues(const std::vector<std::pair<std::string, std::string> >& values);
 
     void setSensors(const std::vector<DeviceSensorSpec_t>& _binaryInput);
+    void setSensorsInfo(const uint8_t sensorIndex, DeviceSensor_t& _sensorInfo);
     uint8_t getSensorCount() const;
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;
@@ -757,9 +766,11 @@ namespace dss {
     bool isSensorDataValid(int _sensorIndex) const;
 
     void setOutputChannels(const std::vector<int>& _outputChannels);
+    void setOutputChannelInfo(const uint8_t channelIndex, DeviceChannel_t& _channelInfo);
     int getOutputChannelCount() const;
-    int getOutputChannelIndex(int _channelId) const;
-    int getOutputChannel(int _index) const;
+    int getOutputChannelIndex(int _channelType) const;
+    boost::shared_ptr<DeviceChannel_t> getOutputChannel(uint8_t _index) const;
+    boost::shared_ptr<DeviceChannel_t> getOutputChannelById(const std::string& _channelId) const;
 
     uint8_t getDeviceUMVRelayValue();
     void setDeviceUMVRelayValue(uint8_t _value);

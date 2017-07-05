@@ -189,8 +189,12 @@ namespace dss {
 
     _json.startArray("outputChannels");
     for (int i = 0; i < _device.getDevice()->getOutputChannelCount(); i++) {
+      boost::shared_ptr<DeviceChannel_t> pChannel = _device.getDevice()->getOutputChannel(i);
       _json.startObject();
-      _json.add("channelType", _device.getDevice()->getOutputChannel(i));
+      _json.add("channelId", pChannel->m_channelId);
+      _json.add("channelType", pChannel->m_channelType);
+      _json.add("channelIndex", pChannel->m_channelIndex);
+      _json.add("channelName", pChannel->m_channelName);
       _json.endObject();
     }
     _json.endArray();
