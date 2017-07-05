@@ -1253,12 +1253,15 @@ namespace dss {
       json.startArray("channels");
 
       for (size_t i = 0; i < channels->size(); i++) {
+        uint8_t channelIndex = pDevice->getOutputChannelIndex(channels->at(i).first);
+        boost::shared_ptr<DeviceChannel_t> pChannel = pDevice->getOutputChannel(channelIndex);
         json.startObject();
-        json.add("channel", getOutputChannelName(channels->at(i).first));
+        json.add("channel", pChannel->m_channelId);
+        json.add("index", channelIndex);
         json.add("value",
                 convertFromOutputChannelValue(
-                    channels->at(i).first,
-                    pDevice->getDeviceOutputChannelValue(channels->at(i).first)));
+                    pChannel->m_channelType,
+                    pDevice->getDeviceOutputChannelValue(channelIndex)));
         json.endObject();
         // don't flood the bus on bulk requests
         if (!pDevice->isVdcDevice() && (channels->size() > 1) && (i < channels->size() - 1)) {
@@ -1279,11 +1282,11 @@ namespace dss {
       boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > channels =  parseOutputChannelsWithValues(vals);
 
       for (size_t i = 0; i < channels->size(); i++) {
-        pDevice->setDeviceOutputChannelValue(boost::get<0>(channels->at(i)),
+        uint8_t channelIndex = pDevice->getOutputChannelIndex(boost::get<0>(channels->at(i)));
+        pDevice->setDeviceOutputChannelValue(channelIndex,
                                              boost::get<1>(channels->at(i)),
                                              boost::get<2>(channels->at(i)),
-                                             applyNow &&
-                                             (i == (channels->size() - 1)));
+                                             applyNow && (i == (channels->size() - 1)));
         // don't flood the bus on bulk requests
         if (!pDevice->isVdcDevice() && (channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);
@@ -1666,10 +1669,10 @@ namespace dss {
 
       uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
       for (int i = 0; i < pDevice->getOutputChannelCount(); i++) {
-        json.startObject();
-        int channelId = pDevice->getOutputChannel(i);
-        json.add("channel", getOutputChannelName(channelId));
-
+        boost::shared_ptr<DeviceChannel_t> pChannel = pDevice->getOutputChannel(i);
+        json.startObject(pChannel->m_channelId);
+        json.add("index", pChannel->m_channelIndex);
+        json.add("channel", getOutputChannelName(pChannel->m_channelType));
         json.add("dontCare", ((value & (1 << i)) > 0));
         json.endObject();
       }

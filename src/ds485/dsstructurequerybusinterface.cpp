@@ -494,11 +494,10 @@ namespace dss {
         }
 
         for (int i = 0; i < numChannels; i++) {
-          uint8_t outputChannel;
-          ret = DeviceOPCTable_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i,
-                                            &outputChannel);
+          uint8_t outputChannelType;
+          ret = DeviceOPCTable_get_by_index(m_DSMApiHandle, _dsMeterID, _spec.ShortAddress, i, &outputChannelType);
           DSBusInterface::checkResultCode(ret);
-          _spec.outputChannels.push_back(outputChannel);
+          _spec.outputChannels.push_back(outputChannelType);
         }
         _spec.outputChannelsValid = true;
       } catch(BusApiError& e) {
