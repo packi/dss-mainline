@@ -168,6 +168,8 @@ static OutputChannelInfo kOutputChannels[] = {
     { "coolingCapacity",           8,  0,      100     },  // id 17  cooling capacity and intensity
     { "audioVolume",               8,  0,      100     },  // id 18  audio loudness
     { "powerState",                8,  0,      2       },  // id 19  power status
+    { "airLouverAuto",             8,  0,      1       },  // id 20  autmatic louver position of ventilation
+    { "airFlowAuto",               8,  0,      1       },  // id 21  autmatic intensity of ventilation
 };
 
   std::pair<uint8_t, uint8_t> getOutputChannelIdAndSize(std::string _channelName) {

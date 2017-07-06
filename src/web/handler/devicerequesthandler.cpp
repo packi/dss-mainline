@@ -1253,12 +1253,15 @@ namespace dss {
       json.startArray("channels");
 
       for (size_t i = 0; i < channels->size(); i++) {
+        uint8_t channelIndex = pDevice->getOutputChannelIndex(channels->at(i).first);
+        boost::shared_ptr<DeviceChannel_t> pChannel = pDevice->getOutputChannel(channelIndex);
         json.startObject();
-        json.add("channel", getOutputChannelName(channels->at(i).first));
+        json.add("channel", pChannel->m_channelId);
+        json.add("index", channelIndex);
         json.add("value",
                 convertFromOutputChannelValue(
-                    channels->at(i).first,
-                    pDevice->getDeviceOutputChannelValue(channels->at(i).first)));
+                    pChannel->m_channelType,
+                    pDevice->getDeviceOutputChannelValue(channelIndex)));
         json.endObject();
         // don't flood the bus on bulk requests
         if (!pDevice->isVdcDevice() && (channels->size() > 1) && (i < channels->size() - 1)) {
@@ -1279,11 +1282,11 @@ namespace dss {
       boost::shared_ptr<std::vector<boost::tuple<int, int, int> > > channels =  parseOutputChannelsWithValues(vals);
 
       for (size_t i = 0; i < channels->size(); i++) {
-        pDevice->setDeviceOutputChannelValue(boost::get<0>(channels->at(i)),
+        uint8_t channelIndex = pDevice->getOutputChannelIndex(boost::get<0>(channels->at(i)));
+        pDevice->setDeviceOutputChannelValue(channelIndex,
                                              boost::get<1>(channels->at(i)),
                                              boost::get<2>(channels->at(i)),
-                                             applyNow &&
-                                             (i == (channels->size() - 1)));
+                                             applyNow && (i == (channels->size() - 1)));
         // don't flood the bus on bulk requests
         if (!pDevice->isVdcDevice() && (channels->size() > 1) && (i < channels->size() - 1)) {
           sleep(1);
@@ -1296,88 +1299,27 @@ namespace dss {
         return JSONWriter::failure("This call is currently only supported on vDCs");
       }
 
-      std::string str_chan = _request.getParameter("channels");
-      if (str_chan.empty()) {
-        return JSONWriter::failure("Missing or invalid parameter 'channels'");
-      }
-
-      boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
-
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
       vdcapi::PropertyElement* channelStates = query.Add();
-      channelStates->set_name("outputChannelStates");
+      channelStates->set_name("channelStates");
 
-      for (size_t i = 0; i < channels->size(); i++) {
-        if (pDevice->getOutputChannelIndex(channels->at(i).first) != -1) {
-          vdcapi::PropertyElement *channelIndexProp = channelStates->add_elements();
-          channelIndexProp->set_name(
-                  intToString(pDevice->getOutputChannelIndex(channels->at(i).first)));
-        }
+      std::string str_chan = _request.getParameter("channels");
+      std::vector<std::string> chans = dss::splitString(str_chan, ';');
+      for (size_t i = 0; i < chans.size(); i++) {
+        vdcapi::PropertyElement *channelIndexProp = channelStates->add_elements();
+        channelIndexProp->set_name(chans[i]);
       }
+
       vdcapi::Message message = pDevice->getVdcProperty(query);
       vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
-
+      VdcElementReader reader(message.vdc_response_get_property().properties());
 
       JSONWriter json;
-      json.startObject("channels");
-
-      for (int i = 0; i < response.properties_size(); i++) {
-        vdcapi::PropertyElement property = response.properties(i);
-        if (!property.has_name()) {
-          continue;
-        }
-
-        if (property.name() == "outputChannelStates") {
-          const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& channels = property.elements();
-          for (int e = 0; e < channels.size(); e++) {
-            vdcapi::PropertyElement channel = channels.Get(e);
-            if (!channel.has_name()) {
-              continue;
-            }
-
-            // vdcs return an index instead of an actual name
-            int channelIndex = strToIntDef(channel.name(), -1);
-            if (channelIndex == -1) {
-              Logger::getInstance()->log("Ignoring channel with invalid index" +
-                                         channel.name());
-              continue;
-            }
-            int channelId = pDevice->getOutputChannel(channelIndex);
-            json.startObject(getOutputChannelName(channelId));
-
-            const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& channelData = channel.elements();
-
-            for (int d = 0; d < channelData.size(); d++) {
-              vdcapi::PropertyElement data = channelData.Get(d);
-              if (!data.has_name() || !data.has_value()) {
-                continue;
-              }
-
-              const vdcapi::PropertyValue& value = data.value();
-
-              if ((data.name() == "value") && value.has_v_double()) {
-                json.add("value", value.v_double());
-              } else if ((data.name() == "automatic") && value.has_v_bool()) {
-                json.add("automatic", value.v_bool());
-              } else if ((data.name() == "dontCare") && value.has_v_bool()) {
-                json.add("dontCare", value.v_bool());
-              }
-            }
-
-            json.endObject();
-          }
-          break;
-        }
-      }
-
-      json.endObject();
-
+      json.add("channels");
+      ProtobufToJSon::processElementsPretty(reader["channelStates"].childElements(), json);
       return json.successJSON();
-    } else if (_request.getMethod() == "setOutputChannelValue2") {
-      if (!pDevice->isVdcDevice()) {
-        return JSONWriter::failure("This call is currently only supported on vDCs");
-      }
 
+    } else if (_request.getMethod() == "setOutputChannelValue2") {
       bool applyNow = strToIntDef(_request.getParameter("applyNow"), 1);
       std::string inputjson = _request.getParameter("channels");
       if (inputjson.empty()) {
@@ -1386,74 +1328,48 @@ namespace dss {
 
       rapidjson::Document d;
       d.Parse(inputjson.c_str());
-
       if (!d.IsObject()) {
         return JSONWriter::failure("Invalid parameter channels: not a JSON object");
       }
-
       rapidjson::Value::ConstMemberIterator lastElement = d.MemberBegin();
       if (d.MemberCount() > 0) {
         lastElement = d.MemberEnd() - 1;
       }
-      for (rapidjson::Value::ConstMemberIterator i = d.MemberBegin();
-           i != d.MemberEnd(); ++i) {
-        std::pair<int, int> chaninfo = getOutputChannelIdAndSize(i->name.GetString());
-        const rapidjson::Value& channel = i->value;
+      for (rapidjson::Value::ConstMemberIterator i = d.MemberBegin(); i != d.MemberEnd(); ++i) {
+        // verify channelId is valid and available
+        boost::shared_ptr<DeviceChannel_t> chaninfo = pDevice->getOutputChannelById(i->name.GetString());
+        std::pair<uint8_t, uint8_t> chantype =  getOutputChannelIdAndSize(chaninfo->m_channelId);
 
-        vdcapi::Message message;
-        message.set_type(vdcapi::VDSM_NOTIFICATION_SET_OUTPUT_CHANNEL_VALUE);
-        vdcapi::vdsm_NotificationSetOutputChannelValue* setOutputChannelValue = message.mutable_vdsm_send_output_channel_value();
+        const rapidjson::Value& valueObj =
+            i->value.IsObject() && i->value.HasMember("value") ? i->value["value"] : i->value;
+        double value;
 
-        char dsuid_string[DSUID_STR_LEN];
-        const dsuid_t dsuid = pDevice->getDSID();
-        dsuid_to_string(&dsuid, dsuid_string);
-
-        setOutputChannelValue->add_dsuid(dsuid_string);
-        setOutputChannelValue->set_channel(chaninfo.first);
-
-        if (channel.HasMember("value") && channel["value"].IsNumber()) {
-          setOutputChannelValue->set_value(channel["value"].GetDouble());
+        if (valueObj.IsNumber()) {
+          value = valueObj.GetDouble();
+        } else if (valueObj.IsBool()) {
+          value = valueObj.GetBool() ? 1 : 0;
+        } else if (valueObj.IsString()) {
+          value = strToDouble(valueObj.GetString());
+        } else if (valueObj.IsObject() || valueObj.IsNull()) {
+          continue; // ignore empty objects, like: "airFlowAuto":{ }
+        } else {
+          return JSONWriter::failure("Invalid parameter channels: value type unsupported");
         }
-        if (channel.HasMember("automatic") && channel["automatic"].IsBool()) {
-          setOutputChannelValue->set_automatic(channel["automatic"].GetBool());
+        pDevice->setDeviceOutputChannelValue(chaninfo->m_channelIndex,
+            chantype.second,
+            (uint16_t) value,
+            applyNow && (i == lastElement));
+
+        // don't flood the bus on bulk requests
+        if (!pDevice->isVdcDevice() && (i != lastElement)) {
+          sleep(1);
         }
-
-        setOutputChannelValue->set_apply_now(applyNow && (i == lastElement));
-
-        uint8_t arrayOut[REQUEST_LEN];
-        if (!message.SerializeToArray(arrayOut, sizeof(arrayOut))) {
-         return JSONWriter::failure("could not serialize protobuf message");
-        }
-
-        uint8_t arrayIn[RESPONSE_LEN];
-        uint16_t arrayInSize;
-        m_Apartment.getBusInterface()->getStructureQueryBusInterface()->protobufMessageRequest(
-            pDevice->getDSMeterDSID(), message.ByteSize(), arrayOut,
-            &arrayInSize, arrayIn);
-
-        if (!message.ParseFromArray(arrayIn, arrayInSize)) {
-          return JSONWriter::failure("could not parse protobuf message");
-	    }
-        if (message.type() != vdcapi::GENERIC_RESPONSE) {
-          return JSONWriter::failure("invalid vdc response");
-        }
-
-        const vdcapi::GenericResponse& response = message.generic_response();
-        if (response.code() != vdcapi::ERR_OK) {
-          return JSONWriter::failure(std::string("Vdc error code:") +
-                                     intToString(response.code()) +
-                                     " message:" + response.description());
-	    }
       }
       return JSONWriter::success();
+
     } else if (_request.getMethod() == "getOutputChannelSceneValue2") {
       if (!pDevice->isVdcDevice()) {
         return JSONWriter::failure("This call is currently only supported on vDCs");
-      }
-
-      std::string str_chan = _request.getParameter("channels");
-      if (str_chan.empty()) {
-        return JSONWriter::failure("Missing or invalid parameter 'channels'");
       }
 
       int sceneNum = strToIntDef(_request.getParameter("sceneNumber"), -1);
@@ -1461,105 +1377,32 @@ namespace dss {
         return JSONWriter::failure("Missing or invalid parameter 'sceneNumber'");
       }
 
-      boost::shared_ptr<std::vector<std::pair<int, int> > > channels =  parseOutputChannels(str_chan);
-
-      JSONWriter json;
-
       google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
       vdcapi::PropertyElement* scenes = query.Add();
       scenes->set_name("scenes");
       vdcapi::PropertyElement* sn = scenes->add_elements();
       sn->set_name(_request.getParameter("sceneNumber"));
 
-      vdcapi::Message message = pDevice->getVdcProperty(query);
-      vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
-
-      for (int i = 0; i < response.properties_size(); i++) {
-        vdcapi::PropertyElement property = response.properties(i);
-        if (!property.has_name()) {
-          continue;
+      std::string str_chan = _request.getParameter("channels");
+      std::vector<std::string> chans = dss::splitString(str_chan, ';');
+      if (chans.size() > 0) {
+        vdcapi::PropertyElement* cn = sn->add_elements();
+        cn->set_name("channels");
+        for (size_t i = 0; i < chans.size(); i++) {
+          vdcapi::PropertyElement *channelIndexProp = cn->add_elements();
+          channelIndexProp->set_name(chans[i]);
         }
-
-        if (property.name() != "scenes") {
-            continue;
-        }
-
-        const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& responseScenes = property.elements();
-        for (int e = 0; e < responseScenes.size(); e++) {
-          vdcapi::PropertyElement responseScene = responseScenes.Get(e);
-          if (!responseScene.has_name()) {
-            continue;
-          }
-
-          int sceneID = strToIntDef(responseScene.name(), -1);
-          if (sceneID == -1) {
-            Logger::getInstance()->log("Ignoring scene with invalid id" +
-                                       responseScene.name());
-            continue;
-          }
-
-          if (sceneID != sceneNum) {
-              continue;
-          }
-
-          json.add("sceneID", sceneID);
-
-
-          if (responseScene.elements().size() < 1) {
-            continue;
-          }
-
-          const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& responseChannels = responseScene.elements().Get(0).elements();
-
-          json.startObject("channels");
-          for (int c = 0; c < responseChannels.size(); c++) {
-            vdcapi::PropertyElement channel = responseChannels.Get(c);
-
-            if (!channel.has_name()) {
-              continue;
-            }
-
-            int channelIndex = strToIntDef(channel.name(), -1);
-            if (channelIndex == -1) {
-              Logger::getInstance()->log("Ignoring channel with invalid index " +
-                                         channel.name());
-              continue;
-            }
-
-            int channelId = pDevice->getOutputChannel(channelIndex);
-            json.startObject(getOutputChannelName(channelId));
-
-            const google::protobuf::RepeatedPtrField<vdcapi::PropertyElement>& channelData = channel.elements();
-
-            for (int d = 0; d < channelData.size(); d++) {
-              vdcapi::PropertyElement data = channelData.Get(d);
-              if (!data.has_name() || !data.has_value()) {
-                continue;
-              }
-
-              const vdcapi::PropertyValue& value = data.value();
-
-              if ((data.name() == "value") && value.has_v_double()) {
-                json.add("value", value.v_double());
-              } else if ((data.name() == "automatic") && value.has_v_bool()) {
-                json.add("automatic", value.v_bool());
-              } else if ((data.name() == "dontCare") && value.has_v_bool()) {
-                json.add("dontCare", value.v_bool());
-              }
-            }
-
-            json.endObject(); // channel name
-          }
-          json.endObject(); // channels
-          // requested scene was processed, since only one is supported we
-          // do not care if the vdc sends more
-          break;
-        }
-        // only intererested in the "scenes" property, stop searching if found
-        break;
       }
 
+      vdcapi::Message message = pDevice->getVdcProperty(query);
+      vdcapi::vdc_ResponseGetProperty response = message.vdc_response_get_property();
+      VdcElementReader reader(message.vdc_response_get_property().properties());
+
+      JSONWriter json;
+      json.add("scenes");
+      ProtobufToJSon::processElementsPretty(reader["scenes"].childElements(), json);
       return json.successJSON();
+
     } else if (_request.getMethod() == "setOutputChannelSceneValue2") {
       if (!pDevice->isVdcDevice()) {
         return JSONWriter::failure("This call is currently only supported on vDCs");
@@ -1591,29 +1434,36 @@ namespace dss {
       vdcapi::PropertyElement* channels = scene->add_elements();
       channels->set_name("channels");
 
-      for (rapidjson::Value::ConstMemberIterator i = d.MemberBegin();
-           i != d.MemberEnd(); ++i) {
-        std::pair<int, int> chaninfo = getOutputChannelIdAndSize(i->name.GetString());
-
+      for (rapidjson::Value::ConstMemberIterator i = d.MemberBegin(); i != d.MemberEnd(); ++i) {
         vdcapi::PropertyElement* protochannel = channels->add_elements();
-        protochannel->set_name(intToString(pDevice->getOutputChannelIndex(chaninfo.first)));
-        const rapidjson::Value& channel = i->value;
-        if (channel.HasMember("value") && channel["value"].IsNumber()) {
-            vdcapi::PropertyElement* val = protochannel->add_elements();
-            val->set_name("value");
-            val->mutable_value()->set_v_double(channel["value"].GetDouble());
-        }
+        protochannel->set_name(i->name.GetString());
+        const rapidjson::Value& valueObj =
+            i->value.IsObject() && i->value.HasMember("value") ? i->value["value"] : i->value;
 
-        if (channel.HasMember("dontCare") && channel["dontCare"].IsBool()) {
+        if (i->value.IsObject()) {
+          if (i->value.HasMember("dontCare") && i->value["dontCare"].IsBool()) {
             vdcapi::PropertyElement* dc = protochannel->add_elements();
             dc->set_name("dontCare");
-            dc->mutable_value()->set_v_bool(channel["dontCare"].GetBool());
-        }
-
-        if (channel.HasMember("automatic") && channel["automatic"].IsBool()) {
+            dc->mutable_value()->set_v_bool(i->value["dontCare"].GetBool());
+          }
+          if (i->value.HasMember("command") && i->value["command"].IsString()) {
             vdcapi::PropertyElement* automatic = protochannel->add_elements();
-            automatic->set_name("automatic");
-            automatic->mutable_value()->set_v_bool(channel["automatic"].GetBool());
+            automatic->set_name("command");
+            automatic->mutable_value()->set_v_string(i->value["command"].GetString());
+          }
+        }
+        if (valueObj.IsNumber()) {
+          vdcapi::PropertyElement* val = protochannel->add_elements();
+          val->set_name("value");
+          val->mutable_value()->set_v_double(valueObj.GetDouble());
+        } else if (valueObj.IsBool()) {
+          vdcapi::PropertyElement* val = protochannel->add_elements();
+          val->set_name("value");
+          val->mutable_value()->set_v_bool(valueObj.GetBool());
+        } else if (valueObj.IsString()) {
+          vdcapi::PropertyElement* val = protochannel->add_elements();
+          val->set_name("value");
+          val->mutable_value()->set_v_string(valueObj.GetString());
         }
       }
 
@@ -1666,10 +1516,10 @@ namespace dss {
 
       uint16_t value = pDevice->getDeviceOutputChannelDontCareFlags(scene);
       for (int i = 0; i < pDevice->getOutputChannelCount(); i++) {
-        json.startObject();
-        int channelId = pDevice->getOutputChannel(i);
-        json.add("channel", getOutputChannelName(channelId));
-
+        boost::shared_ptr<DeviceChannel_t> pChannel = pDevice->getOutputChannel(i);
+        json.startObject(pChannel->m_channelId);
+        json.add("index", pChannel->m_channelIndex);
+        json.add("channel", getOutputChannelName(pChannel->m_channelType));
         json.add("dontCare", ((value & (1 << i)) > 0));
         json.endObject();
       }
@@ -2353,6 +2203,7 @@ namespace dss {
       vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addEventDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addPropertyDescriptions(db, *pDevice, langCode, json);
+      vdcInfo::addSensorDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addActionDescriptions(db, *pDevice, langCode, json);
       vdcInfo::addStandardActions(db, *pDevice, langCode, json);
       return json.successJSON();

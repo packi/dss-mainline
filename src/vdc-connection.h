@@ -99,14 +99,23 @@ namespace dss {
 
     struct SensorDesc {
       std::string sensorName;
+      uint8_t index;
       int sensorUsage;
       SensorType sensorType;
       double min, max, resolution;
       double updateInterval;
-      SensorDesc() : sensorUsage(0), sensorType(SensorType::UnknownType),
+      SensorDesc() : index(255), sensorUsage(0), sensorType(SensorType::UnknownType),
           min(0), max(0), resolution(0), updateInterval(0) {}
     };
-    static std::map<int,SensorDesc> getSensorDesc(dsuid_t _vdsm, dsuid_t _device);
+    static std::map<std::string,SensorDesc> getSensorDesc(dsuid_t _vdsm, dsuid_t _device);
+
+    struct ChannelDesc {
+      std::string name;
+      uint8_t index;
+      uint8_t type;
+      ChannelDesc() : index(255), type(255) {}
+    };
+    static std::map<std::string,ChannelDesc> getChannelDesc(dsuid_t _vdsm, dsuid_t _device);
 
     static vdcapi::Message callLearningFunction(dsuid_t vdc, bool establish, int64_t timeout, const vdcapi::PropertyElement& params);
     static vdcapi::Message callFirmwareFunction(dsuid_t vdc, bool checkOnly, bool clearSettings, const vdcapi::PropertyElement& params);

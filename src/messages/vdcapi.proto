@@ -145,6 +145,7 @@ message vdsm_NotificationDimChannel {
     optional int32 area = 4;
     optional int32 group = 5;
     optional int32 zone_id = 6;
+    optional string channelId = 7; // new in API v3
 }
 
 message vdsm_NotificationSetOutputChannelValue {
@@ -152,5 +153,5 @@ message vdsm_NotificationSetOutputChannelValue {
     optional bool apply_now = 2 [ default = true ];
     optional int32 channel = 3;
     optional double value = 4;
-    optional bool automatic = 5;
+    optional string channelId = 5; // new in API v3
 }
