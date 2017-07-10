@@ -2577,6 +2577,14 @@ namespace dss {
     }
   }
 
+  void Device::setSensorsInfo(const uint8_t sensorIndex, DeviceSensor_t& _sensorInfo) {
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
+    if (sensorIndex >= m_sensorInputCount) {
+      throw ItemNotFoundException(std::string("Device::setSensorsInfo: index out of bounds"));
+    }
+    m_sensorInputs[sensorIndex] = boost::make_shared<DeviceSensor_t> (_sensorInfo);
+  }
+
   void Device::setOutputChannels(const std::vector<int>& _outputChannels) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
     PropertyNodePtr outputChannelNode;
@@ -2590,51 +2598,65 @@ namespace dss {
     m_outputChannelCount = 0;
     m_outputChannels.clear();
 
-    // The first entry of the table describes the default channel. Do not add to channel list.
     if (_outputChannels.size() >= 1) {
-      std::string bpath = std::string("outputChannelDefault");
-      PropertyNodePtr entry = outputChannelNode->createProperty(bpath);
-      entry->createProperty("channelID")->setIntegerValue(_outputChannels[0]);
-    }
+      for (std::vector<int>::const_iterator it = _outputChannels.begin();
+          it != _outputChannels.end();
+          ++it) {
+        boost::shared_ptr<DeviceChannel_t> output = boost::make_shared<DeviceChannel_t>();
+        m_outputChannels.push_back(output);
+        output->m_channelIndex = m_outputChannelCount;
+        output->m_channelType = *it;
 
-    // Only continue if there are 2 or more entries in the table
-    if (_outputChannels.size() < 2) {
-      return;
-    }
-
-    for (std::vector<int>::const_iterator it = ++_outputChannels.begin();
-        it != _outputChannels.end();
-        ++it) {
-      m_outputChannels.push_back(*it);
-
-      if (m_pPropertyNode != NULL) {
-        std::string bpath = std::string("outputChannel") + intToString(m_outputChannelCount);
-        PropertyNodePtr entry = outputChannelNode->createProperty(bpath);
-        entry->createProperty("channelID")->setIntegerValue(m_outputChannels[m_outputChannelCount]);
+        if (m_pPropertyNode != NULL) {
+          std::string bpath = std::string("outputChannel") + intToString(m_outputChannelCount);
+          PropertyNodePtr entry = outputChannelNode->createProperty(bpath);
+          entry->createProperty("type")
+            ->linkToProxy(PropertyProxyReference<int, uint8_t>(m_outputChannels[m_outputChannelCount]->m_channelType));
+          entry->createProperty("name")
+            ->linkToProxy(PropertyProxyReference<std::string>(m_outputChannels[m_outputChannelCount]->m_channelName));
+          entry->createProperty("id")
+            ->linkToProxy(PropertyProxyReference<std::string>(m_outputChannels[m_outputChannelCount]->m_channelId));
+          entry->createProperty("index")
+            ->linkToProxy(PropertyProxyReference<int>(m_outputChannels[m_outputChannelCount]->m_channelIndex));
+        }
+        m_outputChannelCount ++;
       }
-
-      m_outputChannelCount ++;
     }
   }
 
-  int Device::getOutputChannelIndex(int _channelId) const {
-    int index = 0;
-    for (std::vector<int>::const_iterator it = m_outputChannels.begin();
-            it != m_outputChannels.end();
-            ++it) {
-      if (*it == _channelId) {
-        return index;
+  void Device::setOutputChannelInfo(const uint8_t _channelIndex, DeviceChannel_t& _channelInfo) {
+    boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
+    if (_channelIndex >= m_outputChannelCount) {
+      throw ItemNotFoundException(std::string("Device::setOutputChannelInfo: index out of bounds"));
+    }
+    m_outputChannels[_channelIndex]->m_channelId = _channelInfo.m_channelId;
+    m_outputChannels[_channelIndex]->m_channelName = _channelInfo.m_channelName;
+    m_outputChannels[_channelIndex]->m_channelType = _channelInfo.m_channelType;
+  }
+
+  int Device::getOutputChannelIndex(int _channelType) const {
+    for (int i = 0; i < m_outputChannelCount; i++) {
+      if (m_outputChannels[i]->m_channelType == _channelType) {
+        return m_outputChannels[i]->m_channelIndex;
       }
-      index++;
     }
     return -1;
   }
 
-  int Device::getOutputChannel(int _index) const {
-    if (_index > m_outputChannelCount) {
-      return -1;
+  boost::shared_ptr<DeviceChannel_t> Device::getOutputChannel(uint8_t _index) const {
+    if (_index >= m_outputChannelCount) {
+      throw ItemNotFoundException(std::string("Device::getOutputChannel: index out of bounds"));
     }
     return m_outputChannels[_index];
+  }
+
+  boost::shared_ptr<DeviceChannel_t> Device::getOutputChannelById(const std::string& _channelId) const {
+    for (int i = 0; i < m_outputChannelCount; i++) {
+      if (m_outputChannels[i]->m_channelId == _channelId) {
+        return m_outputChannels[i];
+      }
+    }
+    throw ItemNotFoundException(std::string("Device::getOutputChannelById: channelId invalid"));
   }
 
   int Device::getOutputChannelCount() const {

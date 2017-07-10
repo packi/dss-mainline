@@ -290,6 +290,7 @@ void ActionExecute::executeDeviceChannelValue(PropertyNodePtr _actionNode) {
 
     struct channel {
       int id;
+      int index;
       int value;
     };
     std::vector<channel> vChannels;
@@ -302,7 +303,9 @@ void ActionExecute::executeDeviceChannelValue(PropertyNodePtr _actionNode) {
         break;
       }
       i++;
-      vChannels.push_back(channel{oChannelIdNode->getIntegerValue(), oChannelValueNode->getIntegerValue()});
+      int channelId = oChannelIdNode->getIntegerValue();
+      int channelIndex = target->getOutputChannelIndex(channelId);
+      vChannels.push_back(channel{channelId, channelIndex, oChannelValueNode->getIntegerValue()});
     }
 
     auto numNonApplyChannels = static_cast <int>(vChannels.size()) - 1;
@@ -315,10 +318,10 @@ void ActionExecute::executeDeviceChannelValue(PropertyNodePtr _actionNode) {
 
     for (int i = 0; i < numNonApplyChannels; ++i) {
       auto ch = vChannels[i];
-      target->setDeviceOutputChannelValue(ch.id, getOutputChannelSize(ch.id), ch.value, false);
+      target->setDeviceOutputChannelValue(ch.index, getOutputChannelSize(ch.id), ch.value, false);
     }
     auto ch = vChannels[numNonApplyChannels];
-    target->setDeviceOutputChannelValue(ch.id, getOutputChannelSize(ch.id), ch.value, true);
+    target->setDeviceOutputChannelValue(ch.index, getOutputChannelSize(ch.id), ch.value, true);
 
   } catch(SceneAccessException& e) {
     Logger::getInstance()->log("ActionExecute::"
