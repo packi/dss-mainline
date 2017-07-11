@@ -57,7 +57,7 @@ static constexpr boost::chrono::milliseconds LATENCY = boost::chrono::millisecon
 
 #define INTERNAL_STOP_RUN_FOR(ioService, duration, macro)                                                  \
     do {                                                                                                   \
-        static_assert(std::is_base_of<::ds::asio::catch_::IoService DS_COMMA decltype(ioService)>::value,  \
+        static_assert(std::is_base_of< ::ds::asio::catch_::IoService DS_COMMA decltype(ioService)>::value, \
                 "ioService must be if ::ds::asio::catch_::IoService type");                                \
         auto dsAsioCatchDuration = boost::chrono::duration_cast<boost::chrono::milliseconds>(duration);    \
         INFO("Running even loop for " << dsAsioCatchDuration.count() << "ms and expect stop");             \
@@ -78,7 +78,7 @@ static constexpr boost::chrono::milliseconds LATENCY = boost::chrono::millisecon
 
 #define INTERNAL_NO_STOP_RUN_FOR(ioService, duration, macro)                                               \
     do {                                                                                                   \
-        static_assert(std::is_base_of<::ds::asio::catch_::IoService DS_COMMA decltype(ioService)>::value,  \
+        static_assert(std::is_base_of< ::ds::asio::catch_::IoService DS_COMMA decltype(ioService)>::value, \
                 "ioService must be if ::ds::asio::catch_::IoService type");                                \
         auto dsAsioCatchDuration = (duration);                                                             \
         INFO("Running even loop for " << dsAsioCatchDuration.count() << "ms and expect NO stop");          \
