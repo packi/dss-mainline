@@ -91,7 +91,9 @@ Watchdog::Watchdog(boost::asio::io_service &ioService, boost::chrono::microsecon
 
 Watchdog::~Watchdog() = default;
 
-void Watchdog::setTimeoutFunction(std::function<void()> &&x) { m_impl->m_timeoutFunction = std::move(x); }
+void Watchdog::setTimeoutFunction(std::function<void()> &&x) {
+    m_impl->m_timeoutFunction = std::move(x);
+}
 
 } // namespace sqlite3
 } // namespace ds
