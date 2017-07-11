@@ -27,9 +27,8 @@ TEST_CASE("dsAsioTimer", TAGS) {
     auto&& LATENCY = ds::asio::catch_::LATENCY;
 
     SECTION("is started") {
-        timer.expires_from_now(boost::chrono::milliseconds(0));
         bool asyncWaitCalled = false;
-        timer.asyncWait([&] {
+        timer.expiresFromNow(boost::chrono::milliseconds(0), [&] {
             asyncWaitCalled = true;
             ioService.stop();
         });
@@ -66,5 +65,25 @@ TEST_CASE("dsAsioTimer", TAGS) {
         timer.randomlyExpiresFromNowPercentDown(LATENCY, 25, [&] { ioService.stop(); });
         CHECK_NO_STOP_RUN_FOR(ioService, LATENCY / 2);
         CHECK_STOP_RUN_FOR(ioService, LATENCY);
+    }
+
+    SECTION("canceled timer does not call callback") {
+        // Once the asio timer posts the callback to ioService,
+        // the callback will be executed as posted regardless of
+        // whether the timer is canceled or destroyed in mean time.
+        ioService.post([&] { ioService.stop(); });
+
+        SECTION("callback is scheduled and timer is canceled") {
+            timer.expiresNow([&] { CHECK(false); });
+            CHECK_STOP_RUN(ioService);
+            timer.cancel();
+        }
+
+        SECTION("callback is scheduled and timer is destroyed") {
+            ds::asio::Timer timer2(ioService);
+            timer2.expiresNow([&] { CHECK(false); });
+            CHECK_STOP_RUN(ioService);
+        }
+        CHECK_NO_STOP_RUN(ioService);
     }
 }

@@ -4,8 +4,12 @@ DS_TESTS =
 
 noinst_LIBRARIES += libds.a
 libds_a_SOURCES = \
+        ../src/ds/collection.cpp \
+        ../src/ds/collection.h \
         ../src/ds/common.cpp \
         ../src/ds/common.h \
+        ../src/ds/cstddef.cpp \
+        ../src/ds/cstddef.h \
         ../src/ds/log.cpp \
         ../src/ds/log.h \
         ../src/ds/random.cpp \
@@ -30,6 +34,7 @@ libds_catch_main_a_LIB = \
 
 DS_TESTS += ds-tests
 ds_tests_SOURCES = \
+        ../src/ds/collection-test.cpp \
         ../src/ds/common-test.cpp \
         ../src/ds/log-test.cpp \
         ../src/ds/str-test.cpp \
@@ -42,10 +47,16 @@ ds_tests_LDADD = \
 
 noinst_LIBRARIES += libds-asio.a
 libds_asio_a_SOURCES = \
+	../src/ds/asio/abortable.cpp \
+	../src/ds/asio/abortable.h \
+	../src/ds/asio/reconnecting-socket.cpp \
+	../src/ds/asio/reconnecting-socket.h \
 	../src/ds/asio/io-service.cpp \
 	../src/ds/asio/io-service.h \
 	../src/ds/asio/timer.cpp \
-	../src/ds/asio/timer.h
+	../src/ds/asio/timer.h \
+	../src/ds/asio/watchdog.cpp \
+	../src/ds/asio/watchdog.h
 libds_asio_a_CPPFLAGS = \
         $(libds_a_CPPFLAGS)
 libds_asio_a_LIB = \
@@ -54,6 +65,7 @@ libds_asio_a_LIB = \
 
 DS_TESTS += ds-asio-tests
 ds_asio_tests_SOURCES = \
+        ../src/ds/asio/abortable-test.cpp \
         ../src/ds/asio/io-service-test.cpp \
         ../src/ds/asio/timer-test.cpp
 ds_asio_tests_CPPFLAGS = \

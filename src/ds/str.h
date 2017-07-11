@@ -18,7 +18,9 @@
 */
 #pragma once
 
+#include <boost/foreach.hpp>
 #include <sstream>
+#include <vector>
 #include "common.h"
 
 namespace ds {
@@ -33,27 +35,50 @@ std::string str(Args&&... args);
 namespace _private {
 
 template <typename T>
-void strOne(std::ostream& ostream, T&& x) {
-    ostream << std::forward<T>(x);
-}
+struct Str {
+    template <typename T2>
+    static void f(std::ostream& ostream, T2&& x) {
+        ostream << std::forward<T2>(x);
+    }
+};
+
 // uint8_t and int8_t shall be serialized as numbers, not characters
-inline void strOne(std::ostream& ostream, unsigned char x) {
-    ostream << static_cast<int>(x);
-}
-inline void strOne(std::ostream& ostream, signed char x) {
-    ostream << static_cast<int>(x);
-}
-inline void strOne(std::ostream& ostream, const std::exception& x) {
-    ostream << x.what();
-}
-inline void strOne(std::ostream& ostream, std::exception& x) {
-    ostream << x.what();
-}
+template <>
+struct Str<unsigned char> {
+    static inline void f(std::ostream& ostream, unsigned char x) { ostream << static_cast<int>(x); }
+};
+
+template <>
+struct Str<signed char> {
+    static inline void f(std::ostream& ostream, signed char x) { ostream << static_cast<int>(x); }
+};
+
+template <>
+struct Str<std::exception> {
+    static inline void f(std::ostream& ostream, const std::exception& x) { ostream << x.what(); }
+};
+
+template <typename T>
+struct Str<std::vector<T>> {
+    static inline void f(std::ostream& ostream, const std::vector<T>& xs) {
+        ostream << '(';
+        auto first = true;
+        BOOST_FOREACH (auto&& x, xs) {
+            if (!first) {
+                ostream << ',';
+            } else {
+                first = false;
+            }
+            Str<typename std::decay<T>::type>::f(ostream, x);
+        }
+        ostream << ')';
+    }
+};
 
 inline void strRecursive(std::ostream&) {}
 template <typename Arg, typename... Args>
 void strRecursive(std::ostream& ostream, Arg&& arg, Args&&... args) {
-    strOne(ostream, std::forward<Arg>(arg));
+    Str<typename std::decay<Arg>::type>::f(ostream, std::forward<Arg>(arg));
     strRecursive(ostream, std::forward<Args>(args)...);
 }
 
