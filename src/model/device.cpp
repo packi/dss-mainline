@@ -659,13 +659,13 @@ namespace dss {
   } // getVendrID
 
   void Device::fillSensorTable(std::vector<DeviceSensorSpec_t>& _slist) {
-    DeviceSensorSpec_t sensorInputReserved1 = {SensorType::Reserved1, 0, 0, 0, 0, ""};
-    DeviceSensorSpec_t sensorInputReserved2 = {SensorType::Reserved2, 0, 0, 0, 0, ""};
-    DeviceSensorSpec_t sensorInput04 = {SensorType::ActivePower, 0, 0, 0, 0, ""};
-    DeviceSensorSpec_t sensorInput05 = {SensorType::OutputCurrent, 0, 0, 0, 0, ""};
-    DeviceSensorSpec_t sensorInput06 = {SensorType::ElectricMeter, 0, 0, 0, 0, ""};
-    DeviceSensorSpec_t sensorInput64 = {SensorType::OutputCurrent16A, 0, 0, 0, 0, ""};
-    DeviceSensorSpec_t sensorInput65 = {SensorType::ActivePowerVA, 0, 0, 0, 0, ""};
+    DeviceSensorSpec_t sensorInputReserved1 = {SensorType::Reserved1, 0, 0, 0};
+    DeviceSensorSpec_t sensorInputReserved2 = {SensorType::Reserved2, 0, 0, 0};
+    DeviceSensorSpec_t sensorInput04 = {SensorType::ActivePower, 0, 0, 0};
+    DeviceSensorSpec_t sensorInput05 = {SensorType::OutputCurrent, 0, 0, 0};
+    DeviceSensorSpec_t sensorInput06 = {SensorType::ElectricMeter, 0, 0, 0};
+    DeviceSensorSpec_t sensorInput64 = {SensorType::OutputCurrent16A, 0, 0, 0};
+    DeviceSensorSpec_t sensorInput65 = {SensorType::ActivePowerVA, 0, 0, 0};
     DeviceClasses_t deviceClass = getDeviceClass();
     int devType = (deviceClass << 16) | m_ProductID;
 
@@ -2539,8 +2539,7 @@ namespace dss {
       boost::shared_ptr<DeviceSensor_t> binput = boost::make_shared<DeviceSensor_t>();
       binput->m_sensorIndex = m_sensorInputCount;
       binput->m_sensorType = it->sensorType;
-      binput->m_sensorUsage = it->usage;
-      binput->m_sensorName = it->name;
+      binput->m_sensorUsage = 0;
       binput->m_sensorPollInterval = it->SensorPollInterval;
       binput->m_sensorBroadcastFlag = it->SensorBroadcastFlag;
       binput->m_sensorPushConversionFlag = it->SensorConversionFlag;
@@ -2577,12 +2576,16 @@ namespace dss {
     }
   }
 
-  void Device::setSensorsInfo(const uint8_t sensorIndex, DeviceSensor_t& _sensorInfo) {
+  void Device::setSensorsInfo(const uint8_t _sensorIndex, const std::string&  _sensorId,
+      const std::string& _sensorName, const int _sensorUsage) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (sensorIndex >= m_sensorInputCount) {
+    if (_sensorIndex >= m_sensorInputCount) {
       throw ItemNotFoundException(std::string("Device::setSensorsInfo: index out of bounds"));
     }
-    m_sensorInputs[sensorIndex] = boost::make_shared<DeviceSensor_t> (_sensorInfo);
+    boost::shared_ptr<DeviceSensor_t> binput = m_sensorInputs[_sensorIndex];
+    binput->m_sensorId = _sensorId;
+    binput->m_sensorName = _sensorName;
+    binput->m_sensorUsage = _sensorUsage;
   }
 
   void Device::setOutputChannels(const std::vector<int>& _outputChannels) {
