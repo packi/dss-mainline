@@ -107,8 +107,6 @@ namespace dss {
     uint32_t SensorPollInterval;
     uint8_t SensorBroadcastFlag;
     uint8_t SensorConversionFlag;
-    uint8_t usage;
-    std::string name;
   } DeviceSensorSpec_t;
 
   typedef struct DeviceSensorValue {
