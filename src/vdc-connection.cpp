@@ -366,6 +366,13 @@ namespace dss {
           sDesc.index = strToInt(propertyName);
         } catch(std::exception&) {}
       }
+
+      Logger::getInstance()->log("VdcHelper::getSensorDesc: device " + dsuid2str(_device) +
+          ": id " + propertyName +
+          ", index " + intToString(sDesc.index) +
+          ", name " + sDesc.sensorName +
+          ", type " + intToString(static_cast<int>(sDesc.sensorType)), lsDebug);
+
       sensorList[propertyName] = sDesc;
     }
     return sensorList;
@@ -412,6 +419,13 @@ namespace dss {
       if (sDesc.index == 255) {
         sDesc.index = channelList.size();
       }
+
+      Logger::getInstance()->log("VdcHelper::getChannelDesc: device " + dsuid2str(_device) +
+          ": id " + propertyName +
+          ", index " + intToString(sDesc.index) +
+          ", name " + sDesc.name +
+          ", type " + intToString(sDesc.type), lsDebug);
+
       channelList[propertyName] = sDesc;
     }
     return channelList;
