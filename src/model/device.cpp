@@ -2576,12 +2576,16 @@ namespace dss {
     }
   }
 
-  void Device::setSensorsInfo(const uint8_t sensorIndex, DeviceSensor_t& _sensorInfo) {
+  void Device::setSensorsInfo(const uint8_t _sensorIndex, const std::string&  _sensorId,
+      const std::string& _sensorName, const int _sensorUsage) {
     boost::recursive_mutex::scoped_lock lock(m_deviceMutex);
-    if (sensorIndex >= m_sensorInputCount) {
+    if (_sensorIndex >= m_sensorInputCount) {
       throw ItemNotFoundException(std::string("Device::setSensorsInfo: index out of bounds"));
     }
-    m_sensorInputs[sensorIndex] = boost::make_shared<DeviceSensor_t> (_sensorInfo);
+    boost::shared_ptr<DeviceSensor_t> binput = m_sensorInputs[_sensorIndex];
+    binput->m_sensorId = _sensorId;
+    binput->m_sensorName = _sensorName;
+    binput->m_sensorUsage = _sensorUsage;
   }
 
   void Device::setOutputChannels(const std::vector<int>& _outputChannels) {

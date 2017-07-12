@@ -755,7 +755,7 @@ namespace dss {
     void setStateValues(const std::vector<std::pair<std::string, std::string> >& values);
 
     void setSensors(const std::vector<DeviceSensorSpec_t>& _binaryInput);
-    void setSensorsInfo(const uint8_t sensorIndex, DeviceSensor_t& _sensorInfo);
+    void setSensorsInfo(const uint8_t sensorIndex, const std::string& _sensorId, const std::string& _sensorName, const int _sensorUsage);
     uint8_t getSensorCount() const;
     const std::vector<boost::shared_ptr<DeviceSensor_t> >& getSensors() const;
     const boost::shared_ptr<DeviceSensor_t> getSensor(uint8_t _inputIndex) const;

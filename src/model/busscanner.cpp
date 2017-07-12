@@ -514,16 +514,7 @@ namespace dss {
           // read extended sensor info
           auto sList = VdcHelper::getSensorDesc(dev->getDSMeterDSID(), dev->getDSID());
           for (auto it = sList.begin(); it != sList.end(); it ++) {
-            DeviceSensor_t sensorInfo;
-            sensorInfo.m_sensorId = it->first;
-            sensorInfo.m_sensorIndex = it->second.index;
-            sensorInfo.m_sensorName = it->second.sensorName;
-            sensorInfo.m_sensorUsage = it->second.sensorUsage;
-            sensorInfo.m_sensorType = it->second.sensorType;
-            sensorInfo.m_sensorPollInterval = _spec.sensorInputs[sensorInfo.m_sensorIndex].SensorPollInterval;
-            sensorInfo.m_sensorPushConversionFlag = _spec.sensorInputs[sensorInfo.m_sensorIndex].SensorConversionFlag;
-            sensorInfo.m_sensorBroadcastFlag = _spec.sensorInputs[sensorInfo.m_sensorIndex].SensorBroadcastFlag;
-            dev->setSensorsInfo(sensorInfo.m_sensorIndex, sensorInfo);
+            dev->setSensorsInfo(it->second.index, it->first, it->second.sensorName, it->second.sensorUsage);
           }
         } catch (const std::runtime_error& e) {
           log(std::string("initializeDeviceFromSpec() sensor read error:") + e.what(), lsError);
