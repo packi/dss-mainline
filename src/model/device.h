@@ -833,6 +833,14 @@ namespace dss {
                          const vdcapi::PropertyElement& params);
     vdcapi::Message getVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
     void setVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
+
+    /** LED indicates group membership of devices
+     *
+     * Some device indicate group membership with an LED, but the update is not
+     * done by the device firmware, but needs to be handled by dss
+     */
+    void updateLedGroupColor();
+    void updateZws205GroupColor();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

@@ -830,6 +830,7 @@ namespace dss {
     }
 
     updateIconPath();
+    updateLedGroupColor();
   } // setDeviceJokerGroup
 
   void Device::setDeviceOutputMode(uint8_t _modeId) {
@@ -3254,6 +3255,49 @@ namespace dss {
 
   void Device::setVdcSpec(VdsdSpec_t &&x) {
     m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t(std::move(x)));
+  }
+
+  void Device::updateZws205GroupColor() {
+    // TODO(someday), sync LED color upon readout
+    auto bits = [&] {
+      switch (static_cast<ApplicationType>(m_ActiveGroup)) {
+        case ApplicationType::Lights:
+          return 046;
+        case ApplicationType::Blinds:
+          return 047;
+        case ApplicationType::Heating:
+          return 041;
+        case ApplicationType::Cooling:
+          // TODO(now) not specified, treat same Heating
+        case ApplicationType::Ventilation:
+        case ApplicationType::Recirculation:
+          return 041;
+        case ApplicationType::ControlTemperature:
+        case ApplicationType::ApartmentVentilation:
+        case ApplicationType::ApartmentRecirculation:
+          return 041;
+        case ApplicationType::Audio:
+          // Audio/Video swapped in specification, spec says 045 but that's violet
+          return 043;
+        case ApplicationType::Video:
+          // Audio/Video swapped in specification, spec says 043 but that's cyan
+          return 045;
+        case ApplicationType::Joker:
+          return 047;
+        case ApplicationType::Window:
+        case ApplicationType::None:
+          // TODO(now) not specified, not to allowed to be selected
+          ;
+      }
+      DS_FAIL_REQUIRE("ZWS205: no led color for application type", m_ActiveGroup);
+    }();
+    setDeviceConfig(CfgClassFunction, CfgFunction_LedConfig0, bits);
+  }
+
+  void Device::updateLedGroupColor() {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      updateZws205GroupColor();
+    }
   }
 
   std::ostream& operator<<(std::ostream& stream, const Device& x) {
