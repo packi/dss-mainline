@@ -831,6 +831,7 @@ namespace dss {
 
     updateIconPath();
     updateLedGroupColor();
+    updateOutputMode();
   } // setDeviceJokerGroup
 
   void Device::setDeviceOutputMode(uint8_t _modeId) {
@@ -3298,6 +3299,39 @@ namespace dss {
     if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
       updateZws205GroupColor();
     }
+  }
+
+  void Device::updateOutputMode() {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      updateZws205OutputMode();
+    }
+  }
+
+  void Device::updateZws205OutputMode() {
+    auto mode = [&] {
+      switch (static_cast<ApplicationType>(m_ActiveGroup)) {
+        case ApplicationType::Lights:
+        case ApplicationType::Blinds:
+        case ApplicationType::Heating:
+        case ApplicationType::Ventilation:
+        case ApplicationType::Recirculation:
+        case ApplicationType::ApartmentVentilation:
+        case ApplicationType::ApartmentRecirculation:
+        case ApplicationType::Audio:
+        case ApplicationType::Video:
+        case ApplicationType::Joker:
+          return OUTPUT_MODE_SWITCH_2_POL;
+        case ApplicationType::ControlTemperature:
+          return OUTPUT_MODE_TEMPCONTROL_SWITCHED;
+        case ApplicationType::Cooling:
+        case ApplicationType::Window:
+        case ApplicationType::None:
+          // TODO(now) what to do with the excption
+          ;
+      }
+      DS_FAIL_REQUIRE("ZWS205: no output mode for application type", m_ActiveGroup);
+    }();
+    setDeviceOutputMode(mode);
   }
 
   std::ostream& operator<<(std::ostream& stream, const Device& x) {
