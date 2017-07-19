@@ -2843,28 +2843,72 @@ namespace dss {
   }
 
   void Device::setBlinkOnDelay(double _delay) {
-    if (hasBlinkSettings()) {
-      _delay = _delay * 1000.0; // convert from seconds to ms
-
-      if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
-        throw std::runtime_error("invalid delay value");
+    auto lowerBound = [&] {
+      switch (getDeviceType()) {
+        case DEVICE_TYPE_ZWS:
+          return 0.5d;
+        case DEVICE_TYPE_UMR:
+          return 0.0d; // TODO(now) probably not 0s for UMR
+        default:
+          break;
       }
-      uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
-      setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, value);
+      DS_FAIL_REQUIRE("Missing lower blink delay boundary", m_DefaultGroup);
+    }();
+
+    auto upperBound = [&] {
+      switch (getDeviceType()) {
+        case DEVICE_TYPE_ZWS:
+        case DEVICE_TYPE_UMR:
+          return 8.4d; // 255 * UMR_DELAY_STEPS / 1000.0
+        default:
+          break;
+      }
+      DS_FAIL_REQUIRE("Missing upper blink delay boundary", m_DefaultGroup);
+    }();
+
+    if (hasBlinkSettings()) {
+      DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
+      DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
+
+      auto value = 1000.0 * _delay / UMR_DELAY_STEPS;
+      DS_REQUIRE(value < UCHAR_MAX, "delay exceeds data type", _delay);
+      setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, static_cast<uint8_t>(value));
     } else {
       throw std::runtime_error("unsupported configuration for this device");
     }
   }
 
   void Device::setBlinkOffDelay(double _delay) {
-    if (hasBlinkSettings()) {
-      _delay = _delay * 1000.0; // convert from seconds to ms
-
-      if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
-        throw std::runtime_error("invalid delay value");
+    auto lowerBound = [&] {
+      switch (getDeviceType()) {
+        case DEVICE_TYPE_ZWS:
+          return 0.5d;
+        case DEVICE_TYPE_UMR:
+          return 0.0d; // TODO(now) probably not 0s for UMR
+        default:
+          break;
       }
-      uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
-      setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, value);
+      DS_FAIL_REQUIRE("Missing lower blink delay boundary", m_DefaultGroup);
+    }();
+
+    auto upperBound = [&] {
+      switch (getDeviceType()) {
+        case DEVICE_TYPE_ZWS:
+        case DEVICE_TYPE_UMR:
+          return 8.4d; // 255 * UMR_DELAY_STEPS / 1000.0
+        default:
+          break;
+      }
+      DS_FAIL_REQUIRE("Missing upper blink delay boundary", m_DefaultGroup);
+    }();
+
+    if (hasBlinkSettings()) {
+      DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
+      DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
+
+      auto value = 1000.0 * _delay / UMR_DELAY_STEPS;
+      DS_REQUIRE(value < UCHAR_MAX, "delay exceeds data type", _delay);
+      setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, static_cast<uint8_t>(value));
     } else {
       throw std::runtime_error("unsupported configuration for this device");
     }
