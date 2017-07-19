@@ -2832,7 +2832,8 @@ namespace dss {
 
     return false;
   }
-  void Device::setDeviceUMRBlinkRepetitions(uint8_t _count) {
+
+  void Device::setBlinkRepetitions(uint8_t _count) {
     if (hasBlinkSettings()) {
       setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
 
@@ -2841,7 +2842,7 @@ namespace dss {
     }
   }
 
-  void Device::setDeviceUMROnDelay(double _delay) {
+  void Device::setBlinkOnDelay(double _delay) {
     if (hasBlinkSettings()) {
       _delay = _delay * 1000.0; // convert from seconds to ms
 
@@ -2855,7 +2856,7 @@ namespace dss {
     }
   }
 
-  void Device::setDeviceUMROffDelay(double _delay) {
+  void Device::setBlinkOffDelay(double _delay) {
     if (hasBlinkSettings()) {
       _delay = _delay * 1000.0; // convert from seconds to ms
 
@@ -2869,8 +2870,7 @@ namespace dss {
     }
   }
 
-  void Device::getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay,
-                                         uint8_t  *_count) {
+  void Device::getBlinkSettings(double *_ondelay, double *_offdelay, uint8_t  *_count) {
     if (hasBlinkSettings()) {
       uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
       *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
