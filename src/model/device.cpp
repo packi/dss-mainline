@@ -2834,12 +2834,8 @@ namespace dss {
   }
 
   void Device::setBlinkRepetitions(uint8_t _count) {
-    if (hasBlinkSettings()) {
-      setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
-
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
+    setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
   }
 
   void Device::setBlinkOnDelay(double _delay) {
@@ -2866,16 +2862,13 @@ namespace dss {
       DS_FAIL_REQUIRE("Missing upper blink delay boundary", m_DefaultGroup);
     }();
 
-    if (hasBlinkSettings()) {
-      DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
-      DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
+    DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
+    DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
 
-      auto value = 1000.0 * _delay / UMR_DELAY_STEPS;
-      DS_REQUIRE(value < UCHAR_MAX, "delay exceeds data type", _delay);
-      setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, static_cast<uint8_t>(value));
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+    auto value = 1000.0 * _delay / UMR_DELAY_STEPS;
+    DS_REQUIRE(value < UCHAR_MAX, "delay exceeds data type", _delay);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, static_cast<uint8_t>(value));
   }
 
   void Device::setBlinkOffDelay(double _delay) {
@@ -2902,29 +2895,24 @@ namespace dss {
       DS_FAIL_REQUIRE("Missing upper blink delay boundary", m_DefaultGroup);
     }();
 
-    if (hasBlinkSettings()) {
-      DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
-      DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
+    DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
+    DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
 
-      auto value = 1000.0 * _delay / UMR_DELAY_STEPS;
-      DS_REQUIRE(value < UCHAR_MAX, "delay exceeds data type", _delay);
-      setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, static_cast<uint8_t>(value));
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+    auto value = 1000.0 * _delay / UMR_DELAY_STEPS;
+    DS_REQUIRE(value < UCHAR_MAX, "delay exceeds data type", _delay);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, static_cast<uint8_t>(value));
   }
 
   void Device::getBlinkSettings(double *_ondelay, double *_offdelay, uint8_t  *_count) {
-    if (hasBlinkSettings()) {
-      uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
-      *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
-      *_count = (uint8_t)(value >> 8) & 0xff;
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
-      uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
-      *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+    uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
+    *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
+    *_count = (uint8_t)(value >> 8) & 0xff;
+
+    uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
+    *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
   }
 
   std::vector<int> Device::getLockedScenes() {
