@@ -59,6 +59,7 @@ const char *SDS20 =     "SDS:20"; // wildcard for SDS-20*
 const char *SDS22 =     "SDS:22"; // wildcard for SDS-22*
 const char *SDS2 =      "SDS:2"; // wildcard for all SDS-2*
 const char *ZWS2 =      "ZWS:2"; // wildcard for all ZWS-2*
+const char *ZWS205 =    "ZWS:205";
 const char *KL213 =     "KL:213";
 const char *KL214 =     "KL:214";
 const char *UMV204 =    "UMV:204";
@@ -600,6 +601,26 @@ const ModelFeatureId MF_SW_ZWS2[] =
   ModelFeatureId::blinkconfig
 };
 
+const ModelFeatureId MF_SW_ZWS205[] =
+{
+  ModelFeatureId::dontcare,
+  ModelFeatureId::blink,
+  ModelFeatureId::ledauto,
+  ModelFeatureId::transt,
+  ModelFeatureId::outvalue8,
+  ModelFeatureId::pushbutton,
+  ModelFeatureId::pushbdevice,
+  ModelFeatureId::pushbarea,
+  ModelFeatureId::pushbadvanced,
+  ModelFeatureId::highlevel,
+  ModelFeatureId::consumption,
+  ModelFeatureId::jokerconfig,
+  ModelFeatureId::outconfigswitch,
+  ModelFeatureId::impulseconfig,
+  ModelFeatureId::blinkconfig
+};
+
+
 const ModelFeatureId MF_SW_KL213[] =
 {
   ModelFeatureId::dontcare,
@@ -885,6 +906,11 @@ ModelFeatures::ModelFeatures() : m_features(ColorIDWhite + 1) {
   fv = boost::make_shared<std::vector<ModelFeatureId> >();
   fv->assign(MF_SW_ZWS2, ARRAY_END(MF_SW_ZWS2));
   setFeatures(ColorIDBlack, ZWS2, fv);
+  fv.reset();
+
+  fv = boost::make_shared<std::vector<ModelFeatureId> >();
+  fv->assign(MF_SW_ZWS205, ARRAY_END(MF_SW_ZWS205));
+  setFeatures(ColorIDBlack, ZWS205, fv);
   fv.reset();
 
   fv = boost::make_shared<std::vector<ModelFeatureId> >();
