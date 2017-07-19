@@ -2994,29 +2994,44 @@ namespace dss {
   }
 
   uint8_t Device::getSWThresholdAddress() const {
-    if (getDeviceType() == DEVICE_TYPE_KM ||
-        getDeviceType() == DEVICE_TYPE_SDM ||
-        getDeviceType() == DEVICE_TYPE_SDS ||
-        getDeviceType() == DEVICE_TYPE_TKM) {
-      return CfgFunction_KM_SWThreshold;
+    switch (getDeviceType()) {
+      case DEVICE_TYPE_KM:
+      case DEVICE_TYPE_SDM:
+      case DEVICE_TYPE_SDS:
+      case DEVICE_TYPE_TKM:
+        return CfgFunction_KM_SWThreshold;
+      case DEVICE_TYPE_KL:
+      case DEVICE_TYPE_ZWS:
+        switch (getDeviceClass()) {
+          case DEVICE_CLASS_GE:
+          case DEVICE_CLASS_SW:
+            return CfgFunction_KL_SWThreshold;
+          default:
+            break;
+        }
+        break;
+      case DEVICE_TYPE_UMV:
+        if (getDeviceClass() == DEVICE_CLASS_GE) {
+          return CfgFunction_UMV_SWThreshold;
+        }
+        break;
+      case DEVICE_TYPE_TNY:
+        if (getDeviceClass() == DEVICE_CLASS_SW && isMainDevice()) {
+          return CfgFunction_Tiny_SWThreshold;
+        }
+        break;
+      case DEVICE_TYPE_UMR:
+        if (getDeviceClass() == DEVICE_CLASS_SW) {
+          return CfgFunction_UMR_SWThreshold;
+        }
+        break;
+      default:
+        // TODO(now) we should limit this to a DEVICE_TYPE
+        if (getDeviceClass() == DEVICE_CLASS_BL) {
+          return CfgFunction_Valve_SWThreshold;
+        }
     }
-    if ((getDeviceType() == DEVICE_TYPE_KL || getDeviceType() == DEVICE_TYPE_ZWS) &&
-        (getDeviceClass() == DEVICE_CLASS_GE || getDeviceClass() == DEVICE_CLASS_SW)) {
-      return CfgFunction_KL_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_UMV && getDeviceClass() == DEVICE_CLASS_GE) {
-      return CfgFunction_UMV_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_TNY && getDeviceClass() == DEVICE_CLASS_SW && isMainDevice()) {
-      return CfgFunction_Tiny_SWThreshold;
-    }
-    if (getDeviceClass() == DEVICE_CLASS_BL) {
-      return CfgFunction_Valve_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_UMR && getDeviceClass() == DEVICE_CLASS_SW) {
-      return CfgFunction_UMR_SWThreshold;
-    }
-    throw std::runtime_error("Device does not support changing the switching threshold");
+    DS_FAIL_REQUIRE("Device does not support changing the switching threshold");
   }
 
   void Device::setSwitchThreshold(uint8_t _threshold) {
