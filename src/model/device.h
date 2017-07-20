@@ -424,8 +424,9 @@ namespace dss {
     int multiDeviceIndex() const;
 
     /** Configure scene configuration */
-    void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);
-    void getDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t& _config);
+    void setDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t _config);
+    void getDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t& _config);
+
     void setDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t _config);
     void getDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t& _config);
     void setDeviceTransitionTime(uint8_t _dimtimeIndex, int up, int down);

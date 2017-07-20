@@ -936,7 +936,7 @@ namespace dss {
     }
   } // setDeviceOutputChannelSceneConfig
 
-  void Device::setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config) {
+  void Device::setDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t _config) {
     uint8_t mode = _config.dontcare ? 1 : 0;
     mode |= _config.localprio ? 2 : 0;
     mode |= _config.specialmode ? 4 : 0;
@@ -946,7 +946,7 @@ namespace dss {
     setDeviceConfig(CfgClassScene, 128 + _sceneId, mode);
   } // setDeviceSceneMode
 
-  void Device::getDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t& _config) {
+  void Device::getDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t& _config) {
     uint8_t mode = getDeviceConfig(CfgClassScene, 128 + _sceneId);
     _config.dontcare = (mode & 1) > 0;
     _config.localprio = (mode & 2) > 0;
