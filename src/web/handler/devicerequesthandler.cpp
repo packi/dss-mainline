@@ -867,11 +867,8 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->getDeviceSceneModeStandard(id, config);
-      }
+      pDevice->getDeviceSceneMode(id, config);
+
       JSONWriter json;
       json.add("sceneID", id);
       json.add("dontCare", config.dontcare);
@@ -893,11 +890,7 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->getDeviceSceneModeStandard(id, config);
-      }
+      pDevice->getDeviceSceneMode(id, config);
 
       if(_request.hasParameter("dontCare"))
         config.dontcare = strToIntDef(_request.getParameter("dontCare"), config.dontcare);
@@ -912,11 +905,7 @@ namespace dss {
       if(_request.hasParameter("dimtimeIndex"))
         config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), config.dimtimeIndex);
 
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->setDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->setDeviceSceneModeStandard(id, config);
-      }
+      pDevice->setDeviceSceneMode(id, config);
 
       return JSONWriter::success();
 
@@ -1865,19 +1854,11 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
-      } else {
-        pDevice->getDeviceSceneModeStandard(SceneImpulse, config);
-      }
+      pDevice->getDeviceSceneMode(SceneImpulse, config);
 
       if (config.flashmode != 1) {
         config.flashmode = 1;
-        if (pDevice->getProductID() == ProductID_UMV_210) {
-          pDevice->setDeviceOutputChannelSceneConfig(SceneImpulse, config);
-        } else {
-          pDevice->setDeviceSceneModeStandard(SceneImpulse, config);
-        }
+        pDevice->setDeviceSceneMode(SceneImpulse, config);
       }
 
       return JSONWriter::success();
@@ -1981,20 +1962,12 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
-      } else {
-        pDevice->getDeviceSceneModeStandard(SceneImpulse, config);
-      }
+      pDevice->getDeviceSceneMode(SceneImpulse, config);
 
       if ((config.dontcare != dontcare) || (config.flashmode != 1)) {
         config.flashmode = 1;
         config.dontcare = dontcare;
-        if (pDevice->getProductID() == ProductID_UMV_210) {
-          pDevice->setDeviceOutputChannelSceneConfig(SceneImpulse, config);
-        } else {
-          pDevice->setDeviceSceneModeStandard(SceneImpulse, config);
-        }
+        pDevice->setDeviceSceneMode(SceneImpulse, config);
       }
 
       pDevice->setSceneValue(SceneImpulse, value);
@@ -2008,11 +1981,7 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
-      } else {
-        pDevice->getDeviceSceneModeStandard(SceneImpulse, config);
-      }
+      pDevice->getDeviceSceneMode(SceneImpulse, config);
 
       int value = pDevice->getSceneValue(SceneImpulse);
 

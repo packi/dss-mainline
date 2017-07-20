@@ -371,6 +371,12 @@ namespace dss {
     bool hasBlinkSettings();
     void publishAliasInZoneGroups();
 
+    // use get/setDeviceSceneMode instaed of these functions, only internal
+    void setDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t _config);
+    void getDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t& _config);
+    void getDeviceOutputChannelSceneConfig(uint8_t scene, DeviceSceneSpec_t& config);
+    void setDeviceOutputChannelSceneConfig(uint8_t scene, DeviceSceneSpec_t config);
+
   public:
     /** Creates and initializes a device. */
     Device(const dsuid_t _dsid, Apartment* _pApartment);
@@ -402,10 +408,6 @@ namespace dss {
     uint16_t getDeviceOutputChannelSceneValue(uint8_t _channel, uint8_t _scene);
     void setDeviceOutputChannelSceneValue(uint8_t _channel, uint8_t _size,
                                           uint8_t _scene, uint16_t _value);
-    void getDeviceOutputChannelSceneConfig(uint8_t _scene,
-                                           DeviceSceneSpec_t& _config);
-    void setDeviceOutputChannelSceneConfig(uint8_t _scene,
-                                           DeviceSceneSpec_t _config);
     void setDeviceOutputChannelDontCareFlags(uint8_t _scene, uint16_t _value);
     uint16_t getDeviceOutputChannelDontCareFlags(uint8_t _scene);
 
@@ -424,8 +426,8 @@ namespace dss {
     int multiDeviceIndex() const;
 
     /** Configure scene configuration */
-    void setDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t _config);
-    void getDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t& _config);
+    void setDeviceSceneMode(uint8_t sceneId, DeviceSceneSpec_t config);
+    void getDeviceSceneMode(uint8_t sceneId, DeviceSceneSpec_t& config);
 
     void setDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t _config);
     void getDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t& _config);

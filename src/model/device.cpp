@@ -946,6 +946,14 @@ namespace dss {
     setDeviceConfig(CfgClassScene, 128 + _sceneId, mode);
   } // setDeviceSceneMode
 
+  void Device::setDeviceSceneMode(uint8_t sceneId, DeviceSceneSpec_t config) {
+    if (getProductID() == ProductID_UMV_210) {
+      setDeviceOutputChannelSceneConfig(SceneImpulse, config);
+    } else {
+      setDeviceSceneModeStandard(SceneImpulse, config);
+    }
+  }
+
   void Device::getDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t& _config) {
     uint8_t mode = getDeviceConfig(CfgClassScene, 128 + _sceneId);
     _config.dontcare = (mode & 1) > 0;
@@ -955,6 +963,14 @@ namespace dss {
     _config.ledconIndex = (mode >> 4) & 3;
     _config.dimtimeIndex = (mode >> 6) & 3;
   } // getDeviceSceneMode
+
+  void Device::getDeviceSceneMode(uint8_t sceneId, DeviceSceneSpec_t &config) {
+    if (getProductID() == ProductID_UMV_210) {
+      getDeviceOutputChannelSceneConfig(SceneImpulse, config);
+    } else {
+      getDeviceSceneModeStandard(SceneImpulse, config);
+    }
+  }
 
   void Device::setDeviceOutputChannelDontCareFlags(uint8_t _scene,
                                                    uint16_t _value) {
