@@ -22,6 +22,7 @@
 #include <ds/common.h>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/chrono/chrono.hpp>
+#include "abortable.h"
 #include "io-service.h"
 
 namespace ds {
@@ -33,11 +34,11 @@ namespace asio {
 ///
 /// Unit tests will need an option to control the time programatically.
 /// It will be much easier to deploy this change if all code uses this class.
-class Timer : public ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock> {
+class Timer : private ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock> {
 public:
     typedef ::boost::asio::basic_waitable_timer<boost::chrono::steady_clock> Super;
     typedef duration Duration;
-    Timer(ds::asio::IoService &ioService) : Super(ioService) {}
+    Timer(IoService &ioService) : Super(ioService) {}
 
     /// Convenient method calling `expires_from_now(x)` and `asyncWait(f)`.
     template <typename F>
@@ -72,16 +73,24 @@ public:
     template <typename F>
     void asyncWait(F &&f) {
         static_assert(std::is_void<decltype(f())>::value, "required F type: void ()");
-        // TODO(c++14): move capture f
-        async_wait([f](boost::system::error_code e) {
-            if (e) {
+        auto abortableHandle = m_abortable.nextHandle();
+        // TODO(c++14): move capture f, inline isDestroed
+        async_wait([f, abortableHandle](boost::system::error_code e) mutable {
+            if (abortableHandle.isAborted() || e) {
                 return; // timer was aborted
             }
             f();
         });
     }
 
+    void cancel() {
+        Super::cancel();
+        m_abortable.abort();
+    }
+
 private:
+    Abortable m_abortable;
+
     void randomlyExpiresFromNow(Duration a, Duration b);
     void randomlyExpiresFromNowPercentDown(Duration d, int p);
 };

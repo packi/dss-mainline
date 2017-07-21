@@ -62,4 +62,14 @@ TEST_CASE("dsStr", TAGS) {
         CHECK(ds::str(static_cast<const std::exception&>(e)) == "a");
         CHECK(ds::str(static_cast<std::exception&>(e)) == "a");
     }
+
+    SECTION("std::vector<T> is serialized") {
+        CHECK(ds::str(std::vector<int>()) == "()");
+        CHECK(ds::str(std::vector<int>({1})) == "(1)");
+        CHECK(ds::str(std::vector<int>({1, 2})) == "(1,2)");
+        CHECK(ds::str(std::vector<std::string>()) == "()");
+        CHECK(ds::str(std::vector<std::string>({"a"})) == "(a)");
+        CHECK(ds::str(std::vector<std::string>({"a", "b"})) == "(a,b)");
+        CHECK(ds::str(std::vector<std::vector<int>>({{1}, {}})) == "((1),())");
+    }
 }

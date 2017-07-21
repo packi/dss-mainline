@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/foreach.hpp>
 #include <boost/noncopyable.hpp>
 #include <utility>
 
@@ -11,6 +12,13 @@ namespace ds {
 #define DS_OVERRIDE
 #define DS_FINAL
 #define DS_NULLPTR 0
+#define DS_CONSTEXPR
+
+// gcc 4.5 does not support explicit default constructor and default move asignment
+// We want explicit copy constructor mainly to catch unintended copies.
+// If it compiles on new compiler, gcc4.5 will not copy either.
+#define DS_MOVABLE_AND_EXPLICIT_COPYABLE(X)
+
 #endif
 #endif
 #ifndef DS_OVERRIDE
@@ -18,6 +26,15 @@ namespace ds {
 #define DS_OVERRIDE override
 #define DS_FINAL final
 #define DS_NULLPTR nullptr
+#define DS_CONSTEXPR constexpr
+
+// Add explicit copy constructor and move constructor, move assignment
+// We want explicit copy constructor mainly to catch unintended copies.
+#define DS_MOVABLE_AND_EXPLICIT_COPYABLE(X) \
+    explicit X(const X &) = default;        \
+    X(X &&) = default;                      \
+    X &operator=(X &&) = default;
+
 #endif
 
 /// define to `[[fallthrough]]` on c++17 complaint compilers
@@ -88,5 +105,17 @@ template <typename Func>
 _private::Deferred<Func> defer(Func&& func) {
     return _private::Deferred<Func>(std::forward<Func>(func));
 }
+
+// Version of KJ_REQUIRE() to be used inside inline methods.
+// Does not include the whole logging framework.
+#define DS_IREQUIRE(condition, message)        \
+    do {                                       \
+        if (DS_LIKELY(condition)) {            \
+        } else {                               \
+            throw std::runtime_error(message); \
+        }                                      \
+    } while (0)
+
+#define DS_FAIL_IREQUIRE(message) throw std::runtime_error(message)
 
 } // namespace ds

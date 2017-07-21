@@ -55,6 +55,8 @@ enum class Severity {
 std::ostream& operator<<(std::ostream& stream, Severity x);
 // parses severity at the start of the string
 boost::optional<Severity> tryParseSeverityChar(const char*);
+// interprets syslog severity value
+Severity severityFromSyslog(int level);
 
 /// All logging macros stringify passed expressions together with their value.
 /// String literals and expressions starting with char '_' are not stringified.
@@ -311,6 +313,11 @@ public:
     /// Default log function writing messages to error output
     static void defaultLogFunction(const char* channelName, Severity severity, std::string);
 
+    /// Default severity if severity is not specified by a an explicty rule
+    /// (e.g. parsed from DS_LOG environmental variable).
+    Severity defaultSeverity() const;
+    void setDefaultSeverity(Severity severity);
+
     // No getter for channels.
     // Iteration over channels would require clients to hold our mutex,
     // because channels are not copyable
@@ -322,6 +329,7 @@ private:
     struct Impl;
     const std::unique_ptr<Impl> m_impl;
 
+    void updateChannelSeverity(Channel& channel);
     // adds channel and sets its severity
     void addChannel(Channel& channel);
     void removeChannel(Channel& channel);
