@@ -780,10 +780,10 @@ namespace dss {
     uint8_t getDeviceUMVRelayValue();
     void setDeviceUMVRelayValue(uint8_t _value);
 
-    void setBlinkRepetitions(uint8_t _count);
-    void setBlinkOnDelay(double delay);
-    void setBlinkOffDelay(double delay);
-    void getBlinkSettings(double *_ondelay, double *_offdelay, uint8_t *_count);
+    void setDeviceBlinkRepetitions(uint8_t _count);
+    void setDeviceBlinkOnDelay(double delay);
+    void setDeviceBlinkOffDelay(double delay);
+    void getDeviceBlinkSettings(double *_ondelay, double *_offdelay, uint8_t *_count);
 
     void setCardinalDirection(CardinalDirection_t _direction, bool _initial = false);
     CardinalDirection_t getCardinalDirection() const {

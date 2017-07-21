@@ -1842,15 +1842,15 @@ namespace dss {
       }
 
       if (blinkCount != -1) {
-        device->setBlinkRepetitions((uint8_t)blinkCount);
+        device->setDeviceBlinkRepetitions((uint8_t)blinkCount);
       }
 
       if (onDelay != -1) {
-        device->setBlinkOnDelay(onDelay);
+        device->setDeviceBlinkOnDelay(onDelay);
       }
 
       if (offDelay != -1) {
-         device->setBlinkOffDelay(offDelay);
+         device->setDeviceBlinkOffDelay(offDelay);
       }
 
       DeviceSceneSpec_t config;
@@ -1874,7 +1874,7 @@ namespace dss {
       uint8_t umr_count;
       double umr_ondelay;
       double umr_offdelay;
-      device->getBlinkSettings(&umr_ondelay, &umr_offdelay, &umr_count);
+      device->getDeviceBlinkSettings(&umr_ondelay, &umr_offdelay, &umr_count);
       json.add("count", umr_count);
       json.add("ondelay", umr_ondelay);
       json.add("offdelay", umr_offdelay);

@@ -2833,12 +2833,12 @@ namespace dss {
     return false;
   }
 
-  void Device::setBlinkRepetitions(uint8_t _count) {
+  void Device::setDeviceBlinkRepetitions(uint8_t _count) {
     DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
     setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
   }
 
-  void Device::setBlinkOnDelay(double _delay) {
+  void Device::setDeviceBlinkOnDelay(double _delay) {
     auto lowerBound = [&] {
       switch (getDeviceType()) {
         case DEVICE_TYPE_ZWS:
@@ -2871,7 +2871,7 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, static_cast<uint8_t>(value));
   }
 
-  void Device::setBlinkOffDelay(double _delay) {
+  void Device::setDeviceBlinkOffDelay(double _delay) {
     auto lowerBound = [&] {
       switch (getDeviceType()) {
         case DEVICE_TYPE_ZWS:
@@ -2904,7 +2904,7 @@ namespace dss {
     setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, static_cast<uint8_t>(value));
   }
 
-  void Device::getBlinkSettings(double *_ondelay, double *_offdelay, uint8_t  *_count) {
+  void Device::getDeviceBlinkSettings(double *_ondelay, double *_offdelay, uint8_t  *_count) {
     DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
     uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
