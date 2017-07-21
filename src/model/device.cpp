@@ -60,6 +60,8 @@
 #include "status.h"
 #include "src/model-features.h"
 
+DS_STATIC_LOG_CHANNEL(dssModelDevice);
+
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
 
@@ -3305,7 +3307,8 @@ namespace dss {
           // TODO(now) not specified, not to allowed to be selected
           ;
       }
-      DS_FAIL_REQUIRE("ZWS205: no led color for application type", m_ActiveGroup);
+      DS_WARNING("ZWS205: no led color for application type", m_ActiveGroup);
+      return 047; // default to joker
     }();
     setDeviceConfig(CfgClassFunction, CfgFunction_LedConfig0, bits);
   }
@@ -3344,7 +3347,8 @@ namespace dss {
           // TODO(now) what to do with the excption
           ;
       }
-      DS_FAIL_REQUIRE("ZWS205: no output mode for application type", m_ActiveGroup);
+      DS_WARNING("ZWS205: no output mode for application type", m_ActiveGroup);
+      return OUTPUT_MODE_SWITCH_2_POL; // go with the 90%
     }();
     setDeviceOutputMode(mode);
   }
