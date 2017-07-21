@@ -589,7 +589,8 @@ namespace dss {
     ftwdisplaysettings = 45,
     ftwbacklighttimeout = 46,
     ventconfig = 47,
-    fcu = 48
+    fcu = 48,
+    pushbdisabled = 49
   };
 
   boost::optional<const char*> modelFeatureName(ModelFeatureId x);

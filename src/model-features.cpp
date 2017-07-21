@@ -120,7 +120,8 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::ftwdisplaysettings,
   ModelFeatureId::ftwbacklighttimeout,
   ModelFeatureId::ventconfig,
-  ModelFeatureId::fcu
+  ModelFeatureId::fcu,
+  ModelFeatureId::pushbdisabled
 };
 
 // model features
@@ -612,6 +613,7 @@ const ModelFeatureId MF_SW_ZWS205[] =
   ModelFeatureId::pushbdevice,
   ModelFeatureId::pushbarea,
   ModelFeatureId::pushbadvanced,
+  ModelFeatureId::pushbdisabled,
   ModelFeatureId::highlevel,
   ModelFeatureId::consumption,
   ModelFeatureId::jokerconfig,

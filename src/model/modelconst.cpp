@@ -627,6 +627,8 @@ namespace dss {
         return "ventconfig";
       case ModelFeatureId::fcu:
         return "fcu";
+      case ModelFeatureId::pushbdisabled:
+        return "pushbdisabled";
     }
     return boost::none;
   }
@@ -730,6 +732,8 @@ namespace dss {
       return ModelFeatureId::ventconfig;
     } else if (x == "fcu") {
       return ModelFeatureId::fcu;
+    } else if (x == "pushbdisabled") {
+      return ModelFeatureId::pushbdisabled;
     }
 
     return boost::none;
