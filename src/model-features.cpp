@@ -614,6 +614,7 @@ const ModelFeatureId MF_SW_ZWS205[] =
   ModelFeatureId::pushbarea,
   ModelFeatureId::pushbadvanced,
   ModelFeatureId::pushbdisabled,
+  ModelFeatureId::heatingprops,
   ModelFeatureId::highlevel,
   ModelFeatureId::consumption,
   ModelFeatureId::jokerconfig,
