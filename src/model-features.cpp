@@ -619,6 +619,7 @@ const ModelFeatureId MF_SW_ZWS205[] =
   ModelFeatureId::jokerconfig,
   ModelFeatureId::outconfigswitch,
   ModelFeatureId::impulseconfig,
+  ModelFeatureId::valvetype,
   ModelFeatureId::blinkconfig
 };
 
