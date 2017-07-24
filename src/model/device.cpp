@@ -3313,7 +3313,7 @@ namespace dss {
         case ApplicationType::None:
           ;
       }
-      DS_WARNING("ZWS205: no output mode for application type", m_ActiveGroup);
+      DS_ERROR("ZWS205: no output mode for application type", m_ActiveGroup);
       return OUTPUT_MODE_SWITCH_2_POL; // go with the 90%
     }();
     setDeviceOutputMode(mode);
