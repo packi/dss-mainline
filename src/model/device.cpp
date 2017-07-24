@@ -3276,7 +3276,6 @@ namespace dss {
   }
 
   void Device::updateZws205GroupColor() {
-    // TODO(someday), sync LED color upon readout
     auto bits = [&] {
       switch (static_cast<ApplicationType>(m_ActiveGroup)) {
         case ApplicationType::Lights:
