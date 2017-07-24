@@ -629,6 +629,8 @@ namespace dss {
         return "fcu";
       case ModelFeatureId::pushbdisabled:
         return "pushbdisabled";
+      case ModelFeatureId::consumptioneventled:
+        return "consumptioneventled";
     }
     return boost::none;
   }
@@ -734,6 +736,8 @@ namespace dss {
       return ModelFeatureId::fcu;
     } else if (x == "pushbdisabled") {
       return ModelFeatureId::pushbdisabled;
+    } else if (x == "consumptioneventled") {
+      return ModelFeatureId::consumptioneventled;
     }
 
     return boost::none;

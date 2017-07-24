@@ -121,7 +121,8 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::ftwbacklighttimeout,
   ModelFeatureId::ventconfig,
   ModelFeatureId::fcu,
-  ModelFeatureId::pushbdisabled
+  ModelFeatureId::pushbdisabled,
+  ModelFeatureId::consumptioneventled
 };
 
 // model features
@@ -617,6 +618,7 @@ const ModelFeatureId MF_SW_ZWS205[] =
   ModelFeatureId::heatingprops,
   ModelFeatureId::highlevel,
   ModelFeatureId::consumption,
+  ModelFeatureId::consumptioneventled,
   ModelFeatureId::jokerconfig,
   ModelFeatureId::outconfigswitch,
   ModelFeatureId::impulseconfig,
