@@ -3283,12 +3283,9 @@ namespace dss {
         case ApplicationType::Blinds:
           return 047;
         case ApplicationType::Heating:
-          return 041;
         case ApplicationType::Cooling:
-          // TODO(now) not specified, treat same Heating
         case ApplicationType::Ventilation:
         case ApplicationType::Recirculation:
-          return 041;
         case ApplicationType::ControlTemperature:
         case ApplicationType::ApartmentVentilation:
         case ApplicationType::ApartmentRecirculation:
@@ -3302,9 +3299,9 @@ namespace dss {
         case ApplicationType::Joker:
           return 047;
         case ApplicationType::Window:
+          return 041;
         case ApplicationType::None:
-          // TODO(now) not specified, not to allowed to be selected
-          ;
+          return 047;
       }
       DS_WARNING("ZWS205: no led color for application type", m_ActiveGroup);
       return 047; // default to joker
