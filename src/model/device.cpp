@@ -60,6 +60,8 @@
 #include "status.h"
 #include "src/model-features.h"
 
+DS_STATIC_LOG_CHANNEL(dssModelDevice);
+
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
 
@@ -1560,11 +1562,49 @@ namespace dss {
     _entry.sceneID = (value & 0x7F00) >> 8;
   }
 
+  void Device::setSensorEventTableEntryZws205(int row, const DeviceSensorEventSpec_t& entry) {
+    // see ds-basics: Appendix C.4 "Sensor Event Table"
+    DS_FAIL_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event");
+    DS_FAIL_REQUIRE(entry.sensorIndex <= 0xff, "sensor index exceeded");
+    DS_FAIL_REQUIRE(entry.test != 0x3, "invalid comparison operator");
+    DS_FAIL_REQUIRE(entry.action == 0 || entry.action == 0x3, "on/off action only");
+    uint8_t offset0 = (entry.sensorIndex << 4 | entry.test << 2 | entry.action);
+
+    DS_FAIL_REQUIRE(entry.value >= 5, "ZWS205 has 5W lower bound limit");
+    uint8_t offset1 = (entry.value & 0xFF0) >> 4;
+    uint8_t offset2 = (entry.value & 0x00F) << 4;
+
+    if (entry.hysteresis != 0) {
+      DS_NOTICE("ZWS205, does not support hysteresis, ignored");
+    }
+
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 0, offset0);
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 1, offset1);
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 2, offset2);
+    // clear hysteresis
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 3, 0);
+    // execute always, independent of output value
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 4, 0);
+
+    auto minimalDurationOffset = [&] {
+      // offset outside of device event table
+      if (eventIndex == 0) {
+        return 0x30;
+      } else {
+        return 0x32;
+      }
+    }();
+    setDeviceConfig(CfgClassSensorEvent, minimalDurationOffset, entry.minimalDuration);
+  }
+
   void Device::setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry) {
     if (_eventIndex > 15) {
       throw DSSException("Device::setSensorEventEntry: index out of range");
     }
-    if (getRevisionID() < 0x0328) {
+
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      return setSensorEventTableEntryZws205(_eventIndex, _entry);
+    } else if (getRevisionID() < 0x0328) {
       /* older devices have a bug, where the hysteresis setting leads to strange behavior */
       _entry.hysteresis = 0;
     }
