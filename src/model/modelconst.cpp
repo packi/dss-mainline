@@ -431,6 +431,31 @@ namespace dss {
     return 0;
   }
 
+  RgbBitmask getApplicationTypeRgbBitmask(ApplicationType type) {
+    switch (getApplicationTypeColor(type)) {
+      case ColorIDYellow:
+        return RgbBitmask::yellow;
+      case ColorIDGray:
+        return RgbBitmask::gray;
+      case ColorIDBlue:
+        return RgbBitmask::blue;
+      case ColorIDCyan:
+        return RgbBitmask::cyan;
+      case ColorIDViolet:
+        return RgbBitmask::magenta;
+      case ColorIDRed:
+        return RgbBitmask::red;
+      case ColorIDGreen:
+        return RgbBitmask::green;
+      case ColorIDBlack:
+        return RgbBitmask::gray;
+      case ColorIDWhite:
+      default:
+        // new enum for Color yet, just some const int
+        return RgbBitmask::gray;
+    }
+  }
+
   boost::optional<const char*> heatingControlModeName(HeatingControlMode x) {
     switch (x) {
       case HeatingControlMode::OFF:

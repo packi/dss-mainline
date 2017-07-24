@@ -3276,36 +3276,7 @@ namespace dss {
   }
 
   void Device::updateZws205GroupColor() {
-    auto bits = [&] {
-      switch (static_cast<ApplicationType>(m_ActiveGroup)) {
-        case ApplicationType::Lights:
-          return 046;
-        case ApplicationType::Blinds:
-          return 047;
-        case ApplicationType::Heating:
-        case ApplicationType::Cooling:
-        case ApplicationType::Ventilation:
-        case ApplicationType::Recirculation:
-        case ApplicationType::ControlTemperature:
-        case ApplicationType::ApartmentVentilation:
-        case ApplicationType::ApartmentRecirculation:
-          return 041;
-        case ApplicationType::Audio:
-          // Audio/Video swapped in specification, spec says 045 but that's violet
-          return 043;
-        case ApplicationType::Video:
-          // Audio/Video swapped in specification, spec says 043 but that's cyan
-          return 045;
-        case ApplicationType::Joker:
-          return 047;
-        case ApplicationType::Window:
-          return 041;
-        case ApplicationType::None:
-          return 047;
-      }
-      DS_WARNING("ZWS205: no led color for application type", m_ActiveGroup);
-      return 047; // default to joker
-    }();
+    auto bits = 040 | static_cast<uint8_t>(getApplicationTypeRgbBitmask(static_cast<ApplicationType>(m_ActiveGroup)));
     setDeviceConfig(CfgClassFunction, CfgFunction_LedConfig0, bits);
   }
 
