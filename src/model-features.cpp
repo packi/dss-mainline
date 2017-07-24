@@ -121,7 +121,8 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::ftwbacklighttimeout,
   ModelFeatureId::ventconfig,
   ModelFeatureId::fcu,
-  ModelFeatureId::pushbdisabled
+  ModelFeatureId::pushbdisabled,
+  ModelFeatureId::consumptioneventled
 };
 
 // model features
