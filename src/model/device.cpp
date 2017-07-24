@@ -3340,7 +3340,6 @@ namespace dss {
         case ApplicationType::Cooling:
         case ApplicationType::Window:
         case ApplicationType::None:
-          // TODO(now) what to do with the excption
           ;
       }
       DS_WARNING("ZWS205: no output mode for application type", m_ActiveGroup);
