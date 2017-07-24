@@ -631,6 +631,8 @@ namespace dss {
         return "pushbdisabled";
       case ModelFeatureId::consumptioneventled:
         return "consumptioneventled";
+      case ModelFeatureId::consumptiontimer:
+        return "consumptiontimer";
     }
     return boost::none;
   }
@@ -738,6 +740,8 @@ namespace dss {
       return ModelFeatureId::pushbdisabled;
     } else if (x == "consumptioneventled") {
       return ModelFeatureId::consumptioneventled;
+    } else if (x == "consumptiontimer") {
+      return ModelFeatureId::consumptiontimer;
     }
 
     return boost::none;

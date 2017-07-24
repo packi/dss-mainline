@@ -122,7 +122,8 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::ventconfig,
   ModelFeatureId::fcu,
   ModelFeatureId::pushbdisabled,
-  ModelFeatureId::consumptioneventled
+  ModelFeatureId::consumptioneventled,
+  ModelFeatureId::consumptiontimer
 };
 
 // model features

@@ -591,7 +591,8 @@ namespace dss {
     ventconfig = 47,
     fcu = 48,
     pushbdisabled = 49,
-    consumptioneventled = 50
+    consumptioneventled = 50,
+    consumptiontimer = 51
   };
 
   boost::optional<const char*> modelFeatureName(ModelFeatureId x);
