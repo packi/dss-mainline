@@ -1541,8 +1541,34 @@ namespace dss {
     }
   }
 
+  void Device::getSensorEventTableEntryZws205(const int row, DeviceSensorEventSpec_t& entry) {
+    DS_FAIL_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event");
+
+    // TODO(now) memset probably not possible with string members
+    memset(&entry, 0, sizeof(entry));
+    entry.name = getSensorEventName(row);
+
+    // read 16bit per call
+    auto value0_1 = getDeviceConfigWord(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 0);
+    auto value2_3 = getDeviceConfigWord(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 2);
+
+    entry.action = (value0_1 & 0x0003);
+    entry.test = (value0_1 & 0x000C) >> 2;
+    entry.sensorIndex = (value0_1 & 0x00F0) >> 4;
+
+    entry.value  = (value0_1 & 0xFF00) >> 4;
+    entry.value |= (value2_3 & 0x00F0) >> 4;
+
+    entry.hysteresis = 0;
+
+    auto minimalDurationOffset = (row == 0) ? 0x30 : 0x32;
+    entry.minimalDuration = getDeviceConfig(CfgClassSensorEvent, minimalDurationOffset);
+  }
+
   void Device::getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry) {
-    if (_eventIndex > 15) {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      return getSensorEventTableEntryZws205(_eventIndex, _entry);
+    } else if (_eventIndex > 15) {
       throw DSSException("Device::getSensorEventEntry: index out of range");
     }
     _entry.name = getSensorEventName(_eventIndex);
@@ -1586,14 +1612,8 @@ namespace dss {
     // execute always, independent of output value
     setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 4, 0);
 
-    auto minimalDurationOffset = [&] {
-      // offset outside of device event table
-      if (eventIndex == 0) {
-        return 0x30;
-      } else {
-        return 0x32;
-      }
-    }();
+    // offset outside of sensor event table
+    auto minimalDurationOffset = (row == 0) ? 0x30 : 0x32;
     setDeviceConfig(CfgClassSensorEvent, minimalDurationOffset, entry.minimalDuration);
   }
 

@@ -356,6 +356,7 @@ namespace dss {
     void setButtonInputMode(ButtonInputMode mode);
 
     void setSensorEventTableEntryZws205(int row, const DeviceSensorEventSpec_t& entry);
+    void getSensorEventTableEntryZws205(int row, DeviceSensorEventSpec_t& entry);
 
   protected:
     /** Sends the application a note that something has changed.
