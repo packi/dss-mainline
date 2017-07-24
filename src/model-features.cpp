@@ -620,6 +620,7 @@ const ModelFeatureId MF_SW_ZWS205[] =
   ModelFeatureId::highlevel,
   ModelFeatureId::consumption,
   ModelFeatureId::consumptioneventled,
+  ModelFeatureId::consumptiontimer,
   ModelFeatureId::jokerconfig,
   ModelFeatureId::outconfigswitch,
   ModelFeatureId::impulseconfig,
