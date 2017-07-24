@@ -618,6 +618,7 @@ const ModelFeatureId MF_SW_ZWS205[] =
   ModelFeatureId::heatingprops,
   ModelFeatureId::highlevel,
   ModelFeatureId::consumption,
+  ModelFeatureId::consumptioneventled,
   ModelFeatureId::jokerconfig,
   ModelFeatureId::outconfigswitch,
   ModelFeatureId::impulseconfig,
