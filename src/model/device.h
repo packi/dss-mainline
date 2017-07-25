@@ -58,11 +58,13 @@
 #define BUTTONINPUT_AKM_RISING_EDGE         "rising_edge"
 #define BUTTONINPUT_AKM_FALLING_EDGE        "falling_edge"
 
-// UMR output modes for pairing
+// UMR output modes for pairing, import from Config.js in UI
 #define OUTPUT_MODE_TWO_STAGE_SWITCH        34
-#define OUTPUT_MODE_BIPOLAR_SWITCH          43
+#define OUTPUT_MODE_SWITCH_2_POL            35
 #define OUTPUT_MODE_THREE_STAGE_SWITCH      38
+#define OUTPUT_MODE_BIPOLAR_SWITCH          43
 
+#define OUTPUT_MODE_TEMPCONTROL_SWITCHED    65
 #define OUTPUT_MODE_TEMPCONTROL_2OUT_2STEPS 67
 #define OUTPUT_MODE_TEMPCONTROL_2OUT_3STEPS 68
 #define OUTPUT_MODE_TEMPCONTROL_2OUT_PARALLEL 69
@@ -836,6 +838,18 @@ namespace dss {
                          const vdcapi::PropertyElement& params);
     vdcapi::Message getVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
     void setVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
+
+    /** LED indicates group membership of devices
+     *
+     * Some device indicate group membership with an LED, but the update is not
+     * done by the device firmware, but needs to be handled by dss
+     */
+    void updateLedGroupColor();
+    void updateZws205GroupColor();
+
+    /** Somes device have application specififc default output mode */
+    void updateOutputMode();
+    void updateZws205OutputMode();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

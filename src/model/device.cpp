@@ -60,6 +60,8 @@
 #include "status.h"
 #include "src/model-features.h"
 
+DS_STATIC_LOG_CHANNEL(dssModelDevice);
+
 #define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
 namespace dss {
 
@@ -830,6 +832,8 @@ namespace dss {
     }
 
     updateIconPath();
+    updateLedGroupColor();
+    updateOutputMode();
   } // setDeviceJokerGroup
 
   void Device::setDeviceOutputMode(uint8_t _modeId) {
@@ -3009,29 +3013,44 @@ namespace dss {
   }
 
   uint8_t Device::getSWThresholdAddress() const {
-    if (getDeviceType() == DEVICE_TYPE_KM ||
-        getDeviceType() == DEVICE_TYPE_SDM ||
-        getDeviceType() == DEVICE_TYPE_SDS ||
-        getDeviceType() == DEVICE_TYPE_TKM) {
-      return CfgFunction_KM_SWThreshold;
+    switch (getDeviceType()) {
+      case DEVICE_TYPE_KM:
+      case DEVICE_TYPE_SDM:
+      case DEVICE_TYPE_SDS:
+      case DEVICE_TYPE_TKM:
+        return CfgFunction_KM_SWThreshold;
+      case DEVICE_TYPE_KL:
+      case DEVICE_TYPE_ZWS:
+        switch (getDeviceClass()) {
+          case DEVICE_CLASS_GE:
+          case DEVICE_CLASS_SW:
+            return CfgFunction_KL_SWThreshold;
+          default:
+            break;
+        }
+        break;
+      case DEVICE_TYPE_UMV:
+        if (getDeviceClass() == DEVICE_CLASS_GE) {
+          return CfgFunction_UMV_SWThreshold;
+        }
+        break;
+      case DEVICE_TYPE_TNY:
+        if (getDeviceClass() == DEVICE_CLASS_SW && isMainDevice()) {
+          return CfgFunction_Tiny_SWThreshold;
+        }
+        break;
+      case DEVICE_TYPE_UMR:
+        if (getDeviceClass() == DEVICE_CLASS_SW) {
+          return CfgFunction_UMR_SWThreshold;
+        }
+        break;
+      default:
+        // TODO(now) we should limit this to a DEVICE_TYPE
+        if (getDeviceClass() == DEVICE_CLASS_BL) {
+          return CfgFunction_Valve_SWThreshold;
+        }
     }
-    if ((getDeviceType() == DEVICE_TYPE_KL || getDeviceType() == DEVICE_TYPE_ZWS) &&
-        (getDeviceClass() == DEVICE_CLASS_GE || getDeviceClass() == DEVICE_CLASS_SW)) {
-      return CfgFunction_KL_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_UMV && getDeviceClass() == DEVICE_CLASS_GE) {
-      return CfgFunction_UMV_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_TNY && getDeviceClass() == DEVICE_CLASS_SW && isMainDevice()) {
-      return CfgFunction_Tiny_SWThreshold;
-    }
-    if (getDeviceClass() == DEVICE_CLASS_BL) {
-      return CfgFunction_Valve_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_UMR && getDeviceClass() == DEVICE_CLASS_SW) {
-      return CfgFunction_UMR_SWThreshold;
-    }
-    throw std::runtime_error("Device does not support changing the switching threshold");
+    DS_FAIL_REQUIRE("Device does not support changing the switching threshold");
   }
 
   void Device::setSwitchThreshold(uint8_t _threshold) {
@@ -3271,6 +3290,50 @@ namespace dss {
 
   void Device::setVdcSpec(VdsdSpec_t &&x) {
     m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t(std::move(x)));
+  }
+
+  void Device::updateZws205GroupColor() {
+    auto bits = 040 | static_cast<uint8_t>(getApplicationTypeRgbBitmask(static_cast<ApplicationType>(m_ActiveGroup)));
+    setDeviceConfig(CfgClassFunction, CfgFunction_LedConfig0, bits);
+  }
+
+  void Device::updateLedGroupColor() {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      updateZws205GroupColor();
+    }
+  }
+
+  void Device::updateOutputMode() {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      updateZws205OutputMode();
+    }
+  }
+
+  void Device::updateZws205OutputMode() {
+    auto mode = [&] {
+      switch (static_cast<ApplicationType>(m_ActiveGroup)) {
+        case ApplicationType::Lights:
+        case ApplicationType::Blinds:
+        case ApplicationType::Heating:
+        case ApplicationType::Ventilation:
+        case ApplicationType::Recirculation:
+        case ApplicationType::ApartmentVentilation:
+        case ApplicationType::ApartmentRecirculation:
+        case ApplicationType::Audio:
+        case ApplicationType::Video:
+        case ApplicationType::Joker:
+          return OUTPUT_MODE_SWITCH_2_POL;
+        case ApplicationType::ControlTemperature:
+          return OUTPUT_MODE_TEMPCONTROL_SWITCHED;
+        case ApplicationType::Cooling:
+        case ApplicationType::Window:
+        case ApplicationType::None:
+          ;
+      }
+      DS_ERROR("ZWS205: no output mode for application type", m_ActiveGroup);
+      return OUTPUT_MODE_SWITCH_2_POL; // go with the 90%
+    }();
+    setDeviceOutputMode(mode);
   }
 
   std::ostream& operator<<(std::ostream& stream, const Device& x) {

@@ -276,6 +276,19 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, ApplicationType type);
   int getApplicationTypeColor(ApplicationType type);
 
+  enum class RgbBitmask {
+    // black   = 00, // unused
+    blue    = 01,
+    green   = 02,
+    red     = 04,
+    cyan    = 03,
+    magenta = 05,
+    yellow  = 06,
+    gray    = 07,
+  };
+
+  RgbBitmask getApplicationTypeRgbBitmask(ApplicationType type);
+
   enum class BinaryInputStateValue {
     Inactive = 0,
     Active = 1,
