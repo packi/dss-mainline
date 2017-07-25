@@ -2854,7 +2854,7 @@ namespace dss {
     DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
     DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
 
-    auto value = 1000.0 * _delay / UMR_DELAY_STEPS;
+    auto value = round(1000.0 * _delay / UMR_DELAY_STEPS);
     DS_REQUIRE(value < UCHAR_MAX, "delay exceeds data type", _delay);
     setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, static_cast<uint8_t>(value));
   }
@@ -2875,7 +2875,7 @@ namespace dss {
     DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
     DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
 
-    auto value = 1000.0 * _delay / UMR_DELAY_STEPS;
+    auto value = round(1000.0 * _delay / UMR_DELAY_STEPS);
     DS_REQUIRE(value < UCHAR_MAX, "delay exceeds data type", _delay);
     setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, static_cast<uint8_t>(value));
   }
