@@ -3339,4 +3339,12 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, const Device& x) {
     return stream << x.getName();
   }
+
+  void Device::setConsumptionVisualizationEnabled(bool enabled) {
+    DS_FAIL_REQUIRE("Consumption visualization not support by device");
+  }
+
+  bool Device::getConsumptionVisualizationEnabled() {
+    DS_FAIL_REQUIRE("Consumption visualization not support by device");
+  }
 } // namespace dss

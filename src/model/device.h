@@ -850,6 +850,9 @@ namespace dss {
     /** Somes device have application specififc default output mode */
     void updateOutputMode();
     void updateZws205OutputMode();
+
+    void setConsumptionVisualizationEnabled(bool enabled);
+    bool getConsumptionVisualizationEnabled();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
