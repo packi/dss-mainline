@@ -3340,11 +3340,34 @@ namespace dss {
     return stream << x.getName();
   }
 
+  void Device::setConsumptionVisualizationEnabledZws205(bool enabled) {
+    uint8_t bits = enabled ? 0x2 : 0xff;
+    setDeviceConfig(CfgClassFunction, CfgFunction_ZWS_LedVisuSensId, bits);
+  }
+
+  bool Device::getConsumptionVisualizationEnabledZws205() {
+    auto bits = getDeviceConfig(CfgClassFunction, CfgFunction_ZWS_LedVisuSensId);
+    switch (bits) {
+      case 0x2:
+        return true;
+      case 0xff:
+        return false;
+    }
+    DS_ERROR("unknown led visualisation value", bits);
+    return false;
+  }
+
   void Device::setConsumptionVisualizationEnabled(bool enabled) {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      return setConsumptionVisualizationEnabledZws205(enabled);
+    }
     DS_FAIL_REQUIRE("Consumption visualization not support by device");
   }
 
   bool Device::getConsumptionVisualizationEnabled() {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      return getConsumptionVisualizationEnabledZws205();
+    }
     DS_FAIL_REQUIRE("Consumption visualization not support by device");
   }
 } // namespace dss

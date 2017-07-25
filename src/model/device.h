@@ -379,6 +379,9 @@ namespace dss {
     void getDeviceOutputChannelSceneConfig(uint8_t scene, DeviceSceneSpec_t& config);
     void setDeviceOutputChannelSceneConfig(uint8_t scene, DeviceSceneSpec_t config);
 
+    void setConsumptionVisualizationEnabledZws205(bool enabled);
+    bool getConsumptionVisualizationEnabledZws205();
+
   public:
     /** Creates and initializes a device. */
     Device(const dsuid_t _dsid, Apartment* _pApartment);

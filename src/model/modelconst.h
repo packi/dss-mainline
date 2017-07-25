@@ -491,6 +491,9 @@ namespace dss {
   const uint8_t CfgFunction_SK_TempOffsetExt = 0x51;
   const uint8_t CfgFunction_SK_Config = 0x96;
   const uint8_t CfgFunction_SK_BacklightDuration = 0x97;
+
+  const uint8_t CfgFunction_ZWS_LedVisuSensId = 0x56;
+
   const uint8_t CfgRuntime_Shade_Position = 0x02;
   const uint8_t CfgRuntime_Shade_PositionAngle = 0x04;
   const uint8_t CfgRuntime_Shade_PositionCurrent = 0x06;
