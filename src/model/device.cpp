@@ -62,7 +62,8 @@
 
 DS_STATIC_LOG_CHANNEL(dssModelDevice);
 
-#define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
+#define BLINK_DELAY_SCALE 33.333333 // value specced by Christian Theiss
+
 namespace dss {
 
   //================================================== DeviceBinaryInput
@@ -2849,13 +2850,13 @@ namespace dss {
     }();
 
     // upper limit with 8bit registers
-    // 255 * UMR_DELAY_STEPS / 1000.0
+    // 255 * BLINK_DELAY_SCALE / 1000.0
     auto upperBound = 8.4d;
 
     DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
     DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
 
-    auto value = round(1000.0 * _delay / UMR_DELAY_STEPS);
+    auto value = round(1000.0 * _delay / BLINK_DELAY_SCALE);
     DS_REQUIRE(value >= 0 && value <= UCHAR_MAX, "delay exceeds data type", _delay);
     setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, static_cast<uint8_t>(value));
   }
@@ -2871,13 +2872,13 @@ namespace dss {
     }();
 
     // upper limit with 8bit registers
-    // 255 * UMR_DELAY_STEPS / 1000.0
+    // 255 * BLINK_DELAY_SCALE / 1000.0
     auto upperBound = 8.4d;
 
     DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
     DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
 
-    auto value = round(1000.0 * _delay / UMR_DELAY_STEPS);
+    auto value = round(1000.0 * _delay / BLINK_DELAY_SCALE);
     DS_REQUIRE(value >= 0 && value <= UCHAR_MAX, "delay exceeds data type", _delay);
     setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, static_cast<uint8_t>(value));
   }
@@ -2886,11 +2887,11 @@ namespace dss {
     DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
     uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
-    *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
+    *_ondelay = (double)((value & 0xff) * BLINK_DELAY_SCALE) / 1000.0;
     *_count = (uint8_t)(value >> 8) & 0xff;
 
     uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
-    *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
+    *_offdelay = (value2 * BLINK_DELAY_SCALE) / 1000.0; // convert to seconds
   }
 
   std::vector<int> Device::getLockedScenes() {
