@@ -2453,12 +2453,7 @@ namespace dss {
 
     } else if (_request.getMethod() == "getConsumptionVisualization") {
       JSONWriter json;
-
-      if (pDevice->getConsumptionVisualizationEnabled()) {
-        json.add("value", 1);
-      } else {
-        json.add("value", 0);
-      }
+      json.add("value", pDevice->getConsumptionVisualizationEnabled());
       return json.successJSON();
 
     } else {
