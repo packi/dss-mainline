@@ -1555,9 +1555,7 @@ namespace dss {
     entry.test = (value0_1 & 0x000C) >> 2;
     entry.sensorIndex = (value0_1 & 0x00F0) >> 4;
 
-    entry.value  = (value0_1 & 0xFF00) >> 4;
-    entry.value |= (value2_3 & 0x00F0) >> 4;
-
+    entry.value = ((value0_1 & 0xFF00) | (value2_3 & 0x00F0)) >> 4;
     entry.hysteresis = 0;
 
     auto minimalDurationOffset = (row == 0) ? 0x30 : 0x32;
