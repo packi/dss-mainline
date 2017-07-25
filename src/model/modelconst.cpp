@@ -450,10 +450,9 @@ namespace dss {
       case ColorIDBlack:
         return RgbBitmask::gray;
       case ColorIDWhite:
-      default:
-        // new enum for Color yet, just some const int
         return RgbBitmask::gray;
     }
+    return RgbBitmask::gray;
   }
 
   boost::optional<const char*> heatingControlModeName(HeatingControlMode x) {
