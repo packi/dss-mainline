@@ -1544,8 +1544,7 @@ namespace dss {
   void Device::getSensorEventTableEntryZws205(const int row, DeviceSensorEventSpec_t& entry) {
     DS_FAIL_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event");
 
-    // TODO(now) memset probably not possible with string members
-    memset(&entry, 0, sizeof(entry));
+    entry = DeviceSensorEventSpec_t();
     entry.name = getSensorEventName(row);
 
     // read 16bit per call
