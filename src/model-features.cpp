@@ -123,7 +123,8 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::fcu,
   ModelFeatureId::pushbdisabled,
   ModelFeatureId::consumptioneventled,
-  ModelFeatureId::consumptiontimer
+  ModelFeatureId::consumptiontimer,
+  ModelFeatureId::jokertempcontrol
 };
 
 // model features
@@ -622,6 +623,7 @@ const ModelFeatureId MF_SW_ZWS205[] =
   ModelFeatureId::consumptioneventled,
   ModelFeatureId::consumptiontimer,
   ModelFeatureId::jokerconfig,
+  ModelFeatureId::jokertempcontrol,
   ModelFeatureId::outconfigswitch,
   ModelFeatureId::impulseconfig,
   ModelFeatureId::valvetype,

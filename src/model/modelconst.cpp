@@ -657,6 +657,8 @@ namespace dss {
         return "consumptioneventled";
       case ModelFeatureId::consumptiontimer:
         return "consumptiontimer";
+      case ModelFeatureId::jokertempcontrol:
+        return "jokertempcontrol";
     }
     return boost::none;
   }
@@ -766,6 +768,8 @@ namespace dss {
       return ModelFeatureId::consumptioneventled;
     } else if (x == "consumptiontimer") {
       return ModelFeatureId::consumptiontimer;
+    } else if (x == "jokertempcontrol") {
+      return ModelFeatureId::jokertempcontrol;
     }
 
     return boost::none;
