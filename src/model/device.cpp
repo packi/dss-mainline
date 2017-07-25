@@ -2840,27 +2840,15 @@ namespace dss {
 
   void Device::setDeviceBlinkOnDelay(double _delay) {
     auto lowerBound = [&] {
-      switch (getDeviceType()) {
-        case DEVICE_TYPE_ZWS:
-          return 0.5d;
-        case DEVICE_TYPE_UMR:
-          return 0.0d; // TODO(now) probably not 0s for UMR
-        default:
-          break;
+      if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+        return 0.5d;
       }
-      DS_FAIL_REQUIRE("Missing lower blink delay boundary", m_DefaultGroup);
+      return 0.0d; // TODO(someday) probably wrong but the historically limit
     }();
 
-    auto upperBound = [&] {
-      switch (getDeviceType()) {
-        case DEVICE_TYPE_ZWS:
-        case DEVICE_TYPE_UMR:
-          return 8.4d; // 255 * UMR_DELAY_STEPS / 1000.0
-        default:
-          break;
-      }
-      DS_FAIL_REQUIRE("Missing upper blink delay boundary", m_DefaultGroup);
-    }();
+    // upper limit with 8bit registers
+    // 255 * UMR_DELAY_STEPS / 1000.0
+    auto upperBound = 8.4d;
 
     DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
     DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
@@ -2873,27 +2861,15 @@ namespace dss {
 
   void Device::setDeviceBlinkOffDelay(double _delay) {
     auto lowerBound = [&] {
-      switch (getDeviceType()) {
-        case DEVICE_TYPE_ZWS:
-          return 0.5d;
-        case DEVICE_TYPE_UMR:
-          return 0.0d; // TODO(now) probably not 0s for UMR
-        default:
-          break;
+      if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+        return 0.5d;
       }
-      DS_FAIL_REQUIRE("Missing lower blink delay boundary", m_DefaultGroup);
+      return 0.0d; // TODO(someday) probably wrong but the historically limit
     }();
 
-    auto upperBound = [&] {
-      switch (getDeviceType()) {
-        case DEVICE_TYPE_ZWS:
-        case DEVICE_TYPE_UMR:
-          return 8.4d; // 255 * UMR_DELAY_STEPS / 1000.0
-        default:
-          break;
-      }
-      DS_FAIL_REQUIRE("Missing upper blink delay boundary", m_DefaultGroup);
-    }();
+    // upper limit with 8bit registers
+    // 255 * UMR_DELAY_STEPS / 1000.0
+    auto upperBound = 8.4d;
 
     DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
     DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
