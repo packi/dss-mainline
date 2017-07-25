@@ -623,6 +623,7 @@ const ModelFeatureId MF_SW_ZWS205[] =
   ModelFeatureId::consumptioneventled,
   ModelFeatureId::consumptiontimer,
   ModelFeatureId::jokerconfig,
+  ModelFeatureId::jokertempcontrol,
   ModelFeatureId::outconfigswitch,
   ModelFeatureId::impulseconfig,
   ModelFeatureId::valvetype,
