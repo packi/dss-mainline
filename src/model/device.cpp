@@ -1542,7 +1542,7 @@ namespace dss {
   }
 
   void Device::getSensorEventTableEntryZws205(const int row, DeviceSensorEventSpec_t& entry) {
-    DS_FAIL_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event");
+    DS_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event");
 
     entry = DeviceSensorEventSpec_t();
     entry.name = getSensorEventName(row);
@@ -1587,13 +1587,13 @@ namespace dss {
 
   void Device::setSensorEventTableEntryZws205(int row, const DeviceSensorEventSpec_t& entry) {
     // see ds-basics: Appendix C.4 "Sensor Event Table"
-    DS_FAIL_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event");
-    DS_FAIL_REQUIRE(entry.sensorIndex <= 0xff, "sensor index exceeded");
-    DS_FAIL_REQUIRE(entry.test != 0x3, "invalid comparison operator");
-    DS_FAIL_REQUIRE(entry.action == 0 || entry.action == 0x3, "on/off action only");
+    DS_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event ", row);
+    DS_REQUIRE(entry.sensorIndex <= 0xff, "sensor index exceeded");
+    DS_REQUIRE(entry.test != 0x3, "invalid comparison operator");
+    DS_REQUIRE(entry.action == 0 || entry.action == 0x3, "on/off action only");
     uint8_t offset0 = (entry.sensorIndex << 4 | entry.test << 2 | entry.action);
 
-    DS_FAIL_REQUIRE(entry.value >= 5, "ZWS205 has 5W lower bound limit");
+    DS_REQUIRE(entry.value >= 5, "ZWS205 has 5W lower bound limit");
     uint8_t offset1 = (entry.value & 0xFF0) >> 4;
     uint8_t offset2 = (entry.value & 0x00F) << 4;
 
