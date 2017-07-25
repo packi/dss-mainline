@@ -605,7 +605,8 @@ namespace dss {
     fcu = 48,
     pushbdisabled = 49,
     consumptioneventled = 50,
-    consumptiontimer = 51
+    consumptiontimer = 51,
+    jokertempcontrol = 52
   };
 
   boost::optional<const char*> modelFeatureName(ModelFeatureId x);

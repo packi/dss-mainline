@@ -123,7 +123,8 @@ const ModelFeatureId MF_AVAILABLE[] =
   ModelFeatureId::fcu,
   ModelFeatureId::pushbdisabled,
   ModelFeatureId::consumptioneventled,
-  ModelFeatureId::consumptiontimer
+  ModelFeatureId::consumptiontimer,
+  ModelFeatureId::jokertempcontrol
 };
 
 // model features
