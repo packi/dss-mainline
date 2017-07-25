@@ -2839,6 +2839,8 @@ namespace dss {
   }
 
   void Device::setDeviceBlinkOnDelay(double _delay) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
+
     auto lowerBound = [&] {
       if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
         return 0.5d;
@@ -2850,7 +2852,6 @@ namespace dss {
     // 255 * UMR_DELAY_STEPS / 1000.0
     auto upperBound = 8.4d;
 
-    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
     DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
     DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
 
@@ -2860,6 +2861,8 @@ namespace dss {
   }
 
   void Device::setDeviceBlinkOffDelay(double _delay) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
+
     auto lowerBound = [&] {
       if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
         return 0.5d;
@@ -2871,7 +2874,6 @@ namespace dss {
     // 255 * UMR_DELAY_STEPS / 1000.0
     auto upperBound = 8.4d;
 
-    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
     DS_REQUIRE(_delay >= lowerBound, "delay value too small", _delay);
     DS_REQUIRE(_delay <= upperBound, "delay value too big", _delay);
 
