@@ -1153,6 +1153,7 @@ namespace dss {
       json.add("value", event.value);
       json.add("hysteresis", event.hysteresis);
       json.add("validity", event.validity);
+      json.add("minimalDuration", event.minimalDuration);
       if (event.action == 2) {
         json.add("buttonNumber", event.buttonNumber);
         json.add("clickType", event.clickType);
