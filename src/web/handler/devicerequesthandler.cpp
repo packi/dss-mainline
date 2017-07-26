@@ -2440,10 +2440,10 @@ namespace dss {
       auto value = strToIntDef(_request.getParameter("value"), -1);
       switch (value) {
         case 0:
-          pDevice->setConsumptionVisualizationEnabled(true);
+          pDevice->setConsumptionVisualizationEnabled(false);
           return JSONWriter::success();
         case 1:
-          pDevice->setConsumptionVisualizationEnabled(false);
+          pDevice->setConsumptionVisualizationEnabled(true);
           return JSONWriter::success();
         default:
           return JSONWriter::failure("invalid value");
