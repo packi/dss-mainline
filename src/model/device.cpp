@@ -62,7 +62,8 @@
 
 DS_STATIC_LOG_CHANNEL(dssModelDevice);
 
-#define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
+#define BLINK_DELAY_SCALE 33.333333 // value specced by Christian Theiss
+
 namespace dss {
 
   //================================================== DeviceBinaryInput
@@ -2884,55 +2885,65 @@ namespace dss {
 
     return false;
   }
-  void Device::setDeviceUMRBlinkRepetitions(uint8_t _count) {
-    if (hasBlinkSettings()) {
-      setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
 
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+  void Device::setDeviceBlinkRepetitions(uint8_t count) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
+    setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, count);
   }
 
-  void Device::setDeviceUMROnDelay(double _delay) {
-    if (hasBlinkSettings()) {
-      _delay = _delay * 1000.0; // convert from seconds to ms
+  void Device::setDeviceBlinkOnDelay(double delay) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
-      if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
-        throw std::runtime_error("invalid delay value");
+    auto lowerBound = [&] {
+      if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+        return 0.5d;
       }
-      uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
-      setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, value);
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+      return 0.0d; // TODO(someday) probably wrong but the historically limit
+    }();
+
+    // upper limit with 8bit registers
+    // 255 * BLINK_DELAY_SCALE / 1000.0
+    auto upperBound = 8.4d;
+
+    DS_REQUIRE(delay >= lowerBound, "delay value too small", delay);
+    DS_REQUIRE(delay <= upperBound, "delay value too big", delay);
+
+    auto value = round(1000.0 * delay / BLINK_DELAY_SCALE);
+    DS_REQUIRE(value >= 0 && value <= UCHAR_MAX, "delay exceeds data type", delay);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, static_cast<uint8_t>(value));
   }
 
-  void Device::setDeviceUMROffDelay(double _delay) {
-    if (hasBlinkSettings()) {
-      _delay = _delay * 1000.0; // convert from seconds to ms
+  void Device::setDeviceBlinkOffDelay(double delay) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
-      if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
-        throw std::runtime_error("invalid delay value");
+    auto lowerBound = [&] {
+      if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+        return 0.5d;
       }
-      uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
-      setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, value);
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+      return 0.0d; // TODO(someday) probably wrong but the historically limit
+    }();
+
+    // upper limit with 8bit registers
+    // 255 * BLINK_DELAY_SCALE / 1000.0
+    auto upperBound = 8.4d;
+
+    DS_REQUIRE(delay >= lowerBound, "delay value too small", delay);
+    DS_REQUIRE(delay <= upperBound, "delay value too big", delay);
+
+    auto value = round(1000.0 * delay / BLINK_DELAY_SCALE);
+    DS_REQUIRE(value >= 0 && value <= UCHAR_MAX, "delay exceeds data type", delay);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, static_cast<uint8_t>(value));
   }
 
-  void Device::getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay,
-                                         uint8_t  *_count) {
-    if (hasBlinkSettings()) {
-      uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
-      *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
-      *_count = (uint8_t)(value >> 8) & 0xff;
+  void Device::getDeviceBlinkSettings(double *ondelay, double *offdelay, uint8_t  *count) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
-      uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
-      *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+    uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
+    *ondelay = (double)((value & 0xff) * BLINK_DELAY_SCALE) / 1000.0;
+    *count = (uint8_t)(value >> 8) & 0xff;
+
+    uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
+    *offdelay = (value2 * BLINK_DELAY_SCALE) / 1000.0; // convert to seconds
   }
 
   std::vector<int> Device::getLockedScenes() {
