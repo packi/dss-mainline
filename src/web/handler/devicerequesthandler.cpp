@@ -1153,6 +1153,7 @@ namespace dss {
       json.add("value", event.value);
       json.add("hysteresis", event.hysteresis);
       json.add("validity", event.validity);
+      json.add("minimalDuration", event.minimalDuration);
       if (event.action == 2) {
         json.add("buttonNumber", event.buttonNumber);
         json.add("clickType", event.clickType);
@@ -1197,6 +1198,13 @@ namespace dss {
         return JSONWriter::failure("Invalid or missing parameter 'validity'");
       }
       event.validity = validity;
+      if (_request.hasParameter("minimalDuration")) {
+        int minimalDuration = strToIntDef(_request.getParameter("minimalDuration"), -1);
+        if (minimalDuration < 0 || minimalDuration > 0xff) {
+          return JSONWriter::failure("Invalid or missing parameter 'minimalDuration'");
+        }
+        event.minimalDuration = minimalDuration;
+      }
       if (event.action == 2) {
         int buttonNumber = strToIntDef(_request.getParameter("buttonNumber"), -1);
         if ((buttonNumber < 0) || (buttonNumber > 0xF)) {

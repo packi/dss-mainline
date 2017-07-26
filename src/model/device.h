@@ -110,6 +110,7 @@ namespace dss {
     uint8_t buttonNumber;
     uint8_t clickType;
     uint8_t sceneID;
+    uint8_t minimalDuration; //< condition must last at least for so many seconds
   } DeviceSensorEventSpec_t;
 
   typedef struct {
@@ -355,6 +356,9 @@ namespace dss {
     friend class BusScanner;
     friend class ModelMaintenance;
     void setButtonInputMode(ButtonInputMode mode);
+
+    void setSensorEventTableEntryZws205(int row, const DeviceSensorEventSpec_t& entry);
+    void getSensorEventTableEntryZws205(int row, DeviceSensorEventSpec_t& entry);
 
   protected:
     /** Sends the application a note that something has changed.
