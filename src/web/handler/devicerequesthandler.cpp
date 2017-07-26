@@ -2441,15 +2441,13 @@ namespace dss {
       switch (value) {
         case 0:
           pDevice->setConsumptionVisualizationEnabled(true);
-          break;
+          return JSONWriter::success();
         case 1:
           pDevice->setConsumptionVisualizationEnabled(false);
-          break;
+          return JSONWriter::success();
         default:
-          JSONWriter::failure("invalid value");
-          break;
+          return JSONWriter::failure("invalid value");
       }
-      return JSONWriter::success();
 
     } else if (_request.getMethod() == "getConsumptionVisualization") {
       JSONWriter json;
