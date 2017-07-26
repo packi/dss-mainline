@@ -2436,6 +2436,24 @@ namespace dss {
       json.add("seconds", (int)seconds);
       return json.successJSON();
 
+    } else if (_request.getMethod() == "setConsumptionVisualization") {
+      auto value = strToIntDef(_request.getParameter("value"), -1);
+      switch (value) {
+        case 0:
+          pDevice->setConsumptionVisualizationEnabled(false);
+          return JSONWriter::success();
+        case 1:
+          pDevice->setConsumptionVisualizationEnabled(true);
+          return JSONWriter::success();
+        default:
+          return JSONWriter::failure("invalid value");
+      }
+
+    } else if (_request.getMethod() == "getConsumptionVisualization") {
+      JSONWriter json;
+      json.add("value", pDevice->getConsumptionVisualizationEnabled());
+      return json.successJSON();
+
     } else {
       throw std::runtime_error("Unhandled function");
     }

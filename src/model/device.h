@@ -379,6 +379,9 @@ namespace dss {
     void getDeviceOutputChannelSceneConfig(uint8_t scene, DeviceSceneSpec_t& config);
     void setDeviceOutputChannelSceneConfig(uint8_t scene, DeviceSceneSpec_t config);
 
+    void setConsumptionVisualizationEnabledZws205(bool enabled);
+    bool getConsumptionVisualizationEnabledZws205();
+
   public:
     /** Creates and initializes a device. */
     Device(const dsuid_t _dsid, Apartment* _pApartment);
@@ -850,6 +853,9 @@ namespace dss {
     /** Somes device have application specififc default output mode */
     void updateOutputMode();
     void updateZws205OutputMode();
+
+    void setConsumptionVisualizationEnabled(bool enabled);
+    bool getConsumptionVisualizationEnabled();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);
