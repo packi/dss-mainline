@@ -1563,11 +1563,11 @@ namespace dss {
   }
 
   void Device::getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry) {
+    DS_REQUIRE(_eventIndex <= 7, "row index exceeds table size");
     if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
       return getSensorEventTableEntryZws205(_eventIndex, _entry);
-    } else if (_eventIndex > 15) {
-      throw DSSException("Device::getSensorEventEntry: index out of range");
     }
+
     _entry.name = getSensorEventName(_eventIndex);
     uint16_t value = getDeviceConfigWord(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 0);
     _entry.sensorIndex = (value & 0x00F0) >> 4;
@@ -1615,10 +1615,7 @@ namespace dss {
   }
 
   void Device::setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry) {
-    if (_eventIndex > 15) {
-      throw DSSException("Device::setSensorEventEntry: index out of range");
-    }
-
+    DS_REQUIRE(_eventIndex <= 7, "row index exceeds table size");
     if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
       return setSensorEventTableEntryZws205(_eventIndex, _entry);
     } else if (getRevisionID() < 0x0328) {
