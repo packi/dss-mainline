@@ -276,6 +276,19 @@ namespace dss {
   std::ostream& operator<<(std::ostream& stream, ApplicationType type);
   int getApplicationTypeColor(ApplicationType type);
 
+  enum class RgbBitmask {
+    // black   = 00, // unused
+    blue    = 01,
+    green   = 02,
+    red     = 04,
+    cyan    = 03,
+    magenta = 05,
+    yellow  = 06,
+    gray    = 07,
+  };
+
+  RgbBitmask getApplicationTypeRgbBitmask(ApplicationType type);
+
   enum class BinaryInputStateValue {
     Inactive = 0,
     Active = 1,
@@ -478,6 +491,9 @@ namespace dss {
   const uint8_t CfgFunction_SK_TempOffsetExt = 0x51;
   const uint8_t CfgFunction_SK_Config = 0x96;
   const uint8_t CfgFunction_SK_BacklightDuration = 0x97;
+
+  const uint8_t CfgFunction_ZWS_LedVisuSensId = 0x56;
+
   const uint8_t CfgRuntime_Shade_Position = 0x02;
   const uint8_t CfgRuntime_Shade_PositionAngle = 0x04;
   const uint8_t CfgRuntime_Shade_PositionCurrent = 0x06;
@@ -589,7 +605,11 @@ namespace dss {
     ftwdisplaysettings = 45,
     ftwbacklighttimeout = 46,
     ventconfig = 47,
-    fcu = 48
+    fcu = 48,
+    pushbdisabled = 49,
+    consumptioneventled = 50,
+    consumptiontimer = 51,
+    jokertempcontrol = 52
   };
 
   boost::optional<const char*> modelFeatureName(ModelFeatureId x);

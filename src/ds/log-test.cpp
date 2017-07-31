@@ -181,6 +181,19 @@ TEST_CASE("tryParseSeverityChar", TAGS) {
     }
 }
 
+TEST_CASE("severityFromSyslog", TAGS) {
+    CHECK(ds::log::severityFromSyslog(0) == ds::log::Severity::FATAL);
+    CHECK(ds::log::severityFromSyslog(1) == ds::log::Severity::FATAL);
+    CHECK(ds::log::severityFromSyslog(2) == ds::log::Severity::FATAL);
+    CHECK(ds::log::severityFromSyslog(3) == ds::log::Severity::ERROR);
+    CHECK(ds::log::severityFromSyslog(4) == ds::log::Severity::WARNING);
+    CHECK(ds::log::severityFromSyslog(5) == ds::log::Severity::NOTICE);
+    CHECK(ds::log::severityFromSyslog(6) == ds::log::Severity::INFO);
+    CHECK(ds::log::severityFromSyslog(7) == ds::log::Severity::DEBUG);
+    CHECK(ds::log::severityFromSyslog(8) == ds::log::Severity::DEBUG);
+    CHECK(ds::log::severityFromSyslog(100) == ds::log::Severity::DEBUG);
+}
+
 namespace {
 class MockedLoggerLogFunction : boost::noncopyable {
 public:
@@ -358,5 +371,25 @@ TEST_CASE("dsLogTrimFile", TAGS) {
         CHECK(ds::log::_private::trimFile("123456789012345678901234567890.cpp") == "...6789012345678901234567890.cpp");
         CHECK(ds::log::_private::trimFile("src/123456789012345678901234567890.cpp") ==
                 "...6789012345678901234567890.cpp");
+    }
+}
+
+TEST_CASE("Logger.defaultSeverity", TAGS) {
+    ds::log::Channel channel("dsLogLoggerSetDefaultSeverity");
+    auto&& logger = ds::log::Logger::instance();
+
+    SECTION("defaults to NOTICE") {
+        CHECK(logger.defaultSeverity() == ds::log::Severity::NOTICE);
+        CHECK(channel.severity() == ds::log::Severity::NOTICE);
+    }
+
+    SECTION("can be set") {
+        auto oldSeverity = logger.defaultSeverity();
+        {
+            DS_DEFER(logger.setDefaultSeverity(oldSeverity));
+            logger.setDefaultSeverity(ds::log::Severity::DEBUG);
+            CHECK(channel.severity() == ds::log::Severity::DEBUG);
+        }
+        CHECK(channel.severity() == oldSeverity);
     }
 }

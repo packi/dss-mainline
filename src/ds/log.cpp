@@ -18,6 +18,7 @@
 */
 #include "log.h"
 #include <sys/time.h>
+#include <time.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
 #include <cstdlib>
@@ -91,6 +92,28 @@ boost::optional<Severity> tryParseSeverityChar(const char* x) {
     return boost::none;
 }
 
+Severity severityFromSyslog(int level) {
+    switch (level) {
+        case 0:
+            return Severity::FATAL;
+        case 1:
+            return Severity::FATAL;
+        case 2:
+            return Severity::FATAL;
+        case 3:
+            return Severity::ERROR;
+        case 4:
+            return Severity::WARNING;
+        case 5:
+            return Severity::NOTICE;
+        case 6:
+            return Severity::INFO;
+        case 7:
+            return Severity::DEBUG;
+    }
+    return Severity::DEBUG;
+}
+
 Channel::Channel(const char* name) : m_name(name), m_severity(Severity::NOTICE) {
     Logger::instance().addChannel(*this);
 }
@@ -156,7 +179,9 @@ struct Logger::Impl {
     std::mutex mutex;
     LogFunction logFunction;
     std::vector<Channel*> channels;
+    Severity defaultSeverity;
     std::vector<Rule> rules;
+    Impl() : defaultSeverity(Severity::NOTICE) {}
 };
 
 Logger::Logger() : m_impl(new Impl()) {
@@ -174,6 +199,17 @@ Logger& Logger::instance() {
     return *s_instance;
 }
 
+Severity Logger::defaultSeverity() const {
+    std::lock_guard<std::mutex> lock(m_impl->mutex);
+    return m_impl->defaultSeverity;
+}
+
+void Logger::setDefaultSeverity(Severity severity) {
+    std::lock_guard<std::mutex> lock(m_impl->mutex);
+    m_impl->defaultSeverity = severity;
+    BOOST_FOREACH (auto&& channel, m_impl->channels) { updateChannelSeverity(*channel); }
+}
+
 void Logger::log(const char* channelName, Severity severity, std::string message) const {
     std::lock_guard<std::mutex> lock(m_impl->mutex);
     m_impl->logFunction(channelName, severity, std::move(message));
@@ -187,11 +223,21 @@ void Logger::setLogFunction(LogFunction logFunction) {
 void Logger::defaultLogFunction(const char* channelName, Severity severity, std::string message) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    struct tm* tm_info = gmtime(&tv.tv_sec);
-    char dateTimeStr[26];
-    snprintf(dateTimeStr, sizeof(dateTimeStr), "%04d-%02d-%02d %02d:%02d:%02d.%03dZ", 1900 + tm_info->tm_year,
-            tm_info->tm_mon + 1, tm_info->tm_mday, tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec,
-            int(tv.tv_usec / 1000));
+    struct tm tm;
+    localtime_r(&tv.tv_sec, &tm);
+
+    // http://stackoverflow.com/questions/1551597/using-strftime-in-c-how-can-i-format-time-exactly-like-a-unix-timestamp
+    char dateTimeFmt[sizeof "2011-10-08T07:07:09.000+02:00"];
+    char dateTimeStr[sizeof "2011-10-08T07:07:09.000+02:00"];
+    localtime_r(&tv.tv_sec, &tm);
+    strftime(dateTimeFmt, sizeof dateTimeFmt, "%FT%T.%%03u%z", &tm);
+    snprintf(dateTimeStr, sizeof dateTimeStr, dateTimeFmt, tv.tv_usec / 1000);
+    // insert ':' into time zone
+    dateTimeStr[29] = '\0';
+    dateTimeStr[28] = dateTimeStr[27];
+    dateTimeStr[27] = dateTimeStr[26];
+    dateTimeStr[26] = ':';
+
     auto str = ds::str('[', dateTimeStr, "] ", severity, " ", channelName, " ", message, "\n");
 
     // Use raw file descriptor instead of std::cerr. Logger can be created
@@ -211,16 +257,22 @@ void Logger::defaultLogFunction(const char* channelName, Severity severity, std:
     ::fsync(2);
 }
 
+void Logger::updateChannelSeverity(Channel& channel) {
+    // Locked at higher level
+    auto&& channelName = channel.name();
+    auto severity = m_impl->defaultSeverity;
+    BOOST_FOREACH (const auto& rule, m_impl->rules) {
+        if (boost::starts_with(channelName, rule.channelNamePrefix)) {
+            severity = rule.severity;
+        }
+    }
+    channel.setSeverity(severity);
+}
+
 void Logger::addChannel(Channel& channel) {
     std::lock_guard<std::mutex> lock(m_impl->mutex);
     m_impl->channels.emplace_back(&channel);
-
-    auto&& channelName = channel.name();
-    BOOST_FOREACH (const auto& rule, m_impl->rules) {
-        if (boost::starts_with(channelName, rule.channelNamePrefix)) {
-            channel.setSeverity(rule.severity);
-        }
-    }
+    updateChannelSeverity(channel);
 }
 
 void Logger::removeChannel(Channel& channel) {
