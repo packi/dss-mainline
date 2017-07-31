@@ -60,7 +60,10 @@
 #include "status.h"
 #include "src/model-features.h"
 
-#define UMR_DELAY_STEPS  33.333333 // value specced by Christian Theiss
+DS_STATIC_LOG_CHANNEL(dssModelDevice);
+
+#define BLINK_DELAY_SCALE 33.333333 // value specced by Christian Theiss
+
 namespace dss {
 
   //================================================== DeviceBinaryInput
@@ -830,6 +833,8 @@ namespace dss {
     }
 
     updateIconPath();
+    updateLedGroupColor();
+    updateOutputMode();
   } // setDeviceJokerGroup
 
   void Device::setDeviceOutputMode(uint8_t _modeId) {
@@ -936,7 +941,7 @@ namespace dss {
     }
   } // setDeviceOutputChannelSceneConfig
 
-  void Device::setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config) {
+  void Device::setDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t _config) {
     uint8_t mode = _config.dontcare ? 1 : 0;
     mode |= _config.localprio ? 2 : 0;
     mode |= _config.specialmode ? 4 : 0;
@@ -946,7 +951,15 @@ namespace dss {
     setDeviceConfig(CfgClassScene, 128 + _sceneId, mode);
   } // setDeviceSceneMode
 
-  void Device::getDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t& _config) {
+  void Device::setDeviceSceneMode(uint8_t sceneId, DeviceSceneSpec_t config) {
+    if (getProductID() == ProductID_UMV_210) {
+      setDeviceOutputChannelSceneConfig(SceneImpulse, config);
+    } else {
+      setDeviceSceneModeStandard(SceneImpulse, config);
+    }
+  }
+
+  void Device::getDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t& _config) {
     uint8_t mode = getDeviceConfig(CfgClassScene, 128 + _sceneId);
     _config.dontcare = (mode & 1) > 0;
     _config.localprio = (mode & 2) > 0;
@@ -955,6 +968,14 @@ namespace dss {
     _config.ledconIndex = (mode >> 4) & 3;
     _config.dimtimeIndex = (mode >> 6) & 3;
   } // getDeviceSceneMode
+
+  void Device::getDeviceSceneMode(uint8_t sceneId, DeviceSceneSpec_t &config) {
+    if (getProductID() == ProductID_UMV_210) {
+      getDeviceOutputChannelSceneConfig(SceneImpulse, config);
+    } else {
+      getDeviceSceneModeStandard(SceneImpulse, config);
+    }
+  }
 
   void Device::setDeviceOutputChannelDontCareFlags(uint8_t _scene,
                                                    uint16_t _value) {
@@ -1523,10 +1544,33 @@ namespace dss {
     }
   }
 
+  void Device::getSensorEventTableEntryZws205(const int row, DeviceSensorEventSpec_t& entry) {
+    DS_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event");
+
+    entry = DeviceSensorEventSpec_t();
+    entry.name = getSensorEventName(row);
+
+    // read 16bit per call
+    auto value0_1 = getDeviceConfigWord(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 0);
+    auto value2_3 = getDeviceConfigWord(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 2);
+
+    entry.action = (value0_1 & 0x0003);
+    entry.test = (value0_1 & 0x000C) >> 2;
+    entry.sensorIndex = (value0_1 & 0x00F0) >> 4;
+
+    entry.value = ((value0_1 & 0xFF00) | (value2_3 & 0x00F0)) >> 4;
+    entry.hysteresis = 0;
+
+    auto minimalDurationOffset = (row == 0) ? 0x30 : 0x32;
+    entry.minimalDuration = getDeviceConfig(CfgClassSensorEvent, minimalDurationOffset);
+  }
+
   void Device::getSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t& _entry) {
-    if (_eventIndex > 15) {
-      throw DSSException("Device::getSensorEventEntry: index out of range");
+    DS_REQUIRE(_eventIndex <= 7, "row index exceeds table size");
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      return getSensorEventTableEntryZws205(_eventIndex, _entry);
     }
+
     _entry.name = getSensorEventName(_eventIndex);
     uint16_t value = getDeviceConfigWord(CfgClassSensorEvent, CfgFSensorEvent_TableSize * _eventIndex + 0);
     _entry.sensorIndex = (value & 0x00F0) >> 4;
@@ -1544,11 +1588,40 @@ namespace dss {
     _entry.sceneID = (value & 0x7F00) >> 8;
   }
 
-  void Device::setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry) {
-    if (_eventIndex > 15) {
-      throw DSSException("Device::setSensorEventEntry: index out of range");
+  void Device::setSensorEventTableEntryZws205(int row, const DeviceSensorEventSpec_t& entry) {
+    // see ds-basics: Appendix C.4 "Sensor Event Table"
+    DS_REQUIRE(row < 2, "ZWS205 only supports on/off consumption event ", row);
+    DS_REQUIRE(entry.sensorIndex <= 0xff, "sensor index exceeded");
+    DS_REQUIRE(entry.test != 0x3, "invalid comparison operator");
+    DS_REQUIRE(entry.action == 0 || entry.action == 0x3, "on/off action only");
+    uint8_t offset0 = (entry.sensorIndex << 4 | entry.test << 2 | entry.action);
+
+    DS_REQUIRE(entry.value >= 5, "ZWS205 has 5W lower bound limit");
+    uint8_t offset1 = (entry.value & 0xFF0) >> 4;
+    uint8_t offset2 = (entry.value & 0x00F) << 4;
+
+    if (entry.hysteresis != 0) {
+      DS_NOTICE("ZWS205, does not support hysteresis, ignored");
     }
-    if (getRevisionID() < 0x0328) {
+
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 0, offset0);
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 1, offset1);
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 2, offset2);
+    // clear hysteresis
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 3, 0);
+    // execute always, independent of output value
+    setDeviceConfig(CfgClassSensorEvent, row * CfgFSensorEvent_TableSize + 4, 0);
+
+    // offset outside of sensor event table
+    auto minimalDurationOffset = (row == 0) ? 0x30 : 0x32;
+    setDeviceConfig(CfgClassSensorEvent, minimalDurationOffset, entry.minimalDuration);
+  }
+
+  void Device::setSensorEventEntry(const int _eventIndex, DeviceSensorEventSpec_t _entry) {
+    DS_REQUIRE(_eventIndex <= 7, "row index exceeds table size");
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      return setSensorEventTableEntryZws205(_eventIndex, _entry);
+    } else if (getRevisionID() < 0x0328) {
       /* older devices have a bug, where the hysteresis setting leads to strange behavior */
       _entry.hysteresis = 0;
     }
@@ -2237,7 +2310,8 @@ namespace dss {
 
   bool Device::isValveDevice() const {
     return (hasOutput() && ((getDeviceClass() == DEVICE_CLASS_BL) ||
-                               ((getDeviceType() == DEVICE_TYPE_UMR) && (getRevisionID() >= 0x0383))));
+                               ((getDeviceType() == DEVICE_TYPE_UMR) && (getRevisionID() >= 0x0383)) ||
+                               ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205))));
   }
 
   DeviceValveType_t Device::getValveType () const {
@@ -2811,55 +2885,65 @@ namespace dss {
 
     return false;
   }
-  void Device::setDeviceUMRBlinkRepetitions(uint8_t _count) {
-    if (hasBlinkSettings()) {
-      setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, _count);
 
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+  void Device::setDeviceBlinkRepetitions(uint8_t count) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
+    setDeviceConfig(CfgClassFunction, CfgFunction_FCount1, count);
   }
 
-  void Device::setDeviceUMROnDelay(double _delay) {
-    if (hasBlinkSettings()) {
-      _delay = _delay * 1000.0; // convert from seconds to ms
+  void Device::setDeviceBlinkOnDelay(double delay) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
-      if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
-        throw std::runtime_error("invalid delay value");
+    auto lowerBound = [&] {
+      if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+        return 0.5d;
       }
-      uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
-      setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, value);
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+      return 0.0d; // TODO(someday) probably wrong but the historically limit
+    }();
+
+    // upper limit with 8bit registers
+    // 255 * BLINK_DELAY_SCALE / 1000.0
+    auto upperBound = 8.4d;
+
+    DS_REQUIRE(delay >= lowerBound, "delay value too small", delay);
+    DS_REQUIRE(delay <= upperBound, "delay value too big", delay);
+
+    auto value = round(1000.0 * delay / BLINK_DELAY_SCALE);
+    DS_REQUIRE(value >= 0 && value <= UCHAR_MAX, "delay exceeds data type", delay);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOnTime1, static_cast<uint8_t>(value));
   }
 
-  void Device::setDeviceUMROffDelay(double _delay) {
-    if (hasBlinkSettings()) {
-      _delay = _delay * 1000.0; // convert from seconds to ms
+  void Device::setDeviceBlinkOffDelay(double delay) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
-      if ((_delay < 0) || (round(_delay / UMR_DELAY_STEPS) > UCHAR_MAX)) {
-        throw std::runtime_error("invalid delay value");
+    auto lowerBound = [&] {
+      if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+        return 0.5d;
       }
-      uint8_t value = (uint8_t)round(_delay / UMR_DELAY_STEPS);
-      setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, value);
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+      return 0.0d; // TODO(someday) probably wrong but the historically limit
+    }();
+
+    // upper limit with 8bit registers
+    // 255 * BLINK_DELAY_SCALE / 1000.0
+    auto upperBound = 8.4d;
+
+    DS_REQUIRE(delay >= lowerBound, "delay value too small", delay);
+    DS_REQUIRE(delay <= upperBound, "delay value too big", delay);
+
+    auto value = round(1000.0 * delay / BLINK_DELAY_SCALE);
+    DS_REQUIRE(value >= 0 && value <= UCHAR_MAX, "delay exceeds data type", delay);
+    setDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1, static_cast<uint8_t>(value));
   }
 
-  void Device::getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay,
-                                         uint8_t  *_count) {
-    if (hasBlinkSettings()) {
-      uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
-      *_ondelay = (double)((value & 0xff) * UMR_DELAY_STEPS) / 1000.0;
-      *_count = (uint8_t)(value >> 8) & 0xff;
+  void Device::getDeviceBlinkSettings(double *ondelay, double *offdelay, uint8_t  *count) {
+    DS_REQUIRE(hasBlinkSettings(), "blink configuration not supported by this device");
 
-      uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
-      *_offdelay = (value2 * UMR_DELAY_STEPS) / 1000.0; // convert to seconds
-    } else {
-      throw std::runtime_error("unsupported configuration for this device");
-    }
+    uint16_t value = getDeviceConfigWord(CfgClassFunction, CfgFunction_FOnTime1);
+    *ondelay = (double)((value & 0xff) * BLINK_DELAY_SCALE) / 1000.0;
+    *count = (uint8_t)(value >> 8) & 0xff;
+
+    uint8_t value2 = getDeviceConfig(CfgClassFunction, CfgFunction_FOffTime1);
+    *offdelay = (value2 * BLINK_DELAY_SCALE) / 1000.0; // convert to seconds
   }
 
   std::vector<int> Device::getLockedScenes() {
@@ -2992,29 +3076,44 @@ namespace dss {
   }
 
   uint8_t Device::getSWThresholdAddress() const {
-    if (getDeviceType() == DEVICE_TYPE_KM ||
-        getDeviceType() == DEVICE_TYPE_SDM ||
-        getDeviceType() == DEVICE_TYPE_SDS ||
-        getDeviceType() == DEVICE_TYPE_TKM) {
-      return CfgFunction_KM_SWThreshold;
+    switch (getDeviceType()) {
+      case DEVICE_TYPE_KM:
+      case DEVICE_TYPE_SDM:
+      case DEVICE_TYPE_SDS:
+      case DEVICE_TYPE_TKM:
+        return CfgFunction_KM_SWThreshold;
+      case DEVICE_TYPE_KL:
+      case DEVICE_TYPE_ZWS:
+        switch (getDeviceClass()) {
+          case DEVICE_CLASS_GE:
+          case DEVICE_CLASS_SW:
+            return CfgFunction_KL_SWThreshold;
+          default:
+            break;
+        }
+        break;
+      case DEVICE_TYPE_UMV:
+        if (getDeviceClass() == DEVICE_CLASS_GE) {
+          return CfgFunction_UMV_SWThreshold;
+        }
+        break;
+      case DEVICE_TYPE_TNY:
+        if (getDeviceClass() == DEVICE_CLASS_SW && isMainDevice()) {
+          return CfgFunction_Tiny_SWThreshold;
+        }
+        break;
+      case DEVICE_TYPE_UMR:
+        if (getDeviceClass() == DEVICE_CLASS_SW) {
+          return CfgFunction_UMR_SWThreshold;
+        }
+        break;
+      default:
+        // TODO(now) we should limit this to a DEVICE_TYPE
+        if (getDeviceClass() == DEVICE_CLASS_BL) {
+          return CfgFunction_Valve_SWThreshold;
+        }
     }
-    if ((getDeviceType() == DEVICE_TYPE_KL || getDeviceType() == DEVICE_TYPE_ZWS) &&
-        (getDeviceClass() == DEVICE_CLASS_GE || getDeviceClass() == DEVICE_CLASS_SW)) {
-      return CfgFunction_KL_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_UMV && getDeviceClass() == DEVICE_CLASS_GE) {
-      return CfgFunction_UMV_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_TNY && getDeviceClass() == DEVICE_CLASS_SW && isMainDevice()) {
-      return CfgFunction_Tiny_SWThreshold;
-    }
-    if (getDeviceClass() == DEVICE_CLASS_BL) {
-      return CfgFunction_Valve_SWThreshold;
-    }
-    if (getDeviceType() == DEVICE_TYPE_UMR && getDeviceClass() == DEVICE_CLASS_SW) {
-      return CfgFunction_UMR_SWThreshold;
-    }
-    throw std::runtime_error("Device does not support changing the switching threshold");
+    DS_FAIL_REQUIRE("Device does not support changing the switching threshold");
   }
 
   void Device::setSwitchThreshold(uint8_t _threshold) {
@@ -3256,7 +3355,82 @@ namespace dss {
     m_vdcSpec = std::unique_ptr<VdsdSpec_t>(new VdsdSpec_t(std::move(x)));
   }
 
+  void Device::updateZws205GroupColor() {
+    auto bits = 040 | static_cast<uint8_t>(getApplicationTypeRgbBitmask(static_cast<ApplicationType>(m_ActiveGroup)));
+    setDeviceConfig(CfgClassFunction, CfgFunction_LedConfig0, bits);
+  }
+
+  void Device::updateLedGroupColor() {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      updateZws205GroupColor();
+    }
+  }
+
+  void Device::updateOutputMode() {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      updateZws205OutputMode();
+    }
+  }
+
+  void Device::updateZws205OutputMode() {
+    auto mode = [&] {
+      switch (static_cast<ApplicationType>(m_ActiveGroup)) {
+        case ApplicationType::Lights:
+        case ApplicationType::Blinds:
+        case ApplicationType::Heating:
+        case ApplicationType::Ventilation:
+        case ApplicationType::Recirculation:
+        case ApplicationType::ApartmentVentilation:
+        case ApplicationType::ApartmentRecirculation:
+        case ApplicationType::Audio:
+        case ApplicationType::Video:
+        case ApplicationType::Joker:
+          return OUTPUT_MODE_SWITCH_2_POL;
+        case ApplicationType::ControlTemperature:
+          return OUTPUT_MODE_TEMPCONTROL_SWITCHED;
+        case ApplicationType::Cooling:
+        case ApplicationType::Window:
+        case ApplicationType::None:
+          ;
+      }
+      DS_ERROR("ZWS205: no output mode for application type", m_ActiveGroup);
+      return OUTPUT_MODE_SWITCH_2_POL; // go with the 90%
+    }();
+    setDeviceOutputMode(mode);
+  }
+
   std::ostream& operator<<(std::ostream& stream, const Device& x) {
     return stream << x.getName();
+  }
+
+  void Device::setConsumptionVisualizationEnabledZws205(bool enabled) {
+    uint8_t bits = enabled ? 0x2 : 0xff;
+    setDeviceConfig(CfgClassFunction, CfgFunction_ZWS_LedVisuSensId, bits);
+  }
+
+  bool Device::getConsumptionVisualizationEnabledZws205() {
+    auto bits = getDeviceConfig(CfgClassFunction, CfgFunction_ZWS_LedVisuSensId);
+    switch (bits) {
+      case 0x2:
+        return true;
+      case 0xff:
+        return false;
+    }
+    DS_ERROR("unknown led visualisation value", bits);
+    return false;
+  }
+
+  void Device::setConsumptionVisualizationEnabled(bool enabled) {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      return setConsumptionVisualizationEnabledZws205(enabled);
+    }
+    DS_FAIL_REQUIRE("Consumption visualization not support by device");
+  }
+
+  bool Device::getConsumptionVisualizationEnabled() {
+    if ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205)) {
+      return getConsumptionVisualizationEnabledZws205();
+    }
+    DS_FAIL_REQUIRE("Consumption visualization not support by device");
   }
 } // namespace dss

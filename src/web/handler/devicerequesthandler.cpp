@@ -867,11 +867,8 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->getDeviceSceneMode(id, config);
-      }
+      pDevice->getDeviceSceneMode(id, config);
+
       JSONWriter json;
       json.add("sceneID", id);
       json.add("dontCare", config.dontcare);
@@ -893,11 +890,7 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->getDeviceSceneMode(id, config);
-      }
+      pDevice->getDeviceSceneMode(id, config);
 
       if(_request.hasParameter("dontCare"))
         config.dontcare = strToIntDef(_request.getParameter("dontCare"), config.dontcare);
@@ -912,11 +905,7 @@ namespace dss {
       if(_request.hasParameter("dimtimeIndex"))
         config.dimtimeIndex = strToIntDef(_request.getParameter("dimtimeIndex"), config.dimtimeIndex);
 
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->setDeviceOutputChannelSceneConfig(id, config);
-      } else {
-        pDevice->setDeviceSceneMode(id, config);
-      }
+      pDevice->setDeviceSceneMode(id, config);
 
       return JSONWriter::success();
 
@@ -1164,6 +1153,7 @@ namespace dss {
       json.add("value", event.value);
       json.add("hysteresis", event.hysteresis);
       json.add("validity", event.validity);
+      json.add("minimalDuration", event.minimalDuration);
       if (event.action == 2) {
         json.add("buttonNumber", event.buttonNumber);
         json.add("clickType", event.clickType);
@@ -1208,6 +1198,13 @@ namespace dss {
         return JSONWriter::failure("Invalid or missing parameter 'validity'");
       }
       event.validity = validity;
+      if (_request.hasParameter("minimalDuration")) {
+        int minimalDuration = strToIntDef(_request.getParameter("minimalDuration"), -1);
+        if (minimalDuration < 0 || minimalDuration > 0xff) {
+          return JSONWriter::failure("Invalid or missing parameter 'minimalDuration'");
+        }
+        event.minimalDuration = minimalDuration;
+      }
       if (event.action == 2) {
         int buttonNumber = strToIntDef(_request.getParameter("buttonNumber"), -1);
         if ((buttonNumber < 0) || (buttonNumber > 0xF)) {
@@ -1853,31 +1850,23 @@ namespace dss {
       }
 
       if (blinkCount != -1) {
-        device->setDeviceUMRBlinkRepetitions((uint8_t)blinkCount);
+        device->setDeviceBlinkRepetitions((uint8_t)blinkCount);
       }
 
       if (onDelay != -1) {
-        device->setDeviceUMROnDelay(onDelay);
+        device->setDeviceBlinkOnDelay(onDelay);
       }
 
       if (offDelay != -1) {
-         device->setDeviceUMROffDelay(offDelay);
+         device->setDeviceBlinkOffDelay(offDelay);
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
-      } else {
-        pDevice->getDeviceSceneMode(SceneImpulse, config);
-      }
+      pDevice->getDeviceSceneMode(SceneImpulse, config);
 
       if (config.flashmode != 1) {
         config.flashmode = 1;
-        if (pDevice->getProductID() == ProductID_UMV_210) {
-          pDevice->setDeviceOutputChannelSceneConfig(SceneImpulse, config);
-        } else {
-          pDevice->setDeviceSceneMode(SceneImpulse, config);
-        }
+        pDevice->setDeviceSceneMode(SceneImpulse, config);
       }
 
       return JSONWriter::success();
@@ -1893,7 +1882,7 @@ namespace dss {
       uint8_t umr_count;
       double umr_ondelay;
       double umr_offdelay;
-      device->getDeviceUMRDelaySettings(&umr_ondelay, &umr_offdelay, &umr_count);
+      device->getDeviceBlinkSettings(&umr_ondelay, &umr_offdelay, &umr_count);
       json.add("count", umr_count);
       json.add("ondelay", umr_ondelay);
       json.add("offdelay", umr_offdelay);
@@ -1981,20 +1970,12 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
-      } else {
-        pDevice->getDeviceSceneMode(SceneImpulse, config);
-      }
+      pDevice->getDeviceSceneMode(SceneImpulse, config);
 
       if ((config.dontcare != dontcare) || (config.flashmode != 1)) {
         config.flashmode = 1;
         config.dontcare = dontcare;
-        if (pDevice->getProductID() == ProductID_UMV_210) {
-          pDevice->setDeviceOutputChannelSceneConfig(SceneImpulse, config);
-        } else {
-          pDevice->setDeviceSceneMode(SceneImpulse, config);
-        }
+        pDevice->setDeviceSceneMode(SceneImpulse, config);
       }
 
       pDevice->setSceneValue(SceneImpulse, value);
@@ -2008,11 +1989,7 @@ namespace dss {
       }
 
       DeviceSceneSpec_t config;
-      if (pDevice->getProductID() == ProductID_UMV_210) {
-        pDevice->getDeviceOutputChannelSceneConfig(SceneImpulse, config);
-      } else {
-        pDevice->getDeviceSceneMode(SceneImpulse, config);
-      }
+      pDevice->getDeviceSceneMode(SceneImpulse, config);
 
       int value = pDevice->getSceneValue(SceneImpulse);
 
@@ -2465,6 +2442,24 @@ namespace dss {
 
       JSONWriter json;
       json.add("seconds", (int)seconds);
+      return json.successJSON();
+
+    } else if (_request.getMethod() == "setConsumptionVisualization") {
+      auto value = strToIntDef(_request.getParameter("value"), -1);
+      switch (value) {
+        case 0:
+          pDevice->setConsumptionVisualizationEnabled(false);
+          return JSONWriter::success();
+        case 1:
+          pDevice->setConsumptionVisualizationEnabled(true);
+          return JSONWriter::success();
+        default:
+          return JSONWriter::failure("invalid value");
+      }
+
+    } else if (_request.getMethod() == "getConsumptionVisualization") {
+      JSONWriter json;
+      json.add("value", pDevice->getConsumptionVisualizationEnabled());
       return json.successJSON();
 
     } else {

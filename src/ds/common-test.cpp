@@ -92,4 +92,10 @@ TEST_CASE("DS_DEFER", TAGS) {
     }
 }
 
+TEST_CASE("DS_IREQUIRE", TAGS) {
+    SECTION("does nothing on success") { DS_IREQUIRE(true, ""); }
+
+    SECTION("throws on failure") { CHECK_THROWS_FIND(DS_IREQUIRE(false, "Foo"), "Foo"); }
+}
+
 } // namespace

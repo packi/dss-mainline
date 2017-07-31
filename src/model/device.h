@@ -58,11 +58,13 @@
 #define BUTTONINPUT_AKM_RISING_EDGE         "rising_edge"
 #define BUTTONINPUT_AKM_FALLING_EDGE        "falling_edge"
 
-// UMR output modes for pairing
+// UMR output modes for pairing, import from Config.js in UI
 #define OUTPUT_MODE_TWO_STAGE_SWITCH        34
-#define OUTPUT_MODE_BIPOLAR_SWITCH          43
+#define OUTPUT_MODE_SWITCH_2_POL            35
 #define OUTPUT_MODE_THREE_STAGE_SWITCH      38
+#define OUTPUT_MODE_BIPOLAR_SWITCH          43
 
+#define OUTPUT_MODE_TEMPCONTROL_SWITCHED    65
 #define OUTPUT_MODE_TEMPCONTROL_2OUT_2STEPS 67
 #define OUTPUT_MODE_TEMPCONTROL_2OUT_3STEPS 68
 #define OUTPUT_MODE_TEMPCONTROL_2OUT_PARALLEL 69
@@ -108,6 +110,7 @@ namespace dss {
     uint8_t buttonNumber;
     uint8_t clickType;
     uint8_t sceneID;
+    uint8_t minimalDuration; //< condition must last at least for so many seconds
   } DeviceSensorEventSpec_t;
 
   typedef struct {
@@ -354,6 +357,9 @@ namespace dss {
     friend class ModelMaintenance;
     void setButtonInputMode(ButtonInputMode mode);
 
+    void setSensorEventTableEntryZws205(int row, const DeviceSensorEventSpec_t& entry);
+    void getSensorEventTableEntryZws205(int row, DeviceSensorEventSpec_t& entry);
+
   protected:
     /** Sends the application a note that something has changed.
      * This will cause the \c apartment.xml to be updated. */
@@ -370,6 +376,15 @@ namespace dss {
     std::string getAKMButtonInputString(ButtonInputMode mode);
     bool hasBlinkSettings();
     void publishAliasInZoneGroups();
+
+    // use get/setDeviceSceneMode instaed of these functions, only internal
+    void setDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t _config);
+    void getDeviceSceneModeStandard(uint8_t _sceneId, DeviceSceneSpec_t& _config);
+    void getDeviceOutputChannelSceneConfig(uint8_t scene, DeviceSceneSpec_t& config);
+    void setDeviceOutputChannelSceneConfig(uint8_t scene, DeviceSceneSpec_t config);
+
+    void setConsumptionVisualizationEnabledZws205(bool enabled);
+    bool getConsumptionVisualizationEnabledZws205();
 
   public:
     /** Creates and initializes a device. */
@@ -402,10 +417,6 @@ namespace dss {
     uint16_t getDeviceOutputChannelSceneValue(uint8_t _channel, uint8_t _scene);
     void setDeviceOutputChannelSceneValue(uint8_t _channel, uint8_t _size,
                                           uint8_t _scene, uint16_t _value);
-    void getDeviceOutputChannelSceneConfig(uint8_t _scene,
-                                           DeviceSceneSpec_t& _config);
-    void setDeviceOutputChannelSceneConfig(uint8_t _scene,
-                                           DeviceSceneSpec_t _config);
     void setDeviceOutputChannelDontCareFlags(uint8_t _scene, uint16_t _value);
     uint16_t getDeviceOutputChannelDontCareFlags(uint8_t _scene);
 
@@ -424,8 +435,9 @@ namespace dss {
     int multiDeviceIndex() const;
 
     /** Configure scene configuration */
-    void setDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t _config);
-    void getDeviceSceneMode(uint8_t _sceneId, DeviceSceneSpec_t& _config);
+    void setDeviceSceneMode(uint8_t sceneId, DeviceSceneSpec_t config);
+    void getDeviceSceneMode(uint8_t sceneId, DeviceSceneSpec_t& config);
+
     void setDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t _config);
     void getDeviceLedMode(uint8_t _ledconIndex, DeviceLedSpec_t& _config);
     void setDeviceTransitionTime(uint8_t _dimtimeIndex, int up, int down);
@@ -775,10 +787,10 @@ namespace dss {
     uint8_t getDeviceUMVRelayValue();
     void setDeviceUMVRelayValue(uint8_t _value);
 
-    void setDeviceUMRBlinkRepetitions(uint8_t _count);
-    void setDeviceUMROnDelay(double delay);
-    void setDeviceUMROffDelay(double delay);
-    void getDeviceUMRDelaySettings(double *_ondelay, double *_offdelay, uint8_t *_count);
+    void setDeviceBlinkRepetitions(uint8_t count);
+    void setDeviceBlinkOnDelay(double delay);
+    void setDeviceBlinkOffDelay(double delay);
+    void getDeviceBlinkSettings(double *ondelay, double *offdelay, uint8_t *count);
 
     void setCardinalDirection(CardinalDirection_t _direction, bool _initial = false);
     CardinalDirection_t getCardinalDirection() const {
@@ -833,6 +845,21 @@ namespace dss {
                          const vdcapi::PropertyElement& params);
     vdcapi::Message getVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
     void setVdcProperty(const ::google::protobuf::RepeatedPtrField< ::vdcapi::PropertyElement >& query);
+
+    /** LED indicates group membership of devices
+     *
+     * Some device indicate group membership with an LED, but the update is not
+     * done by the device firmware, but needs to be handled by dss
+     */
+    void updateLedGroupColor();
+    void updateZws205GroupColor();
+
+    /** Somes device have application specififc default output mode */
+    void updateOutputMode();
+    void updateZws205OutputMode();
+
+    void setConsumptionVisualizationEnabled(bool enabled);
+    bool getConsumptionVisualizationEnabled();
   }; // Device
 
   std::ostream& operator<<(std::ostream& out, const Device& _dt);

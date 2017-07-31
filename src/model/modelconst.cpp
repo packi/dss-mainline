@@ -431,6 +431,30 @@ namespace dss {
     return 0;
   }
 
+  RgbBitmask getApplicationTypeRgbBitmask(ApplicationType type) {
+    switch (getApplicationTypeColor(type)) {
+      case ColorIDYellow:
+        return RgbBitmask::yellow;
+      case ColorIDGray:
+        return RgbBitmask::gray;
+      case ColorIDBlue:
+        return RgbBitmask::blue;
+      case ColorIDCyan:
+        return RgbBitmask::cyan;
+      case ColorIDViolet:
+        return RgbBitmask::magenta;
+      case ColorIDRed:
+        return RgbBitmask::red;
+      case ColorIDGreen:
+        return RgbBitmask::green;
+      case ColorIDBlack:
+        return RgbBitmask::gray;
+      case ColorIDWhite:
+        return RgbBitmask::gray;
+    }
+    return RgbBitmask::gray;
+  }
+
   boost::optional<const char*> heatingControlModeName(HeatingControlMode x) {
     switch (x) {
       case HeatingControlMode::OFF:
@@ -627,6 +651,14 @@ namespace dss {
         return "ventconfig";
       case ModelFeatureId::fcu:
         return "fcu";
+      case ModelFeatureId::pushbdisabled:
+        return "pushbdisabled";
+      case ModelFeatureId::consumptioneventled:
+        return "consumptioneventled";
+      case ModelFeatureId::consumptiontimer:
+        return "consumptiontimer";
+      case ModelFeatureId::jokertempcontrol:
+        return "jokertempcontrol";
     }
     return boost::none;
   }
@@ -730,6 +762,14 @@ namespace dss {
       return ModelFeatureId::ventconfig;
     } else if (x == "fcu") {
       return ModelFeatureId::fcu;
+    } else if (x == "pushbdisabled") {
+      return ModelFeatureId::pushbdisabled;
+    } else if (x == "consumptioneventled") {
+      return ModelFeatureId::consumptioneventled;
+    } else if (x == "consumptiontimer") {
+      return ModelFeatureId::consumptiontimer;
+    } else if (x == "jokertempcontrol") {
+      return ModelFeatureId::jokertempcontrol;
     }
 
     return boost::none;
