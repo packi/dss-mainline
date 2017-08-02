@@ -2320,9 +2320,9 @@ namespace dss {
   }
 
   bool Device::isValveDevice() const {
-    return (hasOutput() && ((getDeviceClass() == DEVICE_CLASS_BL) ||
-                               ((getDeviceType() == DEVICE_TYPE_UMR) && (getRevisionID() >= 0x0383)) ||
-                               ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205))));
+    return (hasOutput() && ((!isInternallyControlled() && (getDeviceClass() == DEVICE_CLASS_BL)) ||
+                            ((getDeviceType() == DEVICE_TYPE_UMR) && (getRevisionID() >= 0x0383)) ||
+                            ((getDeviceType() == DEVICE_TYPE_ZWS) && (getDeviceNumber() == 205))));
   }
 
   DeviceValveType_t Device::getValveType () const {
