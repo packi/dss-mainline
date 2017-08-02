@@ -1809,6 +1809,9 @@ namespace dss {
     if ((subclass == 0x07) && ((funcmodule & 0x3) > 1)) {
       return true;
     }
+    if ((subclass == 0x08) && ((funcmodule & 0x3) > 1)) {
+      return true;
+    }
     return false;
   }
 
@@ -1822,12 +1825,20 @@ namespace dss {
     if ((subclass == 0x07) && ((funcmodule & 0x3) > 0)) {
       return true;
     }
+    if ((subclass == 0x08) && ((funcmodule & 0x3) > 0)) {
+      return true;
+    }
     return false;
   }
 
   bool Device::hasOutput() const {
     int funcmodule = (m_FunctionID & 0x3f);
     return (((funcmodule & 0x10) == 0x10) || (m_FunctionID == 0x6001));
+  }
+
+  bool Device::isInternallyControlled() const {
+    int subclass = (m_FunctionID & 0xfc0) >> 6;
+    return (subclass == 0x08);
   }
 
   DeviceTypes_t Device::getDeviceType() const {
@@ -1972,7 +1983,7 @@ namespace dss {
   void Device::updateModelFeatures() {
     decltype(m_modelFeatures) modelFeatures;
     auto&& subclass = (m_FunctionID >> 6) & 0x3F;
-    if (subclass == 0x07) {
+    if (subclass == 0x07 || subclass == 0x08) {
       modelFeatures[ModelFeatureId::apartmentapplication] = true;
     }
     if (m_modelFeatures == modelFeatures) {
@@ -2996,8 +3007,8 @@ namespace dss {
         case 2: deviceCount = 4; break;
         case 7: deviceCount = 1; break;
       }
-    } else if (((m_FunctionID & 0x0fc0) == 0x0100) || ((m_FunctionID & 0x0fc0) == 0x01c0)) {
-      // subclasses 4 or 7
+    } else if (((m_FunctionID & 0x0fc0) == 0x0100) || ((m_FunctionID & 0x0fc0) == 0x01c0) || ((m_FunctionID & 0x0fc0) == 0x0200)) {
+      // subclasses 4, 7 or 8
       switch (m_FunctionID & 0x3) {
         case 0: deviceCount = 1; break;
         case 1: deviceCount = 1; break;
