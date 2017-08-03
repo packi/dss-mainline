@@ -649,27 +649,27 @@ std::string ZoneRequestHandler::getSensorValues(
   json.add("name", pZone->getName());
   json.startArray("values");
 
-  if (sensorStatus.m_TemperatureValueTS != DateTime::NullDate) {
+  if (sensorStatus.m_TemperatureValueTS != DateTime::NullDate && sensorStatus.m_TemperatureValue) {
     json.startObject();
-    json.add("TemperatureValue", sensorStatus.m_TemperatureValue);
+    json.add("TemperatureValue", *sensorStatus.m_TemperatureValue);
     json.add("TemperatureValueTime", sensorStatus.m_TemperatureValueTS.toISO8601_ms());
     json.endObject();
   }
-  if (sensorStatus.m_HumidityValueTS != DateTime::NullDate) {
+  if (sensorStatus.m_HumidityValueTS != DateTime::NullDate && sensorStatus.m_HumidityValue) {
     json.startObject();
-    json.add("HumidityValue", sensorStatus.m_HumidityValue);
+    json.add("HumidityValue", *sensorStatus.m_HumidityValue);
     json.add("HumidityValueTime", sensorStatus.m_HumidityValueTS.toISO8601_ms());
     json.endObject();
   }
-  if (sensorStatus.m_CO2ConcentrationValueTS != DateTime::NullDate) {
+  if (sensorStatus.m_CO2ConcentrationValueTS != DateTime::NullDate && sensorStatus.m_CO2ConcentrationValue) {
     json.startObject();
-    json.add("CO2concentrationValue", sensorStatus.m_CO2ConcentrationValue);
+    json.add("CO2concentrationValue", *sensorStatus.m_CO2ConcentrationValue);
     json.add("CO2concentrationValueTime", sensorStatus.m_CO2ConcentrationValueTS.toISO8601_ms());
     json.endObject();
   }
-  if (sensorStatus.m_BrightnessValueTS != DateTime::NullDate) {
+  if (sensorStatus.m_BrightnessValueTS != DateTime::NullDate && sensorStatus.m_BrightnessValue) {
     json.startObject();
-    json.add("BrightnessValue", sensorStatus.m_BrightnessValue);
+    json.add("BrightnessValue", *sensorStatus.m_BrightnessValue);
     json.add("BrightnessValueTime", sensorStatus.m_BrightnessValueTS.toISO8601_ms());
     json.endObject();
   }
@@ -817,41 +817,46 @@ void ZoneRequestHandler::addTemperatureControlStatus(JSONWriter& json, boost::sh
       break;
     case HeatingControlMode::PID:
       json.add("OperationMode", pZone->getHeatingOperationMode());
-      if (hSensors.m_TemperatureValueTS == DateTime::NullDate) {
-        json.add("TemperatureValue");
-        json.addNull();
+      json.add("TemperatureValue");
+      if (hSensors.m_TemperatureValue) {
+        json.add(*hSensors.m_TemperatureValue);
       } else {
-        json.add("TemperatureValue", hSensors.m_TemperatureValue);
+        json.addNull();
       }
       json.add("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
-      if (hStatus.m_NominalValueTS == DateTime::NullDate) {
-        json.add("NominalValue");
-        json.addNull();
+      json.add("NominalValue");
+      if (hStatus.m_NominalValue) {
+        json.add(*hStatus.m_NominalValue);
       } else {
-        json.add("NominalValue", hStatus.m_NominalValue);
+        json.addNull();
       }
       json.add("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
-      if (hStatus.m_ControlValueTS == DateTime::NullDate) {
-        json.add("ControlValue");
-        json.addNull();
+      json.add("ControlValue");
+      if (hStatus.m_ControlValue) {
+        json.add(*hStatus.m_ControlValue);
       } else {
-        json.add("ControlValue", hStatus.m_ControlValue);
+        json.addNull();
       }
       json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
       break;
     case HeatingControlMode::ZONE_FOLLOWER:
-      if (hStatus.m_ControlValueTS == DateTime::NullDate) {
-        json.add("ControlValue");
-        json.addNull();
+      json.add("ControlValue");
+      if (hStatus.m_ControlValue) {
+        json.add(*hStatus.m_ControlValue);
       } else {
-        json.add("ControlValue", hStatus.m_ControlValue);
+        json.addNull();
       }
       json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
       break;
     case HeatingControlMode::FIXED:
     case HeatingControlMode::MANUAL:
       json.add("OperationMode", pZone->getHeatingOperationMode());
-      json.add("ControlValue", hStatus.m_ControlValue);
+      json.add("ControlValue");
+      if (hStatus.m_ControlValue) {
+        json.add(*hStatus.m_ControlValue);
+      } else {
+        json.addNull();
+      }
       break;
   }
 }

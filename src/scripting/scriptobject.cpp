@@ -146,6 +146,11 @@ namespace dss {
     doSetProperty(_name, OBJECT_TO_JSVAL(_value->m_pObject));
   } // setProperty<ScriptObject>
 
+  void ScriptObject::setPropertyNull(const std::string& _name) {
+    JSRequest req(&m_Context);
+    doSetProperty(_name, JSVAL_NULL);
+  } // setPropertyNull
+
   bool ScriptObject::is(const std::string& _className) {
     return getClassName() == _className;
   } // is

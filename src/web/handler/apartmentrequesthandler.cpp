@@ -445,27 +445,27 @@ namespace dss {
 
           json.startArray("values");
 
-          if (sensorStatus.m_TemperatureValueTS != DateTime::NullDate) {
+          if (sensorStatus.m_TemperatureValueTS != DateTime::NullDate && sensorStatus.m_TemperatureValue) {
             json.startObject();
-            json.add("TemperatureValue", sensorStatus.m_TemperatureValue);
+            json.add("TemperatureValue", *sensorStatus.m_TemperatureValue);
             json.add("TemperatureValueTime", sensorStatus.m_TemperatureValueTS.toISO8601_ms());
             json.endObject();
           }
-          if (sensorStatus.m_HumidityValueTS != DateTime::NullDate) {
+          if (sensorStatus.m_HumidityValueTS != DateTime::NullDate && sensorStatus.m_HumidityValue) {
             json.startObject();
-            json.add("HumidityValue", sensorStatus.m_HumidityValue);
+            json.add("HumidityValue", *sensorStatus.m_HumidityValue);
             json.add("HumidityValueTime", sensorStatus.m_HumidityValueTS.toISO8601_ms());
             json.endObject();
           }
-          if (sensorStatus.m_CO2ConcentrationValueTS != DateTime::NullDate) {
+          if (sensorStatus.m_CO2ConcentrationValueTS != DateTime::NullDate && sensorStatus.m_CO2ConcentrationValue) {
             json.startObject();
-            json.add("CO2concentrationValue", sensorStatus.m_CO2ConcentrationValue);
+            json.add("CO2concentrationValue", *sensorStatus.m_CO2ConcentrationValue);
             json.add("CO2concentrationValueTime", sensorStatus.m_CO2ConcentrationValueTS.toISO8601_ms());
             json.endObject();
           }
-          if (sensorStatus.m_BrightnessValueTS != DateTime::NullDate) {
+          if (sensorStatus.m_BrightnessValueTS != DateTime::NullDate && sensorStatus.m_BrightnessValue) {
             json.startObject();
-            json.add("BrightnessValue", sensorStatus.m_BrightnessValue);
+            json.add("BrightnessValue", *sensorStatus.m_BrightnessValue);
             json.add("BrightnessValueTime", sensorStatus.m_BrightnessValueTS.toISO8601_ms());
             json.endObject();
           }

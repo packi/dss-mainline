@@ -77,35 +77,29 @@ namespace dss {
 
   typedef struct ZoneHeatingStatus {
     ZoneHeatingStatus() :
-      m_NominalValue(0),
       m_NominalValueTS(DateTime::NullDate),
-      m_ControlValue(0),
       m_ControlValueTS(DateTime::NullDate)
       {}
-    double m_NominalValue;         // only used for mode 1
+    boost::optional<double>  m_NominalValue;         // only used for mode 1
     DateTime m_NominalValueTS;
-    double m_ControlValue;
+    boost::optional<double>  m_ControlValue;
     DateTime m_ControlValueTS;
   } ZoneHeatingStatus_t;
 
   typedef struct ZoneSensorStatus {
     ZoneSensorStatus() :
-      m_TemperatureValue(0),
       m_TemperatureValueTS(DateTime::NullDate),
-      m_HumidityValue(0),
       m_HumidityValueTS(DateTime::NullDate),
-      m_BrightnessValue(0),
       m_BrightnessValueTS(DateTime::NullDate),
-      m_CO2ConcentrationValue(0),
       m_CO2ConcentrationValueTS(DateTime::NullDate)
       {}
-    double m_TemperatureValue;
+    boost::optional<double> m_TemperatureValue;
     DateTime m_TemperatureValueTS;
-    double m_HumidityValue;
+    boost::optional<double> m_HumidityValue;
     DateTime m_HumidityValueTS;
-    double m_BrightnessValue;
+    boost::optional<double> m_BrightnessValue;
     DateTime m_BrightnessValueTS;
-    double m_CO2ConcentrationValue;
+    boost::optional<double> m_CO2ConcentrationValue;
     DateTime m_CO2ConcentrationValueTS;
   } ZoneSensorStatus_t;
 
@@ -209,11 +203,17 @@ namespace dss {
     void setHeatingOperationMode(int _operationMode);
     int getHeatingOperationMode() const;
     void setTemperature(double _value, DateTime& _ts);
+    void resetTemperature();
     void setNominalValue(double _value, DateTime& _ts);
+    void resetNominalValue();
     void setControlValue(double _value, DateTime& _ts);
+    void resetControlValue();
     void setHumidityValue(double _value, DateTime& _ts);
+    void resetHumidityValue();
     void setBrightnessValue(double _value, DateTime& _ts);
+    void resetBrightnessValue();
     void setCO2ConcentrationValue(double _value, DateTime& _ts);
+    void resetCO2ConcentrationValue();
 
     void setSensor(const Device &_device, SensorType _sensorType);
     void setSensor(const MainZoneSensor_t &_mainZoneSensor);
