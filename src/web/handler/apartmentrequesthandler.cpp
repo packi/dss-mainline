@@ -498,7 +498,7 @@ namespace dss {
         json.endObject();
         
         json.startObject("reference");
-        foreach (auto&& feature, *ModelFeatures::getInstance()->getAvailableFeatures()) {
+        foreach (auto&& feature, ModelFeatures::getInstance()->getAvailableFeatures()) {
           if (auto&& name = modelFeatureName(feature)) {
             json.add(*name, false);
           }

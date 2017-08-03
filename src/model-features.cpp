@@ -1026,12 +1026,8 @@ std::string ModelFeatures::colorToString(int _color)
   throw std::runtime_error("unknown color");
 }
 
-boost::shared_ptr<std::vector<ModelFeatureId> > ModelFeatures::getAvailableFeatures()
-{
-  boost::shared_ptr<std::vector<ModelFeatureId> > ret;
-  ret = boost::make_shared<std::vector<ModelFeatureId> >();
-  ret->assign(MF_AVAILABLE, ARRAY_END(MF_AVAILABLE));
-  return ret;
+std::vector<ModelFeatureId> ModelFeatures::getAvailableFeatures() {
+  return std::vector<ModelFeatureId>(MF_AVAILABLE, ARRAY_END(MF_AVAILABLE));
 }
 
 }; // namespace
