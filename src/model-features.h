@@ -41,7 +41,8 @@ public:
   void setFeatures(int _color, std::string model, boost::shared_ptr<std::vector<ModelFeatureId> > _features);
   std::vector<boost::shared_ptr<std::pair<std::string, boost::shared_ptr<const std::vector<ModelFeatureId> > > > > getFeatures(int _color);
   std::string colorToString(int _color);
-  static boost::shared_ptr<std::vector<ModelFeatureId> > getAvailableFeatures();
+  static std::vector<ModelFeatureId> getAvailableFeatures();
+
 private:
   ModelFeatures();
   static ModelFeatures *m_instance;
