@@ -817,15 +817,35 @@ void ZoneRequestHandler::addTemperatureControlStatus(JSONWriter& json, boost::sh
       break;
     case HeatingControlMode::PID:
       json.add("OperationMode", pZone->getHeatingOperationMode());
-      json.add("TemperatureValue", hSensors.m_TemperatureValue);
+      if (hSensors.m_TemperatureValueTS == DateTime::NullDate) {
+        json.add("TemperatureValue");
+        json.addNull();
+      } else {
+        json.add("TemperatureValue", hSensors.m_TemperatureValue);
+      }
       json.add("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
-      json.add("NominalValue", hStatus.m_NominalValue);
+      if (hStatus.m_NominalValueTS == DateTime::NullDate) {
+        json.add("NominalValue");
+        json.addNull();
+      } else {
+        json.add("NominalValue", hStatus.m_NominalValue);
+      }
       json.add("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
-      json.add("ControlValue", hStatus.m_ControlValue);
+      if (hStatus.m_ControlValueTS == DateTime::NullDate) {
+        json.add("ControlValue");
+        json.addNull();
+      } else {
+        json.add("ControlValue", hStatus.m_ControlValue);
+      }
       json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
       break;
     case HeatingControlMode::ZONE_FOLLOWER:
-      json.add("ControlValue", hStatus.m_ControlValue);
+      if (hStatus.m_ControlValueTS == DateTime::NullDate) {
+        json.add("ControlValue");
+        json.addNull();
+      } else {
+        json.add("ControlValue", hStatus.m_ControlValue);
+      }
       json.add("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
       break;
     case HeatingControlMode::FIXED:
