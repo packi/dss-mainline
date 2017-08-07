@@ -427,6 +427,7 @@ namespace dss {
     bool hasMultibuttons() const;
     bool hasInput() const;
     bool hasOutput() const;
+    bool isInternallyControlled() const;
     DeviceTypes_t getDeviceType() const;
     int getDeviceNumber() const;
     DeviceClasses_t getDeviceClass() const;
