@@ -307,7 +307,12 @@ void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode
 
 void addOperationalValuesIntern(VdcDb& db, Device& device, const std::string& langCode, JSONWriter& json) {
   json.startObject("operational");
-  addOperationalValues(db, device, langCode, json);
+  try {
+    addOperationalValues(db, device, langCode, json);
+  } catch (std::exception& e) {
+    json.endObject();
+    throw(e);
+  }
   json.endObject();
 }
 
