@@ -151,14 +151,13 @@ BOOST_FIXTURE_TEST_CASE(getStates, Fixture) {
   BOOST_CHECK_EQUAL(states_i[0].name, "dummyState");
   BOOST_CHECK_EQUAL(states_i[0].title, "dummyState");
   BOOST_REQUIRE_EQUAL(states_i[0].values.size(), 4);
-  BOOST_CHECK_EQUAL(states_i[0].values[0].first, "d");
-  BOOST_CHECK_EQUAL(states_i[0].values[0].second, "d");
-  BOOST_CHECK_EQUAL(states_i[0].values[1].first, "u");
-  BOOST_CHECK_EQUAL(states_i[0].values[1].second, "u");
-  BOOST_CHECK_EQUAL(states_i[0].values[2].first, "mm");
-  BOOST_CHECK_EQUAL(states_i[0].values[2].second, "mm");
-  BOOST_CHECK_EQUAL(states_i[0].values[3].first, "y");
-  BOOST_CHECK_EQUAL(states_i[0].values[3].second, "y");
+  std::vector<std::string> units { "d", "u", "mm", "y" };
+  for (int i = 0; i < 4; ++i) {
+    BOOST_CHECK_EQUAL(states_i[0].values[i].first, states_i[0].values[i].second);
+    auto match = std::find(units.begin(), units.end(), states_i[0].values[i].first);
+    BOOST_CHECK(match != units.end());
+    units.erase(match);
+  }
 
   states_i = db.getStates(gtin, "de_DE");
   BOOST_REQUIRE_EQUAL(states_i.size(), 1);
