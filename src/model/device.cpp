@@ -2791,7 +2791,7 @@ namespace dss {
     }
     DateTime now;
     if (_age > 0) {
-      now.addMilliSeconds((int) _age * (-1));
+      now = now.addMilliSeconds((int) _age * (-1));
     }
     m_sensorInputs[_sensorIndex]->m_sensorValueFloat = _sensorValue;
     m_sensorInputs[_sensorIndex]->m_sensorValue = 0;
