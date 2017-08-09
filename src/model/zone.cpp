@@ -423,33 +423,63 @@ namespace dss {
   }
 
   void Zone::setTemperature(double _value, DateTime& _ts) {
-    m_SensorStatus.m_TemperatureValue = _value;
+    m_SensorStatus.m_TemperatureValue.emplace(_value);
     m_SensorStatus.m_TemperatureValueTS = _ts;
   }
 
+  void Zone::resetTemperature() {
+    m_SensorStatus.m_TemperatureValue.reset();
+    m_SensorStatus.m_TemperatureValueTS = DateTime::NullDate;
+  }
+
   void Zone::setNominalValue(double _value, DateTime& _ts) {
-    m_HeatingStatus.m_NominalValue = _value;
+    m_HeatingStatus.m_NominalValue.emplace(_value);
     m_HeatingStatus.m_NominalValueTS = _ts;
   }
 
+  void Zone::resetNominalValue() {
+    m_HeatingStatus.m_NominalValue.reset();
+    m_HeatingStatus.m_NominalValueTS = DateTime::NullDate;
+  }
+
   void Zone::setControlValue(double _value, DateTime& _ts) {
-    m_HeatingStatus.m_ControlValue = _value;
+    m_HeatingStatus.m_ControlValue.emplace(_value);
     m_HeatingStatus.m_ControlValueTS = _ts;
   }
 
+  void Zone::resetControlValue() {
+    m_HeatingStatus.m_ControlValue.reset();
+    m_HeatingStatus.m_ControlValueTS = DateTime::NullDate;
+  }
+
   void Zone::setHumidityValue(double _value, DateTime& _ts) {
-    m_SensorStatus.m_HumidityValue = _value;
+    m_SensorStatus.m_HumidityValue.emplace(_value);
     m_SensorStatus.m_HumidityValueTS = _ts;
   }
 
+  void Zone::resetHumidityValue() {
+    m_SensorStatus.m_HumidityValue.reset();
+    m_SensorStatus.m_HumidityValueTS = DateTime::NullDate;
+  }
+
   void Zone::setBrightnessValue(double _value, DateTime& _ts) {
-    m_SensorStatus.m_BrightnessValue = _value;
+    m_SensorStatus.m_BrightnessValue.emplace(_value);
     m_SensorStatus.m_BrightnessValueTS = _ts;
   }
 
+  void Zone::resetBrightnessValue() {
+    m_SensorStatus.m_BrightnessValue.reset();
+    m_SensorStatus.m_BrightnessValueTS = DateTime::NullDate;
+  }
+
   void Zone::setCO2ConcentrationValue(double _value, DateTime& _ts) {
-    m_SensorStatus.m_CO2ConcentrationValue = _value;
+    m_SensorStatus.m_CO2ConcentrationValue.emplace(_value);
     m_SensorStatus.m_CO2ConcentrationValueTS = _ts;
+  }
+
+  void Zone::resetCO2ConcentrationValue() {
+    m_SensorStatus.m_CO2ConcentrationValue.reset();
+    m_SensorStatus.m_CO2ConcentrationValueTS = DateTime::NullDate;
   }
 
   bool Zone::isAllowedSensorType(SensorType _sensorType) {

@@ -495,13 +495,13 @@ createHeatingControllerValueDsHub(int _zoneID, int _operationMode,
       break;
     case HeatingControlMode::PID:
       event->setProperty("NominalTemperature",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _stat.m_NominalValue)));
+          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _stat.m_NominalValue.value_or(0))));
       break;
     case HeatingControlMode::ZONE_FOLLOWER:
       break;
     case HeatingControlMode::FIXED:
       event->setProperty("ControlValue",
-          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _stat.m_ControlValue)));
+          doubleToString(sensorValueToDouble(SensorType::RoomTemperatureControlVariable, _stat.m_ControlValue.value_or(0))));
       break;
     case HeatingControlMode::MANUAL:
       break;

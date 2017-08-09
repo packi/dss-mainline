@@ -3960,21 +3960,41 @@ namespace dss {
           break;
         case HeatingControlMode::PID:
           obj.setProperty<int>("OperationMode", pZone->getHeatingOperationMode());
-          obj.setProperty<double>("TemperatureValue", hSensors.m_TemperatureValue);
+          if (hSensors.m_TemperatureValue) {
+            obj.setProperty<double>("TemperatureValue", *hSensors.m_TemperatureValue);
+          } else {
+            obj.setPropertyNull("TemperatureValue");
+          }
           obj.setProperty<std::string>("TemperatureValueTime", hSensors.m_TemperatureValueTS.toISO8601());
-          obj.setProperty<double>("NominalValue", hStatus.m_NominalValue);
+          if (hStatus.m_NominalValue) {
+            obj.setProperty<double>("NominalValue", *hStatus.m_NominalValue);
+          } else {
+            obj.setPropertyNull("NominalValue");
+          }
           obj.setProperty<std::string>("NominalValueTime", hStatus.m_NominalValueTS.toISO8601());
-          obj.setProperty<double>("ControlValue", hStatus.m_ControlValue);
+          if (hStatus.m_ControlValue) {
+            obj.setProperty<double>("ControlValue", *hStatus.m_ControlValue);
+          } else {
+            obj.setPropertyNull("ControlValue");
+          }
           obj.setProperty<std::string>("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
           break;
         case HeatingControlMode::ZONE_FOLLOWER:
-          obj.setProperty<double>("ControlValue", hStatus.m_ControlValue);
+          if (hStatus.m_ControlValue) {
+            obj.setProperty<double>("ControlValue", *hStatus.m_ControlValue);
+          } else {
+            obj.setPropertyNull("ControlValue");
+          }
           obj.setProperty<std::string>("ControlValueTime", hStatus.m_ControlValueTS.toISO8601());
           break;
         case HeatingControlMode::FIXED:
         case HeatingControlMode::MANUAL:
           obj.setProperty<int>("OperationMode", pZone->getHeatingOperationMode());
-          obj.setProperty<double>("ControlValue", hStatus.m_ControlValue);
+          if (hStatus.m_ControlValue) {
+            obj.setProperty<double>("ControlValue", *hStatus.m_ControlValue);
+          } else {
+            obj.setPropertyNull("ControlValue");
+          }
           break;
       }
       return JS_TRUE;
