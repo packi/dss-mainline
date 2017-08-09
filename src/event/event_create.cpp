@@ -211,7 +211,7 @@ createDeviceSensorValueExEvent(boost::shared_ptr<DeviceReference> _devRef,
   event->setProperty("contextId", intToString(_contextId));
   event->setProperty("contextMsg", _contextMsg);
   if (_age > 0) {
-    now.addMilliSeconds((int) _age * (-1));
+    now = now.addMilliSeconds((int) _age * (-1));
     event->setProperty("contextTimestamp", now.toISO8601_ms());
   }
   return event;
