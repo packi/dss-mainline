@@ -182,6 +182,7 @@ namespace dss {
     void setHardwareVersion(const std::string _value) { m_HardwareVersion = _value; }
     int getArmSoftwareVersion() const { return m_armSoftwareVersion; }
     void setArmSoftwareVersion(const int _value) { m_armSoftwareVersion = _value; }
+    std::string getDspSoftwareVersionStr() const { return intToString((m_dspSoftwareVersion >> 24) & 0xFF) + "." + intToString((m_dspSoftwareVersion >> 16) & 0xFF) + "." + intToString((m_dspSoftwareVersion >> 8) & 0xFF) + "." + intToString(m_dspSoftwareVersion & 0xFF); }
     int getDspSoftwareVersion() const { return m_dspSoftwareVersion; }
     void setDspSoftwareVersion(const int _value) { m_dspSoftwareVersion = _value; }
     int getApiVersion() const { return m_ApiVersion; }
