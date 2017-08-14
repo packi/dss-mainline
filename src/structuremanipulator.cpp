@@ -679,6 +679,17 @@ namespace dss {
         /* device has no output, button is active on group */
         _device->setDeviceButtonActiveGroup(_group->getID());
       }
+
+      if ((_device->getDeviceType() == DEVICE_TYPE_KM) && (_device->getDeviceClass() == DEVICE_CLASS_BL) && (_device->getDeviceNumber() == 200)) {
+        // #18333
+        // when moved into temperature control group, set ltmode to 0x41
+        // when moved into heating group, reset ltmode to 0x0
+        if (_group->getID() == GroupIDControlTemperature) {
+          _device->setDeviceButtonInputMode(ButtonInputMode::HEATING_PUSHBUTTON);
+        } else {
+          _device->setDeviceButtonInputMode(ButtonInputMode::STANDARD);
+        }
+      }
     }
     {
       DeviceReference ref(_device, &m_Apartment);
