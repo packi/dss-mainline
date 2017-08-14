@@ -145,10 +145,15 @@ namespace dss {
         }
         foreach(int zoneID, zoneIDs) {
           log("scanDSMeter:  Found zone with id: " + intToString(zoneID));
+          boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
           if (zoneID == 0) {
+            try {
+              scanStatusOfZone(_dsMeter, zone);
+            } catch(BusApiError& e) {
+              log("scanDSMeter: Error scanStatusOfZone: " + std::string(e.what()), lsWarning);
+            }
             continue;
           }
-          boost::shared_ptr<Zone> zone = m_Apartment.allocateZone(zoneID);
           zone->addToDSMeter(_dsMeter);
           zone->setIsPresent(true);
           zone->setIsConnected(true);
