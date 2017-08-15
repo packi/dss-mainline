@@ -1253,7 +1253,9 @@ namespace dss {
         uint8_t channelIndex = pDevice->getOutputChannelIndex(channels->at(i).first);
         boost::shared_ptr<DeviceChannel_t> pChannel = pDevice->getOutputChannel(channelIndex);
         json.startObject();
-        json.add("channel", pChannel->m_channelId);
+        json.add("channel", pChannel->m_channelName);
+        json.add("channelId", pChannel->m_channelId);
+        json.add("channelType", pChannel->m_channelType);
         json.add("index", channelIndex);
         json.add("value",
                 convertFromOutputChannelValue(
