@@ -326,6 +326,30 @@ BOOST_AUTO_TEST_CASE(testDynamicScheduleICal) {
   BOOST_CHECK(firstRecurr.secondsSinceEpoch() - now.secondsSinceEpoch() <= 120);
 } // testDynamicScheduleICal
 
+BOOST_AUTO_TEST_CASE(testScheduleICalTimeLeap) {
+  ICalSchedule sched("FREQ=SECONDLY;INTERVAL=2", "20170815T120000Z");
+
+  DateTime now;
+  DateTime firstRecurr = sched.getNextOccurence(now);
+  BOOST_TEST_MESSAGE("now " + now.toISO8601_ms());
+  BOOST_TEST_MESSAGE("1st " + firstRecurr.toISO8601_ms());
+  BOOST_CHECK(firstRecurr.secondsSinceEpoch() <= now.secondsSinceEpoch() + 2);
+
+  sleep(6);
+  DateTime secondRecurr = sched.getNextOccurence(now);
+  BOOST_TEST_MESSAGE("2nd " + secondRecurr.toISO8601_ms());
+  BOOST_CHECK(secondRecurr.secondsSinceEpoch() <= now.secondsSinceEpoch() + 4);
+
+  DateTime now2;
+  sched.leapAdjust(now2.secondsSinceEpoch());
+  DateTime thirdRecurr = sched.getNextOccurence(now);
+
+  // at least one interval must have been skipped by leapAdjust()
+  BOOST_TEST_MESSAGE("now2 " + now2.toISO8601_ms());
+  BOOST_TEST_MESSAGE("3rd " + thirdRecurr.toISO8601_ms());
+  BOOST_CHECK(thirdRecurr.secondsSinceEpoch() >= now2.secondsSinceEpoch());
+} // testScheduleICalTimeLeap
+
 BOOST_AUTO_TEST_CASE(testICalEvent) {
   ICalEvent event("FREQ=DAILY;BYMONTH=7;UNTIL=20160801T000000Z", "20150707T150000", "20150707T170000");
 
