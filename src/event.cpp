@@ -972,6 +972,15 @@ namespace dss {
             log("Runner: event " + ipSchedEvt->getID() + " has no further schedule");
             removeIDs.push_back(ipSchedEvt->getID());
           }
+
+          // protect recurrent events against time leaps
+          if (ipSchedEvt->getSchedule().hasRecurrence()) {
+            size_t skipped = ipSchedEvt->getSchedule().leapAdjust(nextSecond.secondsSinceEpoch());
+            if (skipped) {
+              log("Runner: event " + ipSchedEvt->getID() + " skipped execution: " + std::to_string(skipped), lsWarning);
+            }
+          }
+
         } else {
           log("Runner: cannot push event back to queue because the queue is NULL", lsFatal);
         }
