@@ -292,6 +292,8 @@ namespace dss {
     DSBusInterface::checkResultCode(ret);
     Logger::getInstance()->log(std::string("DSMeter has ") + intToString(numZones) + " zones");
 
+    result.push_back(0);
+
     uint16_t zoneId;
     for(int iZone = 0; iZone < numZones; iZone++) {
       ret = ZoneInfo_by_index(m_DSMApiHandle, _dsMeterID, iZone,

@@ -527,6 +527,7 @@ namespace dss {
     AKM_OFF_FALLING_EDGE = 21,
     AKM_RISING_EDGE = 22,
     AKM_FALLING_EDGE = 23,
+    HEATING_PUSHBUTTON = 65,
     SDS_SLAVE_M1_M2 = 0xff,
   };
   std::ostream& operator<<(std::ostream& stream, ButtonInputMode x);

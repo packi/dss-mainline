@@ -52,6 +52,8 @@ namespace dss {
     template<class t>
     void setProperty(const std::string& _name, t _value);
 
+    void setPropertyNull(const std::string& _name);
+
     template<class t>
     t callFunctionByName(const std::string& _functionName, ScriptFunctionParameterList& _parameter);
     // FIXME: work around a compiler issue (typeof jsval == typeof int)

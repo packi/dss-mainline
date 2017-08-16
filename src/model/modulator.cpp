@@ -187,8 +187,6 @@ namespace dss {
         ->linkToProxy(PropertyProxyMemberFunction<DSMeter, std::string, false>(*this, &DSMeter::getSoftwareVersion));
       m_pPropertyNode->createProperty("armSoftwareVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_armSoftwareVersion, false));
-      m_pPropertyNode->createProperty("dspSoftwareVersion")
-        ->linkToProxy(PropertyProxyReference<int>(m_dspSoftwareVersion, false));
       m_pPropertyNode->createProperty("apiVersion")
         ->linkToProxy(PropertyProxyReference<int>(m_ApiVersion, false));
       m_pPropertyNode->createProperty("hardwareName")
@@ -354,14 +352,23 @@ namespace dss {
   }
 
   std::string DSMeter::getSoftwareVersion() const {
-    if (!m_softwareVersion.empty()) {
-      return m_softwareVersion;
-    }
+	std::string ret;
 
-    return intToString((m_armSoftwareVersion >> 24) & 0xFF) + "." +
+    if (!m_softwareVersion.empty()) {
+      ret = m_softwareVersion;
+    }
+    else {
+    ret = intToString((m_armSoftwareVersion >> 24) & 0xFF) + "." +
            intToString((m_armSoftwareVersion >> 16) & 0xFF) + "." +
            intToString((m_armSoftwareVersion >> 8) & 0xFF) + "." +
            intToString(m_armSoftwareVersion & 0xFF);
+    }
+
+    if(m_dspSoftwareVersion) {
+    	ret = ret + " / DSP: " + getDspSoftwareVersionStr();
+    }
+
+    return ret;
   }
 
   boost::shared_ptr<State> DSMeter::getPowerState(uint8_t _inputIndex) const {

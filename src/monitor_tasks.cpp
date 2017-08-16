@@ -145,7 +145,7 @@ void SensorMonitorTask::run() {
 
         ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
         if (checkZoneValue(pZone->getGroup(GroupIDControlTemperature), SensorType::RoomTemperatureControlVariable, hStatus.m_ControlValueTS)) {
-          pZone->setControlValue(hStatus.m_ControlValue, DateTime::NullDate);
+          pZone->resetControlValue();
         }
       }
     }
@@ -192,19 +192,19 @@ void SensorMonitorTask::checkZoneSensor(boost::shared_ptr<Zone> _zone, SensorTyp
     sensorFault = true;
     switch (_sensorType) {
       case SensorType::TemperatureIndoors: {
-        _zone->setTemperature(_hSensors.m_TemperatureValue, DateTime::NullDate);
+        _zone->resetTemperature();
         break;
       }
       case SensorType::HumidityIndoors: {
-        _zone->setHumidityValue(_hSensors.m_HumidityValue, DateTime::NullDate);
+        _zone->resetHumidityValue();
         break;
       }
       case SensorType::BrightnessIndoors: {
-        _zone->setBrightnessValue(_hSensors.m_BrightnessValue, DateTime::NullDate);
+        _zone->resetBrightnessValue();
         break;
       }
       case SensorType::CO2Concentration: {
-        _zone->setCO2ConcentrationValue(_hSensors.m_CO2ConcentrationValue, DateTime::NullDate);
+        _zone->resetCO2ConcentrationValue();
         break;
       }
       default:
@@ -241,9 +241,9 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
           pGroup->callScene(coSystem, SAC_MANUAL, pZone->getHeatingOperationMode(), "", false);
           usleep(1000 * 1000);
         }
-        if (hSensors.m_TemperatureValueTS != DateTime::NullDate) {
+        if (hSensors.m_TemperatureValueTS != DateTime::NullDate && hSensors.m_TemperatureValue) {
           pZone->pushSensor(
-              coSystem, SAC_MANUAL, DSUID_NULL, SensorType::TemperatureIndoors, hSensors.m_TemperatureValue, "");
+              coSystem, SAC_MANUAL, DSUID_NULL, SensorType::TemperatureIndoors, *hSensors.m_TemperatureValue, "");
           usleep(1000 * 1000);
         }
 
@@ -257,9 +257,9 @@ void HeatingMonitorTask::syncZone(int _zoneID) {
       case HeatingControlMode::MANUAL:
         if (HeatingOperationModeInvalid != pZone->getHeatingOperationMode()) {
           ZoneHeatingStatus_t hStatus = pZone->getHeatingStatus();
-          if (hStatus.m_ControlValueTS != DateTime::NullDate) {
+          if (hStatus.m_ControlValueTS != DateTime::NullDate && hStatus.m_ControlValue) {
             pGroup->pushSensor(coSystem, SAC_MANUAL, DSUID_NULL, SensorType::RoomTemperatureControlVariable,
-                hStatus.m_ControlValue, "");
+                *hStatus.m_ControlValue, "");
             usleep(1000 * 1000);
           }
         }
