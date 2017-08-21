@@ -236,6 +236,7 @@ namespace dss {
       */
     virtual DateTime getNextOccurence(const DateTime& _from) = 0;
     virtual bool hasRecurrence() const = 0;
+    virtual size_t leapAdjust(const time_t endTime) = 0;
   };
 
   /** Schedule that's scheduled on a specific DateTime */
@@ -247,6 +248,7 @@ namespace dss {
     virtual ~StaticSchedule() {}
     virtual DateTime getNextOccurence(const DateTime& _from);
     virtual bool hasRecurrence() const { return false; }
+    virtual size_t leapAdjust(const time_t endTime) { return 0; }
   };
 
 #if defined(HAVE_LIBICAL_ICAL_H) || defined(HAVE_ICAL_H)
@@ -262,9 +264,10 @@ namespace dss {
     ICalSchedule(const std::string& _rrule, const std::string _startDateISO);
     virtual ~ICalSchedule();
 
-    virtual DateTime getNextOccurence(const DateTime& _from) ;
+    virtual DateTime getNextOccurence(const DateTime& _from);
     virtual bool hasRecurrence() const { return true; }
-  }; // ICalSchedule
+    virtual size_t leapAdjust(const time_t endTime);
+}; // ICalSchedule
 
   class ICalEvent {
     __DECL_LOG_CHANNEL__

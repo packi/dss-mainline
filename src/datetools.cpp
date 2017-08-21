@@ -509,19 +509,26 @@ namespace dss {
     if(!m_StartDate.is_utc) {
       t0 += now.getTimezoneOffset();
     }
-    struct icaltimetype istart = icaltime_from_timet(t0, 0);
 
-    while(!icaltime_is_null_time(m_NextSchedule) &&
-        icaltime_compare(m_NextSchedule, istart) < 0)
-    {
-      m_NextSchedule = icalrecur_iterator_next(m_ICalIterator);
-    }
+    leapAdjust(t0);
   } // ctor
 
   ICalSchedule::~ICalSchedule() {
     icalrecurrencetype_clear(&m_Recurrence);
     icalrecur_iterator_free(m_ICalIterator);
   } // dtor
+
+  size_t ICalSchedule::leapAdjust(time_t endTime) {
+    size_t skippedSchedules = 0;
+    struct icaltimetype istart = icaltime_from_timet(endTime, 0);
+    while(!icaltime_is_null_time(m_NextSchedule) &&
+        icaltime_compare(m_NextSchedule, istart) < 0)
+    {
+      m_NextSchedule = icalrecur_iterator_next(m_ICalIterator);
+      skippedSchedules ++;
+    }
+    return skippedSchedules;
+  }
 
   DateTime ICalSchedule::getNextOccurence(const DateTime& _from) {
     DateTime result;
