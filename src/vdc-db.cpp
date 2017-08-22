@@ -39,7 +39,7 @@ __DEFINE_LOG_CHANNEL__(VdcDb, lsInfo);
 std::mutex VdcDb::s_mutex;
 
 VdcDb::VdcDb(DSS &dss, SQLite3::Mode mode):
-    m_db(getFilePath(dss), mode),
+    m_db(VdcDb::getFilePath(dss), mode),
     m_lock(s_mutex) {
 }
 
@@ -68,6 +68,19 @@ void VdcDb::recreate(DSS &dss) {
           + e2.what() + " e.what():" + e.what());
     }
   }
+}
+
+void VdcDb::update(DSS &dss, const std::string &newDb) {
+  std::string tmpDb = dss.getDatabaseDirectory() + "/vdc.db.tmp";
+  SQLite3 db3(tmpDb, SQLite3::Mode::ReadWrite);
+  db3.exec(newDb);
+
+  int ret = ::rename(tmpDb.c_str(), getFilePath(dss).c_str());
+  if (ret != 0) {
+    throw std::runtime_error(std::string() + "Database update failed: " +
+        std::string(strerror(errno)));
+  }
+  log(std::string("Database update done"), lsInfo);
 }
 
 void VdcDb::extractLangAndCountry(const std::string &langCode, std::string &lang, std::string &country)

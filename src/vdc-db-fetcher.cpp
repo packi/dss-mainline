@@ -76,10 +76,8 @@ void VdcDbFetcher::fetchTask() {
     if (code != 200 && code!= 0) { // file:// will return 0/-1 upon success/failure
       throw std::runtime_error(std::string("Http request failed. url:") + m_url + " code:" + intToString(code));
     }
+    VdcDb::update(m_dss, result);
 
-    VdcDb db(m_dss, SQLite3::Mode::ReadWrite);
-    db.getDb().exec(result);
-    log(std::string("Database updated"), lsNotice);
   } catch (std::runtime_error &e) {
     log(std::string() + "Fetch failed. e.what():" + e.what(), lsError);
       //This is development feature. No special error recovery. We wait for next period.

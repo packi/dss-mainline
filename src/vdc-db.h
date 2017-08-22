@@ -38,6 +38,7 @@ public:
 
   static std::string getFilePath(DSS &dss);
   static void recreate(DSS &dss);
+  static void update(DSS &dss, const std::string &newDb);
 
   SQLite3& getDb() { return m_db; }
 
