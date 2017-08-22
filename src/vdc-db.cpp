@@ -391,6 +391,20 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
       actions.back().params.back().tags = query0.getColumn<std::string>(8);
       if (sqlite3_column_type(query0, 10) != SQLITE_NULL) {
         actions.back().params.back().typePostfix = query0.getColumn<std::string>(10);
+
+        if (actions.back().params.back().typeId == propertyTypeId::enumeration)
+        {
+          // read all the parameter enum values
+          //select value from device_actions_parameter_type INNER JOIN device_actions_parameter_type_enum ON device_actions_parameter_type.id=device_actions_parameter_type_enum.device_action_parameter_type_id WHERE name='enum.coffee.beanAmount'
+          std::string sql1("select value from device_actions_parameter_type INNER JOIN device_actions_parameter_type_enum ON device_actions_parameter_type.id=device_actions_parameter_type_enum.device_action_parameter_type_id WHERE name=?");
+          SqlStatement query1 = m_db.prepare(sql1);
+          SqlStatement::BindScope scope1 = query1.bind(actions.back().params.back().typePostfix);
+
+          while (query1.step() != SqlStatement::StepResult::DONE) {
+              auto value = std::make_pair(query1.getColumn<std::string>(0), query1.getColumn<std::string>(0));
+              actions.back().params.back().values.push_back(value);
+          }
+        }
       }
     }
   }
