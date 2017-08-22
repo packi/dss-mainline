@@ -52,7 +52,11 @@ static void addParameterDescriptions(VdcDb& db, const VdcDb::PropertyDesc& prop,
     case VdcDb::propertyTypeId::enumeration:
       json.add("type", "enumeration");
       json.add("default", prop.defaultValue);
-      //TODO: add option list
+      json.startObject("options");
+      foreach (auto desc, prop.values) {
+        json.add(desc.first, desc.second); // non-translated: translated
+      }
+      json.endObject();
       break;
   }
 }

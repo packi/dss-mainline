@@ -82,6 +82,8 @@ public:
     std::string resolution;
     std::string siUnit;
     std::string tags;
+    std::vector<std::pair<std::string, std::string>> values;
+    // pair: < value, translated value(=title) >
   };
 
   std::vector<PropertyDesc> getProperties(const std::string &gtin, const std::string &langCode = "");
