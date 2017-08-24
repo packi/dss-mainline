@@ -72,6 +72,7 @@ void VdcDbFetcher::fetchTask() {
     HttpClient http;
     std::string result;
 
+    // TODO(soon) vdc-db.sql is 2mb and counting - stream into file instead memory
     long code = http.get(m_url, &result);
     if (code != 200 && code!= 0) { // file:// will return 0/-1 upon success/failure
       throw std::runtime_error(std::string("Http request failed. url:") + m_url + " code:" + intToString(code));

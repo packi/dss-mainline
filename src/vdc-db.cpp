@@ -501,7 +501,7 @@ bool VdcDb::hasActionInterface(const std::string &gtin) {
     std::string name = find.getColumn<std::string>(0);
     result = true;
 
-    Logger::getInstance()->log(std::string(__func__) + "found name for GTIN " + gtin + ": ", name);
+    Logger::getInstance()->log(std::string(__func__) + " found name for GTIN \"" + gtin + "\": ", name);
   }
 
   return result;
