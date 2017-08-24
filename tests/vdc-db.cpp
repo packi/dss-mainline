@@ -279,11 +279,11 @@ BOOST_FIXTURE_TEST_CASE(getStaticInfo, Fixture) {
 
   JSONWriter json;
   vdcInfo::addSpec(db, dev, "", json);
-  vdcInfo::addStateDescriptions(db, dev, "", json);
-  vdcInfo::addPropertyDescriptions(db, dev, "", json);
-  vdcInfo::addSensorDescriptions(db, dev, "", json);
-  vdcInfo::addActionDescriptions(db, dev, "", json);
-  vdcInfo::addStandardActions(db, dev, "", json);
+  vdcInfo::addStateDescriptionsDev(db, dev, "", json);
+  vdcInfo::addPropertyDescriptionsDev(db, dev, "", json);
+  vdcInfo::addSensorDescriptionsDev(db, dev, "", json);
+  vdcInfo::addActionDescriptionsDev(db, dev, "", json);
+  vdcInfo::addStandardActionsDev(db, dev, "", json);
   std::string ret = json.successJSON();
 
   //Logger::getInstance()->log("info: " + ret, lsWarning);
@@ -446,12 +446,12 @@ BOOST_FIXTURE_TEST_CASE(checkNotFound, Fixture) {
   dev.setVdcSpec(VdsdSpec_t());
 
   JSONWriter json;
-  vdcInfo::addStateDescriptions(db, dev, "de_DE", json);
-  vdcInfo::addPropertyDescriptions(db, dev, "de_DE", json);
-  vdcInfo::addSensorDescriptions(db, dev, "de_DE", json);
-  vdcInfo::addActionDescriptions(db, dev, "de_DE", json);
-  vdcInfo::addStandardActions(db, dev, "de_DE", json);
-  vdcInfo::addEventDescriptions(db, dev, "de_DE", json);
+  vdcInfo::addStateDescriptionsDev(db, dev, "de_DE", json);
+  vdcInfo::addPropertyDescriptionsDev(db, dev, "de_DE", json);
+  vdcInfo::addSensorDescriptionsDev(db, dev, "de_DE", json);
+  vdcInfo::addActionDescriptionsDev(db, dev, "de_DE", json);
+  vdcInfo::addStandardActionsDev(db, dev, "de_DE", json);
+  vdcInfo::addEventDescriptionsDev(db, dev, "de_DE", json);
   std::string ret = json.successJSON();
 
   //Logger::getInstance()->log("info: " + ret, lsWarning);

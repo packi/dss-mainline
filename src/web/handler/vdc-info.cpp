@@ -107,9 +107,8 @@ void addSpec(VdcDb& db, const Device& device, const std::string& langCode, JSONW
   json.endObject();
 }
 
-void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
-  const std::string& oemEan = device.getOemEanAsString();
-  auto states = db.getStates(oemEan, langCode);
+void addStateDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json) {
+  auto states = db.getStates(gtin, langCode);
   json.startObject("stateDescriptions");
   foreach (auto &state, states) {
     json.startObject(state.name);
@@ -125,9 +124,13 @@ void addStateDescriptions(VdcDb& db, const Device& device, const std::string& la
   json.endObject();
 }
 
-void addEventDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+void addStateDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
-  const auto& events = db.getEvents(oemEan, langCode);
+  addStateDescriptions(db, oemEan, langCode, json);
+}
+
+void addEventDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json) {
+  const auto& events = db.getEvents(gtin, langCode);
   json.startObject("eventDescriptions");
   foreach (const auto& event, events) {
     json.startObject(event.name);
@@ -137,9 +140,13 @@ void addEventDescriptions(VdcDb& db, const Device& device, const std::string& la
   json.endObject();
 }
 
-void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+void addEventDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
-  auto props = db.getProperties(oemEan, langCode); // throws
+  addEventDescriptions(db, oemEan, langCode, json);
+}
+
+void addPropertyDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json) {
+  auto props = db.getProperties(gtin, langCode); // throws
   json.startObject("propertyDescriptions");
   foreach (auto &prop, props) {
     json.startObject(prop.name);
@@ -151,7 +158,26 @@ void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string&
   json.endObject();
 }
 
-void addSensorDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+void addPropertyDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+  const std::string& oemEan = device.getOemEanAsString();
+  addPropertyDescriptions(db, oemEan, langCode, json);
+}
+
+void addSensorDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json) {
+  auto sensors = db.getSensors(gtin, langCode); // throws
+  json.startObject("sensorDescriptions");
+  foreach (auto &sensor, sensors) {
+    json.startObject(sensor.prop.name);
+    json.add("title", sensor.prop.title);
+    json.add("tags", sensor.prop.tags);
+    addParameterDescriptions(db, sensor.prop, json);
+    json.add("dsIndex", strToInt(sensor.sensorIndex));
+    json.endObject();
+  }
+  json.endObject();
+}
+
+void addSensorDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
   auto sensors = db.getSensors(oemEan, langCode); // throws
   json.startObject("sensorDescriptions");
@@ -169,9 +195,8 @@ void addSensorDescriptions(VdcDb& db, const Device& device, const std::string& l
   json.endObject();
 }
 
-void addActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
-  const std::string& oemEan = device.getOemEanAsString();
-  auto actions = db.getActions(oemEan, langCode);
+void addActionDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json) {
+  auto actions = db.getActions(gtin, langCode);
   json.startObject("actionDescriptions");
   foreach (const VdcDb::ActionDesc &action, actions) {
     json.startObject(action.name);
@@ -190,9 +215,13 @@ void addActionDescriptions(VdcDb& db, const Device& device, const std::string& l
   json.endObject();
 }
 
-void addStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+void addActionDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
   const std::string& oemEan = device.getOemEanAsString();
-  auto stdActions = db.getStandardActions(oemEan, langCode);
+  addActionDescriptions(db, oemEan, langCode, json);
+}
+
+void addStandardActions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json) {
+  auto stdActions = db.getStandardActions(gtin, langCode);
   json.startObject("standardActions");
   foreach (auto &action, stdActions) {
     json.startObject(action.name);
@@ -206,6 +235,11 @@ void addStandardActions(VdcDb& db, const Device& device, const std::string& lang
     json.endObject();
   }
   json.endObject();
+}
+
+void addStandardActionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json) {
+  const std::string& oemEan = device.getOemEanAsString();
+  addStandardActions(db, oemEan, langCode, json);
 }
 
 void addCustomActions(Device& device, JSONWriter& json) {
@@ -359,34 +393,54 @@ Filter parseFilter(const std::string& filterParam) {
   return filter;
 }
 
-void addByFilter(VdcDb& db, Device& device, Filter filter,
-                   const std::string& langCode, JSONWriter& json) {
+void addByFilter(VdcDb& db, Device& device, Filter filter, const std::string& langCode, JSONWriter& json) {
   if (filter.spec) {
     addSpec(db, device, langCode, json);
   }
   if (filter.stateDesc) {
-    addStateDescriptions(db, device, langCode, json);
+    addStateDescriptionsDev(db, device, langCode, json);
   }
   if (filter.eventDesc) {
-    addEventDescriptions(db, device, langCode, json);
+    addEventDescriptionsDev(db, device, langCode, json);
   }
   if (filter.propertyDesc) {
-    addPropertyDescriptions(db, device, langCode, json);
+    addPropertyDescriptionsDev(db, device, langCode, json);
   }
   if (filter.sensorDesc) {
-    addSensorDescriptions(db, device, langCode, json);
+    addSensorDescriptionsDev(db, device, langCode, json);
   }
   if (filter.actionDesc) {
-    addActionDescriptions(db, device, langCode, json);
+    addActionDescriptionsDev(db, device, langCode, json);
   }
   if (filter.stdActions) {
-    addStandardActions(db, device, langCode, json);
+    addStandardActionsDev(db, device, langCode, json);
   }
   if (filter.customActions) {
     addCustomActions(device, json);
   }
   if (filter.operational) {
     addOperationalValuesIntern(db, device, langCode, json);
+  }
+}
+
+void addByFilter(VdcDb& db, std::string& gtin, Filter filter, const std::string& langCode, JSONWriter& json) {
+  if (filter.stateDesc) {
+    addStateDescriptions(db, gtin, langCode, json);
+  }
+  if (filter.eventDesc) {
+    addEventDescriptions(db, gtin, langCode, json);
+  }
+  if (filter.propertyDesc) {
+    addPropertyDescriptions(db, gtin, langCode, json);
+  }
+  if (filter.sensorDesc) {
+    addSensorDescriptions(db, gtin, langCode, json);
+  }
+  if (filter.actionDesc) {
+    addActionDescriptions(db, gtin, langCode, json);
+  }
+  if (filter.stdActions) {
+    addStandardActions(db, gtin, langCode, json);
   }
 }
 

@@ -56,6 +56,7 @@ namespace dss {
     boost::shared_ptr<Device> getDeviceFromRequest(const RestfulRequest& _request);
     boost::shared_ptr<Device> getDeviceByName(const RestfulRequest& _request);
     boost::shared_ptr<Device> getDeviceByDSID(const RestfulRequest& _request);
+    WebServerResponse processRequestDeviceInfo(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection);
 
   private:
     Apartment& m_Apartment;

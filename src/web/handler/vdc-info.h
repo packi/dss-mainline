@@ -44,18 +44,27 @@ namespace dss {
       bool operational : 1;
     };
 
+    void addStateDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json);
+    void addEventDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json);
+    void addPropertyDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json);
+    void addSensorDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json);
+    void addActionDescriptions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json);
+    void addStandardActions(VdcDb& db, const std::string& gtin, const std::string& langCode, JSONWriter& json);
+
+    void addStateDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addEventDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addPropertyDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addSensorDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addActionDescriptionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+    void addStandardActionsDev(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
+
     void addSpec(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-    void addStateDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-    void addEventDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-    void addPropertyDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-    void addSensorDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-    void addActionDescriptions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
-    void addStandardActions(VdcDb& db, const Device& device, const std::string& langCode, JSONWriter& json);
     void addCustomActions(Device& device, JSONWriter& json);
     void addOperationalValues(VdcDb& db, Device& device, const std::string& langCode, JSONWriter& json);
+
     Filter parseFilter(const std::string& filterParam);
-    void addByFilter(VdcDb& db, Device& device, Filter filter,
-                      const std::string& langCode, JSONWriter& json);
+    void addByFilter(VdcDb& db, Device& device, Filter filter, const std::string& langCode, JSONWriter& json);
+    void addByFilter(VdcDb& db, std::string& gtin, Filter filter, const std::string& langCode, JSONWriter& json);
 
   } // namespace vdcInfo
 
