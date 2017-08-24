@@ -101,7 +101,8 @@ BOOST_AUTO_TEST_CASE(testProcessedEventRollover) {
 
 BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
   //
-  // why is erasing events from the queue evil?
+  // why is erasing (duplicate) events from the queue evil?
+  // aka. avoid writing apartment.xml too frequently
   //
   // fig1
   // queue = o o o d <o'> | d d d d:
@@ -109,10 +110,10 @@ BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
   // d = dirty, o = other event
   //
   // We want to be sure o' is processed before continuing hence
-  // we wait until the processed counter is >= 5.
+  // we need to wait until the processed counter is >= 5.
   //
   // solution1: counting erased events
-  // when procesessing event 4, we also remove events 6, 7, 8, 9 see fig1 hence
+  // when procesessing event 4, we can also remove events 6, 7, 8, 9 see fig1 hence
   // the processed counter increases to 10, o' not yet processed
   //
   // fig2
@@ -129,8 +130,8 @@ BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
   // ct    = 1 2 3 4   5     6 7 8 9
   //
   // solution3(adopted): erase no events, but delay writing apartment.xml
-  // Writing apartment.xml to frequently is the intent why erasing events from
-  // the queue was introduced, that is solved by 30s delay. Downside is,
+  // Writing apartment.xml too frequently is the reason that erasing events
+  // from the queue was introduced, that is solved by 30s delay. Downside is,
   // that we expand the period we are vulnerable to power-fails or crashes
   // -- use logging journal
   //
@@ -143,7 +144,7 @@ BOOST_AUTO_TEST_CASE(testEraseBreaksEventCounter) {
   // E.g onRemoveDevice directly removes the device from the model
   // held in memory, but spawns etModelDirty to also save it persistently.
   // Hence all etModelDirty events already queued hold no new information
-  // to be siganlled once they are processed
+  // to be signalled once they are processed
   // EXCEPTION: etDeviceDirty restores some model invariants, then
   // schedules etModelDirty when done
   //
@@ -175,10 +176,11 @@ BOOST_AUTO_TEST_CASE(testIndexOfSyncState) {
   main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
   main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
   main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent)); // 10
+  // no ModelDirty event, 7 is last sync state
 
   BOOST_CHECK_EQUAL(main.indexOfNextSyncState(), 7 + eventCountInit);
 
-  // barrier will not let us pass until event 7
+  // barrier will not let us pass until event 7 is processed
   BOOST_CHECK_EQUAL(main.pendingChangesBarrier(0), false);
   for (int i = 1; i < 7; i++) {
     main.handleModelEvents();
@@ -212,6 +214,7 @@ BOOST_AUTO_TEST_CASE(testChangesBarier) {
   main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
   main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
   main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent)); // 10
+  // no ModelDirty event, 7 is last sync state
 
   unsigned eventCountInit = main.m_processedEvents;
   unsigned syncState = main.indexOfNextSyncState();
@@ -221,13 +224,14 @@ BOOST_AUTO_TEST_CASE(testChangesBarier) {
   boost::thread t(wait_barrier, boost::ref(main), boost::ref(ret));
   boost::this_thread::sleep(boost::posix_time::milliseconds(5));
 
-  // these must be ignored, they arrived after we started waiting
-  // we only wait till #7
+  // add more events after the thread already started waiting
+  // these must be ignored, we shall only wait till #7
   for (int i = 0; i < 10; i++) {
     main.addModelEvent(new ModelEvent(ModelEvent::etDummyEvent));
   }
   main.addModelEvent(new ModelEvent(ModelEvent::etModelDirty));
 
+  // process events until waiting thread is released from barrier
   while (ret == false && main.handleModelEvents()) {
     boost::this_thread::sleep(boost::posix_time::milliseconds(5));
   }
