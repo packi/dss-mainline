@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(testChangesBarier) {
 
   bool ret = false;
   boost::thread t(wait_barrier, boost::ref(main), boost::ref(ret));
-  boost::this_thread::sleep(boost::posix_time::milliseconds(5));
+  boost::this_thread::sleep(boost::posix_time::milliseconds(10));
 
   // add more events after the thread already started waiting
   // these must be ignored, we shall only wait till #7
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(testChangesBarier) {
 
   // process events until waiting thread is released from barrier
   while (ret == false && main.handleModelEvents()) {
-    boost::this_thread::sleep(boost::posix_time::milliseconds(5));
+    boost::this_thread::sleep(boost::posix_time::milliseconds(10));
   }
   t.join();
 
