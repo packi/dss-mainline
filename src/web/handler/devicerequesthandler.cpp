@@ -181,7 +181,141 @@ namespace dss {
     return result;
   } // getDeviceByName
 
+  WebServerResponse DeviceRequestHandler::processRequestDeviceInfo(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
+    StringConverter st("UTF-8", "UTF-8");
+    std::string gtin("");
+    _request.getParameter("gtin", gtin);
+    std::string langCode("");
+    _request.getParameter("lang", langCode);
+
+    boost::shared_ptr<Device> pDevice;
+    JSONWriter json;
+
+    if (_request.getMethod() == "getInfoStatic") {
+      VdcDb db(*DSS::getInstance());
+      if (!gtin.empty()) {
+        vdcInfo::addStateDescriptions(db, gtin, langCode, json);
+        vdcInfo::addEventDescriptions(db, gtin, langCode, json);
+        vdcInfo::addPropertyDescriptions(db, gtin, langCode, json);
+        vdcInfo::addSensorDescriptions(db, gtin, langCode, json);
+        vdcInfo::addActionDescriptions(db, gtin, langCode, json);
+        vdcInfo::addStandardActions(db, gtin, langCode, json);
+      } else {
+        pDevice = getDeviceFromRequest(_request);
+        vdcInfo::addSpec(db, *pDevice, langCode, json);
+        vdcInfo::addStateDescriptionsDev(db, *pDevice, langCode, json);
+        vdcInfo::addEventDescriptionsDev(db, *pDevice, langCode, json);
+        vdcInfo::addPropertyDescriptionsDev(db, *pDevice, langCode, json);
+        vdcInfo::addSensorDescriptionsDev(db, *pDevice, langCode, json);
+        vdcInfo::addActionDescriptionsDev(db, *pDevice, langCode, json);
+        vdcInfo::addStandardActionsDev(db, *pDevice, langCode, json);
+      }
+      return json.successJSON();
+    } else if (_request.getMethod() == "getInfoCustom") {
+      pDevice = getDeviceFromRequest(_request);
+      vdcInfo::addCustomActions(*pDevice, json);
+      return json.successJSON();
+    } else if (_request.getMethod() == "getInfo") {
+      // exceptions will cause the call to abort with a JSON failure.
+      // imho it should not silently ignore and still return a success JSON
+      // if anything goes wrong, as it was done in the previous version
+
+      std::string filterParam;
+      _request.getParameter("filter", filterParam);
+      std::string langCode("");
+      _request.getParameter("lang", langCode);
+
+      VdcDb db(*DSS::getInstance());
+      auto filter = vdcInfo::parseFilter(filterParam);
+      if (!gtin.empty()) {
+        vdcInfo::addByFilter(db, gtin, filter, langCode, json);
+      } else {
+        pDevice = getDeviceFromRequest(_request);
+        vdcInfo::addByFilter(db, *pDevice, filter, langCode, json);
+      }
+      return json.successJSON();
+    } else if (_request.getMethod() == "getInfoOperational") {
+      pDevice = getDeviceFromRequest(_request);
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
+      VdcDb db(*DSS::getInstance());
+      std::string langCode("");
+      _request.getParameter("lang", langCode);
+      vdcInfo::addOperationalValues(db, *pDevice, langCode, json);
+      return json.successJSON();
+    } else if (_request.getMethod() == "setProperty") {
+      pDevice = getDeviceFromRequest(_request);
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
+      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=waterhardness&value=5.55
+      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=name&value="new name"
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return json.failure("missing parameter: id");
+      }
+      std::string value;
+      if (!_request.getParameter("value", value) ) {
+        return json.failure("missing parameter: value");
+      }
+      vdcapi::PropertyElement element = ProtobufToJSon::jsonToElement(value);
+      element.set_name(id);
+      pDevice->setProperty(element);
+      return json.successJSON();
+    } else if (_request.getMethod() == "setCustomAction") {
+      pDevice = getDeviceFromRequest(_request);
+      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
+      // /json/device/setCustomAction?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=custom77&title=Action%201&action=heat&params={"duration":17}
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return json.failure("missing parameter: id");
+      }
+      std::string action;
+      _request.getParameter("action", action);
+      std::string title;
+      vdcapi::PropertyElement parsedParamsElement;
+      const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+      if (!action.empty()) {
+        if (!_request.getParameter("title", title)) {
+          return json.failure("missing parameter: title");
+        }
+        std::string params;
+        if (!_request.getParameter("params", params) ) {
+          return json.failure("missing parameter: params");
+        }
+        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+        paramsElement = &parsedParamsElement;
+      }
+      pDevice->setCustomAction(id, title, action, *paramsElement);
+      return json.successJSON();
+    } else if (_request.getMethod() == "callAction") {
+      pDevice = getDeviceFromRequest(_request);
+      std::string id;
+      if (!_request.getParameter("id", id)) {
+        return json.failure("missing parameter: id");
+      }
+      std::string params;
+      vdcapi::PropertyElement parsedParamsElement;
+      const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
+      if (_request.getParameter("params", params) && !params.empty()) {
+        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
+        paramsElement = &parsedParamsElement;
+      }
+      pDevice->callAction(id, *paramsElement);
+      return json.successJSON();
+    }
+    return json.failure("Error in processRequestDeviceInfo service handler");
+  }
+
   WebServerResponse DeviceRequestHandler::jsonHandleRequest(const RestfulRequest& _request, boost::shared_ptr<Session> _session, const struct mg_connection* _connection) {
+
+    if ((_request.getMethod() == "getInfo") ||
+        (_request.getMethod() == "getInfoStatic") ||
+        (_request.getMethod() == "getInfoCustom") ||
+        (_request.getMethod() == "getInfoOperational") ||
+        (_request.getMethod() == "setProperty") ||
+        (_request.getMethod() == "setCustomAction") ||
+        (_request.getMethod() == "callAction")) {
+      return processRequestDeviceInfo(_request, _session, _connection);
+    }
+
     boost::shared_ptr<Device> pDevice;
     StringConverter st("UTF-8", "UTF-8");
     try {
@@ -2173,110 +2307,6 @@ namespace dss {
 
       json.add("offset", value);
       return json.successJSON();
-    } else if (_request.getMethod() == "getInfoStatic") {
-      std::string langCode("");
-      _request.getParameter("lang", langCode);
-      VdcDb db(*DSS::getInstance());
-      JSONWriter json;
-      vdcInfo::addSpec(db, *pDevice, langCode, json);
-      vdcInfo::addStateDescriptions(db, *pDevice, langCode, json);
-      vdcInfo::addEventDescriptions(db, *pDevice, langCode, json);
-      vdcInfo::addPropertyDescriptions(db, *pDevice, langCode, json);
-      vdcInfo::addSensorDescriptions(db, *pDevice, langCode, json);
-      vdcInfo::addActionDescriptions(db, *pDevice, langCode, json);
-      vdcInfo::addStandardActions(db, *pDevice, langCode, json);
-      return json.successJSON();
-    } else if (_request.getMethod() == "getInfoCustom") {
-      JSONWriter json;
-      vdcInfo::addCustomActions(*pDevice, json);
-      return json.successJSON();
-    } else if (_request.getMethod() == "getInfo") {
-      // exceptions will cause the call to abort with a JSON failure.
-      // imho it should not silently ignore and still return a success JSON
-      // if anything goes wrong, as it was done in the previous version
-
-      std::string filterParam;
-      _request.getParameter("filter", filterParam);
-
-      std::string langCode("");
-      _request.getParameter("lang", langCode);
-
-      VdcDb db(*DSS::getInstance());
-      JSONWriter json;
-      auto filter = vdcInfo::parseFilter(filterParam);
-      vdcInfo::addByFilter(db, *pDevice, filter, langCode, json);
-
-      return json.successJSON();
-    } else if (_request.getMethod() == "getInfoOperational") {
-      google::protobuf::RepeatedPtrField<vdcapi::PropertyElement> query;
-      query.Add()->set_name("deviceStates");
-      query.Add()->set_name("deviceProperties");
-      query.Add()->set_name("sensorStates");
-      vdcapi::Message message = pDevice->getVdcProperty(query);
-      VdcElementReader reader(message.vdc_response_get_property().properties());
-      JSONWriter json;
-      json.add("states");
-      ProtobufToJSon::processElementsPretty(reader["deviceStates"].childElements(), json);
-      json.add("properties");
-      ProtobufToJSon::processElementsPretty(reader["deviceProperties"].childElements(), json);
-      json.add("sensors");
-      ProtobufToJSon::processElementsPretty(reader["sensorStates"].childElements(), json);
-      return json.successJSON();
-    } else if (_request.getMethod() == "setProperty") {
-      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
-      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=waterhardness&value=5.55
-      // /json/device/setProperty?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=name&value="new name"
-      std::string id;
-      if (!_request.getParameter("id", id)) {
-        return JSONWriter::failure("missing parameter: id");
-      }
-      std::string value;
-      if (!_request.getParameter("value", value) ) {
-        return JSONWriter::failure("missing parameter: value");
-      }
-      vdcapi::PropertyElement element = ProtobufToJSon::jsonToElement(value);
-      element.set_name(id);
-      pDevice->setProperty(element);
-      return JSONWriter::success();
-    } else if (_request.getMethod() == "setCustomAction") {
-      boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
-      // /json/device/setCustomAction?dsuid=5601E3DDC1845C14C02503E66296CB5700&id=custom77&title=Action%201&action=heat&params={"duration":17}
-      std::string id;
-      if (!_request.getParameter("id", id)) {
-        return JSONWriter::failure("missing parameter: id");
-      }
-      std::string action;
-      _request.getParameter("action", action);
-      std::string title;
-      vdcapi::PropertyElement parsedParamsElement;
-      const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
-      if (!action.empty()) {
-        if (!_request.getParameter("title", title)) {
-          return JSONWriter::failure("missing parameter: title");
-        }
-        std::string params;
-        if (!_request.getParameter("params", params) ) {
-          return JSONWriter::failure("missing parameter: params");
-        }
-        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
-        paramsElement = &parsedParamsElement;
-      }
-      pDevice->setCustomAction(id, title, action, *paramsElement);
-      return JSONWriter::success();
-    } else if (_request.getMethod() == "callAction") {
-      std::string id;
-      if (!_request.getParameter("id", id)) {
-        return JSONWriter::failure("missing parameter: id");
-      }
-      std::string params;
-      vdcapi::PropertyElement parsedParamsElement;
-      const vdcapi::PropertyElement* paramsElement = &vdcapi::PropertyElement::default_instance();
-      if (_request.getParameter("params", params) && !params.empty()) {
-        parsedParamsElement = ProtobufToJSon::jsonToElement(params);
-        paramsElement = &parsedParamsElement;
-      }
-      pDevice->callAction(id, *paramsElement);
-      return JSONWriter::success();
     } else if (_request.getMethod() == "setSK204Config") {
       boost::recursive_mutex::scoped_lock lock(m_setConfigMutex);
       std::string mode = _request.getParameter("mode");

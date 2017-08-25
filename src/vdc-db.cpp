@@ -231,7 +231,7 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
   std::string lang, country;
   extractLangAndCountry(langCode, lang, country);
 
-  // name, base_type, default_value, min_value, max_value, resolution, si_unit, tags, gtin, type_name
+  // name, base_type, default_value, min_value, max_value, resolution, si_unit, tags, gtin, type_name, prop_id, enum_reference
   std::string sql0("select * from callGetPropertiesBase where gtin=?");
   SqlStatement query0 = m_db.prepare(sql0);
   SqlStatement::BindScope scope0 = query0.bind(gtin);
@@ -264,6 +264,19 @@ std::vector<VdcDb::PropertyDesc> VdcDb::getProperties(const std::string &gtin, c
     props.back().tags = query0.getColumn<std::string>(7);
     if (sqlite3_column_type(query0, 9) != SQLITE_NULL) {
       props.back().typePostfix = query0.getColumn<std::string>(9);
+    }
+    if (sqlite3_column_type(query0, 11) != SQLITE_NULL) {
+      int typeId = query0.getColumn<int>(11);
+      if ((props.back().typeId == propertyTypeId::enumeration) && (typeId != 0)) {
+        std::string sql1 = R"sqlquery(select typeId,enumId,propId,propName,displayName from callGetEnumValues "
+            "where typeId=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
+        SqlStatement query1 = m_db.prepare(sql1);
+        SqlStatement::BindScope scope1 = query1.bind(typeId, lang, country);
+        while (query1.step() != SqlStatement::StepResult::DONE) {
+          auto value = std::make_pair(query1.getColumn<std::string>(3), query1.getColumn<std::string>(4));
+          props.back().values.push_back(value);
+        }
+      }
     }
   }
 
@@ -350,7 +363,7 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
   std::string lang, country;
   extractLangAndCountry(langCode, lang, country);
 
-  // command, parameterName, type_id, default_value, min_value, max_value, resolution, si_unit, tags, gtin
+  // command, parameterName, type_id, default_value, min_value, max_value, resolution, si_unit, tags, gtin, name, enum_reference
   std::string sql0("select * from callGetActionsBase where gtin=?");
   SqlStatement query0 = m_db.prepare(sql0);
   SqlStatement::BindScope scope0 = query0.bind(gtin);
@@ -391,18 +404,17 @@ std::vector<VdcDb::ActionDesc> VdcDb::getActions(const std::string &gtin, const 
       actions.back().params.back().tags = query0.getColumn<std::string>(8);
       if (sqlite3_column_type(query0, 10) != SQLITE_NULL) {
         actions.back().params.back().typePostfix = query0.getColumn<std::string>(10);
-
-        if (actions.back().params.back().typeId == propertyTypeId::enumeration)
-        {
-          // read all the parameter enum values
-          //select value from device_actions_parameter_type INNER JOIN device_actions_parameter_type_enum ON device_actions_parameter_type.id=device_actions_parameter_type_enum.device_action_parameter_type_id WHERE name='enum.coffee.beanAmount'
-          std::string sql1("select value from device_actions_parameter_type INNER JOIN device_actions_parameter_type_enum ON device_actions_parameter_type.id=device_actions_parameter_type_enum.device_action_parameter_type_id WHERE name=?");
+      }
+      if (sqlite3_column_type(query0, 11) != SQLITE_NULL) {
+        int typeId = query0.getColumn<int>(11);
+        if ((actions.back().params.back().typeId == propertyTypeId::enumeration) && (typeId != 0)) {
+          std::string sql1 = R"sqlquery(select typeId,enumId,propId,propName,displayName from callGetEnumValues "
+              "where typeId=? and (lang=?) and (country=? or country="ZZ"))sqlquery";
           SqlStatement query1 = m_db.prepare(sql1);
-          SqlStatement::BindScope scope1 = query1.bind(actions.back().params.back().typePostfix);
-
+          SqlStatement::BindScope scope1 = query1.bind(typeId, lang, country);
           while (query1.step() != SqlStatement::StepResult::DONE) {
-              auto value = std::make_pair(query1.getColumn<std::string>(0), query1.getColumn<std::string>(0));
-              actions.back().params.back().values.push_back(value);
+            auto value = std::make_pair(query1.getColumn<std::string>(3), query1.getColumn<std::string>(4));
+            actions.back().params.back().values.push_back(value);
           }
         }
       }
@@ -489,7 +501,7 @@ bool VdcDb::hasActionInterface(const std::string &gtin) {
     std::string name = find.getColumn<std::string>(0);
     result = true;
 
-    Logger::getInstance()->log(std::string(__func__) + "found name for GTIN " + gtin + ": ", name);
+    Logger::getInstance()->log(std::string(__func__) + " found name for GTIN \"" + gtin + "\": ", name);
   }
 
   return result;
